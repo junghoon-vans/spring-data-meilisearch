@@ -3,7 +3,7 @@ plugins {
 }
 
 ext {
-    projectVersion = '0.0.1'
+    projectVersion = '1.0.0-SNAPSHOT'
 }
 
 group = 'io.vanslog'
