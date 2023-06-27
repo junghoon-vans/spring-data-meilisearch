@@ -29,9 +29,6 @@ public class MeilisearchClientFactoryBean implements FactoryBean<Client>, Initia
 	private Client client;
 
 	private MeilisearchClientFactoryBean() {
-		this.hostUrl = "http://localhost:7700";
-		this.apiKey = "";
-		this.jsonHandler = new GsonJsonHandler();
 		this.clientAgents = new String[0];
 	}
 
