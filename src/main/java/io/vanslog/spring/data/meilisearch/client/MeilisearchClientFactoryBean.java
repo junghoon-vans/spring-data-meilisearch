@@ -76,6 +76,7 @@ public class MeilisearchClientFactoryBean implements FactoryBean<Client>, Initia
 	public void destroy() {
 		if (client != null) {
 			client = null;
+			logger.info("Closed MeiliSearch client");
 		}
 	}
 }
