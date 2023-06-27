@@ -22,28 +22,28 @@
                     <xsd:attribute name="host-url" type="xsd:string" default="http://localhost:7700">
                         <xsd:annotation>
                             <xsd:documentation>
-                                <![CDATA[URL of the MeiliSearch server]]>
+                                <![CDATA[The host address of the Meilisearch server. The default is http://localhost:7700.]]>
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
                     <xsd:attribute name="api-key" type="xsd:string" default="">
                         <xsd:annotation>
                             <xsd:documentation>
-                                <![CDATA[API key of the MeiliSearch server]]>
+                                <![CDATA[The API key of the Meilisearch server. The default is empty string.]]>
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
                     <xsd:attribute name="json-handler" type="xsd:string" default="GSON">
                         <xsd:annotation>
                             <xsd:documentation>
-                                <![CDATA[JSON handler of the MeiliSearch server]]>
+                                <![CDATA[The enum value of java: io.vanslog.spring.data.meilisearch.config.JsonHandlerBuilder. The default is GSON.]]>
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
                     <xsd:attribute name="client-agents" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
-                                <![CDATA[Client agents of the MeiliSearch server]]>
+                                <![CDATA[The comma delimited string array of client agents]]>
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
