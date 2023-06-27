@@ -18,9 +18,9 @@ import org.springframework.beans.factory.InitializingBean;
  * @see Client
  * @author Junghoon Ban
  */
-public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean, DisposableBean {
+public class MeilisearchClientFactoryBean implements FactoryBean<Client>, InitializingBean, DisposableBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(ClientFactoryBean.class);
+	private static final Logger logger = LoggerFactory.getLogger(MeilisearchClientFactoryBean.class);
 
 	private String hostUrl;
 	private String apiKey;
@@ -28,7 +28,7 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean,
 	private String[] clientAgents;
 	private Client client;
 
-	private ClientFactoryBean() {
+	private MeilisearchClientFactoryBean() {
 		this.hostUrl = "http://localhost:7700";
 		this.apiKey = "";
 		this.jsonHandler = new GsonJsonHandler();

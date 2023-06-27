@@ -12,6 +12,6 @@ public class MeilisearchNamespaceHandler extends NamespaceHandlerSupport {
 
   @Override
   public void init() {
-    registerBeanDefinitionParser("client", new ClientBeanDefinitionParser());
+    registerBeanDefinitionParser("meilisearch-client", new MeilisearchClientBeanDefinitionParser());
   }
 }

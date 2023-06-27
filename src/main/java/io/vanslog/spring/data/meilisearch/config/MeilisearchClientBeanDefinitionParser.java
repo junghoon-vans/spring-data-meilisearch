@@ -1,6 +1,6 @@
 package io.vanslog.spring.data.meilisearch.config;
 
-import io.vanslog.spring.data.meilisearch.client.ClientFactoryBean;
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClientFactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -15,11 +15,12 @@ import org.w3c.dom.Element;
  * @author Junghoon Ban
  */
 
-public class ClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
+public class MeilisearchClientBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ClientFactoryBean.class);
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(
+        MeilisearchClientFactoryBean.class);
 		setLocalSettings(element, builder);
 		return getSourcedBeanDefinition(builder, element, parserContext);
 	}
