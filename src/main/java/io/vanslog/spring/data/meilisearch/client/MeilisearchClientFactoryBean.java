@@ -10,8 +10,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * FactoryBean class that creates a MeiliSearch {@link Client}.
- * The MeiliSearch client is created by setting the host URL, API key, JSON handler, and client agents.
+ * FactoryBean class that creates a Meilisearch {@link Client}.
+ * The Meilisearch client is created by setting the host URL, API key, JSON handler, and client agents.
  *
  * @since 1.0.0
  * @see Client
@@ -71,7 +71,7 @@ public class MeilisearchClientFactoryBean implements FactoryBean<Client>, Initia
 	@Override
 	public void destroy() {
 		if (client != null) {
-			LOGGER.info("Closing MeiliSearch client");
+			LOGGER.info("Closing Meilisearch client");
 			client = null;
 		}
 	}

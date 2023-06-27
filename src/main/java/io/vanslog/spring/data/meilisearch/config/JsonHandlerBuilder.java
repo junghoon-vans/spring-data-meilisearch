@@ -5,7 +5,7 @@ import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
 /**
- * Builder class that creates a JSON handler for MeiliSearch client.
+ * Builder class that creates a JSON handler for Meilisearch client.
  *
  * @since 1.0.0
  * @see JsonHandler
