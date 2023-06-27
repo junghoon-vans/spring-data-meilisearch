@@ -24,17 +24,17 @@ dependencies {
     // Spring Data
     implementation 'org.springframework.data:spring-data-commons:3.1.1'
 
-    // MeiliSearch
+    // Meilisearch
     implementation 'com.meilisearch.sdk:meilisearch-java:0.11.1'
 
-    // Jackson JSON Mapper
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.14.2'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.1'
-
     // Test
-    testImplementation 'org.springframework:spring-test:6.0.6'
+    testImplementation('org.springframework:spring-test:6.0.6') {
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+    }
+    testImplementation 'org.slf4j:slf4j-simple:2.0.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    testImplementation 'org.assertj:assertj-core:3.21.0'
 }
 
 test {
