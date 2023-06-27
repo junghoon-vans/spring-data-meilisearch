@@ -18,7 +18,7 @@ class MeilisearchNamespaceHandlerTest {
   private ApplicationContext context;
 
   @Test
-  public void shouldCreateMeilisearchClient() {
+  void shouldCreateMeilisearchClient() {
     assertThat(context.getBean(MeilisearchClientFactoryBean.class))
         .isInstanceOf(MeilisearchClientFactoryBean.class);
   }
