@@ -26,10 +26,10 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="api-key" type="xsd:string" default="">
+                    <xsd:attribute name="api-key" type="xsd:string" default="masterKey">
                         <xsd:annotation>
                             <xsd:documentation>
-                                <![CDATA[The API key of the Meilisearch server. The default is empty string.]]>
+                                <![CDATA[The API key of the Meilisearch server.]]>
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
