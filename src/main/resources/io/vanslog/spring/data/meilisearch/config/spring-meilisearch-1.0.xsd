@@ -19,10 +19,34 @@
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="beans:identifiedType">
-                    <xsd:attribute name="host-url" type="xsd:string" default="http://localhost:7700"/>
-                    <xsd:attribute name="api-key" type="xsd:string" default=""/>
-                    <xsd:attribute name="json-handler" type="xsd:string" default="GSON"/>
-                    <xsd:attribute name="client-agents" type="xsd:string"/>
+                    <xsd:attribute name="host-url" type="xsd:string" default="http://localhost:7700">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                <![CDATA[URL of the MeiliSearch server]]>
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="api-key" type="xsd:string" default="">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                <![CDATA[API key of the MeiliSearch server]]>
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="json-handler" type="xsd:string" default="GSON">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                <![CDATA[JSON handler of the MeiliSearch server]]>
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="client-agents" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                <![CDATA[Client agents of the MeiliSearch server]]>
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>
