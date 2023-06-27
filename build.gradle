@@ -35,6 +35,7 @@ dependencies {
     testImplementation 'org.springframework:spring-test:6.0.6'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    testImplementation 'org.assertj:assertj-core:3.21.0'
 }
 
 test {
