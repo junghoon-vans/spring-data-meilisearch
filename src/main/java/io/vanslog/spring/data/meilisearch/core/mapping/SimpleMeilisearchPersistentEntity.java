@@ -1,5 +1,6 @@
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
+import io.vanslog.spring.data.meilisearch.annotations.Document;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -20,10 +21,19 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		implements MeilisearchPersistentEntity<T>, ApplicationContextAware {
 
 	private final StandardEvaluationContext context;
+	private String indexUid;
+	private String primaryKey;
 
 	public SimpleMeilisearchPersistentEntity(TypeInformation<T> information) {
 		super(information);
 		this.context = new StandardEvaluationContext();
+
+		Class<T> rawType = information.getType();
+		if (rawType.isAnnotationPresent(Document.class)) {
+			Document document = rawType.getAnnotation(Document.class);
+			this.indexUid = document.indexUid();
+			this.primaryKey = document.primaryKey();
+		}
 	}
 
 	@Override
@@ -31,5 +41,15 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		context.addPropertyAccessor(new BeanFactoryAccessor());
 		context.setBeanResolver(new BeanFactoryResolver(applicationContext));
 		context.setRootObject(applicationContext);
+	}
+
+	@Override
+	public String getIndexUid() {
+		return indexUid;
+	}
+
+	@Override
+	public String getPrimaryKey() {
+		return primaryKey;
 	}
 }
