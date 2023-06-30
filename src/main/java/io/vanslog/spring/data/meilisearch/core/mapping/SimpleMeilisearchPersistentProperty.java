@@ -26,4 +26,9 @@ public class SimpleMeilisearchPersistentProperty extends
 	protected Association<MeilisearchPersistentProperty> createAssociation() {
 		return null;
 	}
+
+	@Override
+	public String getFieldName() {
+		return super.getField().getName();
+	}
 }

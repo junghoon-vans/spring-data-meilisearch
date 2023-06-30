@@ -1,5 +1,6 @@
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mapping.PersistentProperty;
 
 /**
@@ -9,5 +10,15 @@ import org.springframework.data.mapping.PersistentProperty;
  * @author Junghoon Ban
  */
 public interface MeilisearchPersistentProperty extends PersistentProperty<MeilisearchPersistentProperty> {
+  String getFieldName();
 
+  public enum PropertyToFieldNameConverter implements
+      Converter<MeilisearchPersistentProperty, String> {
+
+    INSTANCE;
+
+    public String convert(MeilisearchPersistentProperty source) {
+      return source.getFieldName();
+    }
+  }
 }
