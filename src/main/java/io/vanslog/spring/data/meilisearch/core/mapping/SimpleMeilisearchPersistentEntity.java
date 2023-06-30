@@ -22,7 +22,6 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 
 	private final StandardEvaluationContext context;
 	private String indexUid;
-	private String primaryKey;
 
 	public SimpleMeilisearchPersistentEntity(TypeInformation<T> information) {
 		super(information);
@@ -32,7 +31,6 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		if (rawType.isAnnotationPresent(Document.class)) {
 			Document document = rawType.getAnnotation(Document.class);
 			this.indexUid = document.indexUid();
-			this.primaryKey = document.primaryKey();
 		}
 	}
 
@@ -46,10 +44,5 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 	@Override
 	public String getIndexUid() {
 		return indexUid;
-	}
-
-	@Override
-	public String getPrimaryKey() {
-		return primaryKey;
 	}
 }

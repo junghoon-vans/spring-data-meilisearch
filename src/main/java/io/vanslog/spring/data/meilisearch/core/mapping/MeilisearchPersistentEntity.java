@@ -12,5 +12,4 @@ import org.springframework.data.mapping.PersistentEntity;
 public interface MeilisearchPersistentEntity<T> extends PersistentEntity<T, MeilisearchPersistentProperty> {
 
   String getIndexUid();
-  String getPrimaryKey();
 }

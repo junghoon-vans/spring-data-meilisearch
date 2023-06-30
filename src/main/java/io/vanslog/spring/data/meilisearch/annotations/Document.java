@@ -19,5 +19,4 @@ import org.springframework.data.annotation.Persistent;
  */
 public @interface Document {
   String indexUid();
-  String primaryKey() default "id";
 }
