@@ -1,10 +1,9 @@
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
-import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.entities.Movie;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.util.TypeInformation;
 
 /**
@@ -24,16 +23,5 @@ public class SimpleMeilisearchPersistentEntityTests {
   void testGetIndexUid() {
     String indexUid = entityPersistentEntity.getIndexUid();
     Assertions.assertEquals("movie", indexUid);
-  }
-
-  @Document(indexUid = "movie")
-  @SuppressWarnings("unused")
-  private static class Movie {
-
-    @Id
-    private String id;
-    private String title;
-    private String description;
-    private String[] genres;
   }
 }
