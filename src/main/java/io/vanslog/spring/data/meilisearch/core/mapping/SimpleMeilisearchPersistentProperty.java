@@ -1,5 +1,7 @@
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.model.AnnotationBasedPersistentProperty;
@@ -16,6 +18,8 @@ public class SimpleMeilisearchPersistentProperty extends
 		AnnotationBasedPersistentProperty<MeilisearchPersistentProperty> implements
 		MeilisearchPersistentProperty {
 
+	private static final List<String> SUPPORTED_ID_PROPERTY_NAMES = Arrays.asList("id");
+
 	public SimpleMeilisearchPersistentProperty(Property property,
 			PersistentEntity<?, MeilisearchPersistentProperty> owner,
 			SimpleTypeHolder simpleTypeHolder) {
@@ -30,5 +34,10 @@ public class SimpleMeilisearchPersistentProperty extends
 	@Override
 	public String getFieldName() {
 		return super.getField().getName();
+	}
+
+	@Override
+	public boolean isIdProperty() {
+		return super.isIdProperty() || SUPPORTED_ID_PROPERTY_NAMES.contains(getFieldName());
 	}
 }

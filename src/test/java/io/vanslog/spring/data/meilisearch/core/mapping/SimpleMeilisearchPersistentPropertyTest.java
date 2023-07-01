@@ -34,4 +34,16 @@ class SimpleMeilisearchPersistentPropertyTest {
     assertThat(descriptionProperty).isNotNull();
     assertThat(genresProperty).isNotNull();
   }
+
+  @Test
+  void shouldReturnTrueWhenPropertyIsIdAndHasIdAnnotation() {
+    SimpleMeilisearchPersistentEntity<?> entity = context.getRequiredPersistentEntity(NoIdAnnotation.class);
+    SimpleMeilisearchPersistentProperty property = (SimpleMeilisearchPersistentProperty) entity.getPersistentProperty("id");
+    assertThat(property.isIdProperty()).isTrue();
+  }
+
+  @SuppressWarnings("unused")
+  static class NoIdAnnotation {
+    private String id;
+  }
 }
