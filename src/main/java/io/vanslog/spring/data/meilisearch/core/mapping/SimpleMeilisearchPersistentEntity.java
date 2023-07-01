@@ -9,6 +9,7 @@ import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.Assert;
 
 /**
  * Meilisearch specific {@link BasicPersistentEntity} implementation holding
@@ -30,6 +31,8 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		Class<T> rawType = information.getType();
 		if (rawType.isAnnotationPresent(Document.class)) {
 			Document document = rawType.getAnnotation(Document.class);
+			Assert.hasText(document.indexUid(),
+					" Unknown indexUid. Make sure the indexUid is defined. e.g @Document(indexUid=\"foo\")");
 			this.indexUid = document.indexUid();
 		}
 	}
