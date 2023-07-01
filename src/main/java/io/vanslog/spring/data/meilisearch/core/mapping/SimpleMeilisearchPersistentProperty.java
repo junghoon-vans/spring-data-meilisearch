@@ -1,5 +1,6 @@
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.data.mapping.Association;
@@ -7,6 +8,7 @@ import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.model.AnnotationBasedPersistentProperty;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
+import org.springframework.util.Assert;
 
 /**
  * Meilisearch specific {@link PersistentEntity} implementation holding
@@ -33,7 +35,9 @@ public class SimpleMeilisearchPersistentProperty extends
 
 	@Override
 	public String getFieldName() {
-		return super.getField().getName();
+		Field field = super.getField();
+		Assert.notNull(field, String.format("Invalid field name for property %s.", field));
+		return field.getName();
 	}
 
 	@Override
