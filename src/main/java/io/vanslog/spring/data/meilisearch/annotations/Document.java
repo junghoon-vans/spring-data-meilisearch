@@ -7,16 +7,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.data.annotation.Persistent;
 
-@Persistent
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
 /**
  * Identifies a domain object to be persisted to Meilisearch.
  *
  * @since 1.0.0
- * @auther Junghoon Ban
+ * @author Junghoon Ban
  */
+
+@Persistent
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
 public @interface Document {
   String indexUid();
 }
