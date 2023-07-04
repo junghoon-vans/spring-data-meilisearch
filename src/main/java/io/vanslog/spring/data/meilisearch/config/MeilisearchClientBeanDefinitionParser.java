@@ -1,10 +1,12 @@
 package io.vanslog.spring.data.meilisearch.config;
 
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClientFactoryBean;
+import java.util.Arrays;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.Assert;
 import org.w3c.dom.Element;
 
 /**
@@ -31,11 +33,11 @@ public class MeilisearchClientBeanDefinitionParser extends AbstractBeanDefinitio
 		builder.addPropertyValue("clientAgents", element.getAttribute("client-agents"));
 
 		String jsonHandlerName = element.getAttribute("json-handler");
-		JsonHandlerBuilder handlerBuilder = JsonHandlerBuilder.valueOf(jsonHandlerName.toUpperCase());
+		Assert.isTrue(JsonHandlerBuilder.contains(jsonHandlerName),
+				"JsonHandler must be one of " + Arrays.toString(JsonHandlerBuilder.values()));
 
-		if (handlerBuilder != null) {
-			builder.addPropertyValue("jsonHandler", handlerBuilder.build());
-		}
+		JsonHandlerBuilder handlerBuilder = JsonHandlerBuilder.valueOf(jsonHandlerName.toUpperCase());
+		builder.addPropertyValue("jsonHandler", handlerBuilder.build());
 	}
 
 	private AbstractBeanDefinition getSourcedBeanDefinition(BeanDefinitionBuilder builder, Element source,

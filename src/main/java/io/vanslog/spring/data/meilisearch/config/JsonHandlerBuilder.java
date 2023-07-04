@@ -28,4 +28,13 @@ public enum JsonHandlerBuilder {
   };
 
   public abstract JsonHandler build();
+
+  public static boolean contains(String name) {
+    for (JsonHandlerBuilder builder : JsonHandlerBuilder.values()) {
+      if (builder.name().equals(name)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
