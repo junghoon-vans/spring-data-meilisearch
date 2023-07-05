@@ -6,5 +6,5 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
   <meilisearch:meilisearch-client id="meilisearchClient"
-    client-agents="Spring-Data-Meilisearch(v1.0.0), Meilisearch-Java(v0.11.1), Java(v17)"/>
+    client-agents="Meilisearch Java (v0.11.1), Spring Data Meilisearch (v1.0.0), Java (17)"/>
 </beans>
