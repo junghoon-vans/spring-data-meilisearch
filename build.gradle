@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'org.sonarqube' version '4.2.1.3168'
 }
 
 ext {
@@ -39,4 +40,12 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+sonar {
+    properties {
+        property 'sonar.host.url', 'https://sonarcloud.io'
+        property 'sonar.organization', 'junghoon-ban'
+        property 'sonar.projectKey', 'junghoon-vans_spring-data-meilisearch'
+    }
 }
