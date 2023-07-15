@@ -3,7 +3,7 @@ package io.vanslog.spring.data.meilisearch.entities;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import org.springframework.data.annotation.Id;
 
-@Document(indexUid = "movie")
+@Document(indexUid = "movies")
 @SuppressWarnings("unused")
 public class Movie {
 
