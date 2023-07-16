@@ -54,5 +54,6 @@ sonar {
         property 'sonar.host.url', 'https://sonarcloud.io'
         property 'sonar.organization', 'junghoon-ban'
         property 'sonar.projectKey', 'junghoon-vans_spring-data-meilisearch'
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
     }
 }
