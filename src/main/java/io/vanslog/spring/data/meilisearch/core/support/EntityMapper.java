@@ -3,7 +3,7 @@ package io.vanslog.spring.data.meilisearch.core.support;
 import java.io.IOException;
 
 /**
- * Interface to map entities to JSON and vice versa.
+ * Interface to map entity to JSON and vice versa.
  *
  * @since 1.0.0
  * @author Junghoon Ban
