@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'org.sonarqube' version '4.2.1.3168'
+    id 'jacoco'
 }
 
 ext {
@@ -40,6 +41,12 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
 }
 
 sonar {
