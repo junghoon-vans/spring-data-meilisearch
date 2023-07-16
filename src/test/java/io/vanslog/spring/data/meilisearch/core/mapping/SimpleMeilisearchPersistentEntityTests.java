@@ -20,7 +20,7 @@ class SimpleMeilisearchPersistentEntityTests {
     TypeInformation<Movie> entityTypeInfo = TypeInformation.of(Movie.class);
     SimpleMeilisearchPersistentEntity<Movie> entityPersistentEntity = new SimpleMeilisearchPersistentEntity<>(entityTypeInfo);
     String indexUid = entityPersistentEntity.getIndexUid();
-    assertThat(indexUid).isEqualTo("movie");
+    assertThat(indexUid).isEqualTo("movies");
   }
 
   @Test

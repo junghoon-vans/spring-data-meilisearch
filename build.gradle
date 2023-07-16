@@ -29,6 +29,8 @@ dependencies {
     // Meilisearch
     implementation 'com.meilisearch.sdk:meilisearch-java:0.11.1'
 
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.1'
+
     // Test
     testImplementation('org.springframework:spring-test:6.0.6') {
         exclude group: 'ch.qos.logback', module: 'logback-classic'
