@@ -107,6 +107,12 @@
             <version>${assertj}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.vanslog</groupId>
+            <artifactId>testcontainers-meilisearch</artifactId>
+            <version>1.0.1</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
