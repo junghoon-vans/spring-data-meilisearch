@@ -1,0 +1,70 @@
+name: "Bug Report"
+description: Create a report to help us improve
+title: "[BUG]: "
+labels: [
+  "bug"
+]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: A clear and concise description of what the bug is.
+      placeholder: Bug description
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: "Version"
+      description: The version of the package you are using.
+      placeholder: "e.g. 1.0.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: "OS"
+      description: The operating system you are using.
+      options:
+        - Linux
+        - MacOS
+        - Windows
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to Reproduce"
+      description: Steps to reproduce the behavior.
+      placeholder: |
+          1. Go to '...'
+          2. Click on '....'
+          3. Scroll down to '....'
+          4. See error
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected Behavior"
+      description: A clear and concise description of what you expected to happen.
+      placeholder: Expected behavior
+    validations:
+      required: false
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Actual Behavior"
+      description: A clear and concise description of what actually happened.
+      placeholder: Actual behavior
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional Context"
+      description: Add any other context about the problem here.
+      placeholder: Additional context
+    validations:
+      required: false
