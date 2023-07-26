@@ -5,7 +5,7 @@ plugins {
 }
 
 ext {
-    projectVersion = '1.0.0-SNAPSHOT'
+    projectVersion = '0.1.0-SNAPSHOT'
 }
 
 group = 'io.vanslog'
