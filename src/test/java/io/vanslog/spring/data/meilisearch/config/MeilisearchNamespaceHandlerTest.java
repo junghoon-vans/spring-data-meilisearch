@@ -2,7 +2,9 @@ package io.vanslog.spring.data.meilisearch.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.meilisearch.sdk.Client;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClientFactoryBean;
+import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,5 +23,15 @@ class MeilisearchNamespaceHandlerTest {
   void shouldCreateMeilisearchClient() {
     assertThat(context.getBean(MeilisearchClientFactoryBean.class))
         .isInstanceOf(MeilisearchClientFactoryBean.class);
+  }
+
+  @Test
+  void shouldMakeJacksonAsDefaultJsonHandler() throws NoSuchFieldException, IllegalAccessException {
+    Client client = (Client) context.getBean("meilisearchClient");
+
+    Field jsonHandlerField = client.getClass().getDeclaredField("jsonHandler");
+    jsonHandlerField.setAccessible(true);
+    assertThat(jsonHandlerField.get(client))
+        .isInstanceOf(com.meilisearch.sdk.json.JacksonJsonHandler.class);
   }
 }
