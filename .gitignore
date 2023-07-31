@@ -4,9 +4,8 @@
 ### Spring Beans ###
 .springBeans
 
-### gradle ###
-.gradle
-build
+### Maven ###
+target/
 
 ### Eclipse ###
 .classpath
