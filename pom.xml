@@ -15,8 +15,8 @@
 
   <properties>
     <!-- Compiler -->
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
     <!-- Dependencies -->
     <spring>6.0.6</spring>
     <springdata.commons>3.1.1</springdata.commons>
