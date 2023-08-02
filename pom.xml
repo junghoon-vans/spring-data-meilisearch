@@ -192,8 +192,9 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
-      <id>coverage</id>
+      <id>ci</id>
       <build>
         <plugins>
           <plugin>
@@ -217,6 +218,19 @@
                     <format>XML</format>
                   </formats>
                 </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <version>3.3.0</version>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <goals>
+                  <goal>checkstyle</goal>
+                </goals>
               </execution>
             </executions>
           </plugin>
