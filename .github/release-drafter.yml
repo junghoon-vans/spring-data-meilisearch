@@ -1,0 +1,18 @@
+categories:
+  - title: '⚠️ Breaking changes'
+    label: 'breaking-change'
+  - title: '🚀 Features'
+    label: 'feature'
+  - title: '🐛 Bug Fixes'
+    label: 'fix'
+  - title: '🛠️ Maintenance'
+    labels: ['chore', 'refactor', 'style']
+  - title: '📝 Documentation'
+    label: 'documentation'
+
+exclude-labels:
+  - 'skip-changelog'
+template: |
+  ## What's Changed
+
+  $CHANGES
