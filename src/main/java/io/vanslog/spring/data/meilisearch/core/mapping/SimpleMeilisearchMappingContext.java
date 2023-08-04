@@ -8,20 +8,24 @@ import org.springframework.data.util.TypeInformation;
 /**
  * Meilisearch specific {@link AbstractMappingContext} implementation.
  *
- * @since 1.0.0
  * @author Junghoon Ban
+ * @since 1.0.0
  */
 public class SimpleMeilisearchMappingContext extends
-		AbstractMappingContext<SimpleMeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> {
+        AbstractMappingContext<SimpleMeilisearchPersistentEntity<?>,
+                MeilisearchPersistentProperty> {
 
-	@Override
-	protected <T> SimpleMeilisearchPersistentEntity<?> createPersistentEntity(TypeInformation<T> typeInformation) {
-		return new SimpleMeilisearchPersistentEntity<T>(typeInformation);
-	}
+    @Override
+    protected <T> SimpleMeilisearchPersistentEntity<?> createPersistentEntity(
+            TypeInformation<T> typeInformation) {
+        return new SimpleMeilisearchPersistentEntity<>(typeInformation);
+    }
 
-	@Override
-	protected MeilisearchPersistentProperty createPersistentProperty(Property property,
-																	   SimpleMeilisearchPersistentEntity<?> owner, SimpleTypeHolder simpleTypeHolder) {
-		return new SimpleMeilisearchPersistentProperty(property, owner, simpleTypeHolder);
-	}
+    @Override
+    protected MeilisearchPersistentProperty createPersistentProperty(
+            Property property, SimpleMeilisearchPersistentEntity<?> owner,
+            SimpleTypeHolder simpleTypeHolder) {
+        return new SimpleMeilisearchPersistentProperty(property, owner,
+                simpleTypeHolder);
+    }
 }

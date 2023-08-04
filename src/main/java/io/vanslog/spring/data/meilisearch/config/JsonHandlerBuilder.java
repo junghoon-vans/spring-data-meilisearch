@@ -7,34 +7,43 @@ import com.meilisearch.sdk.json.JsonHandler;
 /**
  * Builder class that creates a JSON handler for Meilisearch client.
  *
- * @since 1.0.0
+ * @author Junghoon Ban
  * @see JsonHandler
  * @see GsonJsonHandler
  * @see JacksonJsonHandler
- * @author Junghoon Ban
+ * @since 1.0.0
  */
 public enum JsonHandlerBuilder {
-  GSON {
-    @Override
-    public JsonHandler build() {
-      return new GsonJsonHandler();
-    }
-  },
-  JACKSON {
-    @Override
-    public JsonHandler build() {
-      return new JacksonJsonHandler();
-    }
-  };
+    GSON {
+        @Override
+        public JsonHandler build() {
+            return new GsonJsonHandler();
+        }
+    },
+    JACKSON {
+        @Override
+        public JsonHandler build() {
+            return new JacksonJsonHandler();
+        }
+    };
 
-  public abstract JsonHandler build();
-
-  public static boolean contains(String name) {
-    for (JsonHandlerBuilder builder : JsonHandlerBuilder.values()) {
-      if (builder.name().equals(name)) {
-        return true;
-      }
+    /**
+     * Check if the given name is a valid JSON handler.
+     * @param name the name to check
+     * @return true if the name is a valid JSON handler
+     */
+    public static boolean contains(String name) {
+        for (JsonHandlerBuilder builder : JsonHandlerBuilder.values()) {
+            if (builder.name().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
-    return false;
-  }
+
+    /**
+     * Build a JSON handler.
+     * @return {@link JsonHandler}
+     */
+    public abstract JsonHandler build();
 }

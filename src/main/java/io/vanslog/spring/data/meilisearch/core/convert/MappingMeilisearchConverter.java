@@ -9,41 +9,51 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.data.mapping.context.MappingContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * MappingMeilisearchConverter
+ * {@link MeilisearchConverter} Implementation based on {@link MappingContext}.
  *
- * @since 1.0.0
  * @author Junghoon Ban
+ * @since 1.0.0
  */
-public class MappingMeilisearchConverter implements MeilisearchConverter, ApplicationContextAware {
+public class MappingMeilisearchConverter
+        implements MeilisearchConverter, ApplicationContextAware {
 
-  private final MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext;
-  private final GenericConversionService conversionService;
+    private final MappingContext<? extends MeilisearchPersistentEntity<?>,
+            MeilisearchPersistentProperty> mappingContext;
+    private final GenericConversionService conversionService;
 
-  @SuppressWarnings("unused, FieldCanBeLocal")
-  private ApplicationContext applicationContext;
+    @SuppressWarnings("unused, FieldCanBeLocal")
+    @Nullable private ApplicationContext applicationContext;
 
-  public MappingMeilisearchConverter(
-      MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext) {
-    Assert.notNull(mappingContext, "MappingContext must not be null!");
-    this.mappingContext = mappingContext;
-    this.conversionService = new DefaultConversionService();
-  }
+    /**
+     * Creates a new {@link MappingMeilisearchConverter} given the {@link MappingContext}.
+     * @param mappingContext must not be {@literal null}.
+     */
+    public MappingMeilisearchConverter(
+            MappingContext<? extends MeilisearchPersistentEntity<?>,
+                    MeilisearchPersistentProperty> mappingContext) {
+        Assert.notNull(mappingContext, "MappingContext must not be null!");
+        this.mappingContext = mappingContext;
+        this.conversionService = new DefaultConversionService();
+    }
 
-  @Override
-  public MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> getMappingContext() {
-    return mappingContext;
-  }
+    @Override
+    public MappingContext<? extends MeilisearchPersistentEntity<?>,
+            MeilisearchPersistentProperty> getMappingContext() {
+        return mappingContext;
+    }
 
-  @Override
-  public ConversionService getConversionService() {
-    return this.conversionService;
-  }
+    @Override
+    public ConversionService getConversionService() {
+        return this.conversionService;
+    }
 
-  @Override
-  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-    this.applicationContext = applicationContext;
-  }
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext)
+            throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 }

@@ -4,53 +4,89 @@ import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
+import org.springframework.lang.Nullable;
 
 /**
  * A builder for Meilisearch {@link Config}.
  */
 public class ClientConfigurationBuilder {
 
-  private String hostUrl;
-  private String apiKey;
-  private JsonHandler jsonHandler;
-  private String[] clientAgents;
+    @Nullable private String hostUrl;
+    @Nullable private String apiKey;
+    private JsonHandler jsonHandler;
+    private String[] clientAgents;
 
-  public ClientConfigurationBuilder() {
-    this.jsonHandler = new JacksonJsonHandler();
-    this.clientAgents = new String[0];
-  }
+    /**
+     * Create a new {@link ClientConfigurationBuilder}.
+     */
+    public ClientConfigurationBuilder() {
+        this.jsonHandler = new JacksonJsonHandler();
+        this.clientAgents = new String[0];
+    }
 
-  public ClientConfigurationBuilder connectedToLocalhost() {
-    this.hostUrl = "http://localhost:7700";
-    return this;
-  }
+    /**
+     * Connect to localhost:7700.
+     * @return {@link ClientConfigurationBuilder}
+     */
+    public ClientConfigurationBuilder connectedToLocalhost() {
+        this.hostUrl = "http://localhost:7700";
+        return this;
+    }
 
-  public ClientConfigurationBuilder connectedTo(String hostUrl) {
-    this.hostUrl = hostUrl;
-    return this;
-  }
+    /**
+     * Connect to the given hostUrl.
+     * @param hostUrl the hostUrl to connect to
+     * @return {@link ClientConfigurationBuilder}
+     */
+    public ClientConfigurationBuilder connectedTo(String hostUrl) {
+        this.hostUrl = hostUrl;
+        return this;
+    }
 
-  public ClientConfigurationBuilder withApiKey(String apiKey) {
-    this.apiKey = apiKey;
-    return this;
-  }
+    /**
+     * Configure API key to access Meilisearch instance.
+     * @param apiKey the apiKey to use
+     * @return {@link ClientConfigurationBuilder}
+     */
+    public ClientConfigurationBuilder withApiKey(String apiKey) {
+        this.apiKey = apiKey;
+        return this;
+    }
 
-  public ClientConfigurationBuilder withJacksonJsonHandler() {
-    this.jsonHandler = new JacksonJsonHandler();
-    return this;
-  }
+    /**
+     * Configure json handler as {@link JacksonJsonHandler}.
+     * @return {@link ClientConfigurationBuilder}
+     */
+    public ClientConfigurationBuilder withJacksonJsonHandler() {
+        this.jsonHandler = new JacksonJsonHandler();
+        return this;
+    }
 
-  public ClientConfigurationBuilder withGsonJsonHandler() {
-    this.jsonHandler = new GsonJsonHandler();
-    return this;
-  }
+    /**
+     * Configure json handler as {@link GsonJsonHandler}.
+     * @return {@link ClientConfigurationBuilder}
+     */
+    public ClientConfigurationBuilder withGsonJsonHandler() {
+        this.jsonHandler = new GsonJsonHandler();
+        return this;
+    }
 
-  public ClientConfigurationBuilder withClientAgents(String[] clientAgents) {
-    this.clientAgents = clientAgents;
-    return this;
-  }
+    /**
+     * Configure client agents that will be sent with User-Agent header.
+     * @param clientAgents String array of client agents
+     * @return {@link ClientConfigurationBuilder}
+     */
+    public ClientConfigurationBuilder withClientAgents(String[] clientAgents) {
+        this.clientAgents = clientAgents;
+        return this;
+    }
 
-  public Config build() {
-    return new Config(this.hostUrl, this.apiKey, this.jsonHandler, this.clientAgents);
-  }
+    /**
+     * Build a {@link Config} with the given parameters.
+     * @return {@link Config}
+     */
+    public Config build() {
+        return new Config(this.hostUrl, this.apiKey, this.jsonHandler,
+                this.clientAgents);
+    }
 }

@@ -6,19 +6,30 @@ import org.springframework.data.mapping.PersistentProperty;
 /**
  * Meilisearch specific {@link PersistentProperty} abstraction.
  *
- * @since 1.0.0
  * @author Junghoon Ban
+ * @since 1.0.0
  */
-public interface MeilisearchPersistentProperty extends PersistentProperty<MeilisearchPersistentProperty> {
-  String getFieldName();
+public interface MeilisearchPersistentProperty
+        extends PersistentProperty<MeilisearchPersistentProperty> {
 
-  public enum PropertyToFieldNameConverter implements
-      Converter<MeilisearchPersistentProperty, String> {
+    /**
+     * Returns the name of the field a property is persisted to.
+     * @return the field name
+     */
+    String getFieldName();
 
-    INSTANCE;
+    enum PropertyToFieldNameConverter implements
+            Converter<MeilisearchPersistentProperty, String> {
 
-    public String convert(MeilisearchPersistentProperty source) {
-      return source.getFieldName();
+        INSTANCE;
+
+        /**
+         * Convert the persistent property into a Meilisearch field name.
+         * @param source the persistent property
+         * @return the field name
+         */
+        public String convert(MeilisearchPersistentProperty source) {
+            return source.getFieldName();
+        }
     }
-  }
 }

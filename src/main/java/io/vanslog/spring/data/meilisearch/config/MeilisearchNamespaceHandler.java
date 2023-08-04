@@ -3,15 +3,20 @@ package io.vanslog.spring.data.meilisearch.config;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
- * NamespaceHandler class that registers namespaces in the XML configuration file.
+ * NamespaceHandler class that registers namespaces
+ * in the XML configuration file.
  *
- * @since 1.0.0
  * @author Junghoon Ban
+ * @since 1.0.0
  */
 public class MeilisearchNamespaceHandler extends NamespaceHandlerSupport {
 
-  @Override
-  public void init() {
-    registerBeanDefinitionParser("meilisearch-client", new MeilisearchClientBeanDefinitionParser());
-  }
+    /**
+     * Registers the MeilisearchClientBeanDefinitionParser.
+     */
+    @Override
+    public void init() {
+        registerBeanDefinitionParser("meilisearch-client",
+                new MeilisearchClientBeanDefinitionParser());
+    }
 }

@@ -6,10 +6,15 @@ import org.springframework.data.mapping.PersistentEntity;
  * Meilisearch specific {@link PersistentEntity} abstraction.
  *
  * @param <T>
- * @since 1.0.0
  * @author Junghoon Ban
+ * @since 1.0.0
  */
-public interface MeilisearchPersistentEntity<T> extends PersistentEntity<T, MeilisearchPersistentProperty> {
+public interface MeilisearchPersistentEntity<T>
+        extends PersistentEntity<T, MeilisearchPersistentProperty> {
 
-  String getIndexUid();
+    /**
+     * Returns the Index UID of the persistent entity.
+     * @return Index UID
+     */
+    String getIndexUid();
 }

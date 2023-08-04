@@ -5,12 +5,24 @@ import java.io.IOException;
 /**
  * Interface to map entity to JSON and vice versa.
  *
- * @since 1.0.0
  * @author Junghoon Ban
+ * @since 1.0.0
  */
 public interface EntityMapper {
 
-	public String toJson(Object object) throws IOException;
+    /**
+     * Writes given object into JSON string.
+     * @param object object to be written
+     * @return JSON string
+     */
+    String toJson(Object object) throws IOException;
 
-	public <T> T fromJson(String json, Class<T> clazz) throws IOException;
+    /**
+     * Reads object from given JSON string.
+     * @param json JSON string
+     * @param clazz type of object
+     * @return object
+     * @param <T> type of object
+     */
+    <T> T fromJson(String json, Class<T> clazz) throws IOException;
 }
