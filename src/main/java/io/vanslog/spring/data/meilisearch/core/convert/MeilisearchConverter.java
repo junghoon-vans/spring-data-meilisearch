@@ -8,23 +8,24 @@ import org.springframework.data.mapping.context.MappingContext;
 /**
  * Meilisearch converter aware of {@link MappingContext}.
  *
- * @since 1.0.0
- * @see MappingContext
  * @author Junghoon Ban
+ * @see MappingContext
+ * @since 1.0.0
  */
 public interface MeilisearchConverter {
 
-	/**
-	 * Returns the {@link MappingContext} used by the converter.
-	 *
-	 * @return never {@literal null}.
-	 */
-	MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> getMappingContext();
+    /**
+     * Returns the {@link MappingContext} used by the converter.
+     *
+     * @return never {@literal null}.
+     */
+    MappingContext<? extends MeilisearchPersistentEntity<?>,
+            MeilisearchPersistentProperty> getMappingContext();
 
-	/**
-	 * Returns the {@link ConversionService} used by the converter.
-	 *
-	 * @return never {@literal null}.
-	 */
-	ConversionService getConversionService();
+    /**
+     * Returns the {@link ConversionService} used by the converter.
+     *
+     * @return never {@literal null}.
+     */
+    ConversionService getConversionService();
 }

@@ -1,13 +1,15 @@
 package io.vanslog.spring.data.meilisearch.client;
 
-import com.meilisearch.sdk.Config;
-
 /**
- * Interface for Meilisearch {@link Config}.
+ * Interface for Meilisearch {@link com.meilisearch.sdk.Config}.
  */
 public interface ClientConfiguration {
 
-  static ClientConfigurationBuilder builder() {
-    return new ClientConfigurationBuilder();
-  }
+    /**
+     * Create a new {@link ClientConfigurationBuilder}.
+     * @return ClientConfigurationBuilder
+     */
+    static ClientConfigurationBuilder builder() {
+        return new ClientConfigurationBuilder();
+    }
 }

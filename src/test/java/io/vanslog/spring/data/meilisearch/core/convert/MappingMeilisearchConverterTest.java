@@ -13,20 +13,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class MappingMeilisearchConverterTest {
 
-  private MappingMeilisearchConverter converter;
+    private MappingMeilisearchConverter converter;
 
-  @BeforeEach
-  void setUp() {
-    converter = new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
-  }
+    @BeforeEach
+    void setUp() {
+        converter = new MappingMeilisearchConverter(
+                new SimpleMeilisearchMappingContext());
+    }
 
-  @Test
-  void shouldReturnMappingContext() {
-    assertThat(converter.getMappingContext()).isNotNull();
-  }
+    @Test
+    void shouldReturnMappingContext() {
+        assertThat(converter.getMappingContext()).isNotNull();
+    }
 
-  @Test
-  void shouldReturnConversionService() {
-    assertThat(converter.getConversionService()).isNotNull();
-  }
+    @Test
+    void shouldReturnConversionService() {
+        assertThat(converter.getConversionService()).isNotNull();
+    }
 }
