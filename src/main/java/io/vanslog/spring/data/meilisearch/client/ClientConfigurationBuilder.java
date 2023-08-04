@@ -4,14 +4,15 @@ import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
+import org.springframework.lang.Nullable;
 
 /**
  * A builder for Meilisearch {@link Config}.
  */
 public class ClientConfigurationBuilder {
 
-    private String hostUrl;
-    private String apiKey;
+    @Nullable private String hostUrl;
+    @Nullable private String apiKey;
     private JsonHandler jsonHandler;
     private String[] clientAgents;
 

@@ -9,6 +9,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.data.mapping.context.MappingContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -25,7 +26,7 @@ public class MappingMeilisearchConverter
     private final GenericConversionService conversionService;
 
     @SuppressWarnings("unused, FieldCanBeLocal")
-    private ApplicationContext applicationContext;
+    @Nullable private ApplicationContext applicationContext;
 
     /**
      * Creates a new {@link MappingMeilisearchConverter} given the {@link MappingContext}.

@@ -38,7 +38,8 @@ public class SimpleMeilisearchPersistentProperty
 
     @Override
     protected Association<MeilisearchPersistentProperty> createAssociation() {
-        return null;
+        throw new UnsupportedOperationException(
+                "No association supported on MeilisearchPersistentProperty.");
     }
 
     @Override

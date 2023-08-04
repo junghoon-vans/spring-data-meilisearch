@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 
 /**
  * FactoryBean class that creates a Meilisearch {@link Client}.
@@ -24,11 +25,11 @@ public final class MeilisearchClientFactoryBean
     private static final Log LOGGER =
             LogFactory.getLog(MeilisearchClientFactoryBean.class);
 
-    private String hostUrl;
-    private String apiKey;
-    private JsonHandler jsonHandler;
+    @Nullable private String hostUrl;
+    @Nullable private String apiKey;
+    @Nullable private JsonHandler jsonHandler;
     private String[] clientAgents;
-    private Client client;
+    @Nullable private Client client;
 
     private MeilisearchClientFactoryBean() {
         this.clientAgents = new String[0];

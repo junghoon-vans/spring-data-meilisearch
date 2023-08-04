@@ -18,7 +18,7 @@ public class SimpleMeilisearchMappingContext extends
     @Override
     protected <T> SimpleMeilisearchPersistentEntity<?> createPersistentEntity(
             TypeInformation<T> typeInformation) {
-        return new SimpleMeilisearchPersistentEntity<T>(typeInformation);
+        return new SimpleMeilisearchPersistentEntity<>(typeInformation);
     }
 
     @Override

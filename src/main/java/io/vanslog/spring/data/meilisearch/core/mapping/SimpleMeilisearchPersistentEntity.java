@@ -9,6 +9,7 @@ import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -23,7 +24,7 @@ public class SimpleMeilisearchPersistentEntity<T>
         implements MeilisearchPersistentEntity<T>, ApplicationContextAware {
 
     private final StandardEvaluationContext context;
-    private String indexUid;
+    @Nullable private String indexUid;
 
     /**
      * Creates a new {@link SimpleMeilisearchPersistentEntity} with the given {@link TypeInformation}.
