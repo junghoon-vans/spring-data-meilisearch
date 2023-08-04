@@ -58,10 +58,10 @@ public class Movie {
 
 ### Index UID
 
-The [Index UID](https://www.meilisearch.com/docs/learn/core_concepts/indexes#index-uid) that is used to identify the index in Meilisearch. 
-You can define the indexUid field with `@Document` annotation or name the field `indexUid`.
+The [Index UID](https://www.meilisearch.com/docs/learn/core_concepts/indexes#index-uid) is a unique identifier for an index.
+It must be defined for each document with `@Document` annotation.
 
-### Document Identifier
+### Document id
 
-The [document identifier](https://www.meilisearch.com/docs/learn/core_concepts/primary_key#document-id) is used to identify the document in Meilisearch.
-You can define the id field with `@Id` annotation or name the field `id`.
+The [Document id](https://www.meilisearch.com/docs/learn/core_concepts/primary_key#document-id) is a unique identifier for a document in an index.
+It can be defined with `@Id` annotation or `id` field.
