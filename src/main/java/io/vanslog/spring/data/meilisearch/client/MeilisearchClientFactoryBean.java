@@ -17,7 +17,6 @@ import org.springframework.lang.Nullable;
  *
  * @author Junghoon Ban
  * @see Client
- * @since 1.0.0
  */
 public final class MeilisearchClientFactoryBean
         implements FactoryBean<Client>, InitializingBean, DisposableBean {

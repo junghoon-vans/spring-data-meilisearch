@@ -7,7 +7,6 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * in the XML configuration file.
  *
  * @author Junghoon Ban
- * @since 1.0.0
  */
 public class MeilisearchNamespaceHandler extends NamespaceHandlerSupport {
 

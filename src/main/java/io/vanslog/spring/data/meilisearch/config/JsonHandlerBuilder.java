@@ -11,7 +11,6 @@ import com.meilisearch.sdk.json.JsonHandler;
  * @see JsonHandler
  * @see GsonJsonHandler
  * @see JacksonJsonHandler
- * @since 1.0.0
  */
 public enum JsonHandlerBuilder {
     GSON {

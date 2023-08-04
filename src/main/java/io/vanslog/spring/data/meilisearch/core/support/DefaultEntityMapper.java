@@ -12,7 +12,6 @@ import java.io.IOException;
  * @author Junghoon Ban
  * @see EntityMapper
  * @see ObjectMapper
- * @since 1.0.0
  */
 public class DefaultEntityMapper implements EntityMapper {
 

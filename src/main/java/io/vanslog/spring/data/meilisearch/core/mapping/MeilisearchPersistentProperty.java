@@ -7,7 +7,6 @@ import org.springframework.data.mapping.PersistentProperty;
  * Meilisearch specific {@link PersistentProperty} abstraction.
  *
  * @author Junghoon Ban
- * @since 1.0.0
  */
 public interface MeilisearchPersistentProperty
         extends PersistentProperty<MeilisearchPersistentProperty> {

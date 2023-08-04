@@ -12,7 +12,6 @@ import java.lang.annotation.Target;
  * Identifies a domain object to be persisted to Meilisearch.
  *
  * @author Junghoon Ban
- * @since 1.0.0
  */
 
 @Persistent

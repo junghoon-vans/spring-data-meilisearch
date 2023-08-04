@@ -7,7 +7,6 @@ import org.springframework.data.mapping.PersistentEntity;
  *
  * @param <T>
  * @author Junghoon Ban
- * @since 1.0.0
  */
 public interface MeilisearchPersistentEntity<T>
         extends PersistentEntity<T, MeilisearchPersistentProperty> {

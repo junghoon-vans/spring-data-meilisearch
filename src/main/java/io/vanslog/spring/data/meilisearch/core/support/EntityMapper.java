@@ -6,7 +6,6 @@ import java.io.IOException;
  * Interface to map entity to JSON and vice versa.
  *
  * @author Junghoon Ban
- * @since 1.0.0
  */
 public interface EntityMapper {
 

@@ -9,7 +9,6 @@ import org.springframework.data.util.TypeInformation;
  * Meilisearch specific {@link AbstractMappingContext} implementation.
  *
  * @author Junghoon Ban
- * @since 1.0.0
  */
 public class SimpleMeilisearchMappingContext extends
         AbstractMappingContext<SimpleMeilisearchPersistentEntity<?>,

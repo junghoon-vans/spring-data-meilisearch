@@ -17,7 +17,6 @@ import org.springframework.util.Assert;
  *
  * @param <T>
  * @author Junghoon Ban
- * @since 1.0.0
  */
 public class SimpleMeilisearchPersistentEntity<T>
         extends BasicPersistentEntity<T, MeilisearchPersistentProperty>

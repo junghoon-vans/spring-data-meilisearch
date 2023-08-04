@@ -16,7 +16,6 @@ import java.util.Arrays;
  * by setting the host URL, API key, JSON handler, and client agents.
  *
  * @author Junghoon Ban
- * @since 1.0.0
  */
 
 public class MeilisearchClientBeanDefinitionParser
