@@ -10,7 +10,6 @@ import org.springframework.data.mapping.context.MappingContext;
  *
  * @author Junghoon Ban
  * @see MappingContext
- * @since 1.0.0
  */
 public interface MeilisearchConverter {
 

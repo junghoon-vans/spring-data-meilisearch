@@ -14,7 +14,6 @@ import java.util.List;
  * Meilisearch specific {@link PersistentEntity} implementation holding.
  *
  * @author Junghoon Ban
- * @since 1.0.0
  */
 public class SimpleMeilisearchPersistentProperty
         extends AnnotationBasedPersistentProperty<MeilisearchPersistentProperty>

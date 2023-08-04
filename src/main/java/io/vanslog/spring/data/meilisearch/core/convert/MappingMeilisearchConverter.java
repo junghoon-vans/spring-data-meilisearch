@@ -16,7 +16,6 @@ import org.springframework.util.Assert;
  * {@link MeilisearchConverter} Implementation based on {@link MappingContext}.
  *
  * @author Junghoon Ban
- * @since 1.0.0
  */
 public class MappingMeilisearchConverter
         implements MeilisearchConverter, ApplicationContextAware {
