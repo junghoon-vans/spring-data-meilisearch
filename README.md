@@ -1,6 +1,12 @@
 Spring Data for Meilisearch
 ===========================
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.vanslog/spring-data-meilisearch.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.vanslog/spring-data-meilisearch/)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=spring-data-meilisearch&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=spring-data-meilisearch)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=spring-data-meilisearch&metric=coverage)](https://sonarcloud.io/summary/new_code?id=spring-data-meilisearch)
+![LICENSE](https://img.shields.io/github/license/junghoon-vans/spring-data-meilisearch?label=License)
+
+
 Spring Data Implementation for Meilisearch
 
 ## Client Configuration
