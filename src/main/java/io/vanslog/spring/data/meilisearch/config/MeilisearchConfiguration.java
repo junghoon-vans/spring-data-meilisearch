@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Base class for a @{@link org.springframework.context.annotation.Configuration}
  * class to set up the Meilisearch connection using the Meilisearch Client.
+ *
+ * @author Junghoon Ban
  */
 @Configuration(proxyBeanMethods = false)
 public abstract class MeilisearchConfiguration {
