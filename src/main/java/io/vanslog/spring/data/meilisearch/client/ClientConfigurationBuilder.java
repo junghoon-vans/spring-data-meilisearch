@@ -8,6 +8,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * A builder for Meilisearch {@link Config}.
+ *
+ * @author Junghoon Ban
  */
 public class ClientConfigurationBuilder {
 
