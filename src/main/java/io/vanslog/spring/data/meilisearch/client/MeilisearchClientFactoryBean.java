@@ -3,9 +3,6 @@ package io.vanslog.spring.data.meilisearch.client;
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.json.JsonHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
@@ -19,10 +16,7 @@ import org.springframework.lang.Nullable;
  * @see Client
  */
 public final class MeilisearchClientFactoryBean
-        implements FactoryBean<Client>, InitializingBean, DisposableBean {
-
-    private static final Log LOGGER =
-            LogFactory.getLog(MeilisearchClientFactoryBean.class);
+        implements FactoryBean<Client>, InitializingBean {
 
     @Nullable private String hostUrl;
     @Nullable private String apiKey;
@@ -80,13 +74,5 @@ public final class MeilisearchClientFactoryBean
      */
     public void setClientAgents(String[] clientAgents) {
         this.clientAgents = clientAgents;
-    }
-
-    @Override
-    public void destroy() {
-        if (client != null) {
-            LOGGER.info("Closing Meilisearch client");
-            client = null;
-        }
     }
 }
