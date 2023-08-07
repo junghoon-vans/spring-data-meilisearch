@@ -8,10 +8,10 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  *
  * @author Junghoon Ban
  */
-public class MeilisearchExtension implements BeforeAllCallback{
+public class MeilisearchExtension implements BeforeAllCallback {
 
-  @Override
-  public void beforeAll(ExtensionContext context) {
-    new MeilisearchConnection();
-  }
+    @Override
+    public void beforeAll(ExtensionContext context) {
+        new MeilisearchConnection();
+    }
 }
