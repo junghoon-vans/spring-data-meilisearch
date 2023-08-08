@@ -15,13 +15,13 @@ To create an integration test, you need to add the following annotation to your 
 ----
 @MeilisearchTest
 @ContextConfiguration(classes = {MeilisearchTestConfiguration.class})
-public class MeilisearchTest {
+class MeilisearchTest {
 
     @Autowired
-    private MeilisearchClient client;
+    Client client;
 
     @Test
-    public void test() {
+    void test() {
         // ...
     }
 }
