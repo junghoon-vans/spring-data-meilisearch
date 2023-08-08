@@ -4,7 +4,7 @@
 
 [source,bash]
 ----
-mvn test
+./mvnw test
 ----
 
 == Create integration test
