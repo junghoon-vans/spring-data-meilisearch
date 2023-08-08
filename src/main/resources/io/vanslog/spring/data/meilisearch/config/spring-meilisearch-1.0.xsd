@@ -26,7 +26,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="api-key" type="xsd:string" default="masterKey">
+                    <xsd:attribute name="api-key" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 <![CDATA[The API key of the Meilisearch server.]]>
