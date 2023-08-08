@@ -5,6 +5,7 @@ import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * A builder for Meilisearch {@link Config}.
@@ -88,6 +89,7 @@ public class ClientConfigurationBuilder {
      * @return {@link Config}
      */
     public Config build() {
+        Assert.notNull(this.apiKey, "API Key must not be null");
         return new Config(this.hostUrl, this.apiKey, this.jsonHandler,
                 this.clientAgents);
     }
