@@ -1,0 +1,32 @@
+= Testing
+
+== Run the tests
+
+[source,bash]
+----
+mvn test
+----
+
+== Create integration test
+
+To create an integration test, you need to add the following annotation to your test class:
+
+[source,java]
+----
+@MeilisearchTest
+@ContextConfiguration(classes = {MeilisearchTestConfiguration.class})
+public class MeilisearchTest {
+
+    @Autowired
+    private MeilisearchClient client;
+
+    @Test
+    public void test() {
+        // ...
+    }
+}
+----
+
+The `MeilisearchTest` annotation means that the test is run in integration with Meilisearch.
+This code makes it easy to run the container.
+`MeilisearchTestConfiguration` is a configuration class for providing a `Client` associated with a container run by MeilisearchTest.
