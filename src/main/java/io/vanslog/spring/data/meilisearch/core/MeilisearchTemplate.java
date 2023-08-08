@@ -1,5 +1,9 @@
 package io.vanslog.spring.data.meilisearch.core;
 
+import com.meilisearch.sdk.Client;
+import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
+import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
+import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 import java.util.List;
 
 /**
@@ -10,6 +14,22 @@ import java.util.List;
  * @see com.meilisearch.sdk.Index
  */
 public class MeilisearchTemplate implements MeilisearchOperations {
+    
+    private final Client client;
+    private final MeilisearchConverter meilisearchConverter;
+
+    public MeilisearchTemplate(Client client) {
+        this.client = client;
+        this.meilisearchConverter = new MappingMeilisearchConverter(
+                new SimpleMeilisearchMappingContext());
+    }
+
+    public MeilisearchTemplate(Client client,
+                               MeilisearchConverter meilisearchConverter) {
+        this.client = client;
+        this.meilisearchConverter = meilisearchConverter;
+    }
+
     @Override
     public <T> T save(T entity) {
         return null;
