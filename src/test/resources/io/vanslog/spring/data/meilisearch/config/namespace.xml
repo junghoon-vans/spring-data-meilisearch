@@ -7,6 +7,11 @@
        http://www.vanslog.io/spring/data/meilisearch
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
 
+    <bean name="meilisearchTemplate"
+          class="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate">
+        <constructor-arg name="client" ref="meilisearchClient"/>
+    </bean>
+
     <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
     <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
 </beans>
