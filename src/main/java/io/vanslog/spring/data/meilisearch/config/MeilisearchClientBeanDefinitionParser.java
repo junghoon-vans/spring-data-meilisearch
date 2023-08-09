@@ -33,6 +33,10 @@ public class MeilisearchClientBeanDefinitionParser
 
     private void setLocalSettings(Element element,
                                   BeanDefinitionBuilder builder) {
+
+        Assert.hasText(element.getAttribute("api-key"),
+                "The attribute 'api-key' is required.");
+
         builder.addPropertyValue("hostUrl", element.getAttribute("host-url"));
         builder.addPropertyValue("apiKey", element.getAttribute("api-key"));
         builder.addPropertyValue("clientAgents",

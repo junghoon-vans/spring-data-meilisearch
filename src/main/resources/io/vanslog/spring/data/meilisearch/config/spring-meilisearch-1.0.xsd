@@ -26,7 +26,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="api-key" type="xsd:string" default="masterKey">
+                    <xsd:attribute name="api-key" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 <![CDATA[The API key of the Meilisearch server.]]>
@@ -58,10 +58,10 @@
                             </xsd:restriction>
                         </xsd:simpleType>
                     </xsd:attribute>
-                    <xsd:attribute name="client-agents" type="xsd:string" default="Spring Data Meilisearch (v0.1.0)">
+                    <xsd:attribute name="client-agents" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
-                                <![CDATA[The comma delimited string array of client agents. The default is package name and version.]]>
+                                <![CDATA[The comma delimited string array of client agents.]]>
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>

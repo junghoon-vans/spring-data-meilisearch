@@ -7,6 +7,5 @@
        http://www.vanslog.io/spring/data/meilisearch
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
 
-    <meilisearch:meilisearch-client id="meilisearchClient"
-                                    client-agents="Meilisearch Java (v0.11.1), Spring Data Meilisearch (v1.0.0), Java (17)"/>
+    <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
 </beans>
