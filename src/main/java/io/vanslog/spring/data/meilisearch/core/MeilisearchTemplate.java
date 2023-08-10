@@ -1,10 +1,16 @@
 package io.vanslog.spring.data.meilisearch.core;
 
 import com.meilisearch.sdk.Client;
+import com.meilisearch.sdk.Index;
+import com.meilisearch.sdk.exceptions.MeilisearchException;
+import io.vanslog.spring.data.meilisearch.IndexAccessException;
+import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
+import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 import java.util.List;
+import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link MeilisearchOperations}.
@@ -14,7 +20,7 @@ import java.util.List;
  * @see com.meilisearch.sdk.Index
  */
 public class MeilisearchTemplate implements MeilisearchOperations {
-    
+
     private final Client client;
     private final MeilisearchConverter meilisearchConverter;
 
@@ -88,5 +94,25 @@ public class MeilisearchTemplate implements MeilisearchOperations {
     @Override
     public boolean deleteAll(Class<?> clazz) {
         return false;
+    }
+
+    private <T> Index getIndexFor(Class<T> clazz) {
+        MeilisearchPersistentEntity<?> persistentEntity =
+                getPersistentEntityFor(clazz);
+        String uid = persistentEntity.getIndexUid();
+        try {
+            return client.index(uid);
+        } catch (MeilisearchException e) {
+            throw new IndexAccessException(uid);
+        }
+    }
+
+    private MeilisearchPersistentEntity<?> getPersistentEntityFor(
+            Class<?> clazz) {
+        Assert.hasText(clazz.getAnnotation(Document.class).indexUid(),
+                "Given class must be annotated with @Document(indexUid = \"foo\")!");
+
+        return meilisearchConverter.getMappingContext()
+                .getRequiredPersistentEntity(clazz);
     }
 }
