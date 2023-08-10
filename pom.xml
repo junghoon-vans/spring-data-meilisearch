@@ -7,7 +7,7 @@
 
     <groupId>io.vanslog</groupId>
     <artifactId>spring-data-meilisearch</artifactId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.2.1</version>
 
     <name>Spring Data Meilisearch</name>
     <description>Spring Data Implementation for Meilisearch</description>
