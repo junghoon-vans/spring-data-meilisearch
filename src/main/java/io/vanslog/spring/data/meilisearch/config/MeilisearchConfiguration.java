@@ -1,7 +1,7 @@
 package io.vanslog.spring.data.meilisearch.config;
 
 import com.meilisearch.sdk.Client;
-import com.meilisearch.sdk.Config;
+import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,10 +16,10 @@ public abstract class MeilisearchConfiguration {
 
     /**
      * Create a Meilisearch client configuration.
-     * @return {@link com.meilisearch.sdk.Config}
+     * @return {@link ClientConfiguration}
      */
     @Bean(name = "meilisearchClientConfiguration")
-    public abstract Config clientConfiguration();
+    public abstract ClientConfiguration clientConfiguration();
 
     /**
      * Create a Meilisearch client.
@@ -27,7 +27,7 @@ public abstract class MeilisearchConfiguration {
      * @return {@link com.meilisearch.sdk.Client}
      */
     @Bean(name = "meilisearchClient")
-    public Client meilisearchClient(Config clientConfiguration) {
-        return new Client(clientConfiguration);
+    public Client meilisearchClient(ClientConfiguration clientConfiguration) {
+        return new Client(clientConfiguration.getConfig());
     }
 }

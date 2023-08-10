@@ -17,7 +17,7 @@ public class MeilisearchTestConfiguration extends MeilisearchConfiguration {
             = MeilisearchConnection.meilisearchConnectionInfo();
 
     @Override
-    public Config clientConfiguration() {
+    public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
                 .connectedTo(HTTP + meilisearchConnectionInfo.getHost() + ":" +
                         meilisearchConnectionInfo.getPort())

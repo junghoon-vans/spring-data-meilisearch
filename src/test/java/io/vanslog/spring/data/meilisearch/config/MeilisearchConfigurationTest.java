@@ -28,7 +28,7 @@ class MeilisearchConfigurationTest {
     @Configuration
     static class CustomConfiguration extends MeilisearchConfiguration {
         @Override
-        public Config clientConfiguration() {
+        public ClientConfiguration clientConfiguration() {
             return ClientConfiguration.builder()
                     .connectedToLocalhost()
                     .withApiKey("masterKey")
