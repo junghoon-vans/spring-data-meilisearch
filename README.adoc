@@ -20,7 +20,7 @@ This library support using Java based `@Configuration` or XML Namespace for conf
 public class CustomConfiguration extends MeilisearchConfiguration {
 
   @Override
-  public Config clientConfiguration() {
+  public ClientConfiguration clientConfiguration() {
     return ClientConfiguration.builder()
         .connectedToLocalhost()
         .withApiKey("masterKey")
