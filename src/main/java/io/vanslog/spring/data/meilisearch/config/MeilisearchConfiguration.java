@@ -16,7 +16,7 @@ public abstract class MeilisearchConfiguration {
 
     /**
      * Create a Meilisearch client configuration.
-     * @return {@link com.meilisearch.sdk.Config}
+     * @return {@link ClientConfiguration}
      */
     @Bean(name = "meilisearchClientConfiguration")
     public abstract ClientConfiguration clientConfiguration();
