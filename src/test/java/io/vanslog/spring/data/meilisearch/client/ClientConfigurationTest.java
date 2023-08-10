@@ -13,7 +13,7 @@ class ClientConfigurationTest {
 
     @Test
     void shouldBuildConfiguration() {
-        Config clientConfiguration = ClientConfiguration.builder()
+        ClientConfiguration clientConfiguration = ClientConfiguration.builder()
                 .connectedToLocalhost()
                 .withApiKey("masterKey")
                 .withGsonJsonHandler()
@@ -24,7 +24,6 @@ class ClientConfigurationTest {
         assertThat(clientConfiguration.getApiKey()).isEqualTo("masterKey");
         assertThat(clientConfiguration.getJsonHandler()).isInstanceOf(
                 GsonJsonHandler.class);
-        assertThat(clientConfiguration.getHeaders().get("User-Agent")).contains(
-                "Meilisearch Java");
+        assertThat(clientConfiguration.getClientAgents()).isEmpty();
     }
 }

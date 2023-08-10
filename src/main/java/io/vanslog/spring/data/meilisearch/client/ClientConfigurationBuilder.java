@@ -1,6 +1,5 @@
 package io.vanslog.spring.data.meilisearch.client;
 
-import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
@@ -8,14 +7,16 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * A builder for Meilisearch {@link Config}.
+ * A builder for Meilisearch {@link ClientConfiguration}.
  *
  * @author Junghoon Ban
  */
 public class ClientConfigurationBuilder {
 
-    @Nullable private String hostUrl;
-    @Nullable private String apiKey;
+    @Nullable
+    private String hostUrl;
+    @Nullable
+    private String apiKey;
     private JsonHandler jsonHandler;
     private String[] clientAgents;
 
@@ -29,6 +30,7 @@ public class ClientConfigurationBuilder {
 
     /**
      * Connect to localhost:7700.
+     *
      * @return {@link ClientConfigurationBuilder}
      */
     public ClientConfigurationBuilder connectedToLocalhost() {
@@ -38,6 +40,7 @@ public class ClientConfigurationBuilder {
 
     /**
      * Connect to the given hostUrl.
+     *
      * @param hostUrl the hostUrl to connect to
      * @return {@link ClientConfigurationBuilder}
      */
@@ -48,6 +51,7 @@ public class ClientConfigurationBuilder {
 
     /**
      * Configure API key to access Meilisearch instance.
+     *
      * @param apiKey the apiKey to use
      * @return {@link ClientConfigurationBuilder}
      */
@@ -58,6 +62,7 @@ public class ClientConfigurationBuilder {
 
     /**
      * Configure json handler as {@link JacksonJsonHandler}.
+     *
      * @return {@link ClientConfigurationBuilder}
      */
     public ClientConfigurationBuilder withJacksonJsonHandler() {
@@ -67,6 +72,7 @@ public class ClientConfigurationBuilder {
 
     /**
      * Configure json handler as {@link GsonJsonHandler}.
+     *
      * @return {@link ClientConfigurationBuilder}
      */
     public ClientConfigurationBuilder withGsonJsonHandler() {
@@ -76,6 +82,7 @@ public class ClientConfigurationBuilder {
 
     /**
      * Configure client agents that will be sent with User-Agent header.
+     *
      * @param clientAgents String array of client agents
      * @return {@link ClientConfigurationBuilder}
      */
@@ -85,12 +92,14 @@ public class ClientConfigurationBuilder {
     }
 
     /**
-     * Build a {@link Config} with the given parameters.
-     * @return {@link Config}
+     * Build a {@link ClientConfiguration} with the given parameters.
+     *
+     * @return {@link ClientConfiguration}
      */
-    public Config build() {
+    public ClientConfiguration build() {
+        Assert.notNull(this.hostUrl, "Host URL must not be null");
         Assert.notNull(this.apiKey, "API Key must not be null");
-        return new Config(this.hostUrl, this.apiKey, this.jsonHandler,
-                this.clientAgents);
+        return new DefaultClientConfiguration(this.hostUrl, this.apiKey,
+                this.jsonHandler, this.clientAgents);
     }
 }
