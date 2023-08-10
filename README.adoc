@@ -11,6 +11,16 @@ Spring Data Implementation for Meilisearch
 
 This library support using Java based `@Configuration` or XML Namespace for configuring the Meilisearch Client.
 
+The elements in the configuration are:
+
+* `host URL`: The Meilisearch host URL
+** default is `http://localhost:7700` in namespace based configuration
+* `API Key`: The Meilisearch API Key
+* `JSON Handler`: The JSON handler for serializing and deserializing the documents
+** default is `GsonJsonHandler`
+* `Client Agents`: The `User-Agent` header for the Meilisearch Client
+** default is empty array
+
 === Annotation based configuration
 
 [source,java]
@@ -24,11 +34,12 @@ public class CustomConfiguration extends MeilisearchConfiguration {
     return ClientConfiguration.builder()
         .connectedToLocalhost()
         .withApiKey("masterKey")
-        .withGsonJsonHandler()
         .build();
   }
 }
 ----
+
+The `host URL` and `API Key` are required configuration.
 
 === Namespace based configuration
 
@@ -41,10 +52,12 @@ public class CustomConfiguration extends MeilisearchConfiguration {
   xsi:schemaLocation="http://www.vanslog.io/spring/data/meilisearch http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-  <meilisearch:meilisearch-client id="meilisearchClient"
-    api-key="masterKey" json-handler="GSON"/>
+  <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
 </beans>
 ----
+
+The `API Key` is required configuration.
+The Host URL is set to `http://localhost:7700` unless otherwise specified.
 
 == Document Definition
 

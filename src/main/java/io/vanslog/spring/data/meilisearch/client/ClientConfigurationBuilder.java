@@ -24,7 +24,7 @@ public class ClientConfigurationBuilder {
      * Create a new {@link ClientConfigurationBuilder}.
      */
     public ClientConfigurationBuilder() {
-        this.jsonHandler = new JacksonJsonHandler();
+        this.jsonHandler = new GsonJsonHandler();
         this.clientAgents = new String[0];
     }
 
