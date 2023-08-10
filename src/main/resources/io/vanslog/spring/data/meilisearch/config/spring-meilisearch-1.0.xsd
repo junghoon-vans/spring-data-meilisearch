@@ -33,10 +33,10 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="json-handler" default="JACKSON">
+                    <xsd:attribute name="json-handler" default="GSON">
                         <xsd:annotation>
                             <xsd:documentation>
-                                <![CDATA[The enum value of java: io.vanslog.spring.data.meilisearch.config.JsonHandlerBuilder. The default is JACKSON.]]>
+                                <![CDATA[The enum value of java: io.vanslog.spring.data.meilisearch.config.JsonHandlerBuilder. The default is GSON.]]>
                             </xsd:documentation>
                         </xsd:annotation>
                         <xsd:simpleType>

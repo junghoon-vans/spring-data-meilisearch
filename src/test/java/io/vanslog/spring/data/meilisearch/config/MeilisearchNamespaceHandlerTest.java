@@ -27,7 +27,7 @@ class MeilisearchNamespaceHandlerTest {
     }
 
     @Test
-    void shouldMakeJacksonAsDefaultJsonHandler()
+    void shouldUseGsonAsDefaultJsonHandler()
             throws NoSuchFieldException, IllegalAccessException {
         Client client = (Client) context.getBean("meilisearchClient");
 
@@ -36,6 +36,6 @@ class MeilisearchNamespaceHandlerTest {
         jsonHandlerField.setAccessible(true);
         assertThat(jsonHandlerField.get(client))
                 .isInstanceOf(
-                        com.meilisearch.sdk.json.JacksonJsonHandler.class);
+                        com.meilisearch.sdk.json.GsonJsonHandler.class);
     }
 }
