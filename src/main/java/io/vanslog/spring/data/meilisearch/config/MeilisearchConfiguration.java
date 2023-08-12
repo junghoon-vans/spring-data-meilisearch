@@ -48,8 +48,10 @@ public abstract class MeilisearchConfiguration extends MeilisearchConfigurationS
      */
     @Bean(name = {"meilisearchOperations", "meilisearchTemplate"})
     public MeilisearchOperations meilisearchOperations(Client client,
-                                                       MeilisearchConverter meilisearchConverter) {
-        return new MeilisearchTemplate(client, meilisearchConverter);
+                                                       MeilisearchConverter meilisearchConverter,
+                                                       ClientConfiguration clientConfiguration) {
+        return new MeilisearchTemplate(client, meilisearchConverter,
+                clientConfiguration.getJsonHandler());
     }
 
     /**

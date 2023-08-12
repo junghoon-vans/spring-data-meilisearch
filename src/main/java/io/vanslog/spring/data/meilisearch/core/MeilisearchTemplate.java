@@ -3,13 +3,20 @@ package io.vanslog.spring.data.meilisearch.core;
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
+import com.meilisearch.sdk.json.GsonJsonHandler;
+import com.meilisearch.sdk.json.JsonHandler;
 import io.vanslog.spring.data.meilisearch.IndexAccessException;
+import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -24,16 +31,20 @@ public class MeilisearchTemplate implements MeilisearchOperations {
     private final Client client;
     private final MeilisearchConverter meilisearchConverter;
 
-    public MeilisearchTemplate(Client client) {
-        this.client = client;
-        this.meilisearchConverter = new MappingMeilisearchConverter(
-                new SimpleMeilisearchMappingContext());
+    private final JsonHandler jsonHandler;
+
+    public MeilisearchTemplate(Client client,
+                               JsonHandler jsonHandler) {
+        this(client, null, jsonHandler);
     }
 
     public MeilisearchTemplate(Client client,
-                               MeilisearchConverter meilisearchConverter) {
+                               @Nullable MeilisearchConverter meilisearchConverter,
+                               @Nullable JsonHandler jsonHandler) {
         this.client = client;
-        this.meilisearchConverter = meilisearchConverter;
+        this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
+                : new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
+        this.jsonHandler = jsonHandler != null ? jsonHandler : new GsonJsonHandler();
     }
 
     @Override

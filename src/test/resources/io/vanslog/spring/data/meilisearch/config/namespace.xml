@@ -10,6 +10,7 @@
     <bean name="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate">
         <constructor-arg name="client" ref="meilisearchClient"/>
+        <constructor-arg name="jsonHandler" ref="jsonHandler"/>
     </bean>
 
     <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
