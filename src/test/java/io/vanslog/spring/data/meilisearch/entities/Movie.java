@@ -12,6 +12,16 @@ public class Movie {
     private String description;
     private String[] genres;
 
+    public Movie() {
+    }
+
+    public Movie(int id, String title, String description, String[] genres) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.genres = genres;
+    }
+
     public int getId() {
         return id;
     }
