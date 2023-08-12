@@ -1,8 +1,5 @@
 package io.vanslog.spring.data.meilisearch.client;
 
-import com.meilisearch.sdk.json.GsonJsonHandler;
-import com.meilisearch.sdk.json.JacksonJsonHandler;
-import com.meilisearch.sdk.json.JsonHandler;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -17,14 +14,12 @@ public class ClientConfigurationBuilder {
     private String hostUrl;
     @Nullable
     private String apiKey;
-    private JsonHandler jsonHandler;
     private String[] clientAgents;
 
     /**
      * Create a new {@link ClientConfigurationBuilder}.
      */
     public ClientConfigurationBuilder() {
-        this.jsonHandler = new GsonJsonHandler();
         this.clientAgents = new String[0];
     }
 
@@ -61,26 +56,6 @@ public class ClientConfigurationBuilder {
     }
 
     /**
-     * Configure json handler as {@link JacksonJsonHandler}.
-     *
-     * @return {@link ClientConfigurationBuilder}
-     */
-    public ClientConfigurationBuilder withJacksonJsonHandler() {
-        this.jsonHandler = new JacksonJsonHandler();
-        return this;
-    }
-
-    /**
-     * Configure json handler as {@link GsonJsonHandler}.
-     *
-     * @return {@link ClientConfigurationBuilder}
-     */
-    public ClientConfigurationBuilder withGsonJsonHandler() {
-        this.jsonHandler = new GsonJsonHandler();
-        return this;
-    }
-
-    /**
      * Configure client agents that will be sent with User-Agent header.
      *
      * @param clientAgents String array of client agents
@@ -100,6 +75,6 @@ public class ClientConfigurationBuilder {
         Assert.notNull(this.hostUrl, "Host URL must not be null");
         Assert.notNull(this.apiKey, "API Key must not be null");
         return new DefaultClientConfiguration(this.hostUrl, this.apiKey,
-                this.jsonHandler, this.clientAgents);
+                this.clientAgents);
     }
 }

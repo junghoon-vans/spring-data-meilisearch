@@ -2,6 +2,7 @@ package io.vanslog.spring.data.meilisearch.client;
 
 import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.json.JsonHandler;
+import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of {@link ClientConfiguration}.
@@ -12,25 +13,22 @@ public class DefaultClientConfiguration implements ClientConfiguration {
 
     private final String hostUrl;
     private final String apiKey;
-    private final JsonHandler jsonHandler;
+    @Nullable private JsonHandler jsonHandler;
     private final String[] clientAgents;
-    private final Config config;
 
     /**
      * Create a new {@link DefaultClientConfiguration}.
-     * @param hostUrl the host url
-     * @param apiKey the api key
-     * @param jsonHandler the json handler
+     *
+     * @param hostUrl      the host url
+     * @param apiKey       the api key
      * @param clientAgents the client agents
      */
     public DefaultClientConfiguration(String hostUrl, String apiKey,
-                                      JsonHandler jsonHandler,
                                       String[] clientAgents) {
         this.hostUrl = hostUrl;
         this.apiKey = apiKey;
-        this.jsonHandler = jsonHandler;
+        this.jsonHandler = null;
         this.clientAgents = clientAgents;
-        this.config = new Config(hostUrl, apiKey, jsonHandler, clientAgents);
     }
 
     @Override
@@ -44,6 +42,7 @@ public class DefaultClientConfiguration implements ClientConfiguration {
     }
 
     @Override
+    @Nullable
     public JsonHandler getJsonHandler() {
         return jsonHandler;
     }
@@ -55,6 +54,15 @@ public class DefaultClientConfiguration implements ClientConfiguration {
 
     @Override
     public Config getConfig() {
-        return config;
+        if (jsonHandler == null) {
+            return new Config(hostUrl, apiKey, clientAgents);
+        }
+        return new Config(hostUrl, apiKey, jsonHandler, clientAgents);
+    }
+
+    @Override
+    public ClientConfiguration withJsonHandler(JsonHandler jsonHandler) {
+        this.jsonHandler = jsonHandler;
+        return this;
     }
 }

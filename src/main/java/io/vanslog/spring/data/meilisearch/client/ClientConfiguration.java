@@ -2,6 +2,7 @@ package io.vanslog.spring.data.meilisearch.client;
 
 import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.json.JsonHandler;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface for Meilisearch Configuration.
@@ -38,6 +39,7 @@ public interface ClientConfiguration {
      *
      * @return jsonHandler
      */
+    @Nullable
     JsonHandler getJsonHandler();
 
     /**
@@ -53,4 +55,11 @@ public interface ClientConfiguration {
      * @return config
      */
     Config getConfig();
+
+    /**
+     * Set the JSON handler.
+     * @param jsonHandler the JSON handler
+     * @return {@link ClientConfiguration}
+     */
+    ClientConfiguration withJsonHandler(JsonHandler jsonHandler);
 }

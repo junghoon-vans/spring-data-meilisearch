@@ -3,6 +3,9 @@ package io.vanslog.spring.data.meilisearch.config;
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
+import com.meilisearch.sdk.json.GsonJsonHandler;
+import com.meilisearch.sdk.json.JacksonJsonHandler;
+import com.meilisearch.sdk.json.JsonHandler;
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,8 +35,12 @@ class MeilisearchConfigurationTest {
             return ClientConfiguration.builder()
                     .connectedToLocalhost()
                     .withApiKey("masterKey")
-                    .withGsonJsonHandler()
                     .build();
+        }
+
+        @Override
+        public JsonHandler jsonHandler() {
+            return new JacksonJsonHandler();
         }
     }
 }
