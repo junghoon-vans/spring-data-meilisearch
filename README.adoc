@@ -93,8 +93,7 @@ As an example, the following class defines a `Movie` document with `id`, `title`
 ----
 @Document(indexUid = "movies")
 public class Movie {
-    @Id
-    private String id;
+    @Id private int id;
     private String title;
     private String description;
     private String[] genres;

@@ -7,17 +7,26 @@ import org.springframework.data.annotation.Id;
 @SuppressWarnings("unused")
 public class Movie {
 
-    @Id
-    private String id;
+    @Id private int id;
     private String title;
     private String description;
     private String[] genres;
 
-    public String getId() {
+    public Movie() {
+    }
+
+    public Movie(int id, String title, String description, String[] genres) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.genres = genres;
+    }
+
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
