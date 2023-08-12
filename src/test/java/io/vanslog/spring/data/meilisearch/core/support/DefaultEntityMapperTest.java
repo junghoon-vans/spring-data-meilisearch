@@ -11,7 +11,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class DefaultEntityMapperTest {
 
     private static final String JSON_STRING =
-            "{\"id\":\"1\",\"title\":\"Carol\","
+            "{\"id\":1,\"title\":\"Carol\","
                     +
                     "\"description\":\"romantic period drama film\",\"genres\":[\"Drama\",\"Romance\"]}";
     private static final Movie MOVIE = new Movie();
@@ -22,7 +22,7 @@ class DefaultEntityMapperTest {
     void setUp() {
         defaultEntityMapper = new DefaultEntityMapper();
 
-        MOVIE.setId("1");
+        MOVIE.setId(1);
         MOVIE.setTitle("Carol");
         MOVIE.setDescription("romantic period drama film");
         MOVIE.setGenres(new String[] {"Drama", "Romance"});
