@@ -8,8 +8,6 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.Assert;
 import org.w3c.dom.Element;
 
-import java.util.Arrays;
-
 /**
  * BeanDefinitionParser class that parses the client tag
  * in the XML configuration file.The client tag is parsed
@@ -39,17 +37,8 @@ public class MeilisearchClientBeanDefinitionParser
 
         builder.addPropertyValue("hostUrl", element.getAttribute("host-url"));
         builder.addPropertyValue("apiKey", element.getAttribute("api-key"));
-        builder.addPropertyValue("clientAgents",
-                element.getAttribute("client-agents"));
-
-        String jsonHandlerName = element.getAttribute("json-handler");
-        Assert.isTrue(JsonHandlerBuilder.contains(jsonHandlerName),
-                "JsonHandler must be one of "
-                        + Arrays.toString(JsonHandlerBuilder.values()));
-
-        JsonHandlerBuilder handlerBuilder =
-                JsonHandlerBuilder.valueOf(jsonHandlerName.toUpperCase());
-        builder.addPropertyValue("jsonHandler", handlerBuilder.build());
+        builder.addPropertyValue("clientAgents", element.getAttribute("client-agents"));
+        builder.addPropertyReference("jsonHandler", element.getAttribute("json-handler-ref"));
     }
 
     private AbstractBeanDefinition getSourcedBeanDefinition(

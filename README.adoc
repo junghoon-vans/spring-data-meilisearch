@@ -14,10 +14,8 @@ This library support using Java based `@Configuration` or XML Namespace for conf
 The elements in the configuration are:
 
 * `host URL`: The Meilisearch host URL
-** default is `http://localhost:7700` in namespace based configuration
 * `API Key`: The Meilisearch API Key
 * `JSON Handler`: The JSON handler for serializing and deserializing the documents
-** default is `GsonJsonHandler`
 * `Client Agents`: The `User-Agent` header for the Meilisearch Client
 ** default is empty array
 
@@ -46,17 +44,21 @@ The `host URL` and `API Key` are required configuration.
 [source,xml]
 ----
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
-  xsi:schemaLocation="http://www.vanslog.io/spring/data/meilisearch http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.vanslog.io/spring/data/meilisearch
+       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
 
-  <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
+    <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
+    <bean id="jsonHandler" class="com.meilisearch.sdk.json.JacksonJsonHandler"/>
 </beans>
+
 ----
 
-The `API Key` is required configuration.
+The `API Key`, `JsonHandler` is required configuration.
 The Host URL is set to `http://localhost:7700` unless otherwise specified.
 
 == Document Definition

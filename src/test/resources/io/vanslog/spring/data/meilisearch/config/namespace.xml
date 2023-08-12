@@ -8,4 +8,5 @@
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
 
     <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
+    <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
 </beans>
