@@ -9,6 +9,17 @@
     <xsd:import namespace="http://www.springframework.org/schema/beans"/>
     <xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
+    <xsd:simpleType name="jsonHandlerRef">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation kind="ref">
+                    <tool:assignable-to type="com.meilisearch.sdk.json.JsonHandler"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:union memberTypes="xsd:string"/>
+    </xsd:simpleType>
+
     <xsd:element name="meilisearch-client">
         <xsd:annotation>
             <xsd:documentation/>
@@ -33,30 +44,12 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="json-handler" default="GSON">
+                    <xsd:attribute name="json-handler-ref" type="jsonHandlerRef" default="jsonHandler">
                         <xsd:annotation>
                             <xsd:documentation>
-                                <![CDATA[The enum value of java: io.vanslog.spring.data.meilisearch.config.JsonHandlerBuilder. The default is GSON.]]>
+                                <![CDATA[The reference to the JSON handler. The default is bean named jsonHandler.]]>
                             </xsd:documentation>
                         </xsd:annotation>
-                        <xsd:simpleType>
-                            <xsd:restriction base="xsd:string">
-                                <xsd:enumeration value="GSON">
-                                    <xsd:annotation>
-                                        <xsd:documentation>
-                                            <![CDATA[Use GSON as the JSON handler.]]>
-                                        </xsd:documentation>
-                                    </xsd:annotation>
-                                </xsd:enumeration>
-                                <xsd:enumeration value="JACKSON">
-                                    <xsd:annotation>
-                                        <xsd:documentation>
-                                            <![CDATA[Use JACKSON as the JSON handler.]]>
-                                        </xsd:documentation>
-                                    </xsd:annotation>
-                                </xsd:enumeration>
-                            </xsd:restriction>
-                        </xsd:simpleType>
                     </xsd:attribute>
                     <xsd:attribute name="client-agents" type="xsd:string">
                         <xsd:annotation>

@@ -1,9 +1,9 @@
 package io.vanslog.spring.data.meilisearch.config;
 
 import com.meilisearch.sdk.Client;
+import com.meilisearch.sdk.json.JsonHandler;
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Base class for a @{@link org.springframework.context.annotation.Configuration}
@@ -11,8 +11,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Junghoon Ban
  */
-@Configuration(proxyBeanMethods = false)
-public abstract class MeilisearchConfiguration {
+public abstract class MeilisearchConfiguration extends MeilisearchConfigurationSupport {
 
     /**
      * Create a Meilisearch client configuration.
@@ -24,10 +23,13 @@ public abstract class MeilisearchConfiguration {
     /**
      * Create a Meilisearch client.
      * @param clientConfiguration the client configuration
+     * @param jsonHandler the json handler
      * @return {@link com.meilisearch.sdk.Client}
      */
     @Bean(name = "meilisearchClient")
-    public Client meilisearchClient(ClientConfiguration clientConfiguration) {
-        return new Client(clientConfiguration.getConfig());
+    public Client meilisearchClient(ClientConfiguration clientConfiguration,
+                                    JsonHandler jsonHandler) {
+        return new Client(clientConfiguration
+                .withJsonHandler(jsonHandler).getConfig());
     }
 }
