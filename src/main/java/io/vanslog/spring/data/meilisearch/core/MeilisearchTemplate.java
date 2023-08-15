@@ -11,11 +11,14 @@ import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
+import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.Objects;
+import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -49,27 +52,50 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
     @Override
     public <T> T save(T entity) {
-        return null;
+        this.save(Collections.singletonList(entity));
+        return entity;
     }
 
     @Override
     public <T> List<T> save(List<T> entities) {
-        return null;
+        try {
+            Index index = getIndexFor(entities.iterator().next().getClass());
+            index.addDocuments(jsonHandler.encode(entities));
+        } catch (RuntimeException | MeilisearchException e) {
+            throw new UncategorizedMeilisearchException(
+                    "Failed to save entities.", e);
+        }
+        return entities;
     }
 
     @Override
     public <T> T get(String documentId, Class<T> clazz) {
-        return null;
+        try {
+            Index index = getIndexFor(clazz);
+            return index.getDocument(documentId, clazz);
+        } catch (RuntimeException | MeilisearchException e) {
+            throw new UncategorizedMeilisearchException("Failed to get entity.", e);
+        }
     }
 
     @Override
     public <T> List<T> multiGet(Class<T> clazz) {
-        return null;
+        try {
+            Index index = getIndexFor(clazz);
+            return Arrays.asList(index.getDocuments(clazz).getResults());
+        } catch (RuntimeException | MeilisearchException e) {
+            throw new UncategorizedMeilisearchException("Failed to get entities.", e);
+        }
     }
 
     @Override
-    public <T> List<T> multiGet(Class<T> clazz, String... documentIds) {
-        return null;
+    public <T> List<T> multiGet(Class<T> clazz, List<String> documentIds) {
+        return documentIds.stream()
+                .map(id -> this.multiGet(clazz).stream()
+                        .filter(entity -> getDocumentIdFor(entity).equals(id))
+                        .findFirst()
+                        .orElse(null))
+                .toList();
     }
 
     @Override
@@ -105,6 +131,20 @@ public class MeilisearchTemplate implements MeilisearchOperations {
     @Override
     public boolean deleteAll(Class<?> clazz) {
         return false;
+    }
+
+    private <T> String getDocumentIdFor(T entity) {
+        PersistentProperty<MeilisearchPersistentProperty> idProperty =
+                getPersistentEntityFor(entity.getClass()).getIdProperty();
+        Assert.notNull(idProperty, "Document must have an id property.");
+
+        try {
+            Method getter = idProperty.getGetter();
+            Object id = Objects.requireNonNull(getter).invoke(entity);
+            return id.toString();
+        } catch (Exception e) {
+            throw new UncategorizedMeilisearchException("Failed to get id.", e);
+        }
     }
 
     private <T> Index getIndexFor(Class<T> clazz) {

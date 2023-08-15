@@ -55,7 +55,7 @@ public interface MeilisearchOperations {
      * @param <T>         the type of the entity
      * @return all entities with the given document ids
      */
-    <T> List<T> multiGet(Class<T> clazz, String... documentIds);
+    <T> List<T> multiGet(Class<T> clazz, List<String> documentIds);
 
     /**
      * Checks whether an entity with the given document id exists.
