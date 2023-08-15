@@ -89,7 +89,7 @@ public interface MeilisearchOperations {
      * @param entity the entity to delete
      * @return {@literal true} if an entity was deleted
      */
-    boolean delete(Object entity);
+    <T> boolean delete(T entity);
 
     /**
      * Deletes all entities of the given type with the given document ids.
@@ -98,7 +98,7 @@ public interface MeilisearchOperations {
      * @param documentIds the document ids of the entities
      * @return {@literal true} if all entities were deleted
      */
-    boolean delete(Class<?> clazz, String... documentIds);
+    boolean delete(Class<?> clazz, List<String> documentIds);
 
     /**
      * Deletes the given entities.
@@ -106,7 +106,7 @@ public interface MeilisearchOperations {
      * @param entities the entities to delete
      * @return {@literal true} if all entities were deleted
      */
-    boolean delete(Iterable<?> entities);
+    <T> boolean delete(List<T> entities);
 
     /**
      * Deletes all entities of the given type.

@@ -120,27 +120,54 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
     @Override
     public boolean delete(String documentId, Class<?> clazz) {
-        return false;
+        Index index = getIndexFor(clazz);
+        try {
+            index.deleteDocument(documentId);
+            return true;
+        } catch (MeilisearchException e) {
+            throw new UncategorizedMeilisearchException(
+                    "Failed to delete entity.", e);
+        }
     }
 
     @Override
-    public boolean delete(Object entity) {
-        return false;
+    public <T> boolean delete(T entity) {
+        Class<?> clazz = entity.getClass();
+        String documentId = getDocumentIdFor(entity);
+        return this.delete(documentId, clazz);
     }
 
     @Override
-    public boolean delete(Class<?> clazz, String... documentIds) {
-        return false;
+    public boolean delete(Class<?> clazz, List<String> documentIds) {
+        Index index = getIndexFor(clazz);
+        try {
+            index.deleteDocuments(documentIds);
+            return true;
+        } catch (MeilisearchException e) {
+            throw new UncategorizedMeilisearchException(
+                    "Failed to delete entities.", e);
+        }
     }
 
     @Override
-    public boolean delete(Iterable<?> entities) {
-        return false;
+    public <T> boolean delete(List<T> entities) {
+        Class<?> clazz = entities.iterator().next().getClass();
+        List<String> documentIds = entities.stream()
+                .map(this::getDocumentIdFor)
+                .toList();
+        return this.delete(clazz, documentIds);
     }
 
     @Override
     public boolean deleteAll(Class<?> clazz) {
-        return false;
+        Index index = getIndexFor(clazz);
+        try {
+            index.deleteAllDocuments();
+            return true;
+        } catch (MeilisearchException e) {
+            throw new UncategorizedMeilisearchException(
+                    "Failed to delete all entities.", e);
+        }
     }
 
     private <T> String getDocumentIdFor(T entity) {
