@@ -110,7 +110,12 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
     @Override
     public long count(Class<?> clazz) {
-        return 0;
+        try {
+            Index index = getIndexFor(clazz);
+            return index.getDocuments(clazz).getTotal();
+        } catch (MeilisearchException e) {
+            throw new UncategorizedMeilisearchException("Failed to count entities.", e);
+        }
     }
 
     @Override
