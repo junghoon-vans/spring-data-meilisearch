@@ -100,7 +100,12 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
     @Override
     public boolean exists(String documentId, Class<?> clazz) {
-        return false;
+        try {
+            Index index = getIndexFor(clazz);
+            return index.getDocument(documentId, clazz) != null;
+        } catch (MeilisearchException e) {
+            throw new UncategorizedMeilisearchException("Failed to check existence.", e);
+        }
     }
 
     @Override
