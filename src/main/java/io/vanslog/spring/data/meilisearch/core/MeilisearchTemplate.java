@@ -58,8 +58,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
     @Override
     public <T> List<T> save(List<T> entities) {
+        Class<?> clazz = entities.iterator().next().getClass();
+        Index index = getIndexFor(clazz);
         try {
-            Index index = getIndexFor(entities.iterator().next().getClass());
             index.addDocuments(jsonHandler.encode(entities));
         } catch (RuntimeException | MeilisearchException e) {
             throw new UncategorizedMeilisearchException(
@@ -70,8 +71,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
     @Override
     public <T> T get(String documentId, Class<T> clazz) {
+        Index index = getIndexFor(clazz);
         try {
-            Index index = getIndexFor(clazz);
             return index.getDocument(documentId, clazz);
         } catch (RuntimeException | MeilisearchException e) {
             throw new UncategorizedMeilisearchException("Failed to get entity.", e);
@@ -80,8 +81,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
     @Override
     public <T> List<T> multiGet(Class<T> clazz) {
+        Index index = getIndexFor(clazz);
         try {
-            Index index = getIndexFor(clazz);
             return Arrays.asList(index.getDocuments(clazz).getResults());
         } catch (RuntimeException | MeilisearchException e) {
             throw new UncategorizedMeilisearchException("Failed to get entities.", e);
@@ -100,8 +101,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
     @Override
     public boolean exists(String documentId, Class<?> clazz) {
+        Index index = getIndexFor(clazz);
         try {
-            Index index = getIndexFor(clazz);
             return index.getDocument(documentId, clazz) != null;
         } catch (MeilisearchException e) {
             throw new UncategorizedMeilisearchException("Failed to check existence.", e);
@@ -110,8 +111,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
     @Override
     public long count(Class<?> clazz) {
+        Index index = getIndexFor(clazz);
         try {
-            Index index = getIndexFor(clazz);
             return index.getDocuments(clazz).getTotal();
         } catch (MeilisearchException e) {
             throw new UncategorizedMeilisearchException("Failed to count entities.", e);
