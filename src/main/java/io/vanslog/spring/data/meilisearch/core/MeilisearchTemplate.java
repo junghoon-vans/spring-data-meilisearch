@@ -5,7 +5,10 @@ import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
+import com.meilisearch.sdk.model.TaskInfo;
+import com.meilisearch.sdk.model.TaskStatus;
 import io.vanslog.spring.data.meilisearch.IndexAccessException;
+import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
@@ -61,7 +64,14 @@ public class MeilisearchTemplate implements MeilisearchOperations {
         Class<?> clazz = entities.iterator().next().getClass();
         Index index = getIndexFor(clazz);
         try {
-            index.addDocuments(jsonHandler.encode(entities));
+            TaskInfo taskInfo = index.addDocuments(jsonHandler.encode(entities));
+            int taskUid = taskInfo.getTaskUid();
+            index.waitForTask(taskUid);
+            TaskStatus taskStatus = index.getTask(taskUid).getStatus();
+
+            if (taskStatus == TaskStatus.CANCELED || taskStatus == TaskStatus.FAILED) {
+                throw new TaskStatusException(taskStatus, "Failed to save entities.");
+            }
         } catch (RuntimeException | MeilisearchException e) {
             throw new UncategorizedMeilisearchException(
                     "Failed to save entities.", e);
@@ -123,8 +133,13 @@ public class MeilisearchTemplate implements MeilisearchOperations {
     public boolean delete(String documentId, Class<?> clazz) {
         Index index = getIndexFor(clazz);
         try {
-            index.deleteDocument(documentId);
-            return true;
+            TaskInfo taskInfo = index.deleteDocument(documentId);
+            int taskUid = taskInfo.getTaskUid();
+            index.waitForTask(taskUid);
+            TaskStatus taskStatus = index.getTask(taskUid).getStatus();
+
+            return taskStatus != TaskStatus.CANCELED &&
+                    taskStatus != TaskStatus.FAILED;
         } catch (MeilisearchException e) {
             throw new UncategorizedMeilisearchException(
                     "Failed to delete entity.", e);
@@ -142,8 +157,13 @@ public class MeilisearchTemplate implements MeilisearchOperations {
     public boolean delete(Class<?> clazz, List<String> documentIds) {
         Index index = getIndexFor(clazz);
         try {
-            index.deleteDocuments(documentIds);
-            return true;
+            TaskInfo taskInfo = index.deleteDocuments(documentIds);
+            int taskUid = taskInfo.getTaskUid();
+            index.waitForTask(taskUid);
+            TaskStatus taskStatus = index.getTask(taskUid).getStatus();
+
+            return taskStatus != TaskStatus.CANCELED &&
+                    taskStatus != TaskStatus.FAILED;
         } catch (MeilisearchException e) {
             throw new UncategorizedMeilisearchException(
                     "Failed to delete entities.", e);
@@ -163,8 +183,13 @@ public class MeilisearchTemplate implements MeilisearchOperations {
     public boolean deleteAll(Class<?> clazz) {
         Index index = getIndexFor(clazz);
         try {
-            index.deleteAllDocuments();
-            return true;
+            TaskInfo taskInfo = index.deleteAllDocuments();
+            int taskUid = taskInfo.getTaskUid();
+            index.waitForTask(taskUid);
+            TaskStatus taskStatus = index.getTask(taskUid).getStatus();
+
+            return taskStatus != TaskStatus.CANCELED &&
+                    taskStatus != TaskStatus.FAILED;
         } catch (MeilisearchException e) {
             throw new UncategorizedMeilisearchException(
                     "Failed to delete all entities.", e);
