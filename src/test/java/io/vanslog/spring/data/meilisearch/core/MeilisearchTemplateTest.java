@@ -4,7 +4,6 @@ import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,13 +45,8 @@ class MeilisearchTemplateTest {
 
     @Test
     void shouldSaveDocuments() {
-        List<Movie> movies = new ArrayList<>();
-        movies.add(movie1);
-        movies.add(movie2);
-
-        meilisearchTemplate.save(movies);
+        meilisearchTemplate.save(List.of(movie1, movie2));
         List<Movie> saved = meilisearchTemplate.multiGet(Movie.class);
-
         assertThat(saved.size()).isEqualTo(2);
     }
 
@@ -70,12 +64,7 @@ class MeilisearchTemplateTest {
 
     @Test
     void shouldDeleteDocuments() {
-        List<Movie> movies = new ArrayList<>();
-        movies.add(movie1);
-        movies.add(movie2);
-        movies.add(movie3);
-
-        meilisearchTemplate.save(movies);
+        meilisearchTemplate.save(List.of(movie1, movie2, movie3));
         meilisearchTemplate.delete(Movie.class, List.of("1", "2"));
 
         List<Movie> saved = meilisearchTemplate.multiGet(Movie.class);
@@ -85,27 +74,18 @@ class MeilisearchTemplateTest {
 
     @Test
     void shouldDeleteAllDocuments() {
-        List<Movie> movies = new ArrayList<>();
-        movies.add(movie1);
-        movies.add(movie2);
-
-        meilisearchTemplate.save(movies);
+        meilisearchTemplate.save(List.of(movie1, movie2));
         meilisearchTemplate.deleteAll(Movie.class);
 
         List<Movie> saved = meilisearchTemplate.multiGet(Movie.class);
 
-        assertThat(saved.size()).isEqualTo(0);
+        assertThat(saved.size()).isZero();
     }
 
     @Test
     void shouldCountDocuments() {
-        List<Movie> movies = new ArrayList<>();
-        movies.add(movie1);
-        movies.add(movie2);
-
-        meilisearchTemplate.save(movies);
+        meilisearchTemplate.save(List.of(movie1, movie2));
         long count = meilisearchTemplate.count(Movie.class);
-
         assertThat(count).isEqualTo(2);
     }
 
@@ -113,7 +93,6 @@ class MeilisearchTemplateTest {
     void shouldExistsDocument() {
         meilisearchTemplate.save(movie1);
         boolean exists = meilisearchTemplate.exists("1", Movie.class);
-
         assertThat(exists).isTrue();
     }
 }
