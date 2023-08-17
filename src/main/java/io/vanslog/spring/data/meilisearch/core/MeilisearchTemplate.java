@@ -63,7 +63,11 @@ public class MeilisearchTemplate implements MeilisearchOperations {
     public <T> List<T> save(List<T> entities) {
         Class<?> clazz = entities.iterator().next().getClass();
         Index index = getIndexFor(clazz);
-        String primaryKey = getPersistentEntityFor(clazz).getIdProperty().getFieldName();
+
+        MeilisearchPersistentProperty idProperty = getPersistentEntityFor(clazz).getIdProperty();
+        Assert.notNull(idProperty, "Id property must not be null.");
+
+        String primaryKey = Objects.requireNonNull(idProperty.getField()).getName();
 
         try {
             TaskInfo taskInfo = index.addDocuments(jsonHandler.encode(entities), primaryKey);
