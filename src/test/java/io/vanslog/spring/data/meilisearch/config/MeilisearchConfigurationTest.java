@@ -7,6 +7,8 @@ import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +25,17 @@ class MeilisearchConfigurationTest {
     @Autowired
     private Client client;
 
+    @Autowired
+    private MeilisearchOperations meilisearchTemplate;
+
     @Test
-    void shouldCreateClient() throws MeilisearchException {
+    void shouldCreateMeilisearchClient() {
         assertThat(client).isNotNull();
+    }
+
+    @Test
+    void shouldCreateMeilisearchTemplate() {
+        assertThat(meilisearchTemplate).isNotNull();
     }
 
     @Configuration

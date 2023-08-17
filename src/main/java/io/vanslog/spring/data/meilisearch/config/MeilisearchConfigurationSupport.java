@@ -1,7 +1,8 @@
 package io.vanslog.spring.data.meilisearch.config;
 
-import com.meilisearch.sdk.json.GsonJsonHandler;
-import com.meilisearch.sdk.json.JsonHandler;
+import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
+import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
+import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,11 +14,25 @@ import org.springframework.context.annotation.Configuration;
 public class MeilisearchConfigurationSupport {
 
     /**
-     * Register a {@link JsonHandler} bean.
-     * @return {@link com.meilisearch.sdk.json.JsonHandler}
+     * Create a {@link MeilisearchConverter} bean.
+     *
+     * @param meilisearchMappingContext the {@link SimpleMeilisearchMappingContext} to use
+     * @return the created {@link MeilisearchConverter} bean.
      */
     @Bean
-    public JsonHandler jsonHandler() {
-        return new GsonJsonHandler();
+    public MeilisearchConverter meilisearchConverter(
+            SimpleMeilisearchMappingContext meilisearchMappingContext) {
+
+        return new MappingMeilisearchConverter(meilisearchMappingContext);
+    }
+
+    /**
+     * Create a {@link SimpleMeilisearchMappingContext} bean.
+     *
+     * @return the created {@link SimpleMeilisearchMappingContext} bean.
+     */
+    @Bean
+    public SimpleMeilisearchMappingContext meilisearchMappingContext() {
+        return new SimpleMeilisearchMappingContext();
     }
 }
