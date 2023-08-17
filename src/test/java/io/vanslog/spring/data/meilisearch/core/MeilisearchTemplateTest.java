@@ -45,9 +45,12 @@ class MeilisearchTemplateTest {
 
     @Test
     void shouldSaveDocuments() {
-        meilisearchTemplate.save(List.of(movie1, movie2));
+        List<Movie> movies = List.of(movie1, movie2);
+
+        meilisearchTemplate.save(movies);
         List<Movie> saved = meilisearchTemplate.multiGet(Movie.class);
-        assertThat(saved.size()).isEqualTo(2);
+
+        assertThat(saved.size()).isEqualTo(movies.size());
     }
 
     @Test
@@ -94,5 +97,15 @@ class MeilisearchTemplateTest {
         meilisearchTemplate.save(movie1);
         boolean exists = meilisearchTemplate.exists("1", Movie.class);
         assertThat(exists).isTrue();
+    }
+
+    @Test
+    void shouldGetCertainDocuments() {
+        List<Movie> movies = List.of(movie1, movie2, movie3);
+
+        meilisearchTemplate.save(movies);
+        List<Movie> saved = meilisearchTemplate.multiGet(Movie.class, List.of("1", "2"));
+
+        assertThat(saved.size()).isEqualTo(2);
     }
 }
