@@ -1,6 +1,7 @@
 package io.vanslog.spring.data.meilisearch.core;
 
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
+import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
@@ -8,6 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -107,5 +109,30 @@ class MeilisearchTemplateTest {
         List<Movie> saved = meilisearchTemplate.multiGet(Movie.class, List.of("1", "2"));
 
         assertThat(saved.size()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldSaveDocumentWithAnnotatedIdField() {
+        AnnotatedIdField annotatedIdField = new AnnotatedIdField();
+        String documentId = "idField";
+        annotatedIdField.setName(documentId);
+
+        meilisearchTemplate.save(annotatedIdField);
+
+        assertThat(meilisearchTemplate.exists(documentId, AnnotatedIdField.class)).isTrue();
+    }
+
+    @Document(indexUid = "annotatedIdField")
+    static class AnnotatedIdField {
+
+        @Id private String name;
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 }

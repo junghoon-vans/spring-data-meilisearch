@@ -63,8 +63,10 @@ public class MeilisearchTemplate implements MeilisearchOperations {
     public <T> List<T> save(List<T> entities) {
         Class<?> clazz = entities.iterator().next().getClass();
         Index index = getIndexFor(clazz);
+        String primaryKey = getPersistentEntityFor(clazz).getIdProperty().getFieldName();
+
         try {
-            TaskInfo taskInfo = index.addDocuments(jsonHandler.encode(entities));
+            TaskInfo taskInfo = index.addDocuments(jsonHandler.encode(entities), primaryKey);
             int taskUid = taskInfo.getTaskUid();
             index.waitForTask(taskUid);
             TaskStatus taskStatus = index.getTask(taskUid).getStatus();
