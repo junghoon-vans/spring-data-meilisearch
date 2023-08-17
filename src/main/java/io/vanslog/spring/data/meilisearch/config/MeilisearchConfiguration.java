@@ -44,6 +44,7 @@ public abstract class MeilisearchConfiguration extends MeilisearchConfigurationS
      *
      * @param client               the Meilisearch client
      * @param meilisearchConverter the Meilisearch converter
+     * @param clientConfiguration  the client configuration
      * @return the created {@link MeilisearchOperations} bean.
      */
     @Bean(name = {"meilisearchOperations", "meilisearchTemplate"})

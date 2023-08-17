@@ -140,8 +140,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
             index.waitForTask(taskUid);
             TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
-            return taskStatus != TaskStatus.CANCELED &&
-                    taskStatus != TaskStatus.FAILED;
+            return taskStatus != TaskStatus.CANCELED
+                    && taskStatus != TaskStatus.FAILED;
         } catch (MeilisearchException e) {
             throw new UncategorizedMeilisearchException(
                     "Failed to delete entity.", e);
@@ -164,8 +164,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
             index.waitForTask(taskUid);
             TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
-            return taskStatus != TaskStatus.CANCELED &&
-                    taskStatus != TaskStatus.FAILED;
+            return taskStatus != TaskStatus.CANCELED
+                    && taskStatus != TaskStatus.FAILED;
         } catch (MeilisearchException e) {
             throw new UncategorizedMeilisearchException(
                     "Failed to delete entities.", e);
@@ -190,8 +190,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
             index.waitForTask(taskUid);
             TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
-            return taskStatus != TaskStatus.CANCELED &&
-                    taskStatus != TaskStatus.FAILED;
+            return taskStatus != TaskStatus.CANCELED
+                    && taskStatus != TaskStatus.FAILED;
         } catch (MeilisearchException e) {
             throw new UncategorizedMeilisearchException(
                     "Failed to delete all entities.", e);

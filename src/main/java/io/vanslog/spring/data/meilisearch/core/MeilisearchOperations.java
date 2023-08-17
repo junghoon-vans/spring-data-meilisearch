@@ -16,6 +16,7 @@ public interface MeilisearchOperations {
      *
      * @param entity the entity to save
      * @param <T>    the type of the entity
+     * @return the saved entity
      */
     <T> T save(T entity);
 
@@ -87,6 +88,7 @@ public interface MeilisearchOperations {
      * Deletes a given entity.
      *
      * @param entity the entity to delete
+     * @param <T>    the type of the entity
      * @return {@literal true} if an entity was deleted
      */
     <T> boolean delete(T entity);
@@ -104,6 +106,7 @@ public interface MeilisearchOperations {
      * Deletes the given entities.
      *
      * @param entities the entities to delete
+     * @param <T>      the type of the entity
      * @return {@literal true} if all entities were deleted
      */
     <T> boolean delete(List<T> entities);

@@ -12,11 +12,20 @@ public class IndexAccessException extends
 
     private final String indexUid;
 
+    /**
+     * Constructor for IndexAccessException.
+     * @param indexUid the index uid
+     */
     public IndexAccessException(String indexUid) {
         super(String.format("Index %s not should be created.", indexUid));
         this.indexUid = indexUid;
     }
 
+    /**
+     * Constructor for IndexAccessException.
+     * @param indexUid the index uid
+     * @param cause the root cause from the data access API in use
+     */
     public IndexAccessException(String indexUid, Throwable cause) {
         super(String.format("Index %s not should be created.", indexUid), cause);
         this.indexUid = indexUid;
