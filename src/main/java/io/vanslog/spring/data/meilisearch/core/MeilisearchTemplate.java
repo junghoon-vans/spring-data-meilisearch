@@ -234,4 +234,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
         return meilisearchConverter.getMappingContext()
                 .getRequiredPersistentEntity(clazz);
     }
+
+    @Override
+    public MeilisearchConverter getMeilisearchConverter() {
+        return meilisearchConverter;
+    }
 }

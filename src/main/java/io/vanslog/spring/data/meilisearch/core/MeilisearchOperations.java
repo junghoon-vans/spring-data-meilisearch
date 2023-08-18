@@ -1,5 +1,6 @@
 package io.vanslog.spring.data.meilisearch.core;
 
+import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 import java.util.List;
 import org.springframework.lang.Nullable;
 
@@ -120,4 +121,11 @@ public interface MeilisearchOperations {
      * @return {@literal true} if all entities were deleted
      */
     boolean deleteAll(Class<?> clazz);
+
+    /**
+     * Return the {@link MeilisearchConverter}.
+     *
+     * @return {@link MeilisearchConverter}
+     */
+    MeilisearchConverter getMeilisearchConverter();
 }
