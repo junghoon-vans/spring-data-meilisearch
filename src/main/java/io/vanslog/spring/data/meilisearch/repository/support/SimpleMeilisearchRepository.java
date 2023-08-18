@@ -5,6 +5,8 @@ import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.repository.core.EntityInformation;
+import org.springframework.util.Assert;
 
 /**
  * Meilisearch specific repository implementation.
@@ -21,9 +23,11 @@ public class SimpleMeilisearchRepository<T, ID>
     private final Class<T> entityType;
 
     public SimpleMeilisearchRepository(MeilisearchOperations meilisearchOperations,
-                                       Class<T> entityType) {
+                                       EntityInformation<T, ID> entityInformation) {
         this.meilisearchOperations = meilisearchOperations;
-        this.entityType = entityType;
+
+        Assert.notNull(entityInformation, "EntityInformation must not be null!");
+        this.entityType = entityInformation.getJavaType();
     }
 
     @Override
