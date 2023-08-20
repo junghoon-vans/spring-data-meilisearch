@@ -17,6 +17,8 @@ import org.w3c.dom.Element;
 public class MeilisearchRepositoryConfigExtension
         extends RepositoryConfigurationExtensionSupport {
 
+    private static final String MODULE_NAME = "Meilisearch";
+
     @Override
     public String getRepositoryFactoryBeanClassName() {
         return MeilisearchRepositoryFactoryBean.class.getName();
@@ -24,7 +26,12 @@ public class MeilisearchRepositoryConfigExtension
 
     @Override
     protected String getModulePrefix() {
-        return "meilisearch";
+        return getModuleIdentifier();
+    }
+
+    @Override
+    public String getModuleName() {
+        return MODULE_NAME;
     }
 
     @Override

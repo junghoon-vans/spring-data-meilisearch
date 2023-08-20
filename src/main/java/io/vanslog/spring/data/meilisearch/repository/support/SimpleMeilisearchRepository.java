@@ -22,8 +22,8 @@ public class SimpleMeilisearchRepository<T, ID>
     private final MeilisearchOperations meilisearchOperations;
     private final Class<T> entityType;
 
-    public SimpleMeilisearchRepository(MeilisearchOperations meilisearchOperations,
-                                       EntityInformation<T, ID> entityInformation) {
+    public SimpleMeilisearchRepository(EntityInformation<T, ID> entityInformation,
+                                       MeilisearchOperations meilisearchOperations) {
         this.meilisearchOperations = meilisearchOperations;
 
         Assert.notNull(entityInformation, "EntityInformation must not be null!");

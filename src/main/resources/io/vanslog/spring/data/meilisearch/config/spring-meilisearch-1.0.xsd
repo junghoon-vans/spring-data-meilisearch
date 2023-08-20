@@ -3,11 +3,37 @@
             xmlns:beans="http://www.springframework.org/schema/beans"
             xmlns:tool="http://www.springframework.org/schema/tool"
             xmlns="http://www.vanslog.io/spring/data/meilisearch"
+            xmlns:repository="http://www.springframework.org/schema/data/repository"
             targetNamespace="http://www.vanslog.io/spring/data/meilisearch"
             elementFormDefault="qualified" attributeFormDefault="unqualified">
 
     <xsd:import namespace="http://www.springframework.org/schema/beans"/>
     <xsd:import namespace="http://www.springframework.org/schema/tool"/>
+    <xsd:import namespace="http://www.springframework.org/schema/data/repository"
+                schemaLocation="http://www.springframework.org/schema/data/repository/spring-repository.xsd"/>
+
+    <xsd:element name="repositories">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="repository:repositories">
+                    <xsd:attributeGroup ref="repository:repository-attributes"/>
+                    <xsd:attribute name="meilisearch-template-ref" type="meilisearchTemplateRef"
+                                   default="meilisearchTemplate"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:simpleType name="meilisearchTemplateRef">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation kind="ref">
+                    <tool:assignable-to type="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:union memberTypes="xsd:string"/>
+    </xsd:simpleType>
 
     <xsd:simpleType name="jsonHandlerRef">
         <xsd:annotation>
