@@ -44,8 +44,7 @@ public class SimpleMeilisearchRepository<T, ID>
 
     @Override
     public Optional<T> findById(ID id) {
-        meilisearchOperations.get(id.toString(), entityType);
-        return Optional.empty();
+        return Optional.ofNullable(meilisearchOperations.get(id.toString(), entityType));
     }
 
     @Override
