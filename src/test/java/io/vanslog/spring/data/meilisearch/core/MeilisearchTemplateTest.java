@@ -94,8 +94,12 @@ class MeilisearchTemplateTest {
     @Test
     void shouldExistsDocument() {
         meilisearchTemplate.save(movie1);
+
         boolean exists = meilisearchTemplate.exists("1", Movie.class);
+        boolean nonExists = meilisearchTemplate.exists("2", Movie.class);
+
         assertThat(exists).isTrue();
+        assertThat(nonExists).isFalse();
     }
 
     @Test
