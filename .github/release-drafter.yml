@@ -4,11 +4,13 @@ categories:
   - title: '🚀 Features'
     label: 'feature'
   - title: '🐛 Bug Fixes'
-    label: 'fix'
+    label: 'bug'
   - title: '🛠️ Maintenance'
     labels: ['chore', 'refactor', 'style']
   - title: '📝 Documentation'
     label: 'documentation'
+  - title: '🧪 Tests'
+    label: 'test'
 
 exclude-labels:
   - 'skip-changelog'
