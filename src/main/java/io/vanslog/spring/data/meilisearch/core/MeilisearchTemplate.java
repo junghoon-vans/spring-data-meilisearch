@@ -113,11 +113,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
     @Override
     public <T> List<T> multiGet(Class<T> clazz, List<String> documentIds) {
-        return documentIds.stream()
-                .map(id -> this.multiGet(clazz).stream()
-                        .filter(entity -> getDocumentIdFor(entity).equals(id))
-                        .findFirst()
-                        .orElse(null))
+        List<T> entities = multiGet(clazz);
+        return entities.stream()
+                .filter(entity -> documentIds.contains(getDocumentIdFor(entity)))
                 .toList();
     }
 

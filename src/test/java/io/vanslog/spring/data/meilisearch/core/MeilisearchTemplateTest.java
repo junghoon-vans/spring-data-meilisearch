@@ -103,9 +103,11 @@ class MeilisearchTemplateTest {
         List<Movie> movies = List.of(movie1, movie2, movie3);
 
         meilisearchTemplate.save(movies);
-        List<Movie> saved = meilisearchTemplate.multiGet(Movie.class, List.of("1", "2"));
+        List<Movie> saved = meilisearchTemplate.multiGet(Movie.class, List.of("1", "3", "4"));
 
         assertThat(saved.size()).isEqualTo(2);
+        assertThat(saved.get(0).getTitle()).isEqualTo(movie1.getTitle());
+        assertThat(saved.get(1).getTitle()).isEqualTo(movie3.getTitle());
     }
 
     @Test
