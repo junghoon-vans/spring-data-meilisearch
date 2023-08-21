@@ -2,6 +2,7 @@ package io.vanslog.spring.data.meilisearch.core;
 
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Index;
+import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
@@ -86,11 +87,16 @@ public class MeilisearchTemplate implements MeilisearchOperations {
     }
 
     @Override
+    @Nullable
     public <T> T get(String documentId, Class<T> clazz) {
         Index index = getIndexFor(clazz);
         try {
             return index.getDocument(documentId, clazz);
-        } catch (RuntimeException | MeilisearchException e) {
+        } catch (MeilisearchException e) {
+            MeilisearchApiException ex = (MeilisearchApiException) e;
+            if (ex.getCode().equals("document_not_found")) {
+                return null;
+            }
             throw new UncategorizedMeilisearchException("Failed to get entity.", e);
         }
     }

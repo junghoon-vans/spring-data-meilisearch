@@ -60,11 +60,8 @@ class MeilisearchTemplateTest {
         meilisearchTemplate.save(movie1);
         meilisearchTemplate.delete(movie1);
 
-        Throwable thrown =
-                catchThrowable(() -> meilisearchTemplate.get("1", Movie.class));
-
-        assertThat(thrown).isInstanceOf(
-                UncategorizedMeilisearchException.class);
+        Movie saved = meilisearchTemplate.get("1", Movie.class);
+        assertThat(saved).isNull();
     }
 
     @Test
