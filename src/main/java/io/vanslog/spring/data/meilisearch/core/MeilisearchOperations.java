@@ -1,6 +1,7 @@
 package io.vanslog.spring.data.meilisearch.core;
 
 import java.util.List;
+import org.springframework.lang.Nullable;
 
 /**
  * The operations for <a href="https://www.meilisearch.com/docs/reference/api/overview">Meilisearch APIs</a>.
@@ -37,6 +38,7 @@ public interface MeilisearchOperations {
      * @param <T>        the type of the entity
      * @return the entity with the given document id or {@literal null} if none found
      */
+    @Nullable
     <T> T get(String documentId, Class<T> clazz);
 
     /**
