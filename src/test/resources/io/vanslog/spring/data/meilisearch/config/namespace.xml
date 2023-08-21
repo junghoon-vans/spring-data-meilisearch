@@ -13,6 +13,10 @@
         <constructor-arg name="jsonHandler" ref="jsonHandler"/>
     </bean>
 
+    <meilisearch:repositories
+            base-package="io.vanslog.spring.data.meilisearch.config"
+            consider-nested-repositories="true"/>
+
     <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
     <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
 </beans>

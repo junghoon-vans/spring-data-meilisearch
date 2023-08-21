@@ -3,6 +3,8 @@ package io.vanslog.spring.data.meilisearch.config;
 import com.meilisearch.sdk.Client;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClientFactoryBean;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
+import io.vanslog.spring.data.meilisearch.entities.Movie;
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,4 +46,12 @@ class MeilisearchNamespaceHandlerTest {
                 .isInstanceOf(
                         com.meilisearch.sdk.json.GsonJsonHandler.class);
     }
+
+    @Test
+    void shouldCreateMeilisearchRepository() {
+        assertThat(context.getBean(MovieRepository.class))
+                .isInstanceOf(MovieRepository.class);
+    }
+
+    interface MovieRepository extends MeilisearchRepository<Movie, String> {}
 }

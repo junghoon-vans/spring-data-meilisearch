@@ -9,6 +9,9 @@ import com.meilisearch.sdk.json.JsonHandler;
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
+import io.vanslog.spring.data.meilisearch.entities.Movie;
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,9 @@ class MeilisearchConfigurationTest {
     @Autowired
     private MeilisearchOperations meilisearchTemplate;
 
+    @Autowired
+    private MovieRepository movieRepository;
+
     @Test
     void shouldCreateMeilisearchClient() {
         assertThat(client).isNotNull();
@@ -38,7 +44,14 @@ class MeilisearchConfigurationTest {
         assertThat(meilisearchTemplate).isNotNull();
     }
 
+    @Test
+    void shouldCreateMeilisearchRepository() {
+        assertThat(movieRepository).isNotNull();
+    }
+
     @Configuration
+    @EnableMeilisearchRepositories(basePackages = {"io.vanslog.spring.data.meilisearch.config"},
+            considerNestedRepositories = true)
     static class CustomConfiguration extends MeilisearchConfiguration {
         @Override
         public ClientConfiguration clientConfiguration() {
@@ -53,4 +66,6 @@ class MeilisearchConfigurationTest {
             return new JacksonJsonHandler();
         }
     }
+
+    interface MovieRepository extends MeilisearchRepository<Movie, String> {}
 }
