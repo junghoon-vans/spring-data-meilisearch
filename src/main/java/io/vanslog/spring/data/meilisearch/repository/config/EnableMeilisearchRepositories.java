@@ -47,7 +47,7 @@ public @interface EnableMeilisearchRepositories {
      * package of each class specified will be scanned. Consider creating a special no-op marker class or interface in
      * each package that serves no purpose other than being referenced by this attribute.
      *
-     * @return Class<?>[]
+     * @return {@literal Class<?>[]}
      */
     Class<?>[] basePackageClasses() default {};
 
@@ -95,7 +95,7 @@ public @interface EnableMeilisearchRepositories {
      * Returns the {@link org.springframework.beans.factory.FactoryBean} class to be used for each repository instance.
      * Defaults to {@code MeilisearchRepositoryFactoryBean}.
      *
-     * @return Class<?>
+     * @return {@literal Class<?>[]}
      */
     Class<?> repositoryFactoryBeanClass() default MeilisearchRepositoryFactoryBean.class;
 
