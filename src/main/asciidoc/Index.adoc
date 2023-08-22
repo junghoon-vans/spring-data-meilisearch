@@ -1,5 +1,10 @@
 = Spring Data Meilisearch - Reference Documentation
 
-:leveloffset: +1
+include::preface.adoc[]
+
+[[reference]]
+= Reference Documentation
+
+:leveloffset: 1
 include::reference/meilisearch-client.adoc[]
 include::reference/meilisearch-document.adoc[]
