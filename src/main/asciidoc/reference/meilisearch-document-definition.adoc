@@ -1,0 +1,25 @@
+= Document Definition
+
+To define the https://www.meilisearch.com/docs/learn/core_concepts/documents[Document], you need to annotate a class with `@Document` annotation.
+As an example, the following class defines a `Movie` document with `id`, `title`, `description` and `genres` fields.
+
+[source,java]
+----
+@Document(indexUid = "movies")
+public class Movie {
+    @Id private int id;
+    private String title;
+    private String description;
+    private String[] genres;
+}
+----
+
+== Index UID
+
+The https://www.meilisearch.com/docs/learn/core_concepts/indexes#index-uid[Index UID] is a unique identifier for an index.
+It must be defined for each document with `@Document` annotation.
+
+== Document id
+
+The https://www.meilisearch.com/docs/learn/core_concepts/primary_key#document-id[Document id] is a unique identifier for a document in an index.
+It can be defined with `@Id` annotation or `id` field.
