@@ -20,17 +20,8 @@
     <url>https://github.com/junghoon-vans/spring-data-meilisearch</url>
 
     <properties>
-        <!-- Compiler -->
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <!-- Dependencies -->
-        <spring>6.0.6</spring>
         <springdata.commons>3.2.0-SNAPSHOT</springdata.commons>
         <meilisearch-java>0.11.1</meilisearch-java>
-        <jackson>2.15.1</jackson>
-        <slf4j-simple>2.0.0</slf4j-simple>
-        <junit-jupiter>5.9.2</junit-jupiter>
-        <assertj>3.21.0</assertj>
 
         <java-module-name>spring.data.meilisearch</java-module-name>
     </properties>
@@ -48,13 +39,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <version>${spring}</version>
         </dependency>
 
         <!-- SPRING DATA -->
@@ -71,50 +60,7 @@
             <version>${meilisearch-java}</version>
         </dependency>
 
-        <!-- Jackson JSON Mapper -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson}</version>
-        </dependency>
-
         <!-- Test -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring}</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j-simple}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit-jupiter}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit-jupiter}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj}</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>io.vanslog</groupId>
             <artifactId>testcontainers-meilisearch</artifactId>
@@ -270,13 +216,6 @@
             </build>
         </profile>
     </profiles>
-
-    <licenses>
-        <license>
-            <name>Apache-2.0</name>
-            <url>https://opensource.org/licenses/Apache-2.0</url>
-        </license>
-    </licenses>
 
     <scm>
         <url>https://github.com/junghoon-vans/spring-data-meilisearch</url>
