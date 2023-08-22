@@ -9,6 +9,12 @@
     <artifactId>spring-data-meilisearch</artifactId>
     <version>0.3.1-SNAPSHOT</version>
 
+    <parent>
+        <groupId>org.springframework.data.build</groupId>
+        <artifactId>spring-data-parent</artifactId>
+        <version>3.2.0-SNAPSHOT</version>
+    </parent>
+
     <name>Spring Data Meilisearch</name>
     <description>Spring Data Implementation for Meilisearch</description>
     <url>https://github.com/junghoon-vans/spring-data-meilisearch</url>
@@ -19,7 +25,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <!-- Dependencies -->
         <spring>6.0.6</spring>
-        <springdata.commons>3.1.1</springdata.commons>
+        <springdata.commons>3.2.0-SNAPSHOT</springdata.commons>
         <meilisearch-java>0.11.1</meilisearch-java>
         <jackson>2.15.1</jackson>
         <slf4j-simple>2.0.0</slf4j-simple>
@@ -280,4 +286,21 @@
         <system>GitHub</system>
         <url>https://github.com/junghoon-vans/spring-data-meilisearch/issues</url>
     </issueManagement>
+
+    <repositories>
+        <repository>
+            <id>spring-snapshot</id>
+            <url>https://repo.spring.io/snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>spring-milestone</id>
+            <url>https://repo.spring.io/milestone</url>
+        </repository>
+    </repositories>
 </project>
