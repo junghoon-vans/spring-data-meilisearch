@@ -31,6 +31,8 @@
         <slf4j-simple>2.0.0</slf4j-simple>
         <junit-jupiter>5.9.2</junit-jupiter>
         <assertj>3.21.0</assertj>
+
+        <java-module-name>spring.data.meilisearch</java-module-name>
     </properties>
 
     <developers>
