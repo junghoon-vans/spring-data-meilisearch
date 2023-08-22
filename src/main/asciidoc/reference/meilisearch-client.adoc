@@ -44,7 +44,7 @@ The `host URL` and `API Key` are required configuration.
 The `API Key` is required configuration.
 The Host URL is set to `http://localhost:7700` unless otherwise specified.
 
-please refer to the link:src/test/resources/io/vanslog/spring/data/meilisearch/config/namespace.xml[example configuration] in test resources.
+please refer to the link:../../../../src/test/resources/io/vanslog/spring/data/meilisearch/config/namespace.xml[example configuration] in test resources.
 
 [[meilisearch.json-handler]]
 == JSON Handler
