@@ -78,22 +78,6 @@
     </distributionManagement>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.3.0</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.puppycrawl.tools</groupId>
-                            <artifactId>checkstyle</artifactId>
-                            <version>10.12.2</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -201,7 +185,21 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-checkstyle-plugin</artifactId>
                         <configuration>
-                            <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+                            <checkstyleRules>
+                                <module name="Checker">
+
+                                    <!-- Configure checker to use UTF-8 encoding -->
+                                    <property name="charset" value="UTF-8"/>
+
+                                    <module name="io.spring.nohttp.checkstyle.check.NoHttpCheck"/>
+                                </module>
+                            </checkstyleRules>
+                            <includes>**/*</includes>
+                            <excludes>
+                                .git/**/*,target/**/*,**/target/**/*,.idea/**/*,**/spring.schemas,**/*.svg,mvnw,mvnw.cmd,**/*.policy,
+                                **/spring.handlers,**/namespace.xml,**/*.xsd,pom.xml
+                            </excludes>
+                            <sourceDirectories>./</sourceDirectories>
                         </configuration>
                         <executions>
                             <execution>
