@@ -2,4 +2,4 @@
 
 :leveloffset: +1
 include::reference/meilisearch-client.adoc[]
-include::reference/meilisearch-document-definition.adoc[]
+include::reference/meilisearch-document.adoc[]

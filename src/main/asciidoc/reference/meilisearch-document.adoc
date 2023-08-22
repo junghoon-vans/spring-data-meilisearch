@@ -1,7 +1,11 @@
-= Document Definition
+[[meilisearch.document]]
+= Document
 
 To define the https://www.meilisearch.com/docs/learn/core_concepts/documents[Document], you need to annotate a class with `@Document` annotation.
 As an example, the following class defines a `Movie` document with `id`, `title`, `description` and `genres` fields.
+
+[[meilisearch.document.example]]
+== Example
 
 [source,java]
 ----
@@ -14,11 +18,13 @@ public class Movie {
 }
 ----
 
+[[meilisearch.document.index-uid]]
 == Index UID
 
 The https://www.meilisearch.com/docs/learn/core_concepts/indexes#index-uid[Index UID] is a unique identifier for an index.
 It must be defined for each document with `@Document` annotation.
 
+[[meilisearch.document.id]]
 == Document id
 
 The https://www.meilisearch.com/docs/learn/core_concepts/primary_key#document-id[Document id] is a unique identifier for a document in an index.

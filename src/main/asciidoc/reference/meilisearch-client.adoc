@@ -1,4 +1,5 @@
-= Client Configuration
+[[meilisearch.client]]
+= Meilisearch Client
 
 This library support using Java based `@Configuration` or XML Namespace for configuring the Meilisearch Client.
 
@@ -8,7 +9,11 @@ The elements in the configuration are:
 * `API Key`: The Meilisearch API Key
 * `Client Agents`: The `User-Agent` header for the Meilisearch Client
 
-== Annotation based configuration
+[[meilisearch.client.configuration]]
+== Client Configuration
+
+[[meilisearch.client.configuration.annotation]]
+=== Annotation based configuration
 
 [source,java]
 ----
@@ -28,7 +33,8 @@ public class CustomConfiguration extends MeilisearchConfiguration {
 
 The `host URL` and `API Key` are required configuration.
 
-== Namespace based configuration
+[[meilisearch.client.configuration.namespace]]
+=== Namespace based configuration
 
 [source,xml]
 ----
@@ -40,7 +46,8 @@ The Host URL is set to `http://localhost:7700` unless otherwise specified.
 
 please refer to the link:src/test/resources/io/vanslog/spring/data/meilisearch/config/namespace.xml[example configuration] in test resources.
 
-= JSON Handler
+[[meilisearch.json-handler]]
+== JSON Handler
 
 The `JSON Handler` is used to serialize and deserialize the JSON data.
 
@@ -49,7 +56,8 @@ The following JSON Handlers are supported:
 * `com.meilisearch.sdk.json.GsonJsonHandler`
 * `com.meilisearch.sdk.json.JacksonJsonHandler`
 
-== Annotation based configuration
+[[meilisearch.json-handler.configuration.annotation]]
+=== Annotation based configuration
 
 [source,java]
 ----
@@ -65,7 +73,8 @@ public class CustomConfiguration extends MeilisearchConfiguration {
 The default JSON Handler is `GsonJsonHandler`.
 You can use other JSON Handler by overriding the `jsonHandler()` method.
 
-== Namespace based configuration
+[[meilisearch.json-handler.configuration.namespace]]
+=== Namespace based configuration
 
 [source,xml]
 ----
