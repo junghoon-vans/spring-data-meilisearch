@@ -147,7 +147,7 @@
                             <includes>**/*</includes>
                             <excludes>
                                 .git/**/*,target/**/*,**/target/**/*,.idea/**/*,**/spring.schemas,**/*.svg,mvnw,mvnw.cmd,**/*.policy,
-                                **/spring.handlers,**/namespace.xml,**/*.xsd,pom.xml
+                                **/spring.handlers,**/namespace.xml,**/*.xsd,pom.xml,**/*.adoc
                             </excludes>
                             <sourceDirectories>./</sourceDirectories>
                         </configuration>
