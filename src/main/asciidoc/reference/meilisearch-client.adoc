@@ -1,29 +1,25 @@
 [[meilisearch.client]]
 = Meilisearch Client
 
-This library support using Java based `@Configuration` or XML Namespace for configuring the Meilisearch Client.
+This chapter describes configuration and usage of the Meilisearch client.
 
-The elements in the configuration are:
+Spring Data Meilisearch operates upon a `Meilisearch Client` (provided by https://github.com/meilisearch/meilisearch-java[Meilisearch Java]) that is connected to a single Meilisearch instance.
 
-* `host URL`: The Meilisearch host URL
-* `API Key`: The Meilisearch API Key
-* `Client Agents`: The `User-Agent` header for the Meilisearch Client
+[[meilisearch.client.annotation]]
+== Annotation based configuration
 
-[[meilisearch.client.configuration]]
-== Client Configuration
+The Spring Data Meilisearch client can be configured using the `@Configuration` annotation.
 
-[[meilisearch.client.configuration.annotation]]
-=== Annotation based configuration
-
+.Spring Data Meilisearch client using JavaConfig
+====
 [source,java]
 ----
-
 @Configuration
-public class CustomConfiguration extends MeilisearchConfiguration {
+public class MyClientConfig extends MeilisearchConfiguration {
 
     @Override
     public ClientConfiguration clientConfiguration() {
-        return ClientConfiguration.builder()
+        return ClientConfiguration.builder()           <.>
                 .connectedToLocalhost()
                 .withApiKey("masterKey")
                 .build();
@@ -31,56 +27,116 @@ public class CustomConfiguration extends MeilisearchConfiguration {
 }
 ----
 
-The `host URL` and `API Key` are required configuration.
+<.> for a detailed description of the builder methods see <<meilisearch.client.configuration>>
+====
 
-[[meilisearch.client.configuration.namespace]]
-=== Namespace based configuration
+[[meilisearch.client.namespace]]
+== Spring Namespace
 
+The Spring Data Meilisearch client can be configured using the Spring XML namespace.
+
+.Spring Data Meilisearch client using XML Namespace
+====
 [source,xml]
 ----
-<meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.vanslog.io/spring/data/meilisearch
+       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
+
+    <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
+
+</beans>
 ----
+====
 
-The `API Key` is required configuration.
-The Host URL is set to `http://localhost:7700` unless otherwise specified.
+IMPORTANT: When setting up a client using the Spring namespace, a JSON handler must be set up.
+Use the following section, <<meilisearch.json-handler.namespace>> of JSON handler.
 
-please refer to the link:../../../../src/test/resources/io/vanslog/spring/data/meilisearch/config/namespace.xml[example configuration] in test resources.
+[[meilisearch.client.configuration]]
+== Client Configuration
 
-[[meilisearch.json-handler]]
-== JSON Handler
+Configuration options are provided by the `ClientConfiguration` builder.
 
-The `JSON Handler` is used to serialize and deserialize the JSON data.
-
-The following JSON Handlers are supported:
-
-* `com.meilisearch.sdk.json.GsonJsonHandler`
-* `com.meilisearch.sdk.json.JacksonJsonHandler`
-
-[[meilisearch.json-handler.configuration.annotation]]
-=== Annotation based configuration
-
+.Client Configuration
+====
 [source,java]
 ----
-public class CustomConfiguration extends MeilisearchConfiguration {
+import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+
+String[] agents = {"Spring Data Meilisearch"};                          <.>
+
+ClientConfiguration clientConfiguration = ClientConfiguration.builder()
+    .connectedTo("http://localhost:7700")                               <.>
+    .withApiKey("masterKey")                                            <.>
+    .withClientAgents(agents)                                           <.>
+    .build();
+----
+
+<.> Define the client agents that will be sent as a `User-Agent` header to Meilisearch.
+<.> Use the builder to provide the Meilisearch host URL.
+<.> Set the Meilisearch API Key to use for authentication.
+<.> Set the client agents.
+====
+
+[[meilisearch.json-handler]]
+== JSON handler
+
+The `JSON handler` is used to serialize and deserialize the JSON data.
+
+[[meilisearch.json-handler.supported]]
+=== Supported JSON handlers
+
+The following JSON handlers are supported:
+
+* `com.meilisearch.sdk.json.GsonJsonhandler`
+* `com.meilisearch.sdk.json.JacksonJsonhandler`
+* Custom JSON handler that implements `com.meilisearch.sdk.json.Jsonhandler`
+
+[[meilisearch.json-handler.annotation]]
+=== Annotation based configuration
+
+You don't need to provide a JSON handler if you are using the default JSON handler, `GsonJsonhandler`.
+But you can override the `jsonhandler()` method to provide a custom JSON handler.
+
+.Setting JSON handler using JavaConfig
+====
+[source,java]
+----
+public class JsonhandlerConfig extends MeilisearchConfiguration {
 
     @Override
-    public JsonHandler jsonHandler() {
-        return new JacksonJsonHandler();
+    public Jsonhandler jsonhandler() {
+        return new JacksonJsonhandler();    <.>
     }
 }
 ----
+<.> Use Jackson JSON handler instead of the default JSON handler.
+====
 
-The default JSON Handler is `GsonJsonHandler`.
-You can use other JSON Handler by overriding the `jsonHandler()` method.
+[[meilisearch.json-handler.namespace]]
+=== Spring Namespace
 
-[[meilisearch.json-handler.configuration.namespace]]
-=== Namespace based configuration
+The JSON handler must be registered as a bean with the `id=jsonhandler`.
+And pass the class name of the JSON handler to the `class` attribute.
 
+.Setting JSON handler using XML Namespace
+====
 [source,xml]
 ----
-<bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.vanslog.io/spring/data/meilisearch
+       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
+
+    <bean id="jsonhandler" class="com.meilisearch.sdk.json.GsonJsonhandler"/>
+
+</beans>
 ----
-
-The default JSON Handler is not provided by the XML Namespace.
-JSON Handler must be defined as a bean with `id="jsonHandler"`.
-
+====
