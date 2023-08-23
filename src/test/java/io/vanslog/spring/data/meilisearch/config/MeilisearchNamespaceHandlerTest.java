@@ -1,11 +1,30 @@
+/*
+ * Copyright 2023 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.vanslog.spring.data.meilisearch.config;
 
-import com.meilisearch.sdk.Client;
+import static org.assertj.core.api.Assertions.*;
+
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClientFactoryBean;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+
 import java.lang.reflect.Field;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,45 +32,42 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.meilisearch.sdk.Client;
 
+/**
+ * Namespace based configuration test.
+ *
+ * @author Junghoon Ban
+ */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("namespace.xml")
 class MeilisearchNamespaceHandlerTest {
 
-    @Autowired
-    private ApplicationContext context;
+	@Autowired private ApplicationContext context;
 
-    @Test
-    void shouldCreateMeilisearchClient() {
-        assertThat(context.getBean(MeilisearchClientFactoryBean.class))
-                .isInstanceOf(MeilisearchClientFactoryBean.class);
-    }
+	@Test
+	void shouldCreateMeilisearchClient() {
+		assertThat(context.getBean(MeilisearchClientFactoryBean.class)).isInstanceOf(MeilisearchClientFactoryBean.class);
+	}
 
-    @Test
-    void shouldCreateMeilisearchTemplate() {
-        assertThat(context.getBean(MeilisearchTemplate.class))
-                .isInstanceOf(MeilisearchTemplate.class);
-    }
+	@Test
+	void shouldCreateMeilisearchTemplate() {
+		assertThat(context.getBean(MeilisearchTemplate.class)).isInstanceOf(MeilisearchTemplate.class);
+	}
 
-    @Test
-    void shouldUseGsonJsonHandler()
-            throws NoSuchFieldException, IllegalAccessException {
-        Client client = (Client) context.getBean("meilisearchClient");
+	@Test
+	void shouldUseGsonJsonHandler() throws NoSuchFieldException, IllegalAccessException {
+		Client client = (Client) context.getBean("meilisearchClient");
 
-        Field jsonHandlerField =
-                client.getClass().getDeclaredField("jsonHandler");
-        jsonHandlerField.setAccessible(true);
-        assertThat(jsonHandlerField.get(client))
-                .isInstanceOf(
-                        com.meilisearch.sdk.json.GsonJsonHandler.class);
-    }
+		Field jsonHandlerField = client.getClass().getDeclaredField("jsonHandler");
+		jsonHandlerField.setAccessible(true);
+		assertThat(jsonHandlerField.get(client)).isInstanceOf(com.meilisearch.sdk.json.GsonJsonHandler.class);
+	}
 
-    @Test
-    void shouldCreateMeilisearchRepository() {
-        assertThat(context.getBean(MovieRepository.class))
-                .isInstanceOf(MovieRepository.class);
-    }
+	@Test
+	void shouldCreateMeilisearchRepository() {
+		assertThat(context.getBean(MovieRepository.class)).isInstanceOf(MovieRepository.class);
+	}
 
-    interface MovieRepository extends MeilisearchRepository<Movie, String> {}
+	interface MovieRepository extends MeilisearchRepository<Movie, String> {}
 }

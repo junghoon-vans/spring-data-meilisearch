@@ -1,11 +1,31 @@
+/*
+ * Copyright 2023 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.vanslog.spring.data.meilisearch.repository;
+
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
+
 import java.util.List;
 import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,231 +33,231 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
+/**
+ * Integration tests for {@link MeilisearchRepository}.
+ *
+ * @author Junghoon Ban
+ */
 @MeilisearchTest
 @ContextConfiguration(classes = MeilisearchRepositoryIntegrationTest.Config.class)
 class MeilisearchRepositoryIntegrationTest {
 
-    @Autowired
-    private MovieRepository movieRepository;
+	@Autowired private MovieRepository movieRepository;
 
-    @BeforeEach
-    void setUp() {
-        movieRepository.deleteAll();
-    }
+	@BeforeEach
+	void setUp() {
+		movieRepository.deleteAll();
+	}
 
-    @Test
-    void shouldSaveDocument() {
-        // given
-        int documentId = 1;
-        Movie movie = new Movie();
-        movie.setId(documentId);
-        movie.setTitle("Carol");
-        movie.setDescription("A love story");
-        movie.setGenres(new String[] {"Romance", "Drama"});
+	@Test
+	void shouldSaveDocument() {
+		// given
+		int documentId = 1;
+		Movie movie = new Movie();
+		movie.setId(documentId);
+		movie.setTitle("Carol");
+		movie.setDescription("A love story");
+		movie.setGenres(new String[] { "Romance", "Drama" });
 
-        // when
-        movieRepository.save(movie);
+		// when
+		movieRepository.save(movie);
 
-        // then
-        Optional<Movie> saved = movieRepository.findById(documentId);
-        assertThat(saved).isPresent();
-    }
+		// then
+		Optional<Movie> saved = movieRepository.findById(documentId);
+		assertThat(saved).isPresent();
+	}
 
-    @Test
-    void shouldSaveDocuments() {
-        // given
-        int documentId1 = 1;
-        Movie movie1 = new Movie();
-        movie1.setId(documentId1);
-        movie1.setTitle("Carol");
-        movie1.setDescription("A love story");
-        movie1.setGenres(new String[] {"Romance", "Drama"});
+	@Test
+	void shouldSaveDocuments() {
+		// given
+		int documentId1 = 1;
+		Movie movie1 = new Movie();
+		movie1.setId(documentId1);
+		movie1.setTitle("Carol");
+		movie1.setDescription("A love story");
+		movie1.setGenres(new String[] { "Romance", "Drama" });
 
-        int documentId2 = 2;
-        Movie movie2 = new Movie();
-        movie2.setId(documentId2);
-        movie2.setTitle("Wonder Woman");
-        movie2.setDescription("A superhero film");
-        movie2.setGenres(new String[] {"Action", "Adventure"});
+		int documentId2 = 2;
+		Movie movie2 = new Movie();
+		movie2.setId(documentId2);
+		movie2.setTitle("Wonder Woman");
+		movie2.setDescription("A superhero film");
+		movie2.setGenres(new String[] { "Action", "Adventure" });
 
-        List<Movie> movies = List.of(movie1, movie2);
+		List<Movie> movies = List.of(movie1, movie2);
 
-        // when
-        movieRepository.saveAll(movies);
+		// when
+		movieRepository.saveAll(movies);
 
-        // then
-        Optional<Movie> saved1 = movieRepository.findById(documentId1);
-        assertThat(saved1).isPresent();
-        Optional<Movie> saved2 = movieRepository.findById(documentId2);
-        assertThat(saved2).isPresent();
-    }
+		// then
+		Optional<Movie> saved1 = movieRepository.findById(documentId1);
+		assertThat(saved1).isPresent();
+		Optional<Movie> saved2 = movieRepository.findById(documentId2);
+		assertThat(saved2).isPresent();
+	}
 
-    @Test
-    void shouldDeleteDocument() {
-        // given
-        int documentId = 1;
-        Movie movie = new Movie();
-        movie.setId(documentId);
-        movie.setTitle("Carol");
-        movie.setDescription("A love story");
-        movie.setGenres(new String[] {"Romance", "Drama"});
+	@Test
+	void shouldDeleteDocument() {
+		// given
+		int documentId = 1;
+		Movie movie = new Movie();
+		movie.setId(documentId);
+		movie.setTitle("Carol");
+		movie.setDescription("A love story");
+		movie.setGenres(new String[] { "Romance", "Drama" });
 
-        // when
-        movieRepository.save(movie);
-        movieRepository.delete(movie);
+		// when
+		movieRepository.save(movie);
+		movieRepository.delete(movie);
 
-        // then
-        Optional<Movie> saved = movieRepository.findById(documentId);
-        assertThat(saved).isEmpty();
-    }
+		// then
+		Optional<Movie> saved = movieRepository.findById(documentId);
+		assertThat(saved).isEmpty();
+	}
 
-    @Test
-    void shouldDeleteDocumentById() {
-        // given
-        int documentId = 1;
-        Movie movie = new Movie();
-        movie.setId(documentId);
-        movie.setTitle("Carol");
-        movie.setDescription("A love story");
-        movie.setGenres(new String[] {"Romance", "Drama"});
+	@Test
+	void shouldDeleteDocumentById() {
+		// given
+		int documentId = 1;
+		Movie movie = new Movie();
+		movie.setId(documentId);
+		movie.setTitle("Carol");
+		movie.setDescription("A love story");
+		movie.setGenres(new String[] { "Romance", "Drama" });
 
-        // when
-        movieRepository.save(movie);
-        movieRepository.deleteById(documentId);
+		// when
+		movieRepository.save(movie);
+		movieRepository.deleteById(documentId);
 
-        // then
-        Optional<Movie> saved = movieRepository.findById(documentId);
-        assertThat(saved).isEmpty();
-    }
+		// then
+		Optional<Movie> saved = movieRepository.findById(documentId);
+		assertThat(saved).isEmpty();
+	}
 
-    @Test
-    void shouldDeleteDocuments() {
-        // given
-        int documentId1 = 1;
-        Movie movie1 = new Movie();
-        movie1.setId(documentId1);
-        movie1.setTitle("Carol");
-        movie1.setDescription("A love story");
-        movie1.setGenres(new String[] {"Romance", "Drama"});
+	@Test
+	void shouldDeleteDocuments() {
+		// given
+		int documentId1 = 1;
+		Movie movie1 = new Movie();
+		movie1.setId(documentId1);
+		movie1.setTitle("Carol");
+		movie1.setDescription("A love story");
+		movie1.setGenres(new String[] { "Romance", "Drama" });
 
-        int documentId2 = 2;
-        Movie movie2 = new Movie();
-        movie2.setId(documentId2);
-        movie2.setTitle("Wonder Woman");
-        movie2.setDescription("A superhero film");
-        movie2.setGenres(new String[] {"Action", "Adventure"});
+		int documentId2 = 2;
+		Movie movie2 = new Movie();
+		movie2.setId(documentId2);
+		movie2.setTitle("Wonder Woman");
+		movie2.setDescription("A superhero film");
+		movie2.setGenres(new String[] { "Action", "Adventure" });
 
-        int documentId3 = 3;
-        Movie movie3 = new Movie();
-        movie3.setId(documentId3);
-        movie3.setTitle("Life of Pi");
-        movie3.setDescription("A survival film");
-        movie3.setGenres(new String[] {"Adventure", "Drama"});
+		int documentId3 = 3;
+		Movie movie3 = new Movie();
+		movie3.setId(documentId3);
+		movie3.setTitle("Life of Pi");
+		movie3.setDescription("A survival film");
+		movie3.setGenres(new String[] { "Adventure", "Drama" });
 
-        List<Movie> movies = List.of(movie1, movie2, movie3);
+		List<Movie> movies = List.of(movie1, movie2, movie3);
 
-        // when
-        movieRepository.saveAll(movies);
-        movieRepository.deleteAll(List.of(movie1, movie2));
+		// when
+		movieRepository.saveAll(movies);
+		movieRepository.deleteAll(List.of(movie1, movie2));
 
-        // then
-        List<Movie> saved = (List<Movie>) movieRepository.findAll();
-        assertThat(saved.size()).isEqualTo(1);
-    }
+		// then
+		List<Movie> saved = (List<Movie>) movieRepository.findAll();
+		assertThat(saved.size()).isEqualTo(1);
+	}
 
-    @Test
-    void shouldDeleteDocumentsById() {
-        // given
-        int documentId1 = 1;
-        Movie movie1 = new Movie();
-        movie1.setId(documentId1);
-        movie1.setTitle("Carol");
-        movie1.setDescription("A love story");
-        movie1.setGenres(new String[] {"Romance", "Drama"});
+	@Test
+	void shouldDeleteDocumentsById() {
+		// given
+		int documentId1 = 1;
+		Movie movie1 = new Movie();
+		movie1.setId(documentId1);
+		movie1.setTitle("Carol");
+		movie1.setDescription("A love story");
+		movie1.setGenres(new String[] { "Romance", "Drama" });
 
-        int documentId2 = 2;
-        Movie movie2 = new Movie();
-        movie2.setId(documentId2);
-        movie2.setTitle("Wonder Woman");
-        movie2.setDescription("A superhero film");
-        movie2.setGenres(new String[] {"Action", "Adventure"});
+		int documentId2 = 2;
+		Movie movie2 = new Movie();
+		movie2.setId(documentId2);
+		movie2.setTitle("Wonder Woman");
+		movie2.setDescription("A superhero film");
+		movie2.setGenres(new String[] { "Action", "Adventure" });
 
-        int documentId3 = 3;
-        Movie movie3 = new Movie();
-        movie3.setId(documentId3);
-        movie3.setTitle("Life of Pi");
-        movie3.setDescription("A survival film");
-        movie3.setGenres(new String[] {"Adventure", "Drama"});
+		int documentId3 = 3;
+		Movie movie3 = new Movie();
+		movie3.setId(documentId3);
+		movie3.setTitle("Life of Pi");
+		movie3.setDescription("A survival film");
+		movie3.setGenres(new String[] { "Adventure", "Drama" });
 
-        List<Movie> movies = List.of(movie1, movie2, movie3);
+		List<Movie> movies = List.of(movie1, movie2, movie3);
 
-        // when
-        movieRepository.saveAll(movies);
-        movieRepository.deleteAllById(List.of(documentId1, documentId2));
+		// when
+		movieRepository.saveAll(movies);
+		movieRepository.deleteAllById(List.of(documentId1, documentId2));
 
-        // then
-        List<Movie> saved = (List<Movie>) movieRepository.findAll();
-        assertThat(saved.size()).isEqualTo(1);
-    }
+		// then
+		List<Movie> saved = (List<Movie>) movieRepository.findAll();
+		assertThat(saved.size()).isEqualTo(1);
+	}
 
-    @Test
-    void shouldCountDocuments() {
-        // given
-        int documentId1 = 1;
-        Movie movie1 = new Movie();
-        movie1.setId(documentId1);
-        movie1.setTitle("Carol");
-        movie1.setDescription("A love story");
-        movie1.setGenres(new String[] {"Romance", "Drama"});
+	@Test
+	void shouldCountDocuments() {
+		// given
+		int documentId1 = 1;
+		Movie movie1 = new Movie();
+		movie1.setId(documentId1);
+		movie1.setTitle("Carol");
+		movie1.setDescription("A love story");
+		movie1.setGenres(new String[] { "Romance", "Drama" });
 
-        int documentId2 = 2;
-        Movie movie2 = new Movie();
-        movie2.setId(documentId2);
-        movie2.setTitle("Wonder Woman");
-        movie2.setDescription("A superhero film");
-        movie2.setGenres(new String[] {"Action", "Adventure"});
+		int documentId2 = 2;
+		Movie movie2 = new Movie();
+		movie2.setId(documentId2);
+		movie2.setTitle("Wonder Woman");
+		movie2.setDescription("A superhero film");
+		movie2.setGenres(new String[] { "Action", "Adventure" });
 
-        List<Movie> movies = List.of(movie1, movie2);
+		List<Movie> movies = List.of(movie1, movie2);
 
-        // when
-        movieRepository.saveAll(movies);
-        long count = movieRepository.count();
+		// when
+		movieRepository.saveAll(movies);
+		long count = movieRepository.count();
 
-        // then
-        assertThat(count).isEqualTo(movies.size());
-    }
+		// then
+		assertThat(count).isEqualTo(movies.size());
+	}
 
-    @Test
-    void shouldExistsDocument() {
-        // given
-        int documentId = 1;
-        Movie movie = new Movie();
-        movie.setId(documentId);
-        movie.setTitle("Carol");
-        movie.setDescription("A love story");
-        movie.setGenres(new String[] {"Romance", "Drama"});
+	@Test
+	void shouldExistsDocument() {
+		// given
+		int documentId = 1;
+		Movie movie = new Movie();
+		movie.setId(documentId);
+		movie.setTitle("Carol");
+		movie.setDescription("A love story");
+		movie.setGenres(new String[] { "Romance", "Drama" });
 
-        int nonExistingDocumentId = 2;
+		int nonExistingDocumentId = 2;
 
-        // when
-        movieRepository.save(movie);
-        boolean exists = movieRepository.existsById(documentId);
-        boolean notExists = movieRepository.existsById(nonExistingDocumentId);
+		// when
+		movieRepository.save(movie);
+		boolean exists = movieRepository.existsById(documentId);
+		boolean notExists = movieRepository.existsById(nonExistingDocumentId);
 
-        // then
-        assertThat(exists).isTrue();
-        assertThat(notExists).isFalse();
-    }
+		// then
+		assertThat(exists).isTrue();
+		assertThat(notExists).isFalse();
+	}
 
-    interface MovieRepository extends MeilisearchRepository<Movie, Integer> {
-    }
+	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
 
-    @Configuration
-    @Import(MeilisearchTestConfiguration.class)
-    @EnableMeilisearchRepositories(basePackages = "io.vanslog.spring.data.meilisearch.repository",
-            considerNestedRepositories = true)
-    static class Config {
-    }
+	@Configuration
+	@Import(MeilisearchTestConfiguration.class)
+	@EnableMeilisearchRepositories(basePackages = "io.vanslog.spring.data.meilisearch.repository",
+			considerNestedRepositories = true)
+	static class Config {}
 }
