@@ -46,7 +46,7 @@ import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
 
 /**
- * Implementation of {@link MeilisearchOperations}.
+ * Implementation of {@link io.vanslog.spring.data.meilisearch.core.MeilisearchOperations}.
  *
  * @author Junghoon Ban
  * @see com.meilisearch.sdk.Client

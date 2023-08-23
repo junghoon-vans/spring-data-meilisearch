@@ -22,7 +22,7 @@ import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.data.util.TypeInformation;
 
 /**
- * Meilisearch specific {@link AbstractMappingContext} implementation.
+ * Meilisearch specific {@link org.springframework.data.mapping.context.AbstractMappingContext} implementation.
  *
  * @author Junghoon Ban
  */

@@ -33,10 +33,10 @@ import org.springframework.context.annotation.Configuration;
 public class MeilisearchConfigurationSupport {
 
 	/**
-	 * Create a {@link MeilisearchConverter} bean.
+	 * Create a {@link io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter} bean.
 	 *
 	 * @param meilisearchMappingContext the {@link SimpleMeilisearchMappingContext} to use
-	 * @return the created {@link MeilisearchConverter} bean.
+	 * @return the created {@link io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter} bean.
 	 */
 	@Bean
 	public MeilisearchConverter meilisearchConverter(SimpleMeilisearchMappingContext meilisearchMappingContext) {
@@ -45,9 +45,9 @@ public class MeilisearchConfigurationSupport {
 	}
 
 	/**
-	 * Create a {@link SimpleMeilisearchMappingContext} bean.
+	 * Create a {@link io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext} bean.
 	 *
-	 * @return the created {@link SimpleMeilisearchMappingContext} bean.
+	 * @return the created {@link io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext} bean.
 	 */
 	@Bean
 	public SimpleMeilisearchMappingContext meilisearchMappingContext() {

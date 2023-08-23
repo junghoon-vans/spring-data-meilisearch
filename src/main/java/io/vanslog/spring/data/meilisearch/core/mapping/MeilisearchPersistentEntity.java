@@ -19,7 +19,7 @@ package io.vanslog.spring.data.meilisearch.core.mapping;
 import org.springframework.data.mapping.PersistentEntity;
 
 /**
- * Meilisearch specific {@link PersistentEntity} abstraction.
+ * Meilisearch specific {@link org.springframework.data.mapping.PersistentEntity} abstraction.
  *
  * @param <T>
  * @author Junghoon Ban

@@ -38,7 +38,7 @@ public abstract class MeilisearchConfiguration extends MeilisearchConfigurationS
 	/**
 	 * Create a Meilisearch client configuration.
 	 *
-	 * @return {@link ClientConfiguration}
+	 * @return {@link io.vanslog.spring.data.meilisearch.client.ClientConfiguration}
 	 */
 	@Bean(name = "meilisearchClientConfiguration")
 	public abstract ClientConfiguration clientConfiguration();
@@ -56,12 +56,12 @@ public abstract class MeilisearchConfiguration extends MeilisearchConfigurationS
 	}
 
 	/**
-	 * Create a {@link MeilisearchOperations} bean.
+	 * Create a {@link io.vanslog.spring.data.meilisearch.core.MeilisearchOperations} bean.
 	 *
 	 * @param client the Meilisearch client
 	 * @param meilisearchConverter the Meilisearch converter
 	 * @param clientConfiguration the client configuration
-	 * @return the created {@link MeilisearchOperations} bean.
+	 * @return the created {@link io.vanslog.spring.data.meilisearch.core.MeilisearchOperations} bean.
 	 */
 	@Bean(name = { "meilisearchOperations", "meilisearchTemplate" })
 	public MeilisearchOperations meilisearchOperations(Client client, MeilisearchConverter meilisearchConverter,
@@ -70,7 +70,7 @@ public abstract class MeilisearchConfiguration extends MeilisearchConfigurationS
 	}
 
 	/**
-	 * Register a {@link JsonHandler} bean.
+	 * Register a {@link com.meilisearch.sdk.json.JsonHandler} bean.
 	 *
 	 * @return {@link com.meilisearch.sdk.json.JsonHandler}
 	 */

@@ -20,7 +20,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mapping.PersistentProperty;
 
 /**
- * Meilisearch specific {@link PersistentProperty} abstraction.
+ * Meilisearch specific {@link org.springframework.data.mapping.PersistentProperty} abstraction.
  *
  * @author Junghoon Ban
  */

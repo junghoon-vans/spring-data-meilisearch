@@ -149,9 +149,9 @@ public interface MeilisearchOperations {
 	boolean deleteAll(Class<?> clazz);
 
 	/**
-	 * Return the {@link MeilisearchConverter}.
+	 * Return the {@link io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter}.
 	 *
-	 * @return {@link MeilisearchConverter}
+	 * @return {@link io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter}
 	 */
 	MeilisearchConverter getMeilisearchConverter();
 }

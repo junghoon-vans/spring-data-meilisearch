@@ -31,14 +31,14 @@ import org.springframework.data.mapping.context.MappingContext;
 public interface MeilisearchConverter {
 
 	/**
-	 * Returns the {@link MappingContext} used by the converter.
+	 * Returns the {@link org.springframework.data.mapping.context.MappingContext}. used by the converter.
 	 *
 	 * @return never {@literal null}.
 	 */
 	MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> getMappingContext();
 
 	/**
-	 * Returns the {@link ConversionService} used by the converter.
+	 * Returns the {@link org.springframework.core.convert.ConversionService} used by the converter.
 	 *
 	 * @return never {@literal null}.
 	 */

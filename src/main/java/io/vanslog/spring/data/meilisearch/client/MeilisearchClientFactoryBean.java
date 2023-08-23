@@ -25,8 +25,8 @@ import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.json.JsonHandler;
 
 /**
- * FactoryBean class that creates a Meilisearch {@link Client}. The Meilisearch client is created by setting the host
- * URL, API key, JSON handler, and client agents.
+ * FactoryBean class that creates a Meilisearch {@link com.meilisearch.sdk.Client}. The Meilisearch client is created by
+ * setting the host URL, API key, JSON handler, and client agents.
  *
  * @author Junghoon Ban
  * @see Client
