@@ -31,6 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 
+/**
+ * Integration tests for {@link MeilisearchTemplate}.
+ *
+ * @author Junghoon Ban
+ */
 @MeilisearchTest
 @ContextConfiguration(classes = { MeilisearchTestConfiguration.class })
 class MeilisearchTemplateTest {

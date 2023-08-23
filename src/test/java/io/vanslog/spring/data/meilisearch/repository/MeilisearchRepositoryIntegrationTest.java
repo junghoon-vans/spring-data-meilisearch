@@ -33,6 +33,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
+/**
+ * Integration tests for {@link MeilisearchRepository}.
+ *
+ * @author Junghoon Ban
+ */
 @MeilisearchTest
 @ContextConfiguration(classes = MeilisearchRepositoryIntegrationTest.Config.class)
 class MeilisearchRepositoryIntegrationTest {

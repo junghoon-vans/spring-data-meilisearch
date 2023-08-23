@@ -34,6 +34,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.meilisearch.sdk.Client;
 
+/**
+ * Namespace based configuration test.
+ *
+ * @author Junghoon Ban
+ */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("namespace.xml")
 class MeilisearchNamespaceHandlerTest {

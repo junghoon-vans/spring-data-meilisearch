@@ -28,7 +28,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.mapping.MappingException;
 
 /**
- * Unit tests for {@link io.vanslog.spring.data.meilisearch.repository.support.MeilisearchEntityInformationCreatorImpl}.
+ * Unit tests for {@link MeilisearchEntityInformationCreatorImpl}.
+ *
+ * @author Junghoon Ban
  */
 class MeilisearchEntityInformationCreatorImplTest {
 

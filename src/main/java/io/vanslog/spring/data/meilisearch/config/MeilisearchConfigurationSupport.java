@@ -25,6 +25,8 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Support class for{@link io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration}.
+ *
+ * @author Junghoon Ban
  */
 
 @Configuration(proxyBeanMethods = false)

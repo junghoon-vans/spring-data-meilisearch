@@ -23,6 +23,8 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Custom Meilisearch configuration for integration tests.
+ *
+ * @author Junghoon Ban
  */
 @Configuration
 public class MeilisearchTestConfiguration extends MeilisearchConfiguration {

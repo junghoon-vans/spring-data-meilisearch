@@ -25,6 +25,8 @@ import com.meilisearch.sdk.json.GsonJsonHandler;
 
 /**
  * Tests for {@link ClientConfiguration}.
+ *
+ * @author Junghoon Ban
  */
 class ClientConfigurationTest {
 

@@ -20,6 +20,11 @@ import io.vanslog.spring.data.meilisearch.annotations.Document;
 
 import org.springframework.data.annotation.Id;
 
+/**
+ * Movie entity for tests.
+ *
+ * @author Junghoon Ban
+ */
 @Document(indexUid = "movies")
 @SuppressWarnings("unused")
 public class Movie {

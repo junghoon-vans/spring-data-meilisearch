@@ -35,6 +35,11 @@ import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
+/**
+ * Annotation based configuration test.
+ *
+ * @author Junghoon Ban
+ */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
 class MeilisearchConfigurationTest {
