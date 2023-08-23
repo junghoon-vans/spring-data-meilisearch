@@ -1,12 +1,16 @@
 [[meilisearch.document]]
-= Document
+= Meilisearch Document
+
+Spring Data Meilisearch provides a simple way to define a https://www.meilisearch.com/docs/learn/core_concepts/documents[Document].
+
+[[meilisearch.document.definition]]
+== Document definition
 
 To define the https://www.meilisearch.com/docs/learn/core_concepts/documents[Document], you need to annotate a class with `@Document` annotation.
 As an example, the following class defines a `Movie` document with `id`, `title`, `description` and `genres` fields.
 
-[[meilisearch.document.example]]
-== Example
-
+.The sample `document` entity
+====
 [source,java]
 ----
 @Document(indexUid = "movies")
@@ -17,6 +21,7 @@ public class Movie {
     private String[] genres;
 }
 ----
+====
 
 [[meilisearch.document.index-uid]]
 == Index UID
