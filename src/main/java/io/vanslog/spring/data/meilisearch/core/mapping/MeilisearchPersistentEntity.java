@@ -24,12 +24,12 @@ import org.springframework.data.mapping.PersistentEntity;
  * @param <T>
  * @author Junghoon Ban
  */
-public interface MeilisearchPersistentEntity<T>
-        extends PersistentEntity<T, MeilisearchPersistentProperty> {
+public interface MeilisearchPersistentEntity<T> extends PersistentEntity<T, MeilisearchPersistentProperty> {
 
-    /**
-     * Returns the Index UID of the persistent entity.
-     * @return Index UID
-     */
-    String getIndexUid();
+	/**
+	 * Returns the Index UID of the persistent entity.
+	 * 
+	 * @return Index UID
+	 */
+	String getIndexUid();
 }

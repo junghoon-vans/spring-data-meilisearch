@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.junit.jupiter;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -28,15 +29,15 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  */
 public class MeilisearchExtension implements BeforeAllCallback {
 
-    private final Lock initLock = new ReentrantLock();
+	private final Lock initLock = new ReentrantLock();
 
-    @Override
-    public void beforeAll(ExtensionContext context) {
-        initLock.lock();
-        try {
-            new MeilisearchConnection();
-        } finally {
-            initLock.unlock();
-        }
-    }
+	@Override
+	public void beforeAll(ExtensionContext context) {
+		initLock.lock();
+		try {
+			new MeilisearchConnection();
+		} finally {
+			initLock.unlock();
+		}
+	}
 }
