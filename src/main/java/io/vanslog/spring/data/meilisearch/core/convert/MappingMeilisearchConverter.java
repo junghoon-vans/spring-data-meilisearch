@@ -30,7 +30,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link MeilisearchConverter} Implementation based on {@link MappingContext}.
+ * {@link io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter} Implementation based on
+ * {@link org.springframework.data.mapping.context.MappingContext}.
  *
  * @author Junghoon Ban
  */
@@ -43,7 +44,8 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 	@Nullable private ApplicationContext applicationContext;
 
 	/**
-	 * Creates a new {@link MappingMeilisearchConverter} given the {@link MappingContext}.
+	 * Creates a new {@link io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter} given the
+	 * {@link org.springframework.data.mapping.context.MappingContext}.
 	 * 
 	 * @param mappingContext must not be {@literal null}.
 	 */

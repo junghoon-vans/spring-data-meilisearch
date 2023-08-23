@@ -22,7 +22,7 @@ import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.json.JsonHandler;
 
 /**
- * Default implementation of {@link ClientConfiguration}.
+ * Default implementation of {@link io.vanslog.spring.data.meilisearch.client.ClientConfiguration}.
  *
  * @author Junghoon Ban
  */

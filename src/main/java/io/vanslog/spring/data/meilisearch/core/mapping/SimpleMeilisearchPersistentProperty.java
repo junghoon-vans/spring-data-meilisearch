@@ -27,7 +27,7 @@ import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.util.Assert;
 
 /**
- * Meilisearch specific {@link PersistentEntity} implementation holding.
+ * Meilisearch specific {@link org.springframework.data.mapping.PersistentEntity} implementation holding.
  *
  * @author Junghoon Ban
  */

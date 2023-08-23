@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Meilisearch specific {@link BasicPersistentEntity} implementation holding.
+ * Meilisearch specific {@link org.springframework.data.mapping.model.BasicPersistentEntity} implementation holding.
  *
  * @param <T>
  * @author Junghoon Ban

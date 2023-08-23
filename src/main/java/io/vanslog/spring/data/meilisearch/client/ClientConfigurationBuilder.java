@@ -20,7 +20,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * A builder for Meilisearch {@link ClientConfiguration}.
+ * A builder for Meilisearch {@link io.vanslog.spring.data.meilisearch.client.ClientConfiguration}.
  *
  * @author Junghoon Ban
  */
@@ -81,9 +81,9 @@ public class ClientConfigurationBuilder {
 	}
 
 	/**
-	 * Build a {@link ClientConfiguration} with the given parameters.
+	 * Build a {@link io.vanslog.spring.data.meilisearch.client.ClientConfiguration} with the given parameters.
 	 *
-	 * @return {@link ClientConfiguration}
+	 * @return {@link io.vanslog.spring.data.meilisearch.client.ClientConfiguration}
 	 */
 	public ClientConfiguration build() {
 		Assert.notNull(this.hostUrl, "Host URL must not be null");
