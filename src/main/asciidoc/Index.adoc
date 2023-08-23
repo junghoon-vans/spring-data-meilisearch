@@ -15,3 +15,4 @@ include::preface.adoc[]
 :leveloffset: 1
 include::reference/meilisearch-client.adoc[]
 include::reference/meilisearch-document.adoc[]
+include::reference/meilisearch-repositories.adoc[]
