@@ -35,12 +35,12 @@ public class MyService {
 public class Config extends MeilisearchConfiguration {
 
     @Override
-        public ClientConfiguration clientConfiguration() {
-            return ClientConfiguration.builder()
-                    .connectedToLocalhost()
-                    .withApiKey("masterKey")
-                    .build();
-        }
+    public ClientConfiguration clientConfiguration() {
+        return ClientConfiguration.builder()
+                .connectedToLocalhost()
+                .withApiKey("masterKey")
+                .build();
+    }
 }
 ----
 
@@ -59,7 +59,7 @@ Add the Maven dependency:
 
 == Guide
 
-* Check the link:src/main/asciidoc/Index.adoc[reference documentation]
+* Check the link:https://junghoon-vans.github.io/spring-data-meilisearch/[reference documentation]
 
 == Reporting Issues
 
