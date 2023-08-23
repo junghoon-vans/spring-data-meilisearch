@@ -8,17 +8,21 @@ This chapter describes how to use Meilisearch repositories.
 
 Meilisearch repositories are used to store and retrieve data from Meilisearch.
 
-.The sample `repository`
+.The sample repository
 ====
 [source,java]
 ----
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+
+import java.util.List;
+
 public class MovieService {
 
-	private MovieRepository repository;private MovieRepository ;
+	private MovieRepository repository;
 
 	public MovieService(MovieRepository repository) {
-        this.repository = repository;
-    }
+		this.repository = repository;
+	}
 
 	public List<Movie> showAllMovies() {
 		return repository.findAll();
@@ -42,17 +46,27 @@ The Spring Data Meilisearch repositories can be configured using the `@EnableMei
 ====
 [source,java]
 ----
+import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 @EnableMeilisearchRepositories(                             <.>
 		basePackages = {"com.example.repositories"}
 )
 public class Config {
+
     @Bean
     public MeilisearchOperations meilisearchTemplate() {    <.>
-		// ...
+        // ...
     }
 }
 ----
-<.> The `@EnableMeilisearchRepositories` annotation enables Meilisearch repositories. If no `basePackages` are configured, the annotation will scan the package of the annotated configuration class.
+
+<.> The `@EnableMeilisearchRepositories` annotation enables Meilisearch repositories.
+If no `basePackages` are configured, the annotation will scan the package of the annotated configuration class.
 <.> Provide a `MeilisearchOperations` bean to override the default `MeilisearchTemplate` bean.
 ====
 
@@ -85,7 +99,9 @@ The Spring Data Meilisearch repositories can be configured using the `meilisearc
     <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>       <.>
 </beans>
 ----
-<.> The `meilisearch:repositories` element enables Meilisearch repositories. If no `base-package` is configured, the namespace will scan the package of the configuration file.
+
+<.> The `meilisearch:repositories` element enables Meilisearch repositories.
+If no `base-package` is configured, the namespace will scan the package of the configuration file.
 <.> The `meilisearchTemplate` bean must be configured with a `MeilisearchClient` and a `JsonHandler`.
 <.> Set the `meilisearchClient` bean as the constructor argument of the `meilisearchTemplate`.
 <.> Set the `jsonHandler` bean as the constructor argument of the `meilisearchTemplate`.

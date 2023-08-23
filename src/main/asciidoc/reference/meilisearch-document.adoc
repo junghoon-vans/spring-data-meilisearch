@@ -9,10 +9,14 @@ Spring Data Meilisearch provides a simple way to define a https://www.meilisearc
 To define the https://www.meilisearch.com/docs/learn/core_concepts/documents[Document], you need to annotate a class with `@Document` annotation.
 As an example, the following class defines a `Movie` document with `id`, `title`, `description` and `genres` fields.
 
-.The sample `document` entity
+.The sample document
 ====
 [source,java]
 ----
+import io.vanslog.spring.data.meilisearch.annotations.Document;
+
+import org.springframework.data.annotation.Id;
+
 @Document(indexUid = "movies")
 public class Movie {
     @Id private int id;

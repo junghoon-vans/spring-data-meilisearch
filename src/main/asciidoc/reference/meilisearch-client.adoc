@@ -14,6 +14,11 @@ The Spring Data Meilisearch client can be configured using the `@Configuration` 
 ====
 [source,java]
 ----
+import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
+
+import org.springframework.context.annotation.Configuration;
+
 @Configuration
 public class MyClientConfig extends MeilisearchConfiguration {
 
@@ -65,8 +70,6 @@ Configuration options are provided by the `ClientConfiguration` builder.
 ====
 [source,java]
 ----
-import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
-
 String[] agents = {"Spring Data Meilisearch"};                          <.>
 
 ClientConfiguration clientConfiguration = ClientConfiguration.builder()
@@ -106,6 +109,11 @@ But you can override the `jsonhandler()` method to provide a custom JSON handler
 ====
 [source,java]
 ----
+import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
+
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 public class JsonhandlerConfig extends MeilisearchConfiguration {
 
     @Override
@@ -114,6 +122,7 @@ public class JsonhandlerConfig extends MeilisearchConfiguration {
     }
 }
 ----
+
 <.> Use Jackson JSON handler instead of the default JSON handler.
 ====
 
