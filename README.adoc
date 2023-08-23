@@ -59,7 +59,7 @@ Add the Maven dependency:
 
 == Guide
 
-* Check the link:src/main/asciidoc/Index.adoc[reference documentation]
+* Check the link:src/main/asciidoc/index.adoc[reference documentation]
 
 == Reporting Issues
 
