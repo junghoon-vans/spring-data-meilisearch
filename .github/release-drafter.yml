@@ -1,20 +1,20 @@
 categories:
-  - title: '⚠️ Breaking changes'
-    label: 'breaking-change'
-  - title: '🚀 Features'
-    label: 'feature'
-  - title: '🐛 Bug Fixes'
-    label: 'bug'
-  - title: '🛠️ Maintenance'
-    labels: ['chore', 'refactor', 'style']
-  - title: '📝 Documentation'
-    label: 'documentation'
-  - title: '🧪 Tests'
-    label: 'test'
+  - title: '⭐ New Features'
+    label: 'type: enhancement'
+  - title: '🐞 Bug Fixes'
+    label: 'type: bug'
+  - title: '📔 Documentation'
+    label: 'type: documentation'
+  - title: '🔨 Dependency Upgrades'
+    label: 'type: dependency-upgrade'
 
-exclude-labels:
-  - 'skip-changelog'
+change-template: '* $TITLE #$NUMBER'
 template: |
-  ## What's Changed
 
   $CHANGES
+  
+  ❤️ Contributors
+  
+  We'd like to thank all the contributors who worked on this release!
+  
+  $CONTRIBUTORS
