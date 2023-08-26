@@ -52,4 +52,18 @@ public interface ClientConfiguration {
 	 * @return clientAgents
 	 */
 	String[] getClientAgents();
+
+	/**
+	 * Get the timeout to wait for task to complete.
+	 *
+	 * @return timeout in milliseconds
+	 */
+	int getTimeout();
+
+	/**
+	 * Get the interval to wait for task to complete.
+	 *
+	 * @return interval in milliseconds
+	 */
+	int getInterval();
 }

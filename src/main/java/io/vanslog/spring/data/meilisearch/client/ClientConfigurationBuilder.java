@@ -29,12 +29,16 @@ public class ClientConfigurationBuilder {
 	@Nullable private String hostUrl;
 	@Nullable private String apiKey;
 	private String[] clientAgents;
+	private int timeout;
+	private int interval;
 
 	/**
 	 * Create a new {@link ClientConfigurationBuilder}.
 	 */
 	public ClientConfigurationBuilder() {
 		this.clientAgents = new String[0];
+		this.timeout = 5000;
+		this.interval = 50;
 	}
 
 	/**
@@ -81,6 +85,26 @@ public class ClientConfigurationBuilder {
 	}
 
 	/**
+	 * Configure timeout to wait for task to complete.
+	 * @param timeout in milliseconds
+	 * @return {@link ClientConfigurationBuilder}
+	 */
+	public ClientConfigurationBuilder withTimeout(int timeout) {
+		this.timeout = timeout;
+		return this;
+	}
+
+	/**
+	 * Configure interval to wait for task to complete.
+	 * @param interval in milliseconds
+	 * @return {@link ClientConfigurationBuilder}
+	 */
+	public ClientConfigurationBuilder withInterval(int interval) {
+		this.interval = interval;
+		return this;
+	}
+
+	/**
 	 * Build a {@link io.vanslog.spring.data.meilisearch.client.ClientConfiguration} with the given parameters.
 	 *
 	 * @return {@link io.vanslog.spring.data.meilisearch.client.ClientConfiguration}
@@ -88,6 +112,6 @@ public class ClientConfigurationBuilder {
 	public ClientConfiguration build() {
 		Assert.notNull(this.hostUrl, "Host URL must not be null");
 		Assert.notNull(this.apiKey, "API Key must not be null");
-		return new DefaultClientConfiguration(this.hostUrl, this.apiKey, this.clientAgents);
+		return new DefaultClientConfiguration(this.hostUrl, this.apiKey, this.clientAgents, this.timeout, this.interval);
 	}
 }

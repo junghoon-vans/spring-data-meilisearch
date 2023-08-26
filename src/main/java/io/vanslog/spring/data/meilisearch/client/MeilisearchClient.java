@@ -29,15 +29,22 @@ import com.meilisearch.sdk.json.JsonHandler;
 public class MeilisearchClient {
 
 	private final Client client;
-	private JsonHandler jsonHandler = new GsonJsonHandler();
+	private final JsonHandler jsonHandler;
+	private final int timeout;
+	private final int interval;
 
 	public MeilisearchClient(ClientConfiguration config) {
 		this.client = new Client(new Config(config.getHostUrl(), config.getApiKey(), config.getClientAgents()));
+		this.timeout = config.getTimeout();
+		this.interval = config.getInterval();
+		this.jsonHandler = new GsonJsonHandler();
 	}
 
 	public MeilisearchClient(ClientConfiguration config, JsonHandler jsonHandler) {
 		this.client = new Client(
 				new Config(config.getHostUrl(), config.getApiKey(), jsonHandler, config.getClientAgents()));
+		this.timeout = config.getTimeout();
+		this.interval = config.getInterval();
 		this.jsonHandler = jsonHandler;
 	}
 
@@ -47,5 +54,13 @@ public class MeilisearchClient {
 
 	public JsonHandler getJsonHandler() {
 		return jsonHandler;
+	}
+
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public int getInterval() {
+		return interval;
 	}
 }

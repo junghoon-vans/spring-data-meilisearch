@@ -55,6 +55,13 @@ class MeilisearchConfigurationTest {
 	}
 
 	@Test
+	void shouldConfigureMeilisearchClient() {
+		assertThat(meilisearchClient.getJsonHandler()).isInstanceOf(JacksonJsonHandler.class);
+		assertThat(meilisearchClient.getTimeout()).isEqualTo(2000);
+		assertThat(meilisearchClient.getInterval()).isEqualTo(20);
+	}
+
+	@Test
 	void shouldCreateMeilisearchTemplate() {
 		assertThat(meilisearchTemplate).isNotNull();
 	}
@@ -72,7 +79,8 @@ class MeilisearchConfigurationTest {
 	static class CustomConfiguration extends MeilisearchConfiguration {
 		@Override
 		public ClientConfiguration clientConfiguration() {
-			return ClientConfiguration.builder().connectedToLocalhost().withApiKey("masterKey").build();
+			return ClientConfiguration.builder().connectedToLocalhost().withApiKey("masterKey").withTimeout(2000)
+					.withInterval(20).build();
 		}
 
 		@Override
