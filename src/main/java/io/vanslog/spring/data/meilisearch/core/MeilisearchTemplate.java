@@ -56,11 +56,15 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	private final Client client;
 	private final JsonHandler jsonHandler;
+	private final int timeout;
+	private final int interval;
 	private final MeilisearchConverter meilisearchConverter;
 
 	public MeilisearchTemplate(MeilisearchClient client, @Nullable MeilisearchConverter meilisearchConverter) {
 		this.client = client.getClient();
 		this.jsonHandler = client.getJsonHandler();
+		this.timeout = client.getTimeout();
+		this.interval = client.getInterval();
 		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 	}
@@ -84,7 +88,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			TaskInfo taskInfo = index.addDocuments(jsonHandler.encode(entities), primaryKey);
 			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid);
+			index.waitForTask(taskUid, timeout, interval);
 			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
 			if (taskStatus != TaskStatus.SUCCEEDED) {
@@ -148,7 +152,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			TaskInfo taskInfo = index.deleteDocument(documentId);
 			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid);
+			index.waitForTask(taskUid, timeout, interval);
 			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
 			return taskStatus == TaskStatus.SUCCEEDED;
@@ -170,7 +174,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			TaskInfo taskInfo = index.deleteDocuments(documentIds);
 			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid);
+			index.waitForTask(taskUid, timeout, interval);
 			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
 			return taskStatus == TaskStatus.SUCCEEDED;
@@ -192,7 +196,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			TaskInfo taskInfo = index.deleteAllDocuments();
 			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid);
+			index.waitForTask(taskUid, timeout, interval);
 			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
 			return taskStatus == TaskStatus.SUCCEEDED;
