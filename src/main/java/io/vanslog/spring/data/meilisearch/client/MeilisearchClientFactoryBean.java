@@ -54,11 +54,8 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 
 	@Override
 	public void afterPropertiesSet() {
-		ClientConfiguration clientConfiguration = ClientConfiguration.builder()
-				.connectedTo(hostUrl)
-				.withApiKey(apiKey)
-				.withClientAgents(clientAgents)
-				.build();
+		ClientConfiguration clientConfiguration = ClientConfiguration.builder().connectedTo(hostUrl).withApiKey(apiKey)
+				.withClientAgents(clientAgents).build();
 
 		meilisearchClient = new MeilisearchClient(clientConfiguration, jsonHandler);
 	}

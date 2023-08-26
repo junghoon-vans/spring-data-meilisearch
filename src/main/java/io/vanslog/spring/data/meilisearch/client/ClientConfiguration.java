@@ -16,11 +16,6 @@
 
 package io.vanslog.spring.data.meilisearch.client;
 
-import org.springframework.lang.Nullable;
-
-import com.meilisearch.sdk.Config;
-import com.meilisearch.sdk.json.JsonHandler;
-
 /**
  * Interface for Meilisearch Configuration.
  *
