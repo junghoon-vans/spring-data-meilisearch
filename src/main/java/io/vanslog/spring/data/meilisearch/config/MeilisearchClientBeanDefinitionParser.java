@@ -49,6 +49,13 @@ public class MeilisearchClientBeanDefinitionParser extends AbstractBeanDefinitio
 		builder.addPropertyValue("apiKey", element.getAttribute("api-key"));
 		builder.addPropertyValue("clientAgents", element.getAttribute("client-agents"));
 		builder.addPropertyReference("jsonHandler", element.getAttribute("json-handler-ref"));
+
+		if (element.hasAttribute("timeout")) {
+			builder.addPropertyValue("timeout", element.getAttribute("timeout"));
+		}
+		if (element.hasAttribute("interval")) {
+			builder.addPropertyValue("interval", element.getAttribute("interval"));
+		}
 	}
 
 	private AbstractBeanDefinition getSourcedBeanDefinition(BeanDefinitionBuilder builder, Element source,
