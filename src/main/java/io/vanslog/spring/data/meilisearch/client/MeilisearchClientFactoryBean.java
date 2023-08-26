@@ -21,31 +21,30 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 
 import com.meilisearch.sdk.Client;
-import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.json.JsonHandler;
 
 /**
- * FactoryBean class that creates a Meilisearch {@link com.meilisearch.sdk.Client}. The Meilisearch client is created by
- * setting the host URL, API key, JSON handler, and client agents.
+ * FactoryBean class that creates a {@link io.vanslog.spring.data.meilisearch.client.MeilisearchClient}. The Meilisearch
+ * client is created by setting the host URL, API key, JSON handler, and client agents.
  *
  * @author Junghoon Ban
  * @see Client
  */
-public final class MeilisearchClientFactoryBean implements FactoryBean<Client>, InitializingBean {
+public final class MeilisearchClientFactoryBean implements FactoryBean<MeilisearchClient>, InitializingBean {
 
 	@Nullable private String hostUrl;
 	@Nullable private String apiKey;
 	@Nullable private JsonHandler jsonHandler;
 	private String[] clientAgents;
-	@Nullable private Client client;
+	@Nullable private MeilisearchClient meilisearchClient;
 
 	private MeilisearchClientFactoryBean() {
 		this.clientAgents = new String[0];
 	}
 
 	@Override
-	public Client getObject() {
-		return client;
+	public MeilisearchClient getObject() {
+		return meilisearchClient;
 	}
 
 	@Override
@@ -54,9 +53,11 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Client>, 
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		Config config = new Config(hostUrl, apiKey, jsonHandler, clientAgents);
-		client = new Client(config);
+	public void afterPropertiesSet() {
+		ClientConfiguration clientConfiguration = ClientConfiguration.builder().connectedTo(hostUrl).withApiKey(apiKey)
+				.withClientAgents(clientAgents).build();
+
+		meilisearchClient = new MeilisearchClient(clientConfiguration, jsonHandler);
 	}
 
 	/**

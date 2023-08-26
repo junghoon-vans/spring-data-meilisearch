@@ -2,8 +2,8 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:beans="http://www.springframework.org/schema/beans"
             xmlns:tool="http://www.springframework.org/schema/tool"
-            xmlns="http://www.vanslog.io/spring/data/meilisearch"
             xmlns:repository="http://www.springframework.org/schema/data/repository"
+            xmlns="http://www.vanslog.io/spring/data/meilisearch"
             targetNamespace="http://www.vanslog.io/spring/data/meilisearch"
             elementFormDefault="qualified" attributeFormDefault="unqualified">
 
@@ -50,7 +50,7 @@
         <xsd:annotation>
             <xsd:documentation/>
             <xsd:appinfo>
-                <tool:assignable-to type="com.meilisearch.sdk.Client"/>
+                <tool:assignable-to type="io.vanslog.spring.data.meilisearch.client.MeilisearchClient"/>
             </xsd:appinfo>
         </xsd:annotation>
         <xsd:complexType>
