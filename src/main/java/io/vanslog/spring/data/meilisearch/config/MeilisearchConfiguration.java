@@ -17,13 +17,13 @@
 package io.vanslog.spring.data.meilisearch.config;
 
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 
 import org.springframework.context.annotation.Bean;
 
-import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
@@ -48,25 +48,25 @@ public abstract class MeilisearchConfiguration extends MeilisearchConfigurationS
 	 *
 	 * @param clientConfiguration the client configuration
 	 * @param jsonHandler the json handler
-	 * @return {@link com.meilisearch.sdk.Client}
+	 * @return {@link io.vanslog.spring.data.meilisearch.client.MeilisearchClient}
 	 */
 	@Bean(name = "meilisearchClient")
-	public Client meilisearchClient(ClientConfiguration clientConfiguration, JsonHandler jsonHandler) {
-		return new Client(clientConfiguration.withJsonHandler(jsonHandler).getConfig());
+	public MeilisearchClient meilisearchClient(ClientConfiguration clientConfiguration, JsonHandler jsonHandler) {
+		return new MeilisearchClient(clientConfiguration.withJsonHandler(jsonHandler).getConfig());
 	}
 
 	/**
 	 * Create a {@link io.vanslog.spring.data.meilisearch.core.MeilisearchOperations} bean.
 	 *
-	 * @param client the Meilisearch client
+	 * @param meilisearchClient the Meilisearch client
 	 * @param meilisearchConverter the Meilisearch converter
 	 * @param clientConfiguration the client configuration
 	 * @return the created {@link io.vanslog.spring.data.meilisearch.core.MeilisearchOperations} bean.
 	 */
 	@Bean(name = { "meilisearchOperations", "meilisearchTemplate" })
-	public MeilisearchOperations meilisearchOperations(Client client, MeilisearchConverter meilisearchConverter,
-			ClientConfiguration clientConfiguration) {
-		return new MeilisearchTemplate(client, meilisearchConverter, clientConfiguration.getJsonHandler());
+	public MeilisearchOperations meilisearchOperations(MeilisearchClient meilisearchClient,
+			MeilisearchConverter meilisearchConverter, ClientConfiguration clientConfiguration) {
+		return new MeilisearchTemplate(meilisearchClient, meilisearchConverter, clientConfiguration.getJsonHandler());
 	}
 
 	/**

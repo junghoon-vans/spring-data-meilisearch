@@ -20,6 +20,7 @@ import io.vanslog.spring.data.meilisearch.IndexAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
@@ -59,13 +60,13 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	private final JsonHandler jsonHandler;
 
-	public MeilisearchTemplate(Client client, JsonHandler jsonHandler) {
+	public MeilisearchTemplate(MeilisearchClient client, JsonHandler jsonHandler) {
 		this(client, null, jsonHandler);
 	}
 
-	public MeilisearchTemplate(Client client, @Nullable MeilisearchConverter meilisearchConverter,
+	public MeilisearchTemplate(MeilisearchClient client, @Nullable MeilisearchConverter meilisearchConverter,
 			@Nullable JsonHandler jsonHandler) {
-		this.client = client;
+		this.client = client.getClient();
 		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 		this.jsonHandler = jsonHandler != null ? jsonHandler : new GsonJsonHandler();

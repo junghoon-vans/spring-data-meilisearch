@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.config;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClientFactoryBean;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
@@ -57,7 +58,8 @@ class MeilisearchNamespaceHandlerTest {
 
 	@Test
 	void shouldUseGsonJsonHandler() throws NoSuchFieldException, IllegalAccessException {
-		Client client = (Client) context.getBean("meilisearchClient");
+		MeilisearchClient meilisearchClient = (MeilisearchClient) context.getBean("meilisearchClient");
+		Client client = meilisearchClient.getClient();
 
 		Field jsonHandlerField = client.getClass().getDeclaredField("jsonHandler");
 		jsonHandlerField.setAccessible(true);

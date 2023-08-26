@@ -19,6 +19,7 @@ package io.vanslog.spring.data.meilisearch.config;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
@@ -44,13 +45,13 @@ import com.meilisearch.sdk.json.JsonHandler;
 @ContextConfiguration
 class MeilisearchConfigurationTest {
 
-	@Autowired private Client client;
+	@Autowired private MeilisearchClient meilisearchClient;
 	@Autowired private MeilisearchOperations meilisearchTemplate;
 	@Autowired private MovieRepository movieRepository;
 
 	@Test
 	void shouldCreateMeilisearchClient() {
-		assertThat(client).isNotNull();
+		assertThat(meilisearchClient).isNotNull();
 	}
 
 	@Test
