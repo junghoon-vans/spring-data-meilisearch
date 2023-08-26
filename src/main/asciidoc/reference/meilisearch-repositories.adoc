@@ -92,7 +92,6 @@ The Spring Data Meilisearch repositories can be configured using the `meilisearc
     <bean name="meilisearchTemplate"                                                <.>
           class="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate">
         <constructor-arg name="client" ref="meilisearchClient"/>                    <.>
-        <constructor-arg name="jsonHandler" ref="jsonHandler"/>                     <.>
     </bean>
 
     <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>    <.>
@@ -102,8 +101,7 @@ The Spring Data Meilisearch repositories can be configured using the `meilisearc
 
 <.> The `meilisearch:repositories` element enables Meilisearch repositories.
 If no `base-package` is configured, the namespace will scan the package of the configuration file.
-<.> The `meilisearchTemplate` bean must be configured with a `MeilisearchClient` and a `JsonHandler`.
-<.> Set the `meilisearchClient` bean as the constructor argument of the `meilisearchTemplate`.
+<.> The `meilisearchTemplate` bean must be configured with a `MeilisearchClient`.
 <.> Set the `jsonHandler` bean as the constructor argument of the `meilisearchTemplate`.
 <.> Configure the Meilisearch client with the `api-key` attribute.
 <.> Configure the `jsonHandler` bean with the `GsonJsonHandler` class.

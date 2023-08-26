@@ -50,7 +50,7 @@
         <xsd:annotation>
             <xsd:documentation/>
             <xsd:appinfo>
-                <tool:assignable-to type="com.meilisearch.sdk.Client"/>
+                <tool:assignable-to type="io.vanslog.spring.data.meilisearch.client.MeilisearchClient"/>
             </xsd:appinfo>
         </xsd:annotation>
         <xsd:complexType>

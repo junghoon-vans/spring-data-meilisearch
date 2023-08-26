@@ -21,7 +21,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 
 import com.meilisearch.sdk.Client;
-import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.json.JsonHandler;
 
 /**
@@ -55,8 +54,13 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 
 	@Override
 	public void afterPropertiesSet() {
-		Config config = new Config(hostUrl, apiKey, jsonHandler, clientAgents);
-		meilisearchClient = new MeilisearchClient(config);
+		ClientConfiguration clientConfiguration = ClientConfiguration.builder()
+				.connectedTo(hostUrl)
+				.withApiKey(apiKey)
+				.withClientAgents(clientAgents)
+				.build();
+
+		meilisearchClient = new MeilisearchClient(clientConfiguration, jsonHandler);
 	}
 
 	/**

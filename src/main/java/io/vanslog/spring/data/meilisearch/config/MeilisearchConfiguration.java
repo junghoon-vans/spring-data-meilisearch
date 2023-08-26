@@ -52,7 +52,7 @@ public abstract class MeilisearchConfiguration extends MeilisearchConfigurationS
 	 */
 	@Bean(name = "meilisearchClient")
 	public MeilisearchClient meilisearchClient(ClientConfiguration clientConfiguration, JsonHandler jsonHandler) {
-		return new MeilisearchClient(clientConfiguration.withJsonHandler(jsonHandler).getConfig());
+		return new MeilisearchClient(clientConfiguration, jsonHandler);
 	}
 
 	/**
@@ -60,13 +60,12 @@ public abstract class MeilisearchConfiguration extends MeilisearchConfigurationS
 	 *
 	 * @param meilisearchClient the Meilisearch client
 	 * @param meilisearchConverter the Meilisearch converter
-	 * @param clientConfiguration the client configuration
 	 * @return the created {@link io.vanslog.spring.data.meilisearch.core.MeilisearchOperations} bean.
 	 */
 	@Bean(name = { "meilisearchOperations", "meilisearchTemplate" })
 	public MeilisearchOperations meilisearchOperations(MeilisearchClient meilisearchClient,
-			MeilisearchConverter meilisearchConverter, ClientConfiguration clientConfiguration) {
-		return new MeilisearchTemplate(meilisearchClient, meilisearchConverter, clientConfiguration.getJsonHandler());
+			MeilisearchConverter meilisearchConverter) {
+		return new MeilisearchTemplate(meilisearchClient, meilisearchConverter);
 	}
 
 	/**

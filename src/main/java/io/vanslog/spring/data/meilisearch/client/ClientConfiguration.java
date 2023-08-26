@@ -52,32 +52,9 @@ public interface ClientConfiguration {
 	String getApiKey();
 
 	/**
-	 * Get the jsonHandler.
-	 *
-	 * @return jsonHandler
-	 */
-	@Nullable
-	JsonHandler getJsonHandler();
-
-	/**
 	 * Get the clientAgents.
 	 *
 	 * @return clientAgents
 	 */
 	String[] getClientAgents();
-
-	/**
-	 * Get the config.
-	 *
-	 * @return config
-	 */
-	Config getConfig();
-
-	/**
-	 * Set the JSON handler.
-	 * 
-	 * @param jsonHandler the JSON handler
-	 * @return {@link ClientConfiguration}
-	 */
-	ClientConfiguration withJsonHandler(JsonHandler jsonHandler);
 }

@@ -43,10 +43,4 @@ class ClientConfigurationTest {
 		assertThat(clientConfiguration.getApiKey()).isEqualTo("masterKey");
 		assertThat(clientConfiguration.getClientAgents()).isEmpty();
 	}
-
-	@Test
-	void shouldConfigureJsonHandler() {
-		clientConfiguration.withJsonHandler(new GsonJsonHandler());
-		assertThat(clientConfiguration.getJsonHandler()).isInstanceOf(GsonJsonHandler.class);
-	}
 }

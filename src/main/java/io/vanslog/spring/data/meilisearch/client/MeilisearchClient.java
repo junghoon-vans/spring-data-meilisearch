@@ -18,6 +18,8 @@ package io.vanslog.spring.data.meilisearch.client;
 
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Config;
+import com.meilisearch.sdk.json.GsonJsonHandler;
+import com.meilisearch.sdk.json.JsonHandler;
 
 /**
  * Wrapper class for a Meilisearch client.
@@ -27,12 +29,23 @@ import com.meilisearch.sdk.Config;
 public class MeilisearchClient {
 
 	private final Client client;
+	private JsonHandler jsonHandler = new GsonJsonHandler();
 
-	public MeilisearchClient(Config config) {
-		this.client = new Client(config);
+	public MeilisearchClient(ClientConfiguration config) {
+		this.client = new Client(new Config(config.getHostUrl(), config.getApiKey(), config.getClientAgents()));
+	}
+
+	public MeilisearchClient(ClientConfiguration config, JsonHandler jsonHandler) {
+		this.client = new Client(
+				new Config(config.getHostUrl(), config.getApiKey(), jsonHandler, config.getClientAgents()));
+		this.jsonHandler = jsonHandler;
 	}
 
 	public Client getClient() {
 		return client;
+	}
+
+	public JsonHandler getJsonHandler() {
+		return jsonHandler;
 	}
 }

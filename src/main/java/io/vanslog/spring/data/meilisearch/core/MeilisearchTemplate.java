@@ -41,7 +41,6 @@ import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
-import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
@@ -56,20 +55,14 @@ import com.meilisearch.sdk.model.TaskStatus;
 public class MeilisearchTemplate implements MeilisearchOperations {
 
 	private final Client client;
+	private final JsonHandler jsonHandler;
 	private final MeilisearchConverter meilisearchConverter;
 
-	private final JsonHandler jsonHandler;
-
-	public MeilisearchTemplate(MeilisearchClient client, JsonHandler jsonHandler) {
-		this(client, null, jsonHandler);
-	}
-
-	public MeilisearchTemplate(MeilisearchClient client, @Nullable MeilisearchConverter meilisearchConverter,
-			@Nullable JsonHandler jsonHandler) {
+	public MeilisearchTemplate(MeilisearchClient client, @Nullable MeilisearchConverter meilisearchConverter) {
 		this.client = client.getClient();
+		this.jsonHandler = client.getJsonHandler();
 		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
-		this.jsonHandler = jsonHandler != null ? jsonHandler : new GsonJsonHandler();
 	}
 
 	@Override
