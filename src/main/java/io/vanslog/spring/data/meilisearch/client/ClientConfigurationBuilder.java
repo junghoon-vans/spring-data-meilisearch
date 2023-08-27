@@ -32,13 +32,17 @@ public class ClientConfigurationBuilder {
 	private int requestTimeout;
 	private int requestInterval;
 
+	private static final String[] DEFAULT_CLIENT_AGENT = new String[0];
+	private static final int DEFAULT_REQUEST_TIMEOUT = 5000;
+	private static final int DEFAULT_REQUEST_INTERVAL = 50;
+
 	/**
 	 * Create a new {@link ClientConfigurationBuilder}.
 	 */
 	public ClientConfigurationBuilder() {
-		this.clientAgents = new String[0];
-		this.requestTimeout = 5000;
-		this.requestInterval = 50;
+		this.clientAgents = DEFAULT_CLIENT_AGENT;
+		this.requestTimeout = DEFAULT_REQUEST_TIMEOUT;
+		this.requestInterval = DEFAULT_REQUEST_INTERVAL;
 	}
 
 	/**
