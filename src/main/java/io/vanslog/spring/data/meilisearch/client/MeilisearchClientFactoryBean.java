@@ -99,7 +99,7 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 	}
 
 	/**
-	 * Set timeout to wait for task to complete.
+	 * Set request timeout to wait for task to complete.
 	 * 
 	 * @param requestTimeout in milliseconds
 	 */
@@ -108,7 +108,7 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 	}
 
 	/**
-	 * Set interval to wait for task to complete.
+	 * Set request interval to wait for task to complete.
 	 *
 	 * @param requestInterval in milliseconds
 	 */

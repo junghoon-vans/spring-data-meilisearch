@@ -76,8 +76,8 @@ ClientConfiguration clientConfiguration = ClientConfiguration.builder()
     .connectedTo("http://localhost:7700")                               <.>
     .withApiKey("masterKey")                                            <.>
     .withClientAgents(agents)                                           <.>
-    .withRequestTimeout(5000)                                                  <.>
-    .withRequestInterval(50)                                                   <.>
+    .withRequestTimeout(2000)                                                  <.>
+    .withRequestInterval(20)                                                   <.>
     .build();
 ----
 
@@ -85,8 +85,8 @@ ClientConfiguration clientConfiguration = ClientConfiguration.builder()
 <.> Use the builder to provide the Meilisearch host URL.
 <.> Set the Meilisearch API Key to use for authentication.
 <.> Set the client agents.
-<.> Set the timeout in milliseconds to wait for a response from Meilisearch.
-<.> Set the interval in milliseconds to wait for a response from Meilisearch.
+<.> Set the request timeout to 2000 milliseconds.
+<.> Set the request interval to 20 milliseconds.
 ====
 
 [[meilisearch.json-handler]]
