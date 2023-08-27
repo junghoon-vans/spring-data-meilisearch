@@ -56,14 +56,14 @@ public interface ClientConfiguration {
 	/**
 	 * Get the timeout to wait for task to complete.
 	 *
-	 * @return timeout in milliseconds
+	 * @return requestTimeout in milliseconds
 	 */
-	int getTimeout();
+	int getRequestTimeout();
 
 	/**
 	 * Get the interval to wait for task to complete.
 	 *
-	 * @return interval in milliseconds
+	 * @return requestInterval in milliseconds
 	 */
-	int getInterval();
+	int getRequestInterval();
 }

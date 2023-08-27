@@ -30,21 +30,21 @@ public class MeilisearchClient {
 
 	private final Client client;
 	private final JsonHandler jsonHandler;
-	private final int timeout;
-	private final int interval;
+	private final int requestTimeout;
+	private final int requestInterval;
 
 	public MeilisearchClient(ClientConfiguration config) {
 		this.client = new Client(new Config(config.getHostUrl(), config.getApiKey(), config.getClientAgents()));
-		this.timeout = config.getTimeout();
-		this.interval = config.getInterval();
+		this.requestTimeout = config.getRequestTimeout();
+		this.requestInterval = config.getRequestInterval();
 		this.jsonHandler = new GsonJsonHandler();
 	}
 
 	public MeilisearchClient(ClientConfiguration config, JsonHandler jsonHandler) {
 		this.client = new Client(
 				new Config(config.getHostUrl(), config.getApiKey(), jsonHandler, config.getClientAgents()));
-		this.timeout = config.getTimeout();
-		this.interval = config.getInterval();
+		this.requestTimeout = config.getRequestTimeout();
+		this.requestInterval = config.getRequestInterval();
 		this.jsonHandler = jsonHandler;
 	}
 
@@ -56,11 +56,11 @@ public class MeilisearchClient {
 		return jsonHandler;
 	}
 
-	public int getTimeout() {
-		return timeout;
+	public int getRequestTimeout() {
+		return requestTimeout;
 	}
 
-	public int getInterval() {
-		return interval;
+	public int getRequestInterval() {
+		return requestInterval;
 	}
 }

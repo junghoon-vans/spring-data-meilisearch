@@ -77,14 +77,14 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="timeout" type="xsd:integer">
+                    <xsd:attribute name="request-timeout" type="xsd:integer">
                         <xsd:annotation>
                             <xsd:documentation>
                                 <![CDATA[The timeout in milliseconds to wait for task to complete.]]>
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="interval" type="xsd:integer">
+                    <xsd:attribute name="request-interval" type="xsd:integer">
                         <xsd:annotation>
                             <xsd:documentation>
                                 <![CDATA[The interval in milliseconds to wait for task to complete.]]>

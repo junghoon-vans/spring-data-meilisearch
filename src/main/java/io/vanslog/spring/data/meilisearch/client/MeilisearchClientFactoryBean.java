@@ -36,8 +36,8 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 	@Nullable private String apiKey;
 	@Nullable private JsonHandler jsonHandler;
 	private String[] clientAgents;
-	@Nullable private int timeout;
-	@Nullable private int interval;
+	@Nullable private int requestTimeout;
+	@Nullable private int requestInterval;
 	@Nullable private MeilisearchClient meilisearchClient;
 
 	private MeilisearchClientFactoryBean() {
@@ -57,7 +57,7 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 	@Override
 	public void afterPropertiesSet() {
 		ClientConfiguration clientConfiguration = ClientConfiguration.builder().connectedTo(hostUrl).withApiKey(apiKey)
-				.withClientAgents(clientAgents).withTimeout(timeout).withInterval(interval).build();
+				.withClientAgents(clientAgents).withRequestTimeout(requestTimeout).withRequestInterval(requestInterval).build();
 
 		meilisearchClient = new MeilisearchClient(clientConfiguration, jsonHandler);
 	}
@@ -101,18 +101,18 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 	/**
 	 * Set timeout to wait for task to complete.
 	 * 
-	 * @param timeout in milliseconds
+	 * @param requestTimeout in milliseconds
 	 */
-	public void setTimeout(int timeout) {
-		this.timeout = timeout;
+	public void setRequestTimeout(int requestTimeout) {
+		this.requestTimeout = requestTimeout;
 	}
 
 	/**
 	 * Set interval to wait for task to complete.
 	 *
-	 * @param interval in milliseconds
+	 * @param requestInterval in milliseconds
 	 */
-	public void setInterval(int interval) {
-		this.interval = interval;
+	public void setRequestInterval(int requestInterval) {
+		this.requestInterval = requestInterval;
 	}
 }

@@ -26,8 +26,8 @@ public class DefaultClientConfiguration implements ClientConfiguration {
 	private final String hostUrl;
 	private final String apiKey;
 	private final String[] clientAgents;
-	private final int timeout;
-	private final int interval;
+	private final int requestTimeout;
+	private final int requestInterval;
 
 	/**
 	 * Create a new {@link DefaultClientConfiguration}.
@@ -36,12 +36,13 @@ public class DefaultClientConfiguration implements ClientConfiguration {
 	 * @param apiKey the api key
 	 * @param clientAgents the client agents
 	 */
-	public DefaultClientConfiguration(String hostUrl, String apiKey, String[] clientAgents, int timeout, int interval) {
+	public DefaultClientConfiguration(String hostUrl, String apiKey, String[] clientAgents, int requestTimeout,
+			int requestInterval) {
 		this.hostUrl = hostUrl;
 		this.apiKey = apiKey;
 		this.clientAgents = clientAgents;
-		this.timeout = timeout;
-		this.interval = interval;
+		this.requestTimeout = requestTimeout;
+		this.requestInterval = requestInterval;
 	}
 
 	@Override
@@ -60,12 +61,12 @@ public class DefaultClientConfiguration implements ClientConfiguration {
 	}
 
 	@Override
-	public int getTimeout() {
-		return timeout;
+	public int getRequestTimeout() {
+		return requestTimeout;
 	}
 
 	@Override
-	public int getInterval() {
-		return interval;
+	public int getRequestInterval() {
+		return requestInterval;
 	}
 }

@@ -50,11 +50,11 @@ public class MeilisearchClientBeanDefinitionParser extends AbstractBeanDefinitio
 		builder.addPropertyValue("clientAgents", element.getAttribute("client-agents"));
 		builder.addPropertyReference("jsonHandler", element.getAttribute("json-handler-ref"));
 
-		if (element.hasAttribute("timeout")) {
-			builder.addPropertyValue("timeout", element.getAttribute("timeout"));
+		if (element.hasAttribute("request-timeout")) {
+			builder.addPropertyValue("requestTimeout", element.getAttribute("request-timeout"));
 		}
-		if (element.hasAttribute("interval")) {
-			builder.addPropertyValue("interval", element.getAttribute("interval"));
+		if (element.hasAttribute("request-interval")) {
+			builder.addPropertyValue("requestInterval", element.getAttribute("request-interval"));
 		}
 	}
 

@@ -76,8 +76,8 @@ ClientConfiguration clientConfiguration = ClientConfiguration.builder()
     .connectedTo("http://localhost:7700")                               <.>
     .withApiKey("masterKey")                                            <.>
     .withClientAgents(agents)                                           <.>
-    .withTimeout(5000)                                                  <.>
-    .withInterval(50)                                                   <.>
+    .withRequestTimeout(5000)                                                  <.>
+    .withRequestInterval(50)                                                   <.>
     .build();
 ----
 
