@@ -29,12 +29,20 @@ public class ClientConfigurationBuilder {
 	@Nullable private String hostUrl;
 	@Nullable private String apiKey;
 	private String[] clientAgents;
+	private int requestTimeout;
+	private int requestInterval;
+
+	private static final String[] DEFAULT_CLIENT_AGENT = new String[0];
+	private static final int DEFAULT_REQUEST_TIMEOUT = 5000;
+	private static final int DEFAULT_REQUEST_INTERVAL = 50;
 
 	/**
 	 * Create a new {@link ClientConfigurationBuilder}.
 	 */
 	public ClientConfigurationBuilder() {
-		this.clientAgents = new String[0];
+		this.clientAgents = DEFAULT_CLIENT_AGENT;
+		this.requestTimeout = DEFAULT_REQUEST_TIMEOUT;
+		this.requestInterval = DEFAULT_REQUEST_INTERVAL;
 	}
 
 	/**
@@ -81,6 +89,28 @@ public class ClientConfigurationBuilder {
 	}
 
 	/**
+	 * Configure request timeout to wait for task to complete.
+	 * 
+	 * @param requestTimeout in milliseconds
+	 * @return {@link ClientConfigurationBuilder}
+	 */
+	public ClientConfigurationBuilder withRequestTimeout(int requestTimeout) {
+		this.requestTimeout = requestTimeout;
+		return this;
+	}
+
+	/**
+	 * Configure request interval to wait for task to complete.
+	 * 
+	 * @param requestInterval in milliseconds
+	 * @return {@link ClientConfigurationBuilder}
+	 */
+	public ClientConfigurationBuilder withRequestInterval(int requestInterval) {
+		this.requestInterval = requestInterval;
+		return this;
+	}
+
+	/**
 	 * Build a {@link io.vanslog.spring.data.meilisearch.client.ClientConfiguration} with the given parameters.
 	 *
 	 * @return {@link io.vanslog.spring.data.meilisearch.client.ClientConfiguration}
@@ -88,6 +118,7 @@ public class ClientConfigurationBuilder {
 	public ClientConfiguration build() {
 		Assert.notNull(this.hostUrl, "Host URL must not be null");
 		Assert.notNull(this.apiKey, "API Key must not be null");
-		return new DefaultClientConfiguration(this.hostUrl, this.apiKey, this.clientAgents);
+		return new DefaultClientConfiguration(this.hostUrl, this.apiKey, this.clientAgents, this.requestTimeout,
+				this.requestInterval);
 	}
 }

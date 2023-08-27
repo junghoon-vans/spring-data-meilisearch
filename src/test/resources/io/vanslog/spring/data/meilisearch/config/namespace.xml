@@ -16,6 +16,7 @@
             base-package="io.vanslog.spring.data.meilisearch.config"
             consider-nested-repositories="true"/>
 
-    <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
+    <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey" request-timeout="2000"
+                                    request-interval="20"/>
     <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
 </beans>

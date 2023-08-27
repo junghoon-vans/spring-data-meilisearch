@@ -37,11 +37,9 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
-import com.meilisearch.sdk.json.JsonHandler;
 import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
 
@@ -54,13 +52,11 @@ import com.meilisearch.sdk.model.TaskStatus;
  */
 public class MeilisearchTemplate implements MeilisearchOperations {
 
-	private final Client client;
-	private final JsonHandler jsonHandler;
+	private final MeilisearchClient client;
 	private final MeilisearchConverter meilisearchConverter;
 
 	public MeilisearchTemplate(MeilisearchClient client, @Nullable MeilisearchConverter meilisearchConverter) {
-		this.client = client.getClient();
-		this.jsonHandler = client.getJsonHandler();
+		this.client = client;
 		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 	}
@@ -82,9 +78,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		String primaryKey = Objects.requireNonNull(idProperty.getField()).getName();
 
 		try {
-			TaskInfo taskInfo = index.addDocuments(jsonHandler.encode(entities), primaryKey);
+			TaskInfo taskInfo = index.addDocuments(client.getJsonHandler().encode(entities), primaryKey);
 			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid);
+			index.waitForTask(taskUid, client.getRequestTimeout(), client.getRequestInterval());
 			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
 			if (taskStatus != TaskStatus.SUCCEEDED) {
@@ -148,7 +144,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			TaskInfo taskInfo = index.deleteDocument(documentId);
 			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid);
+			index.waitForTask(taskUid, client.getRequestTimeout(), client.getRequestInterval());
 			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
 			return taskStatus == TaskStatus.SUCCEEDED;
@@ -170,7 +166,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			TaskInfo taskInfo = index.deleteDocuments(documentIds);
 			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid);
+			index.waitForTask(taskUid, client.getRequestTimeout(), client.getRequestInterval());
 			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
 			return taskStatus == TaskStatus.SUCCEEDED;
@@ -192,7 +188,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			TaskInfo taskInfo = index.deleteAllDocuments();
 			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid);
+			index.waitForTask(taskUid, client.getRequestTimeout(), client.getRequestInterval());
 			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
 
 			return taskStatus == TaskStatus.SUCCEEDED;
@@ -219,7 +215,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		MeilisearchPersistentEntity<?> persistentEntity = getPersistentEntityFor(clazz);
 		String uid = persistentEntity.getIndexUid();
 		try {
-			return client.index(uid);
+			return client.getClient().index(uid);
 		} catch (MeilisearchException e) {
 			throw new IndexAccessException(uid);
 		}

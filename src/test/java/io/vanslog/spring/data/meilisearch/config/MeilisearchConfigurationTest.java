@@ -32,7 +32,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
@@ -55,6 +54,13 @@ class MeilisearchConfigurationTest {
 	}
 
 	@Test
+	void shouldConfigureMeilisearchClient() {
+		assertThat(meilisearchClient.getJsonHandler()).isInstanceOf(JacksonJsonHandler.class);
+		assertThat(meilisearchClient.getRequestTimeout()).isEqualTo(2000);
+		assertThat(meilisearchClient.getRequestInterval()).isEqualTo(20);
+	}
+
+	@Test
 	void shouldCreateMeilisearchTemplate() {
 		assertThat(meilisearchTemplate).isNotNull();
 	}
@@ -72,7 +78,11 @@ class MeilisearchConfigurationTest {
 	static class CustomConfiguration extends MeilisearchConfiguration {
 		@Override
 		public ClientConfiguration clientConfiguration() {
-			return ClientConfiguration.builder().connectedToLocalhost().withApiKey("masterKey").build();
+			return ClientConfiguration.builder()
+					.connectedToLocalhost()
+					.withApiKey("masterKey")
+					.withRequestTimeout(2000)
+					.withRequestInterval(20).build();
 		}
 
 		@Override

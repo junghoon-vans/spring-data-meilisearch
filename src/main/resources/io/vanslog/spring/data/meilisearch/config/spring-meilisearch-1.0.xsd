@@ -70,17 +70,31 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="json-handler-ref" type="jsonHandlerRef" default="jsonHandler">
-                        <xsd:annotation>
-                            <xsd:documentation>
-                                <![CDATA[The reference to the JSON handler. The default is bean named jsonHandler.]]>
-                            </xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
                     <xsd:attribute name="client-agents" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 <![CDATA[The comma delimited string array of client agents.]]>
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="request-timeout" type="xsd:integer">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                <![CDATA[The request timeout in milliseconds to wait for task to complete.]]>
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="request-interval" type="xsd:integer">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                <![CDATA[The request interval in milliseconds to wait for task to complete.]]>
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="json-handler-ref" type="jsonHandlerRef" default="jsonHandler">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                <![CDATA[The reference to the JSON handler. The default is bean named jsonHandler.]]>
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
