@@ -1,9 +1,9 @@
 = Spring Data for Meilisearch
 
-image:https://img.shields.io/maven-central/v/io.vanslog/spring-data-meilisearch.svg?label=Maven%20Central[Maven Central, link=https://central.sonatype.com/artifact/io.vanslog/spring-data-meilisearch/]
-image:https://sonarcloud.io/api/project_badges/measure?project=spring-data-meilisearch&metric=sqale_rating[Maintainability Rating, link=https://sonarcloud.io/summary/new_code?id=spring-data-meilisearch]
-image:https://sonarcloud.io/api/project_badges/measure?project=spring-data-meilisearch&metric=coverage[Coverage, link=https://sonarcloud.io/summary/new_code?id=spring-data-meilisearch]
-image:https://img.shields.io/github/license/junghoon-vans/spring-data-meilisearch?label=License[License, link=LICENSE]
+image:https://img.shields.io/maven-central/v/io.vanslog/spring-data-meilisearch.svg?label=Maven%20Central[Maven Central,link=https://central.sonatype.com/artifact/io.vanslog/spring-data-meilisearch/]
+image:https://sonarcloud.io/api/project_badges/measure?project=spring-data-meilisearch&metric=sqale_rating[Maintainability Rating,link=https://sonarcloud.io/summary/new_code?id=spring-data-meilisearch]
+image:https://sonarcloud.io/api/project_badges/measure?project=spring-data-meilisearch&metric=coverage[Coverage,link=https://sonarcloud.io/summary/new_code?id=spring-data-meilisearch]
+image:https://img.shields.io/github/license/junghoon-vans/spring-data-meilisearch?label=License[License,link=LICENSE]
 
 The Spring Data Meilisearch project provides integration with the Meilisearch search engine.
 
@@ -18,7 +18,7 @@ Here is a quick teaser of an application using Spring Data Repositories in Java:
 
 [source,java]
 ----
-public interface MovieRepository extends MeilisearchRepository<Movie, Integer> { }
+public interface MovieRepository extends CrudRepository<Movie, Integer> { }
 
 @Service
 public class MyService {
@@ -57,6 +57,23 @@ Add the Maven dependency:
 </dependency>
 ----
 
+If you’d rather like the latest snapshots of the upcoming major version, use our Maven snapshot repository and declare the appropriate dependency version.
+
+[source,xml]
+----
+<dependency>
+    <groupId>io.vanslog</groupId>
+    <artifactId>spring-data-meilisearch</artifactId>
+    <version>${version}-SNAPSHOT</version>
+</dependency>
+
+<repository>
+    <id>sonatype-snapshots</id>
+    <name>Sonatype Snapshot Repository</name>
+    <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+</repository>
+----
+
 == Guide
 
 * Check the link:https://junghoon-vans.github.io/spring-data-meilisearch/[reference documentation]
@@ -76,7 +93,8 @@ Attach a link to your code or a compressed file containing your code.
 
 == Building from Source
 
-Spring Data can be easily built with the https://github.com/takari/maven-wrapper[maven wrapper]. You also need JDK 17 or above.
+Spring Data can be easily built with the https://github.com/takari/maven-wrapper[maven wrapper].
+You also need JDK 17 or above.
 
 [source,bash]
 ----
