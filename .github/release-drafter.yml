@@ -10,11 +10,12 @@ categories:
 
 change-template: '* $TITLE #$NUMBER'
 template: |
+  ## 📗 Links
+  * [Spring Data Meilisearch Reference documentation](https://junghoon-vans.github.io/spring-data-meilisearch/)
 
   $CHANGES
   
-  ❤️ Contributors
-  
+  ## ❤️ Contributors
   We'd like to thank all the contributors who worked on this release!
   
   $CONTRIBUTORS
