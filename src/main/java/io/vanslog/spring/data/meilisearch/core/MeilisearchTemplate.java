@@ -55,10 +55,14 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	private final MeilisearchClient client;
 	private final MeilisearchConverter meilisearchConverter;
 
-	public MeilisearchTemplate(MeilisearchClient client, @Nullable MeilisearchConverter meilisearchConverter) {
+	public MeilisearchTemplate(MeilisearchClient client) {
 		this.client = client;
-		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
-				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
+		this.meilisearchConverter = new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
+	}
+
+	public MeilisearchTemplate(MeilisearchClient client, MeilisearchConverter meilisearchConverter) {
+		this.client = client;
+		this.meilisearchConverter = meilisearchConverter;
 	}
 
 	@Override
