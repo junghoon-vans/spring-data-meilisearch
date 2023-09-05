@@ -76,7 +76,7 @@ If you’d rather like the latest snapshots of the upcoming major version, use o
 
 == Guide
 
-* Check the link:https://junghoon-vans.github.io/spring-data-meilisearch/[reference documentation]
+* Check the link:https://junghoon-vans.github.io/spring-data-meilisearch/[reference documentation], and link:https://javadoc.io/doc/io.vanslog/spring-data-meilisearch/latest/index.html[Javadoc].
 
 == Reporting Issues
 
