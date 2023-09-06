@@ -170,10 +170,11 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 			return callback.doWithIndex(index);
 		} catch (MeilisearchException e) {
 			MeilisearchApiException ex = (MeilisearchApiException) e;
+
 			if (ex.getCode().equals("document_not_found")) {
 				return null;
 			}
-			throw new UncategorizedMeilisearchException("Failed to execute callback.", e);
+			throw new UncategorizedMeilisearchException(ex.getMessage(), ex.getCause());
 		}
 	}
 
