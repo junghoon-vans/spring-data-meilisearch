@@ -16,6 +16,7 @@
 
 package io.vanslog.spring.data.meilisearch.core;
 
+import io.vanslog.spring.data.meilisearch.DocumentAccessException;
 import io.vanslog.spring.data.meilisearch.IndexAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
@@ -92,7 +93,11 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Nullable
 	public <T> T get(String documentId, Class<T> clazz) {
 		Index index = getIndexFor(clazz);
-		return execute(i -> i.getDocument(documentId, clazz), index);
+		try {
+			return execute(i -> i.getDocument(documentId, clazz), index);
+		} catch (DocumentAccessException e) {
+			return null;
+		}
 	}
 
 	@Override
@@ -172,7 +177,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 			MeilisearchApiException ex = (MeilisearchApiException) e;
 
 			if (ex.getCode().equals("document_not_found")) {
-				return null;
+				throw new DocumentAccessException(ex.getMessage(), ex.getCause());
 			}
 			throw new UncategorizedMeilisearchException(ex.getMessage(), ex.getCause());
 		}
