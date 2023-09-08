@@ -16,6 +16,7 @@
 
 package io.vanslog.spring.data.meilisearch.core;
 
+import io.vanslog.spring.data.meilisearch.DocumentAccessException;
 import io.vanslog.spring.data.meilisearch.IndexAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
@@ -78,20 +79,12 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 		MeilisearchPersistentProperty idProperty = getPersistentEntityFor(clazz).getIdProperty();
 		Assert.notNull(idProperty, "Id property must not be null.");
-
 		String primaryKey = Objects.requireNonNull(idProperty.getField()).getName();
 
-		try {
-			TaskInfo taskInfo = index.addDocuments(client.getJsonHandler().encode(entities), primaryKey);
-			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid, client.getRequestTimeout(), client.getRequestInterval());
-			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
+		TaskInfo taskInfo = execute(i -> i.addDocuments(client.getJsonHandler().encode(entities), primaryKey), index);
 
-			if (taskStatus != TaskStatus.SUCCEEDED) {
-				throw new TaskStatusException(taskStatus, "Failed to save entities.");
-			}
-		} catch (RuntimeException | MeilisearchException e) {
-			throw new UncategorizedMeilisearchException("Failed to save entities.", e);
+		if (!isTaskSucceeded(index, taskInfo)) {
+			throw new TaskStatusException(taskInfo.getStatus(), "Failed to save entities.");
 		}
 		return entities;
 	}
@@ -101,24 +94,17 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	public <T> T get(String documentId, Class<T> clazz) {
 		Index index = getIndexFor(clazz);
 		try {
-			return index.getDocument(documentId, clazz);
-		} catch (MeilisearchException e) {
-			MeilisearchApiException ex = (MeilisearchApiException) e;
-			if (ex.getCode().equals("document_not_found")) {
-				return null;
-			}
-			throw new UncategorizedMeilisearchException("Failed to get entity.", e);
+			return execute(i -> i.getDocument(documentId, clazz), index);
+		} catch (DocumentAccessException e) {
+			return null;
 		}
 	}
 
 	@Override
 	public <T> List<T> multiGet(Class<T> clazz) {
 		Index index = getIndexFor(clazz);
-		try {
-			return Arrays.asList(index.getDocuments(clazz).getResults());
-		} catch (RuntimeException | MeilisearchException e) {
-			throw new UncategorizedMeilisearchException("Failed to get entities.", e);
-		}
+		T[] results = execute(i -> i.getDocuments(clazz).getResults(), index);
+		return Arrays.asList(results);
 	}
 
 	@Override
@@ -135,26 +121,14 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Override
 	public long count(Class<?> clazz) {
 		Index index = getIndexFor(clazz);
-		try {
-			return index.getDocuments(clazz).getTotal();
-		} catch (MeilisearchException e) {
-			throw new UncategorizedMeilisearchException("Failed to count entities.", e);
-		}
+		return execute(i -> i.getDocuments(clazz).getTotal(), index).longValue();
 	}
 
 	@Override
 	public boolean delete(String documentId, Class<?> clazz) {
 		Index index = getIndexFor(clazz);
-		try {
-			TaskInfo taskInfo = index.deleteDocument(documentId);
-			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid, client.getRequestTimeout(), client.getRequestInterval());
-			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
-
-			return taskStatus == TaskStatus.SUCCEEDED;
-		} catch (MeilisearchException e) {
-			throw new UncategorizedMeilisearchException("Failed to delete entity.", e);
-		}
+		TaskInfo taskInfo = execute(i -> i.deleteDocument(documentId), index);
+		return isTaskSucceeded(index, taskInfo);
 	}
 
 	@Override
@@ -167,16 +141,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Override
 	public boolean delete(Class<?> clazz, List<String> documentIds) {
 		Index index = getIndexFor(clazz);
-		try {
-			TaskInfo taskInfo = index.deleteDocuments(documentIds);
-			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid, client.getRequestTimeout(), client.getRequestInterval());
-			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
-
-			return taskStatus == TaskStatus.SUCCEEDED;
-		} catch (MeilisearchException e) {
-			throw new UncategorizedMeilisearchException("Failed to delete entities.", e);
-		}
+		TaskInfo taskInfo = execute(i -> i.deleteDocuments(documentIds), index);
+		return isTaskSucceeded(index, taskInfo);
 	}
 
 	@Override
@@ -189,16 +155,51 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Override
 	public boolean deleteAll(Class<?> clazz) {
 		Index index = getIndexFor(clazz);
-		try {
-			TaskInfo taskInfo = index.deleteAllDocuments();
-			int taskUid = taskInfo.getTaskUid();
-			index.waitForTask(taskUid, client.getRequestTimeout(), client.getRequestInterval());
-			TaskStatus taskStatus = index.getTask(taskUid).getStatus();
+		TaskInfo taskInfo = execute(Index::deleteAllDocuments, index);
+		return isTaskSucceeded(index, taskInfo);
+	}
 
-			return taskStatus == TaskStatus.SUCCEEDED;
+	/**
+	 * Execute the given {@link MeilisearchCallback} within the {@link Index} for the given {@link Class}.
+	 * 
+	 * @param callback must not be {@literal null}.
+	 * @param index must not be {@literal null}.
+	 * @return a result object returned by the action or {@literal null}.
+	 * @param <T> the type of the result object
+	 */
+	public <T> T execute(MeilisearchCallback<T> callback, Index index) {
+
+		Assert.notNull(callback, "callback must not be null");
+
+		try {
+			return callback.doWithIndex(index);
 		} catch (MeilisearchException e) {
-			throw new UncategorizedMeilisearchException("Failed to delete all entities.", e);
+			MeilisearchApiException ex = (MeilisearchApiException) e;
+
+			if (ex.getCode().equals("document_not_found")) {
+				throw new DocumentAccessException(ex.getMessage(), ex.getCause());
+			}
+			throw new UncategorizedMeilisearchException(ex.getMessage(), ex.getCause());
 		}
+	}
+
+	/**
+	 * Checks if the given {@link TaskInfo} is succeeded.
+	 * 
+	 * @param index the {@link Index} to check
+	 * @param taskInfo the {@link TaskInfo} to check
+	 * @return {@literal true} if the task is succeeded
+	 */
+	private boolean isTaskSucceeded(Index index, TaskInfo taskInfo) {
+		int taskUid = taskInfo.getTaskUid();
+
+		execute((MeilisearchCallback<Void>) i -> {
+			i.waitForTask(taskUid, client.getRequestTimeout(), client.getRequestInterval());
+			return null;
+		}, index);
+
+		TaskStatus taskStatus = execute(i -> i.getTask(taskUid).getStatus(), index);
+		return taskStatus == TaskStatus.SUCCEEDED;
 	}
 
 	private <T> String getDocumentIdFor(T entity) {
