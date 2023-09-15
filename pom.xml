@@ -27,6 +27,7 @@
     <properties>
         <springdata.commons>3.2.0-SNAPSHOT</springdata.commons>
         <meilisearch-java>0.11.2</meilisearch-java>
+        <testcontainers-meilisearch>1.0.5</testcontainers-meilisearch>
 
         <java-module-name>spring.data.meilisearch</java-module-name>
     </properties>
@@ -69,7 +70,7 @@
         <dependency>
             <groupId>io.vanslog</groupId>
             <artifactId>testcontainers-meilisearch</artifactId>
-            <version>1.0.1</version>
+            <version>${testcontainers-meilisearch}</version>
             <scope>test</scope>
         </dependency>
 
