@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.repository.core.EntityInformation;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -61,12 +62,12 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 
 	@Override
 	public Optional<T> findById(ID id) {
-		return Optional.ofNullable(meilisearchOperations.get(id.toString(), entityType));
+		return Optional.ofNullable(meilisearchOperations.get(stringIdRepresentation(id), entityType));
 	}
 
 	@Override
 	public boolean existsById(ID id) {
-		return meilisearchOperations.exists(id.toString(), entityType);
+		return meilisearchOperations.exists(stringIdRepresentation(id), entityType);
 	}
 
 	@Override
@@ -77,7 +78,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	@Override
 	public Iterable<T> findAllById(Iterable<ID> ids) {
 		List<String> idList = new ArrayList<>();
-		ids.forEach(id -> idList.add(id.toString()));
+		ids.forEach(id -> idList.add(stringIdRepresentation(id)));
 		return meilisearchOperations.multiGet(entityType, idList);
 	}
 
@@ -88,7 +89,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 
 	@Override
 	public void deleteById(ID id) {
-		meilisearchOperations.delete(id.toString(), entityType);
+		meilisearchOperations.delete(stringIdRepresentation(id), entityType);
 	}
 
 	@Override
@@ -99,7 +100,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	@Override
 	public void deleteAllById(Iterable<? extends ID> ids) {
 		List<String> idList = new ArrayList<>();
-		ids.forEach(id -> idList.add(id.toString()));
+		ids.forEach(id -> idList.add(stringIdRepresentation(id)));
 		meilisearchOperations.delete(entityType, idList);
 	}
 
@@ -113,5 +114,9 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	@Override
 	public void deleteAll() {
 		meilisearchOperations.deleteAll(entityType);
+	}
+
+	protected @Nullable String stringIdRepresentation(@Nullable ID id) {
+		return id != null ? meilisearchOperations.getMeilisearchConverter().convertId(id) : null;
 	}
 }

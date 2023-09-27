@@ -21,6 +21,7 @@ import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProp
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.mapping.context.MappingContext;
+import org.springframework.util.Assert;
 
 /**
  * Meilisearch converter aware of {@link MappingContext}.
@@ -43,4 +44,21 @@ public interface MeilisearchConverter {
 	 * @return never {@literal null}.
 	 */
 	ConversionService getConversionService();
+
+	default String convertId(Object idValue) {
+
+		Assert.notNull(idValue, "idValue must not be null!");
+
+		if (!getConversionService().canConvert(idValue.getClass(), String.class)) {
+			return idValue.toString();
+		}
+
+		String converted = getConversionService().convert(idValue, String.class);
+
+		if (converted == null) {
+			return idValue.toString();
+		}
+
+		return converted;
+	}
 }
