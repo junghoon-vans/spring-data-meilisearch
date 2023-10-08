@@ -210,7 +210,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			Method getter = idProperty.getGetter();
 			Object id = Objects.requireNonNull(getter).invoke(entity);
-			return id.toString();
+			return getMeilisearchConverter().convertId(id);
 		} catch (Exception e) {
 			throw new UncategorizedMeilisearchException("Failed to get id.", e);
 		}
