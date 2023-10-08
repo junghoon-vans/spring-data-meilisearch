@@ -18,10 +18,14 @@ package io.vanslog.spring.data.meilisearch.config;
 
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
+import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
+
+import java.util.Collections;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 
 /**
  * Support class for{@link io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration}.
@@ -39,9 +43,12 @@ public class MeilisearchConfigurationSupport {
 	 * @return the created {@link io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter} bean.
 	 */
 	@Bean
-	public MeilisearchConverter meilisearchConverter(SimpleMeilisearchMappingContext meilisearchMappingContext) {
+	public MeilisearchConverter meilisearchConverter(SimpleMeilisearchMappingContext meilisearchMappingContext,
+			MeilisearchCustomConversions meilisearchCustomConversions) {
 
-		return new MappingMeilisearchConverter(meilisearchMappingContext);
+		MappingMeilisearchConverter meilisearchConverter = new MappingMeilisearchConverter(meilisearchMappingContext);
+		meilisearchConverter.setConversions(meilisearchCustomConversions);
+		return meilisearchConverter;
 	}
 
 	/**
@@ -52,5 +59,15 @@ public class MeilisearchConfigurationSupport {
 	@Bean
 	public SimpleMeilisearchMappingContext meilisearchMappingContext() {
 		return new SimpleMeilisearchMappingContext();
+	}
+
+	/**
+	 * Register custom {@link Converter}s in a {@link MeilisearchCustomConversions} object if required.
+	 *
+	 * @return never {@literal null}.
+	 */
+	@Bean
+	public MeilisearchCustomConversions meilisearchCustomConversions() {
+		return new MeilisearchCustomConversions(Collections.emptyList());
 	}
 }
