@@ -22,34 +22,29 @@ import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
 /**
- * Wrapper class for a Meilisearch client.
+ * Extension of {@link Client} that allows to configure the additional attributes that are required for request timeout
+ * and retry handling. And also provides {@link JsonHandler} to convert the request and response body.
  *
  * @author Junghoon Ban
  */
-public class MeilisearchClient {
+public class MeilisearchClient extends Client {
 
-	private final Client client;
 	private final JsonHandler jsonHandler;
 	private final int requestTimeout;
 	private final int requestInterval;
 
-	public MeilisearchClient(ClientConfiguration config) {
-		this.client = new Client(new Config(config.getHostUrl(), config.getApiKey(), config.getClientAgents()));
-		this.requestTimeout = config.getRequestTimeout();
-		this.requestInterval = config.getRequestInterval();
-		this.jsonHandler = new GsonJsonHandler();
+	public MeilisearchClient(ClientConfiguration clientConfiguration) {
+		this(clientConfiguration, new GsonJsonHandler());
 	}
 
-	public MeilisearchClient(ClientConfiguration config, JsonHandler jsonHandler) {
-		this.client = new Client(
-				new Config(config.getHostUrl(), config.getApiKey(), jsonHandler, config.getClientAgents()));
-		this.requestTimeout = config.getRequestTimeout();
-		this.requestInterval = config.getRequestInterval();
+	public MeilisearchClient(ClientConfiguration clientConfiguration, JsonHandler jsonHandler) {
+
+		super(new Config(clientConfiguration.getHostUrl(), clientConfiguration.getApiKey(), jsonHandler,
+				clientConfiguration.getClientAgents()));
+
+		this.requestTimeout = clientConfiguration.getRequestTimeout();
+		this.requestInterval = clientConfiguration.getRequestInterval();
 		this.jsonHandler = jsonHandler;
-	}
-
-	public Client getClient() {
-		return client;
 	}
 
 	public JsonHandler getJsonHandler() {
