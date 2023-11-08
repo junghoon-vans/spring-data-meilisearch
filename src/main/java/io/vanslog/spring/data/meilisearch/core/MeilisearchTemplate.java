@@ -17,7 +17,6 @@
 package io.vanslog.spring.data.meilisearch.core;
 
 import io.vanslog.spring.data.meilisearch.DocumentAccessException;
-import io.vanslog.spring.data.meilisearch.IndexAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
@@ -38,9 +37,10 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-import com.meilisearch.sdk.Index;
+import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
+import com.meilisearch.sdk.json.JsonHandler;
 import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
 
@@ -53,17 +53,24 @@ import com.meilisearch.sdk.model.TaskStatus;
  */
 public class MeilisearchTemplate implements MeilisearchOperations {
 
-	private final MeilisearchClient client;
+	private final Client meilisearchClient;
+	private final JsonHandler jsonHandler;
+	private final int requestTimeout;
+	private final int requestInterval;
 	private final MeilisearchConverter meilisearchConverter;
 
 	public MeilisearchTemplate(MeilisearchClient client) {
-		this.client = client;
-		this.meilisearchConverter = new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
+		this(client, null);
 	}
 
-	public MeilisearchTemplate(MeilisearchClient client, MeilisearchConverter meilisearchConverter) {
-		this.client = client;
-		this.meilisearchConverter = meilisearchConverter;
+	public MeilisearchTemplate(MeilisearchClient client, @Nullable MeilisearchConverter meilisearchConverter) {
+
+		this.meilisearchClient = client.getClient();
+		this.jsonHandler = client.getJsonHandler();
+		this.requestTimeout = client.getRequestTimeout();
+		this.requestInterval = client.getRequestInterval();
+		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
+				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 	}
 
 	@Override
@@ -75,15 +82,17 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Override
 	public <T> List<T> save(List<T> entities) {
 		Class<?> clazz = entities.iterator().next().getClass();
-		Index index = getIndexFor(clazz);
-
+		String indexUid = getPersistentEntityFor(clazz).getIndexUid();
 		MeilisearchPersistentProperty idProperty = getPersistentEntityFor(clazz).getIdProperty();
 		Assert.notNull(idProperty, "Id property must not be null.");
 		String primaryKey = Objects.requireNonNull(idProperty.getField()).getName();
 
-		TaskInfo taskInfo = execute(i -> i.addDocuments(client.getJsonHandler().encode(entities), primaryKey), index);
+		TaskInfo taskInfo = execute(client -> {
+			String document = jsonHandler.encode(entities);
+			return client.index(indexUid).addDocuments(document, primaryKey);
+		});
 
-		if (!isTaskSucceeded(index, taskInfo)) {
+		if (!isTaskSucceeded(indexUid, taskInfo)) {
 			throw new TaskStatusException(taskInfo.getStatus(), "Failed to save entities.");
 		}
 		return entities;
@@ -92,9 +101,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Override
 	@Nullable
 	public <T> T get(String documentId, Class<T> clazz) {
-		Index index = getIndexFor(clazz);
+		String indexUid = getIndexUidFor(clazz);
 		try {
-			return execute(i -> i.getDocument(documentId, clazz), index);
+			return execute(client -> client.index(indexUid).getDocument(documentId, clazz));
 		} catch (DocumentAccessException e) {
 			return null;
 		}
@@ -102,8 +111,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public <T> List<T> multiGet(Class<T> clazz) {
-		Index index = getIndexFor(clazz);
-		T[] results = execute(i -> i.getDocuments(clazz).getResults(), index);
+		String indexUid = getIndexUidFor(clazz);
+		T[] results = execute(client -> client.index(indexUid).getDocuments(clazz).getResults());
 		return Arrays.asList(results);
 	}
 
@@ -120,15 +129,15 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public long count(Class<?> clazz) {
-		Index index = getIndexFor(clazz);
-		return execute(i -> i.getDocuments(clazz).getTotal(), index).longValue();
+		String indexUid = getIndexUidFor(clazz);
+		return execute(client -> client.index(indexUid).getDocuments(clazz).getTotal()).longValue();
 	}
 
 	@Override
 	public boolean delete(String documentId, Class<?> clazz) {
-		Index index = getIndexFor(clazz);
-		TaskInfo taskInfo = execute(i -> i.deleteDocument(documentId), index);
-		return isTaskSucceeded(index, taskInfo);
+		String indexUid = getIndexUidFor(clazz);
+		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteDocument(documentId));
+		return isTaskSucceeded(indexUid, taskInfo);
 	}
 
 	@Override
@@ -140,9 +149,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public boolean delete(Class<?> clazz, List<String> documentIds) {
-		Index index = getIndexFor(clazz);
-		TaskInfo taskInfo = execute(i -> i.deleteDocuments(documentIds), index);
-		return isTaskSucceeded(index, taskInfo);
+		String indexUid = getIndexUidFor(clazz);
+		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteDocuments(documentIds));
+		return isTaskSucceeded(indexUid, taskInfo);
 	}
 
 	@Override
@@ -154,25 +163,24 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public boolean deleteAll(Class<?> clazz) {
-		Index index = getIndexFor(clazz);
-		TaskInfo taskInfo = execute(Index::deleteAllDocuments, index);
-		return isTaskSucceeded(index, taskInfo);
+		String indexUid = getIndexUidFor(clazz);
+		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteAllDocuments());
+		return isTaskSucceeded(indexUid, taskInfo);
 	}
 
 	/**
-	 * Execute the given {@link MeilisearchCallback} within the {@link Index} for the given {@link Class}.
+	 * Execute the given {@link MeilisearchCallback}.
 	 * 
 	 * @param callback must not be {@literal null}.
-	 * @param index must not be {@literal null}.
 	 * @return a result object returned by the action or {@literal null}.
 	 * @param <T> the type of the result object
 	 */
-	public <T> T execute(MeilisearchCallback<T> callback, Index index) {
+	public <T> T execute(MeilisearchCallback<T> callback) {
 
 		Assert.notNull(callback, "callback must not be null");
 
 		try {
-			return callback.doWithIndex(index);
+			return callback.doWithClient(meilisearchClient);
 		} catch (MeilisearchException e) {
 			MeilisearchApiException ex = (MeilisearchApiException) e;
 
@@ -186,19 +194,19 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	/**
 	 * Checks if the given {@link TaskInfo} is succeeded.
 	 * 
-	 * @param index the {@link Index} to check
+	 * @param indexUid the index uid
 	 * @param taskInfo the {@link TaskInfo} to check
 	 * @return {@literal true} if the task is succeeded
 	 */
-	private boolean isTaskSucceeded(Index index, TaskInfo taskInfo) {
+	private boolean isTaskSucceeded(String indexUid, TaskInfo taskInfo) {
 		int taskUid = taskInfo.getTaskUid();
 
-		execute((MeilisearchCallback<Void>) i -> {
-			i.waitForTask(taskUid, client.getRequestTimeout(), client.getRequestInterval());
+		execute(client -> {
+			client.index(indexUid).waitForTask(taskUid, requestTimeout, requestInterval);
 			return null;
-		}, index);
+		});
 
-		TaskStatus taskStatus = execute(i -> i.getTask(taskUid).getStatus(), index);
+		TaskStatus taskStatus = execute(client -> client.index(indexUid).getTask(taskUid).getStatus());
 		return taskStatus == TaskStatus.SUCCEEDED;
 	}
 
@@ -216,14 +224,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		}
 	}
 
-	private <T> Index getIndexFor(Class<T> clazz) {
+	private <T> String getIndexUidFor(Class<T> clazz) {
 		MeilisearchPersistentEntity<?> persistentEntity = getPersistentEntityFor(clazz);
-		String uid = persistentEntity.getIndexUid();
-		try {
-			return client.getClient().index(uid);
-		} catch (MeilisearchException e) {
-			throw new IndexAccessException(uid);
-		}
+		return persistentEntity.getIndexUid();
 	}
 
 	private MeilisearchPersistentEntity<?> getPersistentEntityFor(Class<?> clazz) {
