@@ -16,7 +16,7 @@
 
 package io.vanslog.spring.data.meilisearch.core;
 
-import com.meilisearch.sdk.Index;
+import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 
 /**
@@ -26,5 +26,5 @@ import com.meilisearch.sdk.exceptions.MeilisearchException;
 @FunctionalInterface
 public interface MeilisearchCallback<T> {
 
-	T doWithIndex(Index index) throws MeilisearchException;
+	T doWithClient(Client client) throws MeilisearchException;
 }
