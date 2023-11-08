@@ -37,10 +37,8 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
-import com.meilisearch.sdk.json.JsonHandler;
 import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
 
@@ -53,22 +51,16 @@ import com.meilisearch.sdk.model.TaskStatus;
  */
 public class MeilisearchTemplate implements MeilisearchOperations {
 
-	private final Client meilisearchClient;
-	private final JsonHandler jsonHandler;
-	private final int requestTimeout;
-	private final int requestInterval;
+	private final MeilisearchClient meilisearchClient;
 	private final MeilisearchConverter meilisearchConverter;
 
-	public MeilisearchTemplate(MeilisearchClient client) {
-		this(client, null);
+	public MeilisearchTemplate(MeilisearchClient meilisearchClient) {
+		this(meilisearchClient, null);
 	}
 
-	public MeilisearchTemplate(MeilisearchClient client, @Nullable MeilisearchConverter meilisearchConverter) {
+	public MeilisearchTemplate(MeilisearchClient meilisearchClient, @Nullable MeilisearchConverter meilisearchConverter) {
 
-		this.meilisearchClient = client.getClient();
-		this.jsonHandler = client.getJsonHandler();
-		this.requestTimeout = client.getRequestTimeout();
-		this.requestInterval = client.getRequestInterval();
+		this.meilisearchClient = meilisearchClient;
 		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 	}
@@ -88,7 +80,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		String primaryKey = Objects.requireNonNull(idProperty.getField()).getName();
 
 		TaskInfo taskInfo = execute(client -> {
-			String document = jsonHandler.encode(entities);
+			String document = meilisearchClient.getJsonHandler().encode(entities);
 			return client.index(indexUid).addDocuments(document, primaryKey);
 		});
 
@@ -202,7 +194,10 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		int taskUid = taskInfo.getTaskUid();
 
 		execute(client -> {
-			client.index(indexUid).waitForTask(taskUid, requestTimeout, requestInterval);
+			client.index(indexUid).waitForTask( //
+					taskUid, meilisearchClient.getRequestTimeout(), //
+					meilisearchClient.getRequestInterval() //
+			);
 			return null;
 		});
 

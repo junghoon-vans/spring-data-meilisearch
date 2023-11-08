@@ -59,11 +59,10 @@ class MeilisearchNamespaceHandlerTest {
 	@Test
 	void shouldUseGsonJsonHandler() throws NoSuchFieldException, IllegalAccessException {
 		MeilisearchClient meilisearchClient = (MeilisearchClient) context.getBean("meilisearchClient");
-		Client client = meilisearchClient.getClient();
 
-		Field jsonHandlerField = client.getClass().getDeclaredField("jsonHandler");
+		Field jsonHandlerField = meilisearchClient.getClass().getDeclaredField("jsonHandler");
 		jsonHandlerField.setAccessible(true);
-		assertThat(jsonHandlerField.get(client)).isInstanceOf(com.meilisearch.sdk.json.GsonJsonHandler.class);
+		assertThat(jsonHandlerField.get(meilisearchClient)).isInstanceOf(com.meilisearch.sdk.json.GsonJsonHandler.class);
 	}
 
 	@Test

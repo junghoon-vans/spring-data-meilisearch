@@ -9,7 +9,7 @@
 
     <bean name="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate">
-        <constructor-arg name="client" ref="meilisearchClient"/>
+        <constructor-arg name="meilisearchClient" ref="meilisearchClient"/>
     </bean>
 
     <meilisearch:repositories
