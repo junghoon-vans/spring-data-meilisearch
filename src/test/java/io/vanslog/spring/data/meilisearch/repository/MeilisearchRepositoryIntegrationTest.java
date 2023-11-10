@@ -16,9 +16,9 @@
 
 package io.vanslog.spring.data.meilisearch.repository;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.assertj.core.api.Assertions.*;
 
-import io.vanslog.spring.data.meilisearch.entities.Movie;
+import io.vanslog.spring.data.meilisearch.entities.FilmDistributor;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -42,218 +43,155 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = MeilisearchRepositoryIntegrationTest.Config.class)
 class MeilisearchRepositoryIntegrationTest {
 
-	@Autowired private MovieRepository movieRepository;
+	@Autowired private MovieTheaterRepository repository;
 
 	@BeforeEach
 	void setUp() {
-		movieRepository.deleteAll();
+		repository.deleteAll();
 	}
 
 	@Test
-	void shouldSaveDocument() {
-		// given
-		int documentId = 1;
-		Movie movie = new Movie();
-		movie.setId(documentId);
-		movie.setTitle("Carol");
-		movie.setDescription("A love story");
-		movie.setGenres(new String[] { "Romance", "Drama" });
+	void shouldSaveSimpleEntity() {
 
-		// when
-		movieRepository.save(movie);
+		FilmDistributor waltDisney = new FilmDistributor();
+		waltDisney.setId(1);
 
-		// then
-		Optional<Movie> saved = movieRepository.findById(documentId);
+		repository.save(waltDisney);
+
+		Optional<FilmDistributor> saved = repository.findById(1);
 		assertThat(saved).isPresent();
 	}
 
 	@Test
-	void shouldSaveDocuments() {
-		// given
-		int documentId1 = 1;
-		Movie movie1 = new Movie();
-		movie1.setId(documentId1);
-		movie1.setTitle("Carol");
-		movie1.setDescription("A love story");
-		movie1.setGenres(new String[] { "Romance", "Drama" });
+	void shouldSaveSimpleEntities() {
 
-		int documentId2 = 2;
-		Movie movie2 = new Movie();
-		movie2.setId(documentId2);
-		movie2.setTitle("Wonder Woman");
-		movie2.setDescription("A superhero film");
-		movie2.setGenres(new String[] { "Action", "Adventure" });
+		FilmDistributor waltDisney = new FilmDistributor();
+		waltDisney.setId(1);
+		FilmDistributor warnerBros = new FilmDistributor();
+		warnerBros.setId(2);
 
-		List<Movie> movies = List.of(movie1, movie2);
+		List<FilmDistributor> distributors = List.of(waltDisney, warnerBros);
 
-		// when
-		movieRepository.saveAll(movies);
+		repository.saveAll(distributors);
 
-		// then
-		Optional<Movie> saved1 = movieRepository.findById(documentId1);
-		assertThat(saved1).isPresent();
-		Optional<Movie> saved2 = movieRepository.findById(documentId2);
-		assertThat(saved2).isPresent();
+		assertThat(repository.findById(1)).isPresent();
+		assertThat(repository.findById(2)).isPresent();
 	}
 
 	@Test
-	void shouldDeleteDocument() {
-		// given
-		int documentId = 1;
-		Movie movie = new Movie();
-		movie.setId(documentId);
-		movie.setTitle("Carol");
-		movie.setDescription("A love story");
-		movie.setGenres(new String[] { "Romance", "Drama" });
+	void shouldDeleteEntity() {
 
-		// when
-		movieRepository.save(movie);
-		movieRepository.delete(movie);
+		FilmDistributor waltDisney = new FilmDistributor();
+		waltDisney.setId(1);
+		repository.save(waltDisney);
 
-		// then
-		Optional<Movie> saved = movieRepository.findById(documentId);
+		repository.delete(waltDisney);
+
+		Optional<FilmDistributor> saved = repository.findById(1);
 		assertThat(saved).isEmpty();
 	}
 
 	@Test
-	void shouldDeleteDocumentById() {
-		// given
-		int documentId = 1;
-		Movie movie = new Movie();
-		movie.setId(documentId);
-		movie.setTitle("Carol");
-		movie.setDescription("A love story");
-		movie.setGenres(new String[] { "Romance", "Drama" });
+	void shouldDeleteEntityById() {
 
-		// when
-		movieRepository.save(movie);
-		movieRepository.deleteById(documentId);
+		FilmDistributor waltDisney = new FilmDistributor();
+		waltDisney.setId(1);
+		repository.save(waltDisney);
 
-		// then
-		Optional<Movie> saved = movieRepository.findById(documentId);
+		repository.deleteById(1);
+
+		Optional<FilmDistributor> saved = repository.findById(1);
 		assertThat(saved).isEmpty();
 	}
 
 	@Test
-	void shouldDeleteDocuments() {
-		// given
-		int documentId1 = 1;
-		Movie movie1 = new Movie();
-		movie1.setId(documentId1);
-		movie1.setTitle("Carol");
-		movie1.setDescription("A love story");
-		movie1.setGenres(new String[] { "Romance", "Drama" });
+	void shouldDeleteAllEntities() {
 
-		int documentId2 = 2;
-		Movie movie2 = new Movie();
-		movie2.setId(documentId2);
-		movie2.setTitle("Wonder Woman");
-		movie2.setDescription("A superhero film");
-		movie2.setGenres(new String[] { "Action", "Adventure" });
+		FilmDistributor waltDisney = new FilmDistributor();
+		waltDisney.setId(1);
+		FilmDistributor warnerBros = new FilmDistributor();
+		warnerBros.setId(2);
+		FilmDistributor universal = new FilmDistributor();
+		universal.setId(3);
 
-		int documentId3 = 3;
-		Movie movie3 = new Movie();
-		movie3.setId(documentId3);
-		movie3.setTitle("Life of Pi");
-		movie3.setDescription("A survival film");
-		movie3.setGenres(new String[] { "Adventure", "Drama" });
+		List<FilmDistributor> distributors = List.of(waltDisney, warnerBros, universal);
+		repository.saveAll(distributors);
 
-		List<Movie> movies = List.of(movie1, movie2, movie3);
+		repository.deleteAll();
 
-		// when
-		movieRepository.saveAll(movies);
-		movieRepository.deleteAll(List.of(movie1, movie2));
+		List<FilmDistributor> saved = (List<FilmDistributor>) repository.findAll();
+		assertThat(saved).isEmpty();
+	}
 
-		// then
-		List<Movie> saved = (List<Movie>) movieRepository.findAll();
-		assertThat(saved.size()).isEqualTo(1);
+	@Test
+	void shouldDeleteEntitiesById() {
+
+		FilmDistributor waltDisney = new FilmDistributor();
+		waltDisney.setId(1);
+		FilmDistributor warnerBros = new FilmDistributor();
+		warnerBros.setId(2);
+		FilmDistributor universal = new FilmDistributor();
+		universal.setId(3);
+
+		List<FilmDistributor> distributors = List.of(waltDisney, warnerBros, universal);
+		repository.saveAll(distributors);
+
+		repository.deleteAll(List.of(waltDisney, warnerBros));
+
+		List<FilmDistributor> saved = (List<FilmDistributor>) repository.findAll();
+		assertThat(saved).hasSize(1);
 	}
 
 	@Test
 	void shouldDeleteDocumentsById() {
-		// given
-		int documentId1 = 1;
-		Movie movie1 = new Movie();
-		movie1.setId(documentId1);
-		movie1.setTitle("Carol");
-		movie1.setDescription("A love story");
-		movie1.setGenres(new String[] { "Romance", "Drama" });
 
-		int documentId2 = 2;
-		Movie movie2 = new Movie();
-		movie2.setId(documentId2);
-		movie2.setTitle("Wonder Woman");
-		movie2.setDescription("A superhero film");
-		movie2.setGenres(new String[] { "Action", "Adventure" });
+		FilmDistributor waltDisney = new FilmDistributor();
+		waltDisney.setId(1);
+		FilmDistributor warnerBros = new FilmDistributor();
+		warnerBros.setId(2);
+		FilmDistributor universal = new FilmDistributor();
+		universal.setId(3);
 
-		int documentId3 = 3;
-		Movie movie3 = new Movie();
-		movie3.setId(documentId3);
-		movie3.setTitle("Life of Pi");
-		movie3.setDescription("A survival film");
-		movie3.setGenres(new String[] { "Adventure", "Drama" });
+		List<FilmDistributor> distributors = List.of(waltDisney, warnerBros, universal);
+		repository.saveAll(distributors);
 
-		List<Movie> movies = List.of(movie1, movie2, movie3);
+		repository.deleteAllById(List.of(1, 2));
 
-		// when
-		movieRepository.saveAll(movies);
-		movieRepository.deleteAllById(List.of(documentId1, documentId2));
-
-		// then
-		List<Movie> saved = (List<Movie>) movieRepository.findAll();
-		assertThat(saved.size()).isEqualTo(1);
+		List<FilmDistributor> saved = (List<FilmDistributor>) repository.findAll();
+		assertThat(saved).hasSize(1);
 	}
 
 	@Test
 	void shouldCountDocuments() {
-		// given
-		int documentId1 = 1;
-		Movie movie1 = new Movie();
-		movie1.setId(documentId1);
-		movie1.setTitle("Carol");
-		movie1.setDescription("A love story");
-		movie1.setGenres(new String[] { "Romance", "Drama" });
 
-		int documentId2 = 2;
-		Movie movie2 = new Movie();
-		movie2.setId(documentId2);
-		movie2.setTitle("Wonder Woman");
-		movie2.setDescription("A superhero film");
-		movie2.setGenres(new String[] { "Action", "Adventure" });
+		FilmDistributor waltDisney = new FilmDistributor();
+		waltDisney.setId(1);
+		FilmDistributor warnerBros = new FilmDistributor();
+		warnerBros.setId(2);
 
-		List<Movie> movies = List.of(movie1, movie2);
+		List<FilmDistributor> distributors = List.of(waltDisney, warnerBros);
+		repository.saveAll(distributors);
 
-		// when
-		movieRepository.saveAll(movies);
-		long count = movieRepository.count();
+		long count = repository.count();
 
-		// then
-		assertThat(count).isEqualTo(movies.size());
+		assertThat(count).isEqualTo(distributors.size());
 	}
 
 	@Test
 	void shouldExistsDocument() {
-		// given
-		int documentId = 1;
-		Movie movie = new Movie();
-		movie.setId(documentId);
-		movie.setTitle("Carol");
-		movie.setDescription("A love story");
-		movie.setGenres(new String[] { "Romance", "Drama" });
 
-		int nonExistingDocumentId = 2;
+		FilmDistributor waltDisney = new FilmDistributor();
+		waltDisney.setId(1);
 
-		// when
-		movieRepository.save(movie);
-		boolean exists = movieRepository.existsById(documentId);
-		boolean notExists = movieRepository.existsById(nonExistingDocumentId);
+		repository.save(waltDisney);
+		boolean exists = repository.existsById(1);
+		boolean notExists = repository.existsById(2);
 
-		// then
 		assertThat(exists).isTrue();
 		assertThat(notExists).isFalse();
 	}
 
-	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
+	interface MovieTheaterRepository extends CrudRepository<FilmDistributor, Integer> {}
 
 	@Configuration
 	@Import(MeilisearchTestConfiguration.class)
