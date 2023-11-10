@@ -19,6 +19,7 @@ package io.vanslog.spring.data.meilisearch.repository;
 import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.entities.FilmDistributor;
+import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
@@ -76,6 +77,23 @@ class MeilisearchRepositoryIntegrationTest {
 
 		assertThat(repository.findById(1)).isPresent();
 		assertThat(repository.findById(2)).isPresent();
+	}
+
+	@Test
+	void shouldSaveComplexEntity() {
+
+		FilmDistributor waltDisney = new FilmDistributor();
+		waltDisney.setId(1);
+		waltDisney.setMovies(List.of(
+				new Movie(1, "Frozen", "Let it go", new String[] {"Animation", "Adventure", "Comedy"}),
+				new Movie(2, "The Lion King", "The circle of life", new String[] {"Animation", "Adventure", "Drama"}),
+				new Movie(3, "Toy Story", "You've got a friend in me", new String[] {"Animation", "Adventure", "Comedy"})
+		));
+
+		repository.save(waltDisney);
+
+		Optional<FilmDistributor> saved = repository.findById(1);
+		assertThat(saved).isPresent();
 	}
 
 	@Test
