@@ -42,7 +42,7 @@ import com.meilisearch.sdk.json.JsonHandler;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
-class MeilisearchConfigurationTest {
+class MeilisearchConfigurationUnitTests {
 
 	@Autowired private MeilisearchClient meilisearchClient;
 	@Autowired private MeilisearchOperations meilisearchTemplate;

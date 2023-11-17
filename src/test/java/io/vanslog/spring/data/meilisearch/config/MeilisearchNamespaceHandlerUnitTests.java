@@ -33,8 +33,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.meilisearch.sdk.Client;
-
 /**
  * Namespace based configuration test.
  *
@@ -42,7 +40,7 @@ import com.meilisearch.sdk.Client;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("namespace.xml")
-class MeilisearchNamespaceHandlerTest {
+class MeilisearchNamespaceHandlerUnitTests {
 
 	@Autowired private ApplicationContext context;
 

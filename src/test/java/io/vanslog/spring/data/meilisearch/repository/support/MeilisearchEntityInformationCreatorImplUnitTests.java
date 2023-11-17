@@ -32,7 +32,7 @@ import org.springframework.data.mapping.MappingException;
  *
  * @author Junghoon Ban
  */
-class MeilisearchEntityInformationCreatorImplTest {
+class MeilisearchEntityInformationCreatorImplUnitTests {
 
 	MeilisearchEntityInformationCreatorImpl entityInformationCreator;
 

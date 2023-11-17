@@ -18,7 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
-public class MeilisearchCustomConversionsTests {
+public class MeilisearchCustomConversionsUnitTest {
 
 	@Autowired MeilisearchConverter meilisearchConverter;
 

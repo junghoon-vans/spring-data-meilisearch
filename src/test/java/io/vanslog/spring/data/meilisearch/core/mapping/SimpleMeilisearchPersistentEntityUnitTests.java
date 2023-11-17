@@ -29,7 +29,7 @@ import org.springframework.data.util.TypeInformation;
  *
  * @author Junghoon Ban
  */
-class SimpleMeilisearchPersistentEntityTests {
+class SimpleMeilisearchPersistentEntityUnitTests {
 
 	@Test
 	void shouldReturnIndexUid() {

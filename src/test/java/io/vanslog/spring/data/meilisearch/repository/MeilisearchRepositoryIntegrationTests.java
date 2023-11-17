@@ -39,8 +39,8 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Junghoon Ban
  */
 @MeilisearchTest
-@ContextConfiguration(classes = MeilisearchRepositoryIntegrationTest.Config.class)
-class MeilisearchRepositoryIntegrationTest {
+@ContextConfiguration(classes = MeilisearchRepositoryIntegrationTests.Config.class)
+class MeilisearchRepositoryIntegrationTests {
 
 	@Autowired private MovieRepository movieRepository;
 
