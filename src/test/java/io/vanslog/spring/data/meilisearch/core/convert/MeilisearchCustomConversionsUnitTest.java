@@ -15,7 +15,7 @@
  */
 package io.vanslog.spring.data.meilisearch.core.convert;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.config.MeilisearchConfigurationSupport;
 

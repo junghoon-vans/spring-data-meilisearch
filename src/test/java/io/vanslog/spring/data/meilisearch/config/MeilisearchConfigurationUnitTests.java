@@ -16,7 +16,7 @@
 
 package io.vanslog.spring.data.meilisearch.config;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
