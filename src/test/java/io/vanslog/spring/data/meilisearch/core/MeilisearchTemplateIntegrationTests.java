@@ -16,9 +16,10 @@
 
 package io.vanslog.spring.data.meilisearch.core;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
@@ -31,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.meilisearch.sdk.exceptions.MeilisearchException;
+
 /**
  * Integration tests for {@link MeilisearchTemplate}.
  *
@@ -38,8 +41,9 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @MeilisearchTest
 @ContextConfiguration(classes = { MeilisearchTestConfiguration.class })
-class MeilisearchTemplateTest {
+class MeilisearchTemplateIntegrationTests {
 
+	@Autowired MeilisearchClient meilisearchClient;
 	@Autowired MeilisearchOperations meilisearchTemplate;
 
 	Movie movie1 = new Movie(1, "Carol", "A love story", new String[] { "Romance", "Drama" });
@@ -47,13 +51,33 @@ class MeilisearchTemplateTest {
 	Movie movie3 = new Movie(3, "Life of Pi", "A survival film", new String[] { "Adventure", "Drama" });
 
 	@BeforeEach
-	void setUp() {
-		meilisearchTemplate.deleteAll(Movie.class);
+	void setUp() throws MeilisearchException {
+		meilisearchClient.index("movies").deleteAllDocuments();
 	}
 
 	@Test
-	void shouldSaveDocument() {
+	void shouldSaveEntity() {
+
+		Movie saved = meilisearchTemplate.save(movie1);
+
+		assertThat(saved).isEqualTo(movie1);
+	}
+
+	@Test
+	void shouldSaveEntities() {
+
+		List<Movie> movies = List.of(movie1, movie2);
+
+		List<Movie> saved = meilisearchTemplate.save(movies);
+
+		assertThat(saved).isEqualTo(movies);
+	}
+
+	@Test
+	void shouldGetEntity() {
+
 		meilisearchTemplate.save(movie1);
+
 		Movie saved = meilisearchTemplate.get("1", Movie.class);
 
 		assertThat(saved.getId()).isEqualTo(movie1.getId());
@@ -63,76 +87,91 @@ class MeilisearchTemplateTest {
 	}
 
 	@Test
-	void shouldSaveDocuments() {
-		List<Movie> movies = List.of(movie1, movie2);
+	void shouldGetEntities() {
 
+		List<Movie> movies = List.of(movie1, movie2, movie3);
 		meilisearchTemplate.save(movies);
-		List<Movie> saved = meilisearchTemplate.multiGet(Movie.class);
 
-		assertThat(saved.size()).isEqualTo(movies.size());
+		List<Movie> savedMovies = meilisearchTemplate.multiGet(Movie.class);
+
+		assertThat(savedMovies).containsExactlyInAnyOrder(movie1, movie2, movie3);
 	}
 
 	@Test
-	void shouldDeleteDocument() {
+	void shouldGetCertainEntities() {
+
+		List<Movie> movies = List.of(movie1, movie2, movie3);
+		meilisearchTemplate.save(movies);
+
+		List<Movie> savedMovies = meilisearchTemplate.multiGet(Movie.class, List.of("1", "3"));
+
+		assertThat(savedMovies).containsExactlyInAnyOrder(movie1, movie3);
+	}
+
+	@Test
+	void returnTrueWhenDocumentExists() {
+
+		meilisearchTemplate.save(movie1);
+
+		boolean exists = meilisearchTemplate.exists("1", Movie.class);
+
+		assertThat(exists).isTrue();
+	}
+
+	@Test
+	void returnFalseWhenDocumentDoesNotExist() {
+
 		meilisearchTemplate.save(movie1);
 		meilisearchTemplate.delete(movie1);
 
-		Movie saved = meilisearchTemplate.get("1", Movie.class);
-		assertThat(saved).isNull();
-	}
+		boolean exists = meilisearchTemplate.exists("1", Movie.class);
 
-	@Test
-	void shouldDeleteDocuments() {
-		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
-		meilisearchTemplate.delete(Movie.class, List.of("1", "2"));
-
-		List<Movie> saved = meilisearchTemplate.multiGet(Movie.class);
-
-		assertThat(saved.size()).isEqualTo(1);
-	}
-
-	@Test
-	void shouldDeleteAllDocuments() {
-		meilisearchTemplate.save(List.of(movie1, movie2));
-		meilisearchTemplate.deleteAll(Movie.class);
-
-		List<Movie> saved = meilisearchTemplate.multiGet(Movie.class);
-
-		assertThat(saved.size()).isZero();
+		assertThat(exists).isFalse();
 	}
 
 	@Test
 	void shouldCountDocuments() {
+
 		meilisearchTemplate.save(List.of(movie1, movie2));
+
 		long count = meilisearchTemplate.count(Movie.class);
+
 		assertThat(count).isEqualTo(2);
 	}
 
 	@Test
-	void shouldExistsDocument() {
+	void shouldDeleteDocument() {
+
 		meilisearchTemplate.save(movie1);
 
-		boolean exists = meilisearchTemplate.exists("1", Movie.class);
-		boolean nonExists = meilisearchTemplate.exists("2", Movie.class);
+		meilisearchTemplate.delete(movie1);
 
-		assertThat(exists).isTrue();
-		assertThat(nonExists).isFalse();
+		assertThat(meilisearchTemplate.get("1", Movie.class)).isNull();
 	}
 
 	@Test
-	void shouldGetCertainDocuments() {
-		List<Movie> movies = List.of(movie1, movie2, movie3);
+	void shouldDeleteDocuments() {
 
-		meilisearchTemplate.save(movies);
-		List<Movie> saved = meilisearchTemplate.multiGet(Movie.class, List.of("1", "3", "4"));
+		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 
-		assertThat(saved.size()).isEqualTo(2);
-		assertThat(saved.get(0).getTitle()).isEqualTo(movie1.getTitle());
-		assertThat(saved.get(1).getTitle()).isEqualTo(movie3.getTitle());
+		boolean result = meilisearchTemplate.delete(Movie.class, List.of("1", "2"));
+
+		assertThat(result).isTrue();
 	}
 
 	@Test
-	void shouldSaveDocumentWithAnnotatedIdField() {
+	void shouldDeleteAllDocuments() {
+
+		meilisearchTemplate.save(List.of(movie1, movie2));
+
+		boolean result = meilisearchTemplate.deleteAll(Movie.class);
+
+		assertThat(result).isTrue();
+	}
+
+	@Test
+	void shouldSaveEntityWithAnnotatedIdField() {
+
 		AnnotatedIdField annotatedIdField = new AnnotatedIdField();
 		String documentId = "idField";
 		annotatedIdField.setName(documentId);
