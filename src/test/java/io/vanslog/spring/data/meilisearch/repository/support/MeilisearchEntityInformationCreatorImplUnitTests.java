@@ -60,7 +60,7 @@ class MeilisearchEntityInformationCreatorImplUnitTests {
 	}
 
 	@Document(indexUid = "entity-no-id")
-	class EntityNoId {
+	static class EntityNoId {
 
 	}
 }
