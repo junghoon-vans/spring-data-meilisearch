@@ -23,6 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -114,6 +118,19 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	@Override
 	public void deleteAll() {
 		meilisearchOperations.deleteAll(entityType);
+	}
+
+	@Override
+	public Iterable<T> findAll(Sort sort) {
+		Pageable pageable = Pageable.unpaged();
+		return findAll(pageable);
+	}
+
+	@Override
+	public Page<T> findAll(Pageable pageable) {
+		int intOffset = Math.toIntExact(pageable.getOffset());
+		List<T> entities = meilisearchOperations.multiGet(entityType, intOffset, pageable.getPageSize());
+		return new PageImpl<>(entities, pageable, meilisearchOperations.count(entityType));
 	}
 
 	protected @Nullable String stringIdRepresentation(@Nullable ID id) {

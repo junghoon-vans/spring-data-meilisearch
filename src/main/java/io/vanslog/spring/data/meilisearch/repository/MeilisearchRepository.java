@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
  * Repository interface for Meilisearch.
@@ -28,6 +29,6 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @see org.springframework.data.repository.CrudRepository
  */
 @NoRepositoryBean
-public interface MeilisearchRepository<T, ID> extends CrudRepository<T, ID> {
+public interface MeilisearchRepository<T, ID> extends CrudRepository<T, ID>, PagingAndSortingRepository<T, ID> {
 
 }
