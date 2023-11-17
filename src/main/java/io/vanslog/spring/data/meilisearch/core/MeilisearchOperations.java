@@ -74,6 +74,17 @@ public interface MeilisearchOperations {
 	<T> List<T> multiGet(Class<T> clazz);
 
 	/**
+	 * Retrieves all entities of the given type with the given offset and limit.
+	 * 
+	 * @param clazz must not be {@literal null}.
+	 * @param offset must not be {@literal null}.
+	 * @param limit must not be {@literal null}.
+	 * @return entities
+	 * @param <T> entity type
+	 */
+	<T> List<T> multiGet(Class<T> clazz, int offset, int limit);
+
+	/**
 	 * Retrieves all entities of the given type with the given document ids.
 	 *
 	 * @param documentIds the document ids of the entities
@@ -83,6 +94,18 @@ public interface MeilisearchOperations {
 	 * @return all entities with the given document ids
 	 */
 	<T> List<T> multiGet(Class<T> clazz, List<String> documentIds);
+
+	/**
+	 * Retrieves all entities of the given type with the given document ids and offset and limit.
+	 * 
+	 * @param clazz must not be {@literal null}.
+	 * @param documentIds must not be {@literal null}.
+	 * @param offset must not be {@literal null}.
+	 * @param limit must not be {@literal null}.
+	 * @return entities
+	 * @param <T> entity type
+	 */
+	<T> List<T> multiGet(Class<T> clazz, List<String> documentIds, int offset, int limit);
 
 	/**
 	 * Checks whether an entity with the given document id exists.
