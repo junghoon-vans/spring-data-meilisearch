@@ -14,33 +14,36 @@
  * limitations under the License.
  */
 
-package io.vanslog.spring.data.meilisearch.client;
+package io.vanslog.spring.data.meilisearch.core.convert;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.assertj.core.api.Assertions.*;
+
+import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.meilisearch.sdk.json.GsonJsonHandler;
-
 /**
- * Tests for {@link ClientConfiguration}.
+ * Unit tests for {@link MappingMeilisearchConverter}.
  *
  * @author Junghoon Ban
  */
-class ClientConfigurationTest {
+class MappingMeilisearchConverterUnitTests {
 
-	ClientConfiguration clientConfiguration;
+	private MappingMeilisearchConverter converter;
 
 	@BeforeEach
-	void setup() {
-		clientConfiguration = ClientConfiguration.builder().connectedToLocalhost().withApiKey("masterKey").build();
+	void setUp() {
+		converter = new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 	}
 
 	@Test
-	void shouldBuildConfiguration() {
-		assertThat(clientConfiguration.getHostUrl()).isEqualTo("http://localhost:7700");
-		assertThat(clientConfiguration.getApiKey()).isEqualTo("masterKey");
-		assertThat(clientConfiguration.getClientAgents()).isEmpty();
+	void shouldReturnMappingContext() {
+		assertThat(converter.getMappingContext()).isNotNull();
+	}
+
+	@Test
+	void shouldReturnConversionService() {
+		assertThat(converter.getConversionService()).isNotNull();
 	}
 }

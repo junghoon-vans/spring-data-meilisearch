@@ -18,6 +18,9 @@ package io.vanslog.spring.data.meilisearch.entities;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import org.springframework.data.annotation.Id;
 
 /**
@@ -73,5 +76,29 @@ public class Movie {
 
 	public void setGenres(String[] genres) {
 		this.genres = genres;
+	}
+
+	@Override
+	public boolean equals(Object object) {
+
+		if (this == object) {
+			return true;
+		}
+
+		if (object == null || getClass() != object.getClass()) {
+			return false;
+		}
+
+		Movie movie = (Movie) object;
+		return id == movie.id && Objects.equals(title, movie.title) && Objects.equals(description, movie.description)
+				&& Arrays.equals(genres, movie.genres);
+	}
+
+	@Override
+	public int hashCode() {
+
+		int result = Objects.hash(id, title, description);
+		result = 31 * result + Arrays.hashCode(genres);
+		return result;
 	}
 }

@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Junghoon Ban
  */
-class SimpleMeilisearchPersistentPropertyTest {
+class SimpleMeilisearchPersistentPropertyUnitTests {
 	private final SimpleMeilisearchMappingContext context = new SimpleMeilisearchMappingContext();
 
 	@Test

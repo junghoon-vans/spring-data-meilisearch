@@ -16,7 +16,7 @@
 
 package io.vanslog.spring.data.meilisearch.repository;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
@@ -39,8 +39,8 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Junghoon Ban
  */
 @MeilisearchTest
-@ContextConfiguration(classes = MeilisearchRepositoryIntegrationTest.Config.class)
-class MeilisearchRepositoryIntegrationTest {
+@ContextConfiguration(classes = MeilisearchRepositoryIntegrationTests.Config.class)
+class MeilisearchRepositoryIntegrationTests {
 
 	@Autowired private MovieRepository movieRepository;
 

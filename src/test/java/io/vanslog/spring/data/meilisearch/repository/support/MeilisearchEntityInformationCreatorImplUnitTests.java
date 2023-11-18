@@ -16,8 +16,7 @@
 
 package io.vanslog.spring.data.meilisearch.repository.support;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
@@ -32,7 +31,7 @@ import org.springframework.data.mapping.MappingException;
  *
  * @author Junghoon Ban
  */
-class MeilisearchEntityInformationCreatorImplTest {
+class MeilisearchEntityInformationCreatorImplUnitTests {
 
 	MeilisearchEntityInformationCreatorImpl entityInformationCreator;
 
@@ -60,7 +59,7 @@ class MeilisearchEntityInformationCreatorImplTest {
 	}
 
 	@Document(indexUid = "entity-no-id")
-	class EntityNoId {
+	static class EntityNoId {
 
 	}
 }
