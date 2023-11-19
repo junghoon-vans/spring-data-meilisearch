@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.springframework.lang.Nullable;
 
+import com.meilisearch.sdk.SearchRequest;
+
 /**
  * The operations for <a href="https://www.meilisearch.com/docs/reference/api/overview">Meilisearch APIs</a>.
  *
@@ -147,6 +149,18 @@ public interface MeilisearchOperations {
 	 * @return {@literal true} if all entities were deleted
 	 */
 	boolean deleteAll(Class<?> clazz);
+
+	/**
+	 * Search for entities that meet the criteria using the given {@link SearchRequest}. Note that by default,
+	 * {@literal MaxTotalHits} in {@link com.meilisearch.sdk.model.Pagination} is 1000.
+	 *
+	 * @param searchRequest the search request
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @return the entities found by the search request
+	 * @param <T> the type of the entity
+	 */
+	<T> List<T> search(SearchRequest searchRequest, Class<?> clazz);
 
 	/**
 	 * Return the {@link io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter}.

@@ -30,6 +30,7 @@ import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingC
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,6 +38,8 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meilisearch.sdk.SearchRequest;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.model.TaskInfo;
@@ -53,6 +56,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	private final MeilisearchClient meilisearchClient;
 	private final MeilisearchConverter meilisearchConverter;
+	private final ObjectMapper objectMapper;
 
 	public MeilisearchTemplate(MeilisearchClient meilisearchClient) {
 		this(meilisearchClient, null);
@@ -63,6 +67,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		this.meilisearchClient = meilisearchClient;
 		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
+		this.objectMapper = new ObjectMapper();
 	}
 
 	@Override
@@ -158,6 +163,17 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		String indexUid = getIndexUidFor(clazz);
 		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteAllDocuments());
 		return isTaskSucceeded(indexUid, taskInfo);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> List<T> search(SearchRequest searchRequest, Class<?> clazz) {
+		String indexUid = getIndexUidFor(clazz);
+		List<HashMap<String, Object>> hits = execute(client -> client.index(indexUid).search(searchRequest)).getHits();
+
+		return hits.stream() //
+				.map(hit -> (T) objectMapper.convertValue(hit, clazz)) //
+				.toList();
 	}
 
 	/**

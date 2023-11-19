@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.core;
 
 import static org.assertj.core.api.Assertions.*;
 
+import com.meilisearch.sdk.SearchRequest;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
@@ -167,6 +168,17 @@ class MeilisearchTemplateIntegrationTests {
 		boolean result = meilisearchTemplate.deleteAll(Movie.class);
 
 		assertThat(result).isTrue();
+	}
+
+	@Test
+	void shouldSearchDocuments() {
+
+		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
+
+		SearchRequest searchRequest = new SearchRequest("Wonder");
+		List<Movie> result = meilisearchTemplate.search(searchRequest, Movie.class);
+
+		assertThat(result).containsExactlyInAnyOrder(movie2);
 	}
 
 	@Test
