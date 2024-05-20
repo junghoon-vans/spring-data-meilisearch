@@ -23,6 +23,7 @@ import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -251,6 +254,50 @@ class MeilisearchRepositoryIntegrationTests {
 		// then
 		assertThat(exists).isTrue();
 		assertThat(notExists).isFalse();
+	}
+
+	@Test
+	void shouldFindDocumentsWithPaging() {
+		// given
+		int pagingSize = 2;
+
+		int documentId1 = 1;
+		Movie movie1 = new Movie();
+		movie1.setId(documentId1);
+		movie1.setTitle("Carol");
+		movie1.setDescription("A love story");
+		movie1.setGenres(new String[] { "Romance", "Drama" });
+
+		int documentId2 = 2;
+		Movie movie2 = new Movie();
+		movie2.setId(documentId2);
+		movie2.setTitle("Wonder Woman");
+		movie2.setDescription("A superhero film");
+		movie2.setGenres(new String[] { "Action", "Adventure" });
+
+		int documentId3 = 3;
+		Movie movie3 = new Movie();
+		movie3.setId(documentId3);
+		movie3.setTitle("Life of Pi");
+		movie3.setDescription("A survival film");
+		movie3.setGenres(new String[] { "Adventure", "Drama" });
+
+		List<Movie> movies = List.of(movie1, movie2, movie3);
+		movieRepository.saveAll(movies);
+
+		// when
+		Page<Movie> page1 = movieRepository.findAll(PageRequest.of(0, pagingSize));
+		Page<Movie> page2 = movieRepository.findAll(PageRequest.of(1, pagingSize));
+
+		// then
+		assertThat(page1.getTotalElements()).isEqualTo(movies.size());
+
+		assertThat(page1.getContent()).hasSize(2);
+		assertThat(page1.getContent().get(0)).isEqualTo(movie1);
+		assertThat(page1.getContent().get(1)).isEqualTo(movie2);
+
+		assertThat(page2.getContent()).hasSize(1);
+		assertThat(page2.getContent().get(0)).isEqualTo(movie3);
 	}
 
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
