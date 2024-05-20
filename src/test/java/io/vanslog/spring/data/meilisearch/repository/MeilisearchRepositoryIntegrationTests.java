@@ -18,6 +18,12 @@ package io.vanslog.spring.data.meilisearch.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
+import com.meilisearch.sdk.Index;
+import com.meilisearch.sdk.exceptions.MeilisearchException;
+import com.meilisearch.sdk.model.TaskInfo;
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
@@ -34,6 +40,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -46,6 +53,7 @@ import org.springframework.test.context.ContextConfiguration;
 class MeilisearchRepositoryIntegrationTests {
 
 	@Autowired private MovieRepository movieRepository;
+	@Autowired private MeilisearchTemplate meilisearchTemplate;
 
 	@BeforeEach
 	void setUp() {
@@ -298,6 +306,41 @@ class MeilisearchRepositoryIntegrationTests {
 
 		assertThat(page2.getContent()).hasSize(1);
 		assertThat(page2.getContent().get(0)).isEqualTo(movie3);
+	}
+
+	@Test
+	void shouldFindDocumentsWithSorting() throws MeilisearchException, InterruptedException {
+		// given
+		int documentId1 = 1;
+		Movie movie1 = new Movie();
+		movie1.setId(documentId1);
+		movie1.setTitle("Carol");
+		movie1.setDescription("A love story");
+		movie1.setGenres(new String[] { "Romance", "Drama" });
+
+		int documentId2 = 2;
+		Movie movie2 = new Movie();
+		movie2.setId(documentId2);
+		movie2.setTitle("Wonder Woman");
+		movie2.setDescription("A superhero film");
+		movie2.setGenres(new String[] { "Action", "Adventure" });
+
+		int documentId3 = 3;
+		Movie movie3 = new Movie();
+		movie3.setId(documentId3);
+		movie3.setTitle("Life of Pi");
+		movie3.setDescription("A survival film");
+		movie3.setGenres(new String[] { "Adventure", "Drama" });
+
+		List<Movie> movies = List.of(movie1, movie3, movie2);
+		movieRepository.saveAll(movies);
+
+		// when
+		Iterable<Movie> sorted = movieRepository.findAll(Sort.by(Sort.Direction.DESC, "title"));
+
+		// then
+		assertThat(sorted).hasSize(3);
+		assertThat(sorted).containsExactly(movie2, movie3, movie1);
 	}
 
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}

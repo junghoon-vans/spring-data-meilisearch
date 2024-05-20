@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -189,6 +191,15 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		return hits.stream() //
 				.map(hit -> (T) objectMapper.convertValue(hit, clazz)) //
 				.toList();
+	}
+
+	public <T> void makeSortable(Class<T> clazz, String[] attributes) {
+		String indexUid = getIndexUidFor(clazz);
+		TaskInfo taskInfo = execute(client -> client.index(indexUid).updateSortableAttributesSettings(attributes));
+
+		if (!isTaskSucceeded(indexUid, taskInfo)) {
+			throw new TaskStatusException(taskInfo.getStatus(), "Failed to make sortable.");
+		}
 	}
 
 	/**

@@ -16,6 +16,8 @@
 
 package io.vanslog.spring.data.meilisearch.repository.support;
 
+import com.meilisearch.sdk.SearchRequest;
+import com.meilisearch.sdk.SearchRequest.SearchRequestBuilder;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
@@ -122,8 +124,16 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 
 	@Override
 	public Iterable<T> findAll(Sort sort) {
-		Pageable pageable = Pageable.unpaged();
-		return findAll(pageable);
+		Assert.notNull(sort, "sort must not be null");
+
+		String[] sortAttributes = sort.stream().map(Sort.Order::getProperty).toArray(String[]::new);
+		meilisearchOperations.makeSortable(entityType, sortAttributes);
+
+		String[] sortOption = sort.stream().map(order -> order.getProperty() + ":" + (order.isAscending() ? "asc" : "desc"))
+				.toArray(String[]::new);
+
+		SearchRequest searchRequest = SearchRequest.builder().sort(sortOption).build();
+		return meilisearchOperations.search(searchRequest, entityType);
 	}
 
 	@Override

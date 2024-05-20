@@ -20,6 +20,7 @@ import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 
 import com.meilisearch.sdk.SearchRequest;
@@ -184,6 +185,16 @@ public interface MeilisearchOperations {
 	 * @param <T> the type of the entity
 	 */
 	<T> List<T> search(SearchRequest searchRequest, Class<?> clazz);
+
+	/**
+	 * Make the given attributes sortable.
+	 *
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @param attributes the attributes to make sortable
+	 * @param <T> the type of the entity
+	 */
+	<T> void makeSortable(Class<T> clazz, String[] attributes);
 
 	/**
 	 * Return the {@link io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter}.
