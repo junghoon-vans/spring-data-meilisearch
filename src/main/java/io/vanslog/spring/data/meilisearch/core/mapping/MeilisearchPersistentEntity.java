@@ -16,6 +16,7 @@
 
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
+import com.meilisearch.sdk.model.Settings;
 import org.springframework.data.mapping.PersistentEntity;
 
 /**
@@ -32,4 +33,11 @@ public interface MeilisearchPersistentEntity<T> extends PersistentEntity<T, Meil
 	 * @return Index UID
 	 */
 	String getIndexUid();
+
+	/**
+	 * Returns the default settings for an index.
+	 *
+	 * @return settings
+	 */
+	Settings getDefaultSettings();
 }

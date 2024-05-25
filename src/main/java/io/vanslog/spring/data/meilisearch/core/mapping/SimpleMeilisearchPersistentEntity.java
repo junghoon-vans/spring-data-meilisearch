@@ -16,14 +16,18 @@
 
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
+import com.meilisearch.sdk.model.Settings;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 
+import io.vanslog.spring.data.meilisearch.annotations.Setting;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.expression.BeanFactoryAccessor;
 import org.springframework.context.expression.BeanFactoryResolver;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
+import org.springframework.data.util.Lazy;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
@@ -39,6 +43,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		implements MeilisearchPersistentEntity<T>, ApplicationContextAware {
 
 	private final StandardEvaluationContext context;
+	private final Lazy<SettingsParameter> settingParameter;
 	@Nullable private String indexUid;
 
 	/**
@@ -57,6 +62,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 					"Unknown indexUid. Make sure the indexUid is defined." + "e.g @Document(indexUid=\"foo\")");
 			this.indexUid = document.indexUid();
 		}
+		this.settingParameter = Lazy.of(() -> buildSettingParameter(rawType));
 	}
 
 	@Override
@@ -69,5 +75,42 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 	@Override
 	public String getIndexUid() {
 		return indexUid;
+	}
+
+	@Override
+	public Settings getDefaultSettings() {
+		return settingParameter.get().toSettings();
+	}
+
+	private SettingsParameter buildSettingParameter(Class<?> clazz) {
+
+		SettingsParameter settingsParameter = new SettingsParameter();
+		Setting settingAnnotation = AnnotatedElementUtils.findMergedAnnotation(clazz, Setting.class);
+
+		if (settingAnnotation != null) {
+			processSettingAnnotation(settingAnnotation, settingsParameter);
+		}
+
+		return settingsParameter;
+	}
+
+	private void processSettingAnnotation(Setting settingAnnotation, SettingsParameter settingsParameter) {
+		String[] sortAttributes = settingAnnotation.sortAttributes();
+
+		if (sortAttributes.length > 0) {
+			settingsParameter.sortAttributes = sortAttributes;
+		}
+	}
+
+	private static class SettingsParameter {
+		@Nullable private String[] sortAttributes;
+
+		Settings toSettings() {
+			Settings settings = new Settings();
+			if (sortAttributes != null) {
+				settings.setSortableAttributes(sortAttributes);
+			}
+			return settings;
+		}
 	}
 }
