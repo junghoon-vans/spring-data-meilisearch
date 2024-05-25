@@ -138,7 +138,9 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	@Override
 	public Page<T> findAll(Pageable pageable) {
 		int intOffset = Math.toIntExact(pageable.getOffset());
-		List<T> entities = meilisearchOperations.multiGet(entityType, intOffset, pageable.getPageSize());
+		SearchRequest searchRequest = SearchRequest.builder().limit(pageable.getPageSize()).offset(intOffset).build();
+
+		List<T> entities = meilisearchOperations.search(searchRequest, entityType);
 		return new PageImpl<>(entities, pageable, meilisearchOperations.count(entityType));
 	}
 

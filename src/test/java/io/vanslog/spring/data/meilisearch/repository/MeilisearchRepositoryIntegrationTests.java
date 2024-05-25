@@ -341,7 +341,10 @@ class MeilisearchRepositoryIntegrationTests {
 				.containsExactly(movie1, movie3, movie2);
 	}
 
-	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
+	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {
+
+		List<Movie> findOrderByTitleDesc();
+	}
 
 	@Configuration
 	@Import(MeilisearchTestConfiguration.class)
