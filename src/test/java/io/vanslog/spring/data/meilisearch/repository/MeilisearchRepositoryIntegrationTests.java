@@ -18,7 +18,6 @@ package io.vanslog.spring.data.meilisearch.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
-import com.meilisearch.sdk.exceptions.MeilisearchException;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
@@ -304,7 +303,7 @@ class MeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
-	void shouldFindDocumentsWithSorting() throws MeilisearchException, InterruptedException {
+	void shouldFindDocumentsWithSorting() {
 		// given
 		int documentId1 = 1;
 		Movie movie1 = new Movie();
@@ -334,8 +333,8 @@ class MeilisearchRepositoryIntegrationTests {
 		Iterable<Movie> sorted = movieRepository.findAll(Sort.by(Sort.Direction.DESC, "title"));
 
 		// then
-		assertThat(sorted).hasSize(3);
-		assertThat(sorted).containsExactly(movie2, movie3, movie1);
+		assertThat(sorted).hasSize(3)
+				.containsExactly(movie2, movie3, movie1);
 	}
 
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
