@@ -16,6 +16,7 @@
 
 package io.vanslog.spring.data.meilisearch.repository.support;
 
+import com.meilisearch.sdk.SearchRequest;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
@@ -23,6 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -114,6 +119,37 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	@Override
 	public void deleteAll() {
 		meilisearchOperations.deleteAll(entityType);
+	}
+
+	@Override
+	public Iterable<T> findAll(Sort sort) {
+		Assert.notNull(sort, "sort must not be null");
+
+		String[] sortOptions = convertSortToSortOptions(sort);
+		SearchRequest searchRequest = SearchRequest.builder() //
+				.sort(sortOptions).build();
+
+		return meilisearchOperations.search(searchRequest, entityType);
+	}
+
+	@Override
+	public Page<T> findAll(Pageable pageable) {
+		Assert.notNull(pageable, "pageable must not be null");
+
+		int intOffset = Math.toIntExact(pageable.getOffset());
+		String[] sortOptions = convertSortToSortOptions(pageable.getSort());
+		SearchRequest searchRequest = SearchRequest.builder() //
+				.limit(pageable.getPageSize()) //
+				.offset(intOffset) //
+				.sort(sortOptions).build();
+
+		List<T> entities = meilisearchOperations.search(searchRequest, entityType);
+		return new PageImpl<>(entities, pageable, meilisearchOperations.count(entityType));
+	}
+
+	private String[] convertSortToSortOptions(Sort sort) {
+		return sort.stream().map(order -> order.getProperty() + ":" + (order.isAscending() ? "asc" : "desc"))
+				.toArray(String[]::new);
 	}
 
 	protected @Nullable String stringIdRepresentation(@Nullable ID id) {

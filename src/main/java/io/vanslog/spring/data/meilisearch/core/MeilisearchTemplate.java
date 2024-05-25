@@ -16,6 +16,7 @@
 
 package io.vanslog.spring.data.meilisearch.core;
 
+import com.meilisearch.sdk.model.DocumentsQuery;
 import io.vanslog.spring.data.meilisearch.DocumentAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
@@ -108,14 +109,28 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public <T> List<T> multiGet(Class<T> clazz) {
+		return multiGet(clazz, -1, -1);
+	}
+
+	@Override
+	public <T> List<T> multiGet(Class<T> clazz, int offset, int limit) {
 		String indexUid = getIndexUidFor(clazz);
-		T[] results = execute(client -> client.index(indexUid).getDocuments(clazz).getResults());
+		DocumentsQuery query = new DocumentsQuery();
+		query.setOffset(offset);
+		query.setLimit(limit);
+
+		T[] results = execute(client -> client.index(indexUid).getDocuments(query, clazz).getResults());
 		return Arrays.asList(results);
 	}
 
 	@Override
 	public <T> List<T> multiGet(Class<T> clazz, List<String> documentIds) {
-		List<T> entities = multiGet(clazz);
+		return multiGet(clazz, documentIds, -1, -1);
+	}
+
+	@Override
+	public <T> List<T> multiGet(Class<T> clazz, List<String> documentIds, int offset, int limit) {
+		List<T> entities = multiGet(clazz, offset, limit);
 		return entities.stream().filter(entity -> documentIds.contains(getDocumentIdFor(entity))).toList();
 	}
 
@@ -174,6 +189,15 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		return hits.stream() //
 				.map(hit -> (T) objectMapper.convertValue(hit, clazz)) //
 				.toList();
+	}
+
+	public <T> void makeSortable(Class<T> clazz, String[] attributes) {
+		String indexUid = getIndexUidFor(clazz);
+		TaskInfo taskInfo = execute(client -> client.index(indexUid).updateSortableAttributesSettings(attributes));
+
+		if (!isTaskSucceeded(indexUid, taskInfo)) {
+			throw new TaskStatusException(taskInfo.getStatus(), "Failed to make sortable.");
+		}
 	}
 
 	/**
