@@ -20,7 +20,6 @@ import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 
 import java.util.List;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 
 import com.meilisearch.sdk.SearchRequest;

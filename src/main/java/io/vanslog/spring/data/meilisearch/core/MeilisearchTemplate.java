@@ -35,8 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;

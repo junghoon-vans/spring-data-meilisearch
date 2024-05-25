@@ -17,7 +17,6 @@
 package io.vanslog.spring.data.meilisearch.repository.support;
 
 import com.meilisearch.sdk.SearchRequest;
-import com.meilisearch.sdk.SearchRequest.SearchRequestBuilder;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
