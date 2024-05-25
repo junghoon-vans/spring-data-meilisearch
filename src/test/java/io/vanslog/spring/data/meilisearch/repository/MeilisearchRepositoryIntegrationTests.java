@@ -334,17 +334,57 @@ class MeilisearchRepositoryIntegrationTests {
 		Iterable<Movie> ascOrdered = movieRepository.findAll(Sort.by(Sort.Direction.ASC, "title"));
 
 		// then
-		assertThat(descOrdered).hasSize(3)
-				.containsExactly(movie2, movie3, movie1);
-
-		assertThat(ascOrdered).hasSize(3)
-				.containsExactly(movie1, movie3, movie2);
+		assertThat(descOrdered).hasSize(3).containsExactly(movie2, movie3, movie1);
+		assertThat(ascOrdered).hasSize(3).containsExactly(movie1, movie3, movie2);
 	}
 
-	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {
 
-		List<Movie> findOrderByTitleDesc();
+	@Test
+	void shouldFindDocumentsWithPagingAndSorting() {
+		// given
+		int pagingSize = 2;
+
+		int documentId1 = 1;
+		Movie movie1 = new Movie();
+		movie1.setId(documentId1);
+		movie1.setTitle("Carol");
+		movie1.setDescription("A love story");
+		movie1.setGenres(new String[] { "Romance", "Drama" });
+
+		int documentId2 = 2;
+		Movie movie2 = new Movie();
+		movie2.setId(documentId2);
+		movie2.setTitle("Wonder Woman");
+		movie2.setDescription("A superhero film");
+		movie2.setGenres(new String[] { "Action", "Adventure" });
+
+		int documentId3 = 3;
+		Movie movie3 = new Movie();
+		movie3.setId(documentId3);
+		movie3.setTitle("Life of Pi");
+		movie3.setDescription("A survival film");
+		movie3.setGenres(new String[] { "Adventure", "Drama" });
+
+		List<Movie> movies = List.of(movie1, movie2, movie3);
+		movieRepository.saveAll(movies);
+
+		// when
+		Page<Movie> page1 = movieRepository.findAll(PageRequest.of(0, pagingSize, Sort.by(Sort.Direction.ASC, "title")));
+		Page<Movie> page2 = movieRepository.findAll(PageRequest.of(1, pagingSize, Sort.by(Sort.Direction.ASC, "title")));
+
+		// then
+		assertThat(page1.getTotalElements()).isEqualTo(movies.size());
+
+		assertThat(page1.getContent()).hasSize(2);
+		assertThat(page1.getContent().get(0)).isEqualTo(movie1);
+		assertThat(page1.getContent().get(1)).isEqualTo(movie3);
+
+		assertThat(page2.getContent()).hasSize(1);
+		assertThat(page2.getContent().get(0)).isEqualTo(movie2);
 	}
+
+
+	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
 
 	@Configuration
 	@Import(MeilisearchTestConfiguration.class)

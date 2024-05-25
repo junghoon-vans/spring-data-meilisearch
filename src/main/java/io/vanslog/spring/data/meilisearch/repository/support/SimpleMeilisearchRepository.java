@@ -128,20 +128,25 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 		String[] sortAttributes = sort.stream().map(Sort.Order::getProperty).toArray(String[]::new);
 		meilisearchOperations.makeSortable(entityType, sortAttributes);
 
-		String[] sortOption = sort.stream().map(order -> order.getProperty() + ":" + (order.isAscending() ? "asc" : "desc"))
-				.toArray(String[]::new);
-
-		SearchRequest searchRequest = SearchRequest.builder().sort(sortOption).build();
+		String[] sortOptions = convertSortToSortOptions(sort);
+		SearchRequest searchRequest = SearchRequest.builder().sort(sortOptions).build();
 		return meilisearchOperations.search(searchRequest, entityType);
 	}
 
 	@Override
 	public Page<T> findAll(Pageable pageable) {
 		int intOffset = Math.toIntExact(pageable.getOffset());
-		SearchRequest searchRequest = SearchRequest.builder().limit(pageable.getPageSize()).offset(intOffset).build();
+		String[] sortOptions = convertSortToSortOptions(pageable.getSort());
+		SearchRequest searchRequest = SearchRequest.builder().limit(pageable.getPageSize()).offset(intOffset)
+				.sort(sortOptions).build();
 
 		List<T> entities = meilisearchOperations.search(searchRequest, entityType);
 		return new PageImpl<>(entities, pageable, meilisearchOperations.count(entityType));
+	}
+
+	private String[] convertSortToSortOptions(Sort sort) {
+		return sort.stream().map(order -> order.getProperty() + ":" + (order.isAscending() ? "asc" : "desc"))
+				.toArray(String[]::new);
 	}
 
 	protected @Nullable String stringIdRepresentation(@Nullable ID id) {
