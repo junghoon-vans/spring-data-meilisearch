@@ -328,6 +328,7 @@ class MeilisearchRepositoryIntegrationTests {
 
 		List<Movie> movies = List.of(movie1, movie3, movie2);
 		movieRepository.saveAll(movies);
+		meilisearchTemplate.makeSortable(Movie.class, new String[]{"title"});
 
 		// when
 		Iterable<Movie> descOrdered = movieRepository.findAll(Sort.by(Sort.Direction.DESC, "title"));
@@ -367,6 +368,7 @@ class MeilisearchRepositoryIntegrationTests {
 
 		List<Movie> movies = List.of(movie1, movie2, movie3);
 		movieRepository.saveAll(movies);
+		meilisearchTemplate.makeSortable(Movie.class, new String[]{"title"});
 
 		// when
 		Page<Movie> page1 = movieRepository.findAll(PageRequest.of(0, pagingSize, Sort.by(Sort.Direction.ASC, "title")));

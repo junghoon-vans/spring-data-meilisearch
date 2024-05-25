@@ -125,19 +125,22 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	public Iterable<T> findAll(Sort sort) {
 		Assert.notNull(sort, "sort must not be null");
 
-		String[] sortAttributes = sort.stream().map(Sort.Order::getProperty).toArray(String[]::new);
-		meilisearchOperations.makeSortable(entityType, sortAttributes);
-
 		String[] sortOptions = convertSortToSortOptions(sort);
-		SearchRequest searchRequest = SearchRequest.builder().sort(sortOptions).build();
+		SearchRequest searchRequest = SearchRequest.builder() //
+				.sort(sortOptions).build();
+
 		return meilisearchOperations.search(searchRequest, entityType);
 	}
 
 	@Override
 	public Page<T> findAll(Pageable pageable) {
+		Assert.notNull(pageable, "pageable must not be null");
+
 		int intOffset = Math.toIntExact(pageable.getOffset());
 		String[] sortOptions = convertSortToSortOptions(pageable.getSort());
-		SearchRequest searchRequest = SearchRequest.builder().limit(pageable.getPageSize()).offset(intOffset)
+		SearchRequest searchRequest = SearchRequest.builder() //
+				.limit(pageable.getPageSize()) //
+				.offset(intOffset) //
 				.sort(sortOptions).build();
 
 		List<T> entities = meilisearchOperations.search(searchRequest, entityType);
