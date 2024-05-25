@@ -330,11 +330,15 @@ class MeilisearchRepositoryIntegrationTests {
 		movieRepository.saveAll(movies);
 
 		// when
-		Iterable<Movie> sorted = movieRepository.findAll(Sort.by(Sort.Direction.DESC, "title"));
+		Iterable<Movie> descOrdered = movieRepository.findAll(Sort.by(Sort.Direction.DESC, "title"));
+		Iterable<Movie> ascOrdered = movieRepository.findAll(Sort.by(Sort.Direction.ASC, "title"));
 
 		// then
-		assertThat(sorted).hasSize(3)
+		assertThat(descOrdered).hasSize(3)
 				.containsExactly(movie2, movie3, movie1);
+
+		assertThat(ascOrdered).hasSize(3)
+				.containsExactly(movie1, movie3, movie2);
 	}
 
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
