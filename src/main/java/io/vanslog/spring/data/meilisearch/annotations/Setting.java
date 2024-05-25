@@ -38,4 +38,16 @@ public @interface Setting {
 	 * attributes to define an index sorting
 	 */
 	String[] sortAttributes() default {};
+
+	String[] filterableAttributes() default {};
+
+	String distinctAttribute() default "";
+
+	String[] searchableAttributes() default { "*" };
+
+	String[] displayedAttributes() default { "*" };
+
+	String[] rankingRules() default { "words", "typo", "proximity", "attribute", "sort", "exactness" };
+
+	String[] stopWords() default {};
 }

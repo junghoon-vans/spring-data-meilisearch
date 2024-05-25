@@ -87,6 +87,11 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		SettingsParameter settingsParameter = new SettingsParameter();
 		Setting settingAnnotation = AnnotatedElementUtils.findMergedAnnotation(clazz, Setting.class);
 
+		// default values
+		settingsParameter.searchableAttributes = new String[] { "*" };
+		settingsParameter.displayedAttributes = new String[] { "*" };
+		settingsParameter.rankingRules = new String[] { "words", "typo", "proximity", "attribute", "sort", "exactness" };
+
 		if (settingAnnotation != null) {
 			processSettingAnnotation(settingAnnotation, settingsParameter);
 		}
@@ -95,21 +100,63 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 	}
 
 	private void processSettingAnnotation(Setting settingAnnotation, SettingsParameter settingsParameter) {
+		settingsParameter.searchableAttributes = settingAnnotation.searchableAttributes();
+		settingsParameter.displayedAttributes = settingAnnotation.displayedAttributes();
+		settingsParameter.rankingRules = settingAnnotation.rankingRules();
+
 		String[] sortAttributes = settingAnnotation.sortAttributes();
+		String[] filterableAttributes = settingAnnotation.filterableAttributes();
+		String distinctAttribute = settingAnnotation.distinctAttribute();
+		String[] stopWords = settingAnnotation.stopWords();
 
 		if (sortAttributes.length > 0) {
-			settingsParameter.sortAttributes = sortAttributes;
+			settingsParameter.sortAttributes = settingAnnotation.sortAttributes();
+		}
+
+		if (filterableAttributes.length > 0) {
+			settingsParameter.filterableAttributes = settingAnnotation.filterableAttributes();
+		}
+
+		if (!distinctAttribute.isEmpty()) {
+			settingsParameter.distinctAttribute = settingAnnotation.distinctAttribute();
+		}
+
+		if (stopWords.length > 0) {
+			settingsParameter.stopWords = settingAnnotation.stopWords();
 		}
 	}
 
 	private static class SettingsParameter {
 		@Nullable private String[] sortAttributes;
+		@Nullable private String[] filterableAttributes;
+		@Nullable private String distinctAttribute;
+		private String[] searchableAttributes;
+		private String[] displayedAttributes;
+		private String[] rankingRules;
+		@Nullable private String[] stopWords;
 
 		Settings toSettings() {
 			Settings settings = new Settings();
+			settings.setSearchableAttributes(searchableAttributes);
+			settings.setDisplayedAttributes(displayedAttributes);
+			settings.setRankingRules(rankingRules);
+
 			if (sortAttributes != null) {
 				settings.setSortableAttributes(sortAttributes);
 			}
+
+			if (filterableAttributes != null) {
+				settings.setFilterableAttributes(filterableAttributes);
+			}
+
+			if (distinctAttribute != null) {
+				settings.setDistinctAttribute(distinctAttribute);
+			}
+
+			if (stopWords != null) {
+				settings.setStopWords(stopWords);
+			}
+
 			return settings;
 		}
 	}
