@@ -218,12 +218,20 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			return callback.doWithClient(meilisearchClient);
 		} catch (MeilisearchException e) {
-			MeilisearchApiException ex = (MeilisearchApiException) e;
-
-			if (ex.getCode().equals("document_not_found")) {
-				throw new DocumentAccessException(ex.getMessage(), ex.getCause());
+			if (e instanceof MeilisearchApiException ex) {
+				handleApiException(ex);
 			}
-			throw new UncategorizedMeilisearchException(ex.getMessage(), ex.getCause());
+			throw new UncategorizedMeilisearchException(e.getMessage(), e.getCause());
+		}
+	}
+
+	/**
+	 * Handle the given {@link MeilisearchApiException}.
+	 * @param e the {@link MeilisearchApiException} to handle
+	 */
+	private void handleApiException(MeilisearchApiException e) {
+		if (e.getCode().equals("document_not_found")) {
+			throw new DocumentAccessException(e.getMessage(), e.getCause());
 		}
 	}
 
