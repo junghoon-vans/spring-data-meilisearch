@@ -21,30 +21,33 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.springframework.data.annotation.Persistent;
 
 /**
- * Identifies a domain object to be persisted to Meilisearch.
+ * Meilisearch Setting
  *
  * @author Junghoon Ban
  */
-
 @Persistent
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
-public @interface Document {
+public @interface Setting {
 
 	/**
-	 * UID of the Meilisearch index.
-	 * 
-	 * @return Index UID
+	 * attributes to define an index sorting
 	 */
-	String indexUid();
+	String[] sortAttributes() default {};
 
-	/**
-	 * Apply the settings to the index on repository bootstrapping.
-	 */
-	boolean applySettings() default true;
+	String[] filterableAttributes() default {};
+
+	String distinctAttribute() default "";
+
+	String[] searchableAttributes() default { "*" };
+
+	String[] displayedAttributes() default { "*" };
+
+	String[] rankingRules() default { "words", "typo", "proximity", "attribute", "sort", "exactness" };
+
+	String[] stopWords() default {};
 }

@@ -186,14 +186,13 @@ public interface MeilisearchOperations {
 	<T> List<T> search(SearchRequest searchRequest, Class<?> clazz);
 
 	/**
-	 * Make the given attributes sortable.
-	 *
+	 * Apply the default settings for the given entity class.
+	 * 
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
-	 * @param attributes the attributes to make sortable
 	 * @param <T> the type of the entity
 	 */
-	<T> void makeSortable(Class<T> clazz, String[] attributes);
+	<T> void applySettings(Class<T> clazz);
 
 	/**
 	 * Return the {@link io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter}.

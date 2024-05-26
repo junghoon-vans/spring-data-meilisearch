@@ -17,6 +17,7 @@
 package io.vanslog.spring.data.meilisearch.core;
 
 import com.meilisearch.sdk.model.DocumentsQuery;
+import com.meilisearch.sdk.model.Settings;
 import io.vanslog.spring.data.meilisearch.DocumentAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
@@ -191,12 +192,15 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 				.toList();
 	}
 
-	public <T> void makeSortable(Class<T> clazz, String[] attributes) {
+	public <T> void applySettings(Class<T> clazz) {
 		String indexUid = getIndexUidFor(clazz);
-		TaskInfo taskInfo = execute(client -> client.index(indexUid).updateSortableAttributesSettings(attributes));
+		MeilisearchPersistentEntity<?> persistentEntity = getPersistentEntityFor(clazz);
+		Settings settings = persistentEntity.getDefaultSettings();
+
+		TaskInfo taskInfo = execute(client -> client.index(indexUid).updateSettings(settings));
 
 		if (!isTaskSucceeded(indexUid, taskInfo)) {
-			throw new TaskStatusException(taskInfo.getStatus(), "Failed to make sortable.");
+			throw new TaskStatusException(taskInfo.getStatus(), "Failed to create index.");
 		}
 	}
 
@@ -214,12 +218,20 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			return callback.doWithClient(meilisearchClient);
 		} catch (MeilisearchException e) {
-			MeilisearchApiException ex = (MeilisearchApiException) e;
-
-			if (ex.getCode().equals("document_not_found")) {
-				throw new DocumentAccessException(ex.getMessage(), ex.getCause());
+			if (e instanceof MeilisearchApiException ex) {
+				handleApiException(ex);
 			}
-			throw new UncategorizedMeilisearchException(ex.getMessage(), ex.getCause());
+			throw new UncategorizedMeilisearchException(e.getMessage(), e.getCause());
+		}
+	}
+
+	/**
+	 * Handle the given {@link MeilisearchApiException}.
+	 * @param e the {@link MeilisearchApiException} to handle
+	 */
+	private void handleApiException(MeilisearchApiException e) {
+		if (e.getCode().equals("document_not_found")) {
+			throw new DocumentAccessException(e.getMessage(), e.getCause());
 		}
 	}
 
