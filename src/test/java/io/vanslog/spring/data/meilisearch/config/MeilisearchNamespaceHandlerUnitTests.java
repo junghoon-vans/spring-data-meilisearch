@@ -18,10 +18,10 @@ package io.vanslog.spring.data.meilisearch.config;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClientFactoryBean;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
-import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
 import java.lang.reflect.Field;
@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -65,8 +66,11 @@ class MeilisearchNamespaceHandlerUnitTests {
 
 	@Test
 	void shouldCreateMeilisearchRepository() {
-		assertThat(context.getBean(MovieRepository.class)).isInstanceOf(MovieRepository.class);
+		assertThat(context.getBean(ApplySettingsFalseRepository.class)).isInstanceOf(ApplySettingsFalseRepository.class);
 	}
 
-	interface MovieRepository extends MeilisearchRepository<Movie, String> {}
+	@Document(indexUid = "test-index-config-namespace", applySettings = false)
+	record ApplySettingsFalseEntity(@Id String id) {}
+
+	interface ApplySettingsFalseRepository extends MeilisearchRepository<ApplySettingsFalseEntity, String> {}
 }

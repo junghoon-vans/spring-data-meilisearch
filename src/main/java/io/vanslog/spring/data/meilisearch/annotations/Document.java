@@ -42,4 +42,9 @@ public @interface Document {
 	 * @return Index UID
 	 */
 	String indexUid();
+
+	/**
+	 * Apply the settings to the index on repository bootstrapping.
+	 */
+	boolean applySettings() default true;
 }

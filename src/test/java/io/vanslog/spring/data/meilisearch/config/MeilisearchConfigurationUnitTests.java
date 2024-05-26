@@ -18,10 +18,10 @@ package io.vanslog.spring.data.meilisearch.config;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
-import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
 
@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -46,7 +47,7 @@ class MeilisearchConfigurationUnitTests {
 
 	@Autowired private MeilisearchClient meilisearchClient;
 	@Autowired private MeilisearchOperations meilisearchTemplate;
-	@Autowired private MovieRepository movieRepository;
+	@Autowired private ApplySettingsFalseRepository applySettingsFalseRepository;
 
 	@Test
 	void shouldCreateMeilisearchClient() {
@@ -67,10 +68,13 @@ class MeilisearchConfigurationUnitTests {
 
 	@Test
 	void shouldCreateMeilisearchRepository() {
-		assertThat(movieRepository).isNotNull();
+		assertThat(applySettingsFalseRepository).isNotNull();
 	}
 
-	interface MovieRepository extends MeilisearchRepository<Movie, String> {}
+	@Document(indexUid = "test-index-config-namespace", applySettings = false)
+	record ApplySettingsFalseEntity(@Id String id) {}
+
+	interface ApplySettingsFalseRepository extends MeilisearchRepository<ApplySettingsFalseEntity, String> {}
 
 	@Configuration
 	@EnableMeilisearchRepositories(basePackages = { "io.vanslog.spring.data.meilisearch.config" },

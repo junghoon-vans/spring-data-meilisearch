@@ -43,8 +43,10 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		implements MeilisearchPersistentEntity<T>, ApplicationContextAware {
 
 	private final StandardEvaluationContext context;
-	private final Lazy<SettingsParameter> settingParameter;
+	@Nullable private final Document document;
 	@Nullable private String indexUid;
+	private final Lazy<SettingsParameter> settingParameter;
+	private boolean applySettings;
 
 	/**
 	 * Creates a new {@link SimpleMeilisearchPersistentEntity} with the given {@link TypeInformation}.
@@ -56,13 +58,18 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		this.context = new StandardEvaluationContext();
 
 		Class<T> rawType = information.getType();
-		if (rawType.isAnnotationPresent(Document.class)) {
-			Document document = rawType.getAnnotation(Document.class);
+		document = AnnotatedElementUtils.findMergedAnnotation(rawType, Document.class);
+
+		this.settingParameter = Lazy.of(() -> buildSettingParameter(rawType));
+
+		if (document != null) {
 			Assert.hasText(document.indexUid(),
 					"Unknown indexUid. Make sure the indexUid is defined." + "e.g @Document(indexUid=\"foo\")");
 			this.indexUid = document.indexUid();
+			this.applySettings = document.applySettings();
+		} else {
+			this.applySettings = false;
 		}
-		this.settingParameter = Lazy.of(() -> buildSettingParameter(rawType));
 	}
 
 	@Override
@@ -75,6 +82,11 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 	@Override
 	public String getIndexUid() {
 		return indexUid;
+	}
+
+	@Override
+	public boolean isApplySettings() {
+		return applySettings;
 	}
 
 	@Override

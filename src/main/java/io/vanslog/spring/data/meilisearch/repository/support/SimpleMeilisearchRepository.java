@@ -52,7 +52,14 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 		Assert.notNull(entityInformation, "EntityInformation must not be null!");
 		this.entityType = entityInformation.getJavaType();
 
-		meilisearchOperations.applySettings(entityType);
+		if (isRequiredApplySettings()) {
+			meilisearchOperations.applySettings(entityType);
+		}
+	}
+
+	private boolean isRequiredApplySettings() {
+		return meilisearchOperations.getMeilisearchConverter()
+				.getMappingContext().getRequiredPersistentEntity(entityType).isApplySettings();
 	}
 
 	@Override

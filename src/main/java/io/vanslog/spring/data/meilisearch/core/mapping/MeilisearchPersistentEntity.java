@@ -35,6 +35,12 @@ public interface MeilisearchPersistentEntity<T> extends PersistentEntity<T, Meil
 	String getIndexUid();
 
 	/**
+	 * Returns whether to apply the settings to the index on repository bootstrapping.
+	 * @return applySettings
+	 */
+	boolean isApplySettings();
+
+	/**
 	 * Returns the default settings for an index.
 	 *
 	 * @return settings
