@@ -17,7 +17,6 @@
 package io.vanslog.spring.data.meilisearch.repository.support;
 
 import com.meilisearch.sdk.SearchRequest;
-import io.vanslog.spring.data.meilisearch.annotations.Setting;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

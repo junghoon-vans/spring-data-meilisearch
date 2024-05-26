@@ -18,8 +18,6 @@ package io.vanslog.spring.data.meilisearch.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
-import io.vanslog.spring.data.meilisearch.annotations.Setting;
-import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
@@ -48,7 +46,6 @@ import org.springframework.test.context.ContextConfiguration;
 class MeilisearchRepositoryIntegrationTests {
 
 	@Autowired private MovieRepository movieRepository;
-	@Autowired private MeilisearchTemplate meilisearchTemplate;
 
 	@BeforeEach
 	void setUp() {
