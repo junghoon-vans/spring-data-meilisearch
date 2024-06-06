@@ -1,0 +1,64 @@
+[[meilisearch.settings]]
+= Meilisearch Settings
+
+This chapter covers how to modify search https://www.meilisearch.com/docs/reference/api/settings[settings] in Meilisearch.
+
+[[meilisearch.settings.overview]]
+== Overview
+
+Meilisearch settings are used to define the behavior of the search engine.
+Using `@Setting` annotation, you can define the settings for the index.
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
+  sortAttributes = { "productId" },                                                  <.>
+  distinctAttribute = "productId",                                                   <.>
+  searchableAttributes = { "description", "brand", "color" },                        <.>
+  displayedAttributes = { "description", "brand", "color", "productId" },            <.>
+  rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" }, <.>
+  stopWords = { "a", "an", "the" },                                                  <.>
+)
+class Product {
+    @Id private String id;
+    private String description;
+    private String brand;
+    private String color;
+    private String productId;
+}
+----
+<.> The `sortAttributes` attribute is used to define the fields that must be used for sorting the results.
+<.> The `distinctAttribute` attribute is used to define the field that must be used to remove duplicates from the results.
+<.> The `searchableAttributes` attribute is used to define the fields that must be used for searching the results.
+<.> The `displayedAttributes` attribute is used to define the fields that must be displayed in the results.
+<.> The `rankingRules` attribute is used to define the ranking rules that must be used for sorting the results.
+<.> The `stopWords` attribute is used to define the stop words that must be used for searching the results.
+====
+
+[[meilisearch.settings.pagination]]
+== Pagination
+
+Meilisearch's search function is limited to return a maximum of 1,000 results.
+Therefore, `search(SearchRequest searchRequest, Class<?> clazz)` in MeilisearchOperation can't return more than 1,000 results.
+
+If you have more than 1,000 results, you must use `@Pagination` annotation to extract the remaining results.
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
+  pagination = @Pagination(maxTotalHits = 2000)                                       <.>
+)
+class Product {
+    @Id private String id;
+    private String description;
+    private String brand;
+    private String color;
+    private String productId;
+}
+----
+<.> The `maxTotalHits` is used to define the maximum number of results that must be returned by the search engine.
+====
