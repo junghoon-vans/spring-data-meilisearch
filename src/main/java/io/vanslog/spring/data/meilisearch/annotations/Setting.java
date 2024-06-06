@@ -41,12 +41,6 @@ public @interface Setting {
 	String[] sortAttributes() default {};
 
 	/**
-	 * attributes to be used for filtering
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#filterable-attributes">Filterable attributes</a>
-	 */
-	String[] filterableAttributes() default {};
-
-	/**
 	 * attribute to be used for distinct
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#distinct-attribute">Distinct attribute</a>
 	 */

@@ -118,16 +118,11 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		settingsParameter.pagination = settingAnnotation.pagination();
 
 		String[] sortAttributes = settingAnnotation.sortAttributes();
-		String[] filterableAttributes = settingAnnotation.filterableAttributes();
 		String distinctAttribute = settingAnnotation.distinctAttribute();
 		String[] stopWords = settingAnnotation.stopWords();
 
 		if (sortAttributes.length > 0) {
 			settingsParameter.sortAttributes = settingAnnotation.sortAttributes();
-		}
-
-		if (filterableAttributes.length > 0) {
-			settingsParameter.filterableAttributes = settingAnnotation.filterableAttributes();
 		}
 
 		if (!distinctAttribute.isEmpty()) {
@@ -141,7 +136,6 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 
 	private static class SettingsParameter {
 		@Nullable private String[] sortAttributes;
-		@Nullable private String[] filterableAttributes;
 		@Nullable private String distinctAttribute;
 		private String[] searchableAttributes;
 		private String[] displayedAttributes;
@@ -158,11 +152,6 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 			if (sortAttributes != null) {
 				settings.setSortableAttributes(sortAttributes);
 			}
-
-			if (filterableAttributes != null) {
-				settings.setFilterableAttributes(filterableAttributes);
-			}
-
 			if (distinctAttribute != null) {
 				settings.setDistinctAttribute(distinctAttribute);
 			}
