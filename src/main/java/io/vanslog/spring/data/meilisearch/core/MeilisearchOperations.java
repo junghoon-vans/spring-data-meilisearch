@@ -174,7 +174,8 @@ public interface MeilisearchOperations {
 
 	/**
 	 * Search for entities that meet the criteria using the given {@link SearchRequest}. Note that by default,
-	 * {@literal MaxTotalHits} in {@link com.meilisearch.sdk.model.Pagination} is 1000.
+	 * {@literal MaxTotalHits} in {@link io.vanslog.spring.data.meilisearch.annotations.Pagination} is 1000. If you want
+	 * to change the value, you can use {@link io.vanslog.spring.data.meilisearch.annotations.Setting}.
 	 *
 	 * @param searchRequest the search request
 	 * @param clazz the entity class, must be annotated with
