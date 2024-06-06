@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.core.mapping;
 import com.meilisearch.sdk.model.Settings;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 
+import io.vanslog.spring.data.meilisearch.annotations.Pagination;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -114,6 +115,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		settingsParameter.searchableAttributes = settingAnnotation.searchableAttributes();
 		settingsParameter.displayedAttributes = settingAnnotation.displayedAttributes();
 		settingsParameter.rankingRules = settingAnnotation.rankingRules();
+		settingsParameter.pagination = settingAnnotation.pagination();
 
 		String[] sortAttributes = settingAnnotation.sortAttributes();
 		String[] filterableAttributes = settingAnnotation.filterableAttributes();
@@ -145,6 +147,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		private String[] displayedAttributes;
 		private String[] rankingRules;
 		@Nullable private String[] stopWords;
+		private Pagination pagination;
 
 		Settings toSettings() {
 			Settings settings = new Settings();
@@ -167,6 +170,10 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 			if (stopWords != null) {
 				settings.setStopWords(stopWords);
 			}
+
+			var meiliPagination = new com.meilisearch.sdk.model.Pagination();
+			meiliPagination.setMaxTotalHits(this.pagination.maxTotalHits());
+			settings.setPagination(meiliPagination);
 
 			return settings;
 		}

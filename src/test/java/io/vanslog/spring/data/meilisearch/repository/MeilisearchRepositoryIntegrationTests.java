@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.repository;
 import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.entities.Movie;
+import io.vanslog.spring.data.meilisearch.entities.TotalHitsLimited;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
@@ -45,6 +46,7 @@ import org.springframework.test.context.ContextConfiguration;
 class MeilisearchRepositoryIntegrationTests {
 
 	@Autowired private MovieRepository movieRepository;
+	@Autowired private TotalHitsLimitedRepository totalHitsLimitedRepository;
 
 	@BeforeEach
 	void setUp() {
@@ -335,7 +337,6 @@ class MeilisearchRepositoryIntegrationTests {
 		assertThat(ascOrdered).hasSize(3).containsExactly(movie1, movie3, movie2);
 	}
 
-
 	@Test
 	void shouldFindDocumentsWithPagingAndSorting() {
 		// given
@@ -380,8 +381,28 @@ class MeilisearchRepositoryIntegrationTests {
 		assertThat(page2.getContent().get(0)).isEqualTo(movie2);
 	}
 
+	@Test
+	void shouldNotSearchAllElementsWhenMaxTotalHitsAre10() {
+		// given
+		int elementCount = 11;
+
+		for (int i = 0; i < elementCount; i++) {
+			TotalHitsLimited entity = new TotalHitsLimited(); // It is limited to 10 hits.
+			entity.id = i;
+			entity.name = "name" + i;
+			totalHitsLimitedRepository.save(entity);
+		}
+
+		// when
+		Page<TotalHitsLimited> page = totalHitsLimitedRepository.findAll(PageRequest.of(0, elementCount));
+
+		// then
+		assertThat(page).hasSizeLessThan(elementCount);
+	}
 
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
+
+	interface TotalHitsLimitedRepository extends MeilisearchRepository<TotalHitsLimited, String> {}
 
 	@Configuration
 	@Import(MeilisearchTestConfiguration.class)
