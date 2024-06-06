@@ -47,8 +47,8 @@ public @interface Setting {
 	String[] filterableAttributes() default {};
 
 	/**
-	 * defines the ranking rules
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#ranking-rules">Ranking rules</a>
+	 * attribute to be used for distinct
+	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#distinct-attribute">Distinct attribute</a>
 	 */
 	String distinctAttribute() default "";
 
