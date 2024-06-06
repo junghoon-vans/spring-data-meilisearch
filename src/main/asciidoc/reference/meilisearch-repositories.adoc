@@ -91,7 +91,7 @@ The Spring Data Meilisearch repositories can be configured using the `meilisearc
 
     <bean name="meilisearchTemplate"                                                <.>
           class="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate">
-        <constructor-arg name="meilisearchClient" ref="meilisearchClient"/>                    <.>
+        <constructor-arg name="meilisearchClient" ref="meilisearchClient"/>         <.>
     </bean>
 
     <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>    <.>
