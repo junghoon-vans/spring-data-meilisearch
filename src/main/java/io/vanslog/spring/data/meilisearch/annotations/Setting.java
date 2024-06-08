@@ -36,48 +36,51 @@ public @interface Setting {
 
 	/**
 	 * attributes to be used for sorting
+	 * 
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#sortable-attributes">Sortable attributes</a>
 	 */
 	String[] sortAttributes() default {};
 
 	/**
-	 * attributes to be used for filtering
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#filterable-attributes">Filterable attributes</a>
-	 */
-	String[] filterableAttributes() default {};
-
-	/**
-	 * defines the ranking rules
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#ranking-rules">Ranking rules</a>
+	 * attribute to be used for distinct
+	 * 
+	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#distinct-attribute">Distinct attribute</a>
 	 */
 	String distinctAttribute() default "";
 
 	/**
 	 * attributes to be used for searching
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#searchable-attributes">Searchable attributes</a>
+	 * 
+	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#searchable-attributes">Searchable
+	 *      attributes</a>
 	 */
 	String[] searchableAttributes() default { "*" };
 
 	/**
 	 * attributes to be displayed in the search results
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#displayed-attributes">Displayed attributes</a>
+	 * 
+	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#displayed-attributes">Displayed
+	 *      attributes</a>
 	 */
 	String[] displayedAttributes() default { "*" };
 
 	/**
 	 * defines the ranking rules
+	 * 
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#ranking-rules">Ranking rules</a>
 	 */
 	String[] rankingRules() default { "words", "typo", "proximity", "attribute", "sort", "exactness" };
 
 	/**
 	 * defines the stop words
+	 * 
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#stop-words">Stop words</a>
 	 */
 	String[] stopWords() default {};
 
 	/**
 	 * defines the pagination behavior
+	 * 
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#pagination">Pagination</a>
 	 */
 	Pagination pagination() default @Pagination;

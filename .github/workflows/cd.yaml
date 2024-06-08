@@ -23,7 +23,7 @@ jobs:
           gpg-passphrase: GPG_PASSPHRASE
 
       - name: Deploy to OSSRH
-        run: ./mvnw deploy -DskipTests -P central
+        run: mvn deploy -DskipTests -P central
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}

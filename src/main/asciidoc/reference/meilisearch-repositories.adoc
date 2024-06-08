@@ -35,7 +35,32 @@ public interface MovieRepository extends MeilisearchRepository<Movie, String> {
 ----
 ====
 
-IMPORTANT: It does not yet support query methods, so only the most basic CRUD functionality works.
+[[meilisearch.repositories.autocreation]]
+== Automatic creation of indexes with the corresponding mapping
+
+If the `@Document` annotation is present on the entity,
+the index will be created automatically with the corresponding mapping.
+
+[[meilisearch.repositories.lookup.methods]]
+== Lookup methods
+
+The Meilisearch repository provides the following lookup methods:
+
+- `findById(String id)`
+- `findAllById(Iterable<String> ids)`
+- `findAll()`
+- `findAll(Sort sort)`
+- `findAll(Pageable pageable)`
+
+Note that the above methods perform different behaviors.
+The `findById` and `findAllById` methods use the https://www.meilisearch.com/docs/reference/api/documents#get-one-document[Get one document] or https://www.meilisearch.com/docs/reference/api/documents#get-documents-with-post[Get documents] API.
+However, the `findAll` method uses the https://www.meilisearch.com/docs/reference/api/search[Search] API.
+
+IMPORTANT: This difference in behavior can also cause results to show differently.
+For example, `displayedAttributes` in <<meilisearch.settings>> does not work with the Get one document or Get documents API.
+Go to https://www.meilisearch.com/docs/reference/api/settings#displayed-attributes[Meilisearch documentation] for more information.
+
+[[meilisearch.repositories.custom.query]]
 
 [[meilisearch.repositories.annotation]]
 == Annotation based configuration
@@ -91,7 +116,7 @@ The Spring Data Meilisearch repositories can be configured using the `meilisearc
 
     <bean name="meilisearchTemplate"                                                <.>
           class="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate">
-        <constructor-arg name="meilisearchClient" ref="meilisearchClient"/>                    <.>
+        <constructor-arg name="meilisearchClient" ref="meilisearchClient"/>         <.>
     </bean>
 
     <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>    <.>
