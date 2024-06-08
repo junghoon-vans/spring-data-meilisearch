@@ -32,7 +32,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Build reference documentation
-        run: mvn clean install -Pdistribute
+        run: ./mvnw clean install -Pdistribute
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
