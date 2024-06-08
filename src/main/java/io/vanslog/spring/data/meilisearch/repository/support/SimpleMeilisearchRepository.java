@@ -84,11 +84,6 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	}
 
 	@Override
-	public Iterable<T> findAll() {
-		return meilisearchOperations.multiGet(entityType);
-	}
-
-	@Override
 	public Iterable<T> findAllById(Iterable<ID> ids) {
 		List<String> idList = new ArrayList<>();
 		ids.forEach(id -> idList.add(stringIdRepresentation(id)));
@@ -127,6 +122,15 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	@Override
 	public void deleteAll() {
 		meilisearchOperations.deleteAll(entityType);
+	}
+
+	@Override
+	public Iterable<T> findAll() {
+		SearchRequest searchRequest = SearchRequest.builder() //
+				.limit((int) meilisearchOperations.count(entityType)) //
+				.build();
+
+		return meilisearchOperations.search(searchRequest, entityType);
 	}
 
 	@Override
