@@ -139,6 +139,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 
 		String[] sortOptions = convertSortToSortOptions(sort);
 		SearchRequest searchRequest = SearchRequest.builder() //
+				.limit((int) meilisearchOperations.count(entityType)) //
 				.sort(sortOptions).build();
 
 		return meilisearchOperations.search(searchRequest, entityType);
