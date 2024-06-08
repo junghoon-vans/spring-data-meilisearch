@@ -142,7 +142,13 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Override
 	public long count(Class<?> clazz) {
 		String indexUid = getIndexUidFor(clazz);
-		return execute(client -> client.index(indexUid).getDocuments(clazz).getTotal()).longValue();
+
+		DocumentsQuery query = new DocumentsQuery();
+		query.setOffset(0);
+		query.setLimit(0);
+
+		return execute(client -> client.index(indexUid) //
+				.getDocuments(query, clazz).getTotal()).longValue();
 	}
 
 	@Override
@@ -226,6 +232,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	/**
 	 * Handle the given {@link MeilisearchApiException}.
+	 * 
 	 * @param e the {@link MeilisearchApiException} to handle
 	 */
 	private void handleApiException(MeilisearchApiException e) {
