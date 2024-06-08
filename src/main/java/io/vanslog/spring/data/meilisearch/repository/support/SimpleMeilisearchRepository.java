@@ -57,8 +57,9 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	}
 
 	private boolean isRequiredApplySettings() {
-		return meilisearchOperations.getMeilisearchConverter()
-				.getMappingContext().getRequiredPersistentEntity(entityType).isApplySettings();
+		return meilisearchOperations.getMeilisearchConverter() //
+				.getMappingContext().getRequiredPersistentEntity(entityType)
+				.isApplySettings();
 	}
 
 	@Override

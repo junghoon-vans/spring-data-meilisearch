@@ -20,6 +20,7 @@ import com.meilisearch.sdk.exceptions.MeilisearchException;
 
 /**
  * Callback interface for low level operations executed against a Meilisearch environment.
+ * 
  * @param <T> return type
  */
 @FunctionalInterface

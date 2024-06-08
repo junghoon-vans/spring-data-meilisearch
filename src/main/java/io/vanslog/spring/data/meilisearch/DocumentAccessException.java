@@ -24,12 +24,12 @@ import org.springframework.dao.DataAccessException;
  */
 public class DocumentAccessException extends DataAccessException {
 
-  public DocumentAccessException(String message) {
-    super(message);
-  }
+	public DocumentAccessException(String message) {
+		super(message);
+	}
 
-  public DocumentAccessException(String message, Throwable cause) {
-    super(message, cause);
-  }
+	public DocumentAccessException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 }

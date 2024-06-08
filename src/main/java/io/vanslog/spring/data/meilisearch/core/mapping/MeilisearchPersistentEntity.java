@@ -35,6 +35,7 @@ public interface MeilisearchPersistentEntity<T> extends PersistentEntity<T, Meil
 
 	/**
 	 * Returns whether to apply the settings to the index on repository bootstrapping.
+	 * 
 	 * @return applySettings
 	 */
 	boolean isApplySettings();
