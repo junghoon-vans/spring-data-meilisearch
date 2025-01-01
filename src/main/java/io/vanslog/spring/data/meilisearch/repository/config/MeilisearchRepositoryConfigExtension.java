@@ -15,7 +15,12 @@
  */
 package io.vanslog.spring.data.meilisearch.repository.config;
 
+import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.repository.support.MeilisearchRepositoryFactoryBean;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -37,6 +42,11 @@ public class MeilisearchRepositoryConfigExtension extends RepositoryConfiguratio
 	@Override
 	public String getRepositoryFactoryBeanClassName() {
 		return MeilisearchRepositoryFactoryBean.class.getName();
+	}
+
+	@Override
+	protected Collection<Class<? extends Annotation>> getIdentifyingAnnotations() {
+		return Arrays.asList(Document.class);
 	}
 
 	@Override
