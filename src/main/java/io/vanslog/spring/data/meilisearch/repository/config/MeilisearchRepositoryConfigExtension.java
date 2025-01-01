@@ -19,8 +19,8 @@ import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.repository.support.MeilisearchRepositoryFactoryBean;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -46,7 +46,7 @@ public class MeilisearchRepositoryConfigExtension extends RepositoryConfiguratio
 
 	@Override
 	protected Collection<Class<? extends Annotation>> getIdentifyingAnnotations() {
-		return Arrays.asList(Document.class);
+		return Collections.singleton(Document.class);
 	}
 
 	@Override
