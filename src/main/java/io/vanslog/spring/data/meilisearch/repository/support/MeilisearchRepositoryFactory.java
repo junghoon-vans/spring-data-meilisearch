@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 the original author or authors.
+ * Copyright 2023-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 package io.vanslog.spring.data.meilisearch.repository.support;
 
-import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
-
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
+
+import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 
 /**
  * Factory to create {@link SimpleMeilisearchRepository} instances.

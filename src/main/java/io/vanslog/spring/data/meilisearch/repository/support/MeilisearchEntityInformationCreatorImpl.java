@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 the original author or authors.
+ * Copyright 2023-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 package io.vanslog.spring.data.meilisearch.repository.support;
 
-import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
-import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
-
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.util.Assert;
+
+import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
+import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 
 /**
  * Implementation of {@link io.vanslog.spring.data.meilisearch.repository.support.MeilisearchEntityInformationCreator}.
