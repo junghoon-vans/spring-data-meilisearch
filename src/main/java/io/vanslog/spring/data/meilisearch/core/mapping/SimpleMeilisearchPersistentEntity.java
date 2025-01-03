@@ -141,7 +141,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		private String[] displayedAttributes;
 		private String[] rankingRules;
 		@Nullable private String[] stopWords;
-		private Pagination pagination;
+		@Nullable private Pagination pagination;
 
 		Settings toSettings() {
 			Settings settings = new Settings();
@@ -160,9 +160,11 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 				settings.setStopWords(stopWords);
 			}
 
-			var meiliPagination = new com.meilisearch.sdk.model.Pagination();
-			meiliPagination.setMaxTotalHits(this.pagination.maxTotalHits());
-			settings.setPagination(meiliPagination);
+			if (pagination != null) {
+				var meiliPagination = new com.meilisearch.sdk.model.Pagination();
+				meiliPagination.setMaxTotalHits(this.pagination.maxTotalHits());
+				settings.setPagination(meiliPagination);
+			}
 
 			return settings;
 		}
