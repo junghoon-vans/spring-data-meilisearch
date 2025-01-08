@@ -61,7 +61,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		Class<T> rawType = information.getType();
 		document = AnnotatedElementUtils.findMergedAnnotation(rawType, Document.class);
 
-		this.settingParameter = Lazy.of(() -> buildSettingParameter(rawType));
+		this.settingParameter = Lazy.of(() -> buildSettingsParameter(rawType));
 
 		if (document != null) {
 			Assert.hasText(document.indexUid(),
@@ -95,7 +95,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		return settingParameter.get().toSettings();
 	}
 
-	private SettingsParameter buildSettingParameter(Class<?> clazz) {
+	private SettingsParameter buildSettingsParameter(Class<?> clazz) {
 
 		SettingsParameter settingsParameter = new SettingsParameter();
 		Setting settingAnnotation = AnnotatedElementUtils.findMergedAnnotation(clazz, Setting.class);
@@ -142,7 +142,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		private String[] displayedAttributes;
 		private String[] rankingRules;
 		@Nullable private String[] stopWords;
-		private Pagination pagination;
+		@Nullable private Pagination pagination;
 
 		Settings toSettings() {
 			Settings settings = new Settings();
@@ -161,9 +161,11 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 				settings.setStopWords(stopWords);
 			}
 
-			var meiliPagination = new com.meilisearch.sdk.model.Pagination();
-			meiliPagination.setMaxTotalHits(this.pagination.maxTotalHits());
-			settings.setPagination(meiliPagination);
+			if (pagination != null) {
+				var meiliPagination = new com.meilisearch.sdk.model.Pagination();
+				meiliPagination.setMaxTotalHits(this.pagination.maxTotalHits());
+				settings.setPagination(meiliPagination);
+			}
 
 			return settings;
 		}

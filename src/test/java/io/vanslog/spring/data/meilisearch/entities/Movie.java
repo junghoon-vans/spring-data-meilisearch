@@ -16,7 +16,6 @@
 package io.vanslog.spring.data.meilisearch.entities;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
-import io.vanslog.spring.data.meilisearch.annotations.Setting;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -28,7 +27,6 @@ import org.springframework.data.annotation.Id;
  *
  * @author Junghoon Ban
  */
-@Setting(sortAttributes = { "title" })
 @Document(indexUid = "movies")
 @SuppressWarnings("unused")
 public class Movie {
