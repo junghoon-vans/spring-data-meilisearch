@@ -16,12 +16,14 @@
 package io.vanslog.spring.data.meilisearch.repository.config;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 import io.vanslog.spring.data.meilisearch.repository.support.MeilisearchRepositoryFactoryBean;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
 
+import java.util.List;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource;
@@ -45,11 +47,6 @@ public class MeilisearchRepositoryConfigExtension extends RepositoryConfiguratio
 	}
 
 	@Override
-	protected Collection<Class<? extends Annotation>> getIdentifyingAnnotations() {
-		return Collections.singleton(Document.class);
-	}
-
-	@Override
 	protected String getModulePrefix() {
 		return getModuleIdentifier();
 	}
@@ -69,5 +66,15 @@ public class MeilisearchRepositoryConfigExtension extends RepositoryConfiguratio
 	public void postProcess(BeanDefinitionBuilder builder, XmlRepositoryConfigurationSource config) {
 		Element element = config.getElement();
 		builder.addPropertyReference("meilisearchOperations", element.getAttribute("meilisearch-template-ref"));
+	}
+
+	@Override
+	protected Collection<Class<? extends Annotation>> getIdentifyingAnnotations() {
+		return Collections.singleton(Document.class);
+	}
+
+	@Override
+	protected Collection<Class<?>> getIdentifyingTypes() {
+		return List.of(MeilisearchRepository.class);
 	}
 }
