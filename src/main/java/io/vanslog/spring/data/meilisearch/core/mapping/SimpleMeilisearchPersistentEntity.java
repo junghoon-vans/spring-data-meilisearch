@@ -61,7 +61,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		Class<T> rawType = information.getType();
 		document = AnnotatedElementUtils.findMergedAnnotation(rawType, Document.class);
 
-		this.settingParameter = Lazy.of(() -> buildSettingParameter(rawType));
+		this.settingParameter = Lazy.of(() -> buildSettingsParameter(rawType));
 
 		if (document != null) {
 			Assert.hasText(document.indexUid(),
@@ -95,7 +95,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		return settingParameter.get().toSettings();
 	}
 
-	private SettingsParameter buildSettingParameter(Class<?> clazz) {
+	private SettingsParameter buildSettingsParameter(Class<?> clazz) {
 
 		SettingsParameter settingsParameter = new SettingsParameter();
 		Setting settingAnnotation = AnnotatedElementUtils.findMergedAnnotation(clazz, Setting.class);
