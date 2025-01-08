@@ -15,12 +15,12 @@
  */
 package io.vanslog.spring.data.meilisearch.repository.support;
 
+import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
-
-import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 
 /**
  * Factory to create {@link SimpleMeilisearchRepository} instances.

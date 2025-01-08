@@ -38,8 +38,7 @@ public interface MovieRepository extends MeilisearchRepository<Movie, String> {
 [[meilisearch.repositories.autocreation]]
 == Automatic creation of indexes with the corresponding mapping
 
-If the `@Document` annotation is present on the entity,
-the index will be created automatically with the corresponding mapping.
+If the `@Document` annotation is present on the entity, the index will be created automatically with the corresponding mapping.
 
 [[meilisearch.repositories.lookup.methods]]
 == Lookup methods
@@ -61,7 +60,6 @@ For example, `displayedAttributes` in <<meilisearch.settings>> does not work wit
 Go to https://www.meilisearch.com/docs/reference/api/settings#displayed-attributes[Meilisearch documentation] for more information.
 
 [[meilisearch.repositories.custom.query]]
-
 [[meilisearch.repositories.annotation]]
 == Annotation based configuration
 

@@ -15,11 +15,11 @@
  */
 package io.vanslog.spring.data.meilisearch.repository.support;
 
-import org.springframework.data.mapping.context.MappingContext;
-import org.springframework.util.Assert;
-
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
+
+import org.springframework.data.mapping.context.MappingContext;
+import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link io.vanslog.spring.data.meilisearch.repository.support.MeilisearchEntityInformationCreator}.

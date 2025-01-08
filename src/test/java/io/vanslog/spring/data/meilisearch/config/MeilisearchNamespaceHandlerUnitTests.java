@@ -68,8 +68,9 @@ class MeilisearchNamespaceHandlerUnitTests {
 		assertThat(context.getBean(ApplySettingsFalseRepository.class)).isInstanceOf(ApplySettingsFalseRepository.class);
 	}
 
-	@Document(indexUid = "test-index-config-namespace", applySettings = false)
-	record ApplySettingsFalseEntity(@Id String id) {}
-
 	interface ApplySettingsFalseRepository extends MeilisearchRepository<ApplySettingsFalseEntity, String> {}
+
+	@Document(indexUid = "test-index-config-namespace", applySettings = false)
+	record ApplySettingsFalseEntity(@Id String id) {
+	}
 }

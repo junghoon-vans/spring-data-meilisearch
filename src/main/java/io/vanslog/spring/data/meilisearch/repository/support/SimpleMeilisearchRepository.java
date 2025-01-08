@@ -15,6 +15,9 @@
  */
 package io.vanslog.spring.data.meilisearch.repository.support;
 
+import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,9 +31,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.meilisearch.sdk.SearchRequest;
-
-import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
-import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
 /**
  * Meilisearch specific repository implementation.
@@ -59,8 +59,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 
 	private boolean isRequiredApplySettings() {
 		return meilisearchOperations.getMeilisearchConverter() //
-				.getMappingContext().getRequiredPersistentEntity(entityType)
-				.isApplySettings();
+				.getMappingContext().getRequiredPersistentEntity(entityType).isApplySettings();
 	}
 
 	@Override

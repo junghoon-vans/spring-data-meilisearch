@@ -15,6 +15,8 @@
  */
 package io.vanslog.spring.data.meilisearch.repository.support;
 
+import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+
 import java.io.Serializable;
 
 import org.springframework.data.repository.Repository;
@@ -22,8 +24,6 @@ import org.springframework.data.repository.core.support.RepositoryFactoryBeanSup
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-
-import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} to create

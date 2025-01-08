@@ -16,8 +16,8 @@
 package io.vanslog.spring.data.meilisearch.entities;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
-
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
+
 import java.util.Arrays;
 import java.util.Objects;
 

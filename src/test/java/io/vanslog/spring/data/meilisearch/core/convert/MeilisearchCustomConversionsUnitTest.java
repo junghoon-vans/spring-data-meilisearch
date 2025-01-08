@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */package io.vanslog.spring.data.meilisearch.core.convert;
+ */
+package io.vanslog.spring.data.meilisearch.core.convert;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -40,7 +41,7 @@ class MeilisearchCustomConversionsUnitTest {
 	void shouldRegisterAndUseCustomConverter() {
 		LocalDateTime toConvert = LocalDateTime.of(2009, 1, 3, 18, 15, 5);
 		LocalDate converted = meilisearchConverter.getConversionService().convert(toConvert, LocalDate.class);
-		
+
 		assertThat(converted).isEqualTo(LocalDate.of(2009, 1, 3));
 	}
 

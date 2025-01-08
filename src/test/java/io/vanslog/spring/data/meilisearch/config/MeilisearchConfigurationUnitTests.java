@@ -70,10 +70,11 @@ class MeilisearchConfigurationUnitTests {
 		assertThat(applySettingsFalseRepository).isNotNull();
 	}
 
-	@Document(indexUid = "test-index-config-namespace", applySettings = false)
-	record ApplySettingsFalseEntity(@Id String id) {}
-
 	interface ApplySettingsFalseRepository extends MeilisearchRepository<ApplySettingsFalseEntity, String> {}
+
+	@Document(indexUid = "test-index-config-namespace", applySettings = false)
+	record ApplySettingsFalseEntity(@Id String id) {
+	}
 
 	@Configuration
 	@EnableMeilisearchRepositories(basePackages = { "io.vanslog.spring.data.meilisearch.config" },
@@ -81,10 +82,10 @@ class MeilisearchConfigurationUnitTests {
 	static class CustomConfiguration extends MeilisearchConfiguration {
 		@Override
 		public ClientConfiguration clientConfiguration() {
-			return ClientConfiguration.builder()
-					.connectedToLocalhost()
-					.withApiKey("masterKey")
-					.withRequestTimeout(2000)
+			return ClientConfiguration.builder() //
+					.connectedToLocalhost() //
+					.withApiKey("masterKey") //
+					.withRequestTimeout(2000) //
 					.withRequestInterval(20).build();
 		}
 

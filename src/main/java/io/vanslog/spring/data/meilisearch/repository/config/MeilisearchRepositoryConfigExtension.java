@@ -15,6 +15,9 @@
  */
 package io.vanslog.spring.data.meilisearch.repository.config;
 
+import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.repository.support.MeilisearchRepositoryFactoryBean;
+
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,9 +28,6 @@ import org.springframework.data.repository.config.AnnotationRepositoryConfigurat
 import org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport;
 import org.springframework.data.repository.config.XmlRepositoryConfigurationSource;
 import org.w3c.dom.Element;
-
-import io.vanslog.spring.data.meilisearch.annotations.Document;
-import io.vanslog.spring.data.meilisearch.repository.support.MeilisearchRepositoryFactoryBean;
 
 /**
  * {@link org.springframework.data.repository.config.RepositoryConfigurationExtension} implementation to configure

@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.entities;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.annotations.Pagination;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
+
 import org.springframework.data.annotation.Id;
 
 /**

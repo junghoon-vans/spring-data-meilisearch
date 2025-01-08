@@ -17,7 +17,6 @@ package io.vanslog.spring.data.meilisearch.core;
 
 import static org.assertj.core.api.Assertions.*;
 
-import com.meilisearch.sdk.SearchRequest;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
@@ -32,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.meilisearch.sdk.SearchRequest;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 
 /**

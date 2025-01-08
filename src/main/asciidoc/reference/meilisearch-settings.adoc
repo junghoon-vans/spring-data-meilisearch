@@ -29,6 +29,7 @@ class Product {
     private String productId;
 }
 ----
+
 <.> The `sortAttributes` attribute is used to define the fields that must be used for sorting the results.
 <.> The `distinctAttribute` attribute is used to define the field that must be used to remove duplicates from the results.
 <.> The `searchableAttributes` attribute is used to define the fields that must be used for searching the results.
@@ -60,5 +61,6 @@ class Product {
     private String productId;
 }
 ----
+
 <.> The `maxTotalHits` is used to define the maximum number of results that must be returned by the search engine.
 ====

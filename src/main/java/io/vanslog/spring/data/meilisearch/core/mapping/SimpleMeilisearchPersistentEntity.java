@@ -15,11 +15,10 @@
  */
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
-import com.meilisearch.sdk.model.Settings;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
-
 import io.vanslog.spring.data.meilisearch.annotations.Pagination;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
+
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -33,6 +32,8 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.meilisearch.sdk.model.Settings;
+
 /**
  * Meilisearch specific {@link org.springframework.data.mapping.model.BasicPersistentEntity} implementation holding.
  *
@@ -44,9 +45,9 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 
 	private final StandardEvaluationContext context;
 	@Nullable private final Document document;
-	@Nullable private String indexUid;
 	private final Lazy<SettingsParameter> settingParameter;
-	private boolean applySettings;
+	@Nullable private String indexUid;
+	private final boolean applySettings;
 
 	/**
 	 * Creates a new {@link SimpleMeilisearchPersistentEntity} with the given {@link TypeInformation}.
