@@ -19,10 +19,12 @@ import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.annotations.Faceting;
 import io.vanslog.spring.data.meilisearch.annotations.Pagination;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
-
 import io.vanslog.spring.data.meilisearch.annotations.Synonym;
 import io.vanslog.spring.data.meilisearch.annotations.TypoTolerance;
+
 import java.util.HashMap;
+import java.util.Optional;
+
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -30,7 +32,6 @@ import org.springframework.context.expression.BeanFactoryAccessor;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
-import org.springframework.data.util.Lazy;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
@@ -49,7 +50,8 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 
 	private final StandardEvaluationContext context;
 	@Nullable private final Document document;
-	private final Lazy<SettingsParameter> settingParameter;
+	@Nullable private final SettingsParameter settingParameter;
+	@Nullable private String indexUid;
 	private final boolean applySettings;
 	@Nullable private String indexUid;
 
@@ -65,15 +67,15 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		Class<T> rawType = information.getType();
 		document = AnnotatedElementUtils.findMergedAnnotation(rawType, Document.class);
 
-		this.settingParameter = Lazy.of(() -> buildSettingsParameter(rawType));
-
 		if (document != null) {
 			Assert.hasText(document.indexUid(),
 					"Unknown indexUid. Make sure the indexUid is defined." + "e.g @Document(indexUid=\"foo\")");
 			this.indexUid = document.indexUid();
 			this.applySettings = document.applySettings();
+			this.settingParameter = buildSettingsParameter(rawType);
 		} else {
 			this.applySettings = false;
+			this.settingParameter = null;
 		}
 	}
 
@@ -91,87 +93,54 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 
 	@Override
 	public boolean isApplySettings() {
-		return applySettings;
+		return applySettings && settingParameter != null;
 	}
 
 	@Override
 	public Settings getDefaultSettings() {
-		return settingParameter.get().toSettings();
+		if (settingParameter == null) {
+			return null;
+		}
+
+		return settingParameter.toSettings();
 	}
 
+	@Nullable
 	private SettingsParameter buildSettingsParameter(Class<?> clazz) {
 
 		SettingsParameter settingsParameter = new SettingsParameter();
 		Setting settingAnnotation = AnnotatedElementUtils.findMergedAnnotation(clazz, Setting.class);
 
-		// default values
-		settingsParameter.searchableAttributes = new String[] { "*" };
-		settingsParameter.displayedAttributes = new String[] { "*" };
-		settingsParameter.rankingRules = new String[] { "words", "typo", "proximity", "attribute", "sort", "exactness" };
-		settingsParameter.proximityPrecision = "byWord";
-		settingsParameter.searchCutoffMs = -1;
-
-		if (settingAnnotation != null) {
-			processSettingAnnotation(settingAnnotation, settingsParameter);
+		if (settingAnnotation == null) {
+			return null;
 		}
 
-		return settingsParameter;
-	}
-
-	private void processSettingAnnotation(Setting settingAnnotation, SettingsParameter settingsParameter) {
+		settingsParameter.sortAttributes = settingAnnotation.sortAttributes();
+		settingsParameter.distinctAttribute = settingAnnotation.distinctAttribute();
 		settingsParameter.searchableAttributes = settingAnnotation.searchableAttributes();
 		settingsParameter.displayedAttributes = settingAnnotation.displayedAttributes();
 		settingsParameter.rankingRules = settingAnnotation.rankingRules();
+		settingsParameter.stopWords = settingAnnotation.stopWords();
 		settingsParameter.pagination = settingAnnotation.pagination();
+		settingsParameter.filterableAttributes = settingAnnotation.filterableAttributes();
+		settingsParameter.synonyms = settingAnnotation.synonyms();
 		settingsParameter.typoTolerance = settingAnnotation.typoTolerance();
 		settingsParameter.faceting = settingAnnotation.faceting();
+		settingsParameter.dictionary = settingAnnotation.dictionary();
 		settingsParameter.proximityPrecision = settingAnnotation.proximityPrecision();
+		settingsParameter.searchCutoffMs = settingAnnotation.searchCutoffMs();
+		settingsParameter.separatorTokens = settingAnnotation.separatorTokens();
+		settingsParameter.nonSeparatorTokens = settingAnnotation.nonSeparatorTokens();
 
-		String[] sortAttributes = settingAnnotation.sortAttributes();
-		String distinctAttribute = settingAnnotation.distinctAttribute();
-		String[] stopWords = settingAnnotation.stopWords();
-		String[] filterableAttributes = settingAnnotation.filterableAttributes();
-		Synonym[] synonyms = settingAnnotation.synonyms();
-		String[] dictionary = settingAnnotation.dictionary();
-		String[] separatorTokens = settingAnnotation.separatorTokens();
-		String[] nonSeparatorTokens = settingAnnotation.nonSeparatorTokens();
-		int searchCutoffMs = settingAnnotation.searchCutoffMs();
-
-		if (sortAttributes.length > 0) {
-			settingsParameter.sortAttributes = sortAttributes;
-		}
-		if (!distinctAttribute.isEmpty()) {
-			settingsParameter.distinctAttribute = distinctAttribute;
-		}
-		if (stopWords.length > 0) {
-			settingsParameter.stopWords = stopWords;
-		}
-		if (filterableAttributes.length > 0) {
-			settingsParameter.filterableAttributes = filterableAttributes;
-		}
-		if (synonyms.length > 0) {
-			settingsParameter.synonyms = synonyms;
-		}
-		if (dictionary.length > 0) {
-			settingsParameter.dictionary = dictionary;
-		}
-		if (separatorTokens.length > 0) {
-			settingsParameter.separatorTokens = separatorTokens;
-		}
-		if (nonSeparatorTokens.length > 0) {
-			settingsParameter.nonSeparatorTokens = nonSeparatorTokens;
-		}
-		if (searchCutoffMs > 0) {
-			settingsParameter.searchCutoffMs = searchCutoffMs;
-		}
+		return settingsParameter;
 	}
 
 	private static class SettingsParameter {
 		@Nullable private String[] sortAttributes;
 		@Nullable private String distinctAttribute;
-		private String[] searchableAttributes;
-		private String[] displayedAttributes;
-		private String[] rankingRules;
+		@Nullable private String[] searchableAttributes;
+		@Nullable private String[] displayedAttributes;
+		@Nullable private String[] rankingRules;
 		@Nullable private String[] stopWords;
 		@Nullable private Pagination pagination;
 		@Nullable private String[] filterableAttributes;
@@ -186,66 +155,52 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 
 		Settings toSettings() {
 			Settings settings = new Settings();
-			settings.setSearchableAttributes(searchableAttributes);
-			settings.setDisplayedAttributes(displayedAttributes);
-			settings.setRankingRules(rankingRules);
 
-			if (sortAttributes != null) {
-				settings.setSortableAttributes(sortAttributes);
-			}
-			if (distinctAttribute != null) {
-				settings.setDistinctAttribute(distinctAttribute);
-			}
-			if (stopWords != null) {
-				settings.setStopWords(stopWords);
-			}
-			if (pagination != null) {
+			Optional.ofNullable(sortAttributes).ifPresent(settings::setSortableAttributes);
+			Optional.ofNullable(distinctAttribute).ifPresent(settings::setDistinctAttribute);
+			Optional.ofNullable(searchableAttributes).ifPresent(settings::setSearchableAttributes);
+			Optional.ofNullable(displayedAttributes).ifPresent(settings::setDisplayedAttributes);
+			Optional.ofNullable(rankingRules).ifPresent(settings::setRankingRules);
+			Optional.ofNullable(stopWords).ifPresent(settings::setStopWords);
+			Optional.ofNullable(filterableAttributes).ifPresent(settings::setFilterableAttributes);
+			Optional.ofNullable(dictionary).ifPresent(settings::setDictionary);
+			Optional.ofNullable(proximityPrecision).ifPresent(settings::setProximityPrecision);
+			Optional.ofNullable(separatorTokens).ifPresent(settings::setSeparatorTokens);
+			Optional.ofNullable(nonSeparatorTokens).ifPresent(settings::setNonSeparatorTokens);
+
+			Optional.ofNullable(pagination).ifPresent(p -> {
 				var meiliPagination = new com.meilisearch.sdk.model.Pagination();
-				meiliPagination.setMaxTotalHits(this.pagination.maxTotalHits());
+				meiliPagination.setMaxTotalHits(p.maxTotalHits());
 				settings.setPagination(meiliPagination);
-			}
-			if (filterableAttributes != null) {
-				settings.setFilterableAttributes(filterableAttributes);
-			}
-			if (synonyms != null && synonyms.length > 0) {
-				// Convert Synonym[] to HashMap<String, String[]>
-				HashMap<String, String[]> synonymMap = new HashMap<>();
-				for (Synonym synonym : synonyms) {
+			});
+
+			Optional.ofNullable(synonyms).filter(s -> s.length > 0).ifPresent(s -> {
+				var synonymMap = new HashMap<String, String[]>();
+				for (Synonym synonym : s) {
 					synonymMap.put(synonym.word(), synonym.synonyms());
 				}
 				settings.setSynonyms(synonymMap);
-			}
-			if (typoTolerance != null) {
+			});
+
+			Optional.ofNullable(typoTolerance).ifPresent(t -> {
 				var meiliTypoTolerance = new com.meilisearch.sdk.model.TypoTolerance();
-				meiliTypoTolerance.setEnabled(typoTolerance.enabled());
+				meiliTypoTolerance.setEnabled(t.enabled());
 				var minWordSizeForTypos = new HashMap<String, Integer>();
-				minWordSizeForTypos.put("oneTypo", typoTolerance.minWordSizeForTypos().oneTypo());
-				minWordSizeForTypos.put("twoTypos", typoTolerance.minWordSizeForTypos().twoTypos());
+				minWordSizeForTypos.put("oneTypo", t.minWordSizeForTypos().oneTypo());
+				minWordSizeForTypos.put("twoTypos", t.minWordSizeForTypos().twoTypos());
 				meiliTypoTolerance.setMinWordSizeForTypos(minWordSizeForTypos);
-				meiliTypoTolerance.setDisableOnWords(typoTolerance.disableOnWords());
-				meiliTypoTolerance.setDisableOnAttributes(typoTolerance.disableOnAttributes());
+				meiliTypoTolerance.setDisableOnWords(t.disableOnWords());
+				meiliTypoTolerance.setDisableOnAttributes(t.disableOnAttributes());
 				settings.setTypoTolerance(meiliTypoTolerance);
-			}
-			if (faceting != null) {
+			});
+
+			Optional.ofNullable(faceting).ifPresent(f -> {
 				var meliFaceting = new com.meilisearch.sdk.model.Faceting();
-				meliFaceting.setMaxValuesPerFacet(faceting.maxValuesPerFacet());
+				meliFaceting.setMaxValuesPerFacet(f.maxValuesPerFacet());
 				settings.setFaceting(meliFaceting);
-			}
-			if (dictionary != null) {
-				settings.setDictionary(dictionary);
-			}
-			if (proximityPrecision != null) {
-				settings.setProximityPrecision(proximityPrecision);
-			}
-			if (searchCutoffMs != null && searchCutoffMs != -1) {
-				settings.setSearchCutoffMs(searchCutoffMs);
-			}
-			if (separatorTokens != null) {
-				settings.setSeparatorTokens(separatorTokens);
-			}
-			if (nonSeparatorTokens != null) {
-				settings.setNonSeparatorTokens(nonSeparatorTokens);
-			}
+			});
+
+			Optional.ofNullable(searchCutoffMs).filter(ms -> ms != -1).ifPresent(settings::setSearchCutoffMs);
 
 			return settings;
 		}
