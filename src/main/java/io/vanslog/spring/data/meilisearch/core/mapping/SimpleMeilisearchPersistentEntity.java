@@ -16,9 +16,13 @@
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.annotations.Faceting;
 import io.vanslog.spring.data.meilisearch.annotations.Pagination;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
 
+import io.vanslog.spring.data.meilisearch.annotations.Synonym;
+import io.vanslog.spring.data.meilisearch.annotations.TypoTolerance;
+import java.util.HashMap;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -35,7 +39,7 @@ import org.springframework.util.Assert;
 import com.meilisearch.sdk.model.Settings;
 
 /**
- * Meilisearch specific {@link org.springframework.data.mapping.model.BasicPersistentEntity} implementation holding.
+ * Meilisearch specific {@link BasicPersistentEntity} implementation holding.
  *
  * @param <T>
  * @author Junghoon Ban
@@ -104,6 +108,8 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		settingsParameter.searchableAttributes = new String[] { "*" };
 		settingsParameter.displayedAttributes = new String[] { "*" };
 		settingsParameter.rankingRules = new String[] { "words", "typo", "proximity", "attribute", "sort", "exactness" };
+		settingsParameter.proximityPrecision = "byWord";
+		settingsParameter.searchCutoffMs = -1;
 
 		if (settingAnnotation != null) {
 			processSettingAnnotation(settingAnnotation, settingsParameter);
@@ -117,21 +123,46 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		settingsParameter.displayedAttributes = settingAnnotation.displayedAttributes();
 		settingsParameter.rankingRules = settingAnnotation.rankingRules();
 		settingsParameter.pagination = settingAnnotation.pagination();
+		settingsParameter.typoTolerance = settingAnnotation.typoTolerance();
+		settingsParameter.faceting = settingAnnotation.faceting();
+		settingsParameter.proximityPrecision = settingAnnotation.proximityPrecision();
 
 		String[] sortAttributes = settingAnnotation.sortAttributes();
 		String distinctAttribute = settingAnnotation.distinctAttribute();
 		String[] stopWords = settingAnnotation.stopWords();
+		String[] filterableAttributes = settingAnnotation.filterableAttributes();
+		Synonym[] synonyms = settingAnnotation.synonyms();
+		String[] dictionary = settingAnnotation.dictionary();
+		String[] separatorTokens = settingAnnotation.separatorTokens();
+		String[] nonSeparatorTokens = settingAnnotation.nonSeparatorTokens();
+		int searchCutoffMs = settingAnnotation.searchCutoffMs();
 
 		if (sortAttributes.length > 0) {
-			settingsParameter.sortAttributes = settingAnnotation.sortAttributes();
+			settingsParameter.sortAttributes = sortAttributes;
 		}
-
 		if (!distinctAttribute.isEmpty()) {
-			settingsParameter.distinctAttribute = settingAnnotation.distinctAttribute();
+			settingsParameter.distinctAttribute = distinctAttribute;
 		}
-
 		if (stopWords.length > 0) {
-			settingsParameter.stopWords = settingAnnotation.stopWords();
+			settingsParameter.stopWords = stopWords;
+		}
+		if (filterableAttributes.length > 0) {
+			settingsParameter.filterableAttributes = filterableAttributes;
+		}
+		if (synonyms.length > 0) {
+			settingsParameter.synonyms = synonyms;
+		}
+		if (dictionary.length > 0) {
+			settingsParameter.dictionary = dictionary;
+		}
+		if (separatorTokens.length > 0) {
+			settingsParameter.separatorTokens = separatorTokens;
+		}
+		if (nonSeparatorTokens.length > 0) {
+			settingsParameter.nonSeparatorTokens = nonSeparatorTokens;
+		}
+		if (searchCutoffMs > 0) {
+			settingsParameter.searchCutoffMs = searchCutoffMs;
 		}
 	}
 
@@ -143,6 +174,15 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		private String[] rankingRules;
 		@Nullable private String[] stopWords;
 		@Nullable private Pagination pagination;
+		@Nullable private String[] filterableAttributes;
+		@Nullable private Synonym[] synonyms;
+		@Nullable private TypoTolerance typoTolerance;
+		@Nullable private Faceting faceting;
+		@Nullable private String[] dictionary;
+		@Nullable private String proximityPrecision;
+		@Nullable private Integer searchCutoffMs;
+		@Nullable private String[] separatorTokens;
+		@Nullable private String[] nonSeparatorTokens;
 
 		Settings toSettings() {
 			Settings settings = new Settings();
@@ -156,15 +196,55 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 			if (distinctAttribute != null) {
 				settings.setDistinctAttribute(distinctAttribute);
 			}
-
 			if (stopWords != null) {
 				settings.setStopWords(stopWords);
 			}
-
 			if (pagination != null) {
 				var meiliPagination = new com.meilisearch.sdk.model.Pagination();
 				meiliPagination.setMaxTotalHits(this.pagination.maxTotalHits());
 				settings.setPagination(meiliPagination);
+			}
+			if (filterableAttributes != null) {
+				settings.setFilterableAttributes(filterableAttributes);
+			}
+			if (synonyms != null && synonyms.length > 0) {
+				// Convert Synonym[] to HashMap<String, String[]>
+				HashMap<String, String[]> synonymMap = new HashMap<>();
+				for (Synonym synonym : synonyms) {
+					synonymMap.put(synonym.word(), synonym.synonyms());
+				}
+				settings.setSynonyms(synonymMap);
+			}
+			if (typoTolerance != null) {
+				var meiliTypoTolerance = new com.meilisearch.sdk.model.TypoTolerance();
+				meiliTypoTolerance.setEnabled(typoTolerance.enabled());
+				var minWordSizeForTypos = new HashMap<String, Integer>();
+				minWordSizeForTypos.put("oneTypo", typoTolerance.minWordSizeForTypos().oneTypo());
+				minWordSizeForTypos.put("twoTypos", typoTolerance.minWordSizeForTypos().twoTypos());
+				meiliTypoTolerance.setMinWordSizeForTypos(minWordSizeForTypos);
+				meiliTypoTolerance.setDisableOnWords(typoTolerance.disableOnWords());
+				meiliTypoTolerance.setDisableOnAttributes(typoTolerance.disableOnAttributes());
+				settings.setTypoTolerance(meiliTypoTolerance);
+			}
+			if (faceting != null) {
+				var meliFaceting = new com.meilisearch.sdk.model.Faceting();
+				meliFaceting.setMaxValuesPerFacet(faceting.maxValuesPerFacet());
+				settings.setFaceting(meliFaceting);
+			}
+			if (dictionary != null) {
+				settings.setDictionary(dictionary);
+			}
+			if (proximityPrecision != null) {
+				settings.setProximityPrecision(proximityPrecision);
+			}
+			if (searchCutoffMs != null && searchCutoffMs != -1) {
+				settings.setSearchCutoffMs(searchCutoffMs);
+			}
+			if (separatorTokens != null) {
+				settings.setSeparatorTokens(separatorTokens);
+			}
+			if (nonSeparatorTokens != null) {
+				settings.setNonSeparatorTokens(nonSeparatorTokens);
 			}
 
 			return settings;
