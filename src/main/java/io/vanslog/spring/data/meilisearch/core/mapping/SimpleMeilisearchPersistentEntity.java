@@ -167,42 +167,48 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 			Optional.ofNullable(proximityPrecision).ifPresent(settings::setProximityPrecision);
 			Optional.ofNullable(separatorTokens).ifPresent(settings::setSeparatorTokens);
 			Optional.ofNullable(nonSeparatorTokens).ifPresent(settings::setNonSeparatorTokens);
-
-			Optional.ofNullable(pagination).ifPresent(p -> {
-				var meiliPagination = new com.meilisearch.sdk.model.Pagination();
-				meiliPagination.setMaxTotalHits(p.maxTotalHits());
-				settings.setPagination(meiliPagination);
-			});
-
-			Optional.ofNullable(synonyms).filter(s -> s.length > 0).ifPresent(s -> {
-				var synonymMap = new HashMap<String, String[]>();
-				for (Synonym synonym : s) {
-					synonymMap.put(synonym.word(), synonym.synonyms());
-				}
-				settings.setSynonyms(synonymMap);
-			});
-
-			Optional.ofNullable(typoTolerance).ifPresent(t -> {
-				var meiliTypoTolerance = new com.meilisearch.sdk.model.TypoTolerance();
-				meiliTypoTolerance.setEnabled(t.enabled());
-				var minWordSizeForTypos = new HashMap<String, Integer>();
-				minWordSizeForTypos.put("oneTypo", t.minWordSizeForTypos().oneTypo());
-				minWordSizeForTypos.put("twoTypos", t.minWordSizeForTypos().twoTypos());
-				meiliTypoTolerance.setMinWordSizeForTypos(minWordSizeForTypos);
-				meiliTypoTolerance.setDisableOnWords(t.disableOnWords());
-				meiliTypoTolerance.setDisableOnAttributes(t.disableOnAttributes());
-				settings.setTypoTolerance(meiliTypoTolerance);
-			});
-
-			Optional.ofNullable(faceting).ifPresent(f -> {
-				var meliFaceting = new com.meilisearch.sdk.model.Faceting();
-				meliFaceting.setMaxValuesPerFacet(f.maxValuesPerFacet());
-				settings.setFaceting(meliFaceting);
-			});
-
+			Optional.ofNullable(pagination).map(this::createMeiliPagination).ifPresent(settings::setPagination);
+			Optional.ofNullable(synonyms).map(this::createSynonymMap).ifPresent(settings::setSynonyms);
+			Optional.ofNullable(typoTolerance).map(this::createMeiliTypoTolerance).ifPresent(settings::setTypoTolerance);
+			Optional.ofNullable(faceting).map(this::createMeiliFaceting).ifPresent(settings::setFaceting);
 			Optional.ofNullable(searchCutoffMs).filter(ms -> ms != -1).ifPresent(settings::setSearchCutoffMs);
 
 			return settings;
+		}
+
+		private com.meilisearch.sdk.model.Pagination createMeiliPagination(Pagination pagination) {
+			var meiliPagination = new com.meilisearch.sdk.model.Pagination();
+			meiliPagination.setMaxTotalHits(pagination.maxTotalHits());
+			return meiliPagination;
+		}
+
+		private HashMap<String, String[]> createSynonymMap(Synonym[] synonyms) {
+			var synonymMap = new HashMap<String, String[]>();
+			for (Synonym synonym : synonyms) {
+				synonymMap.put(synonym.word(), synonym.synonyms());
+			}
+			return synonymMap;
+		}
+
+		private com.meilisearch.sdk.model.TypoTolerance createMeiliTypoTolerance(TypoTolerance typoTolerance) {
+			var meiliTypoTolerance = new com.meilisearch.sdk.model.TypoTolerance();
+			meiliTypoTolerance.setEnabled(typoTolerance.enabled());
+
+			var minWordSizeForTypos = new HashMap<String, Integer>();
+			minWordSizeForTypos.put("oneTypo", typoTolerance.minWordSizeForTypos().oneTypo());
+			minWordSizeForTypos.put("twoTypos", typoTolerance.minWordSizeForTypos().twoTypos());
+			meiliTypoTolerance.setMinWordSizeForTypos(minWordSizeForTypos);
+
+			meiliTypoTolerance.setDisableOnWords(typoTolerance.disableOnWords());
+			meiliTypoTolerance.setDisableOnAttributes(typoTolerance.disableOnAttributes());
+
+			return meiliTypoTolerance;
+		}
+
+		private com.meilisearch.sdk.model.Faceting createMeiliFaceting(Faceting faceting) {
+			var meliFaceting = new com.meilisearch.sdk.model.Faceting();
+			meliFaceting.setMaxValuesPerFacet(faceting.maxValuesPerFacet());
+			return meliFaceting;
 		}
 	}
 }
