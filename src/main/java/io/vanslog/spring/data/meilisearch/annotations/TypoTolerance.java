@@ -20,6 +20,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import org.springframework.data.annotation.Persistent;
 
 /**
@@ -33,9 +34,10 @@ import org.springframework.data.annotation.Persistent;
 @Target({ ElementType.TYPE })
 public @interface TypoTolerance {
 	boolean enabled() default true;
+
 	MinWordSizeForTypos minWordSizeForTypos() default @MinWordSizeForTypos;
+
 	String[] disableOnWords() default {};
+
 	String[] disableOnAttributes() default {};
 }
-
-

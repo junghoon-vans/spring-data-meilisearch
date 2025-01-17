@@ -52,14 +52,16 @@ public @interface Setting {
 	/**
 	 * attributes to be used for searching
 	 *
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#searchable-attributes">Searchable attributes</a>
+	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#searchable-attributes">Searchable
+	 *      attributes</a>
 	 */
 	String[] searchableAttributes() default { "*" };
 
 	/**
 	 * attributes to be displayed in the search results
 	 *
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#displayed-attributes">Displayed attributes</a>
+	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#displayed-attributes">Displayed
+	 *      attributes</a>
 	 */
 	String[] displayedAttributes() default { "*" };
 
@@ -87,7 +89,8 @@ public @interface Setting {
 	/**
 	 * defines the filterable attributes
 	 *
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#filterable-attributes">Filterable attributes</a>
+	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#filterable-attributes">Filterable
+	 *      attributes</a>
 	 */
 	String[] filterableAttributes() default {};
 
@@ -127,8 +130,7 @@ public @interface Setting {
 	String proximityPrecision() default "byWord";
 
 	/**
-	 * defines the search cutoff time in milliseconds
-	 * if value is -1, this setting will be disabled
+	 * defines the search cutoff time in milliseconds if value is -1, this setting will be disabled
 	 *
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#search-cutoff-ms">Search cutoff ms</a>
 	 */
@@ -144,7 +146,8 @@ public @interface Setting {
 	/**
 	 * defines the non-separator tokens
 	 *
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#non-separator-tokens">Non-separator tokens</a>
+	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#non-separator-tokens">Non-separator
+	 *      tokens</a>
 	 */
 	String[] nonSeparatorTokens() default {};
 }
