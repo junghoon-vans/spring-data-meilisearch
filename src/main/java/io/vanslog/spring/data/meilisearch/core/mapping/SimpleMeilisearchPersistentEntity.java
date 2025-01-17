@@ -96,6 +96,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 	}
 
 	@Override
+	@Nullable
 	public Settings getDefaultSettings() {
 		if (settingParameter == null) {
 			return null;
