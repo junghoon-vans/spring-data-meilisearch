@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.core.mapping;
 import org.springframework.data.mapping.PersistentEntity;
 
 import com.meilisearch.sdk.model.Settings;
+import org.springframework.lang.Nullable;
 
 /**
  * Meilisearch specific {@link org.springframework.data.mapping.PersistentEntity} abstraction.
@@ -46,5 +47,6 @@ public interface MeilisearchPersistentEntity<T> extends PersistentEntity<T, Meil
 	 *
 	 * @return settings
 	 */
+	@Nullable
 	Settings getDefaultSettings();
 }

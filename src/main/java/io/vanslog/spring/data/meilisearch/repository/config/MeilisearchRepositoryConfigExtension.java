@@ -22,8 +22,8 @@ import io.vanslog.spring.data.meilisearch.repository.support.MeilisearchReposito
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
-
 import java.util.List;
+
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource;
