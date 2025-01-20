@@ -22,6 +22,12 @@ public class IndexQuery extends BaseQuery {
 	@Nullable protected String indexUid;
 	@Nullable protected FederationOptions federationOptions;
 
+	public IndexQuery(IndexQueryBuilder builder) {
+		super(builder);
+		this.indexUid = builder.getIndexUid();
+		this.federationOptions = builder.getFederationOptions();
+	}
+
 	@Nullable
 	public String getIndexUid() {
 		return indexUid;

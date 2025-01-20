@@ -31,7 +31,7 @@ public class MeilisearchConnection implements ExtensionContext.Store.CloseableRe
 
 	private static final Log LOGGER = LogFactory.getLog(MeilisearchConnection.class);
 	private static final String TESTCONTAINERS_IMAGE_NAME = "getmeili/meilisearch";
-	private static final String TESTCONTAINERS_IMAGE_VERSION = "v1.2.0";
+	private static final String TESTCONTAINERS_IMAGE_VERSION = "v1.12.3";
 	private static final int MEILISEARCH_DEFAULT_PORT = 7700;
 	private static final String MEILISEARCH_DEFAULT_MASTER_KEY = "masterKey";
 	private static final ThreadLocal<MeilisearchConnectionInfo> meilisearchConnectionInfoThreadLocal = new ThreadLocal<>();
