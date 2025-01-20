@@ -56,6 +56,34 @@ public class BaseQuery implements Query {
 		this.q = q;
 	}
 
+	public BaseQuery(BaseQueryBuilder builder) {
+		this.q = builder.getQ();
+		this.sort = builder.getSort();
+		setPageable(builder.getPageable() != null ? builder.getPageable() : DEFAULT_PAGE);
+		this.attributesToRetrieve = builder.getAttributesToRetrieve();
+		this.attributesToCrop = builder.getAttributesToCrop();
+		this.cropLength = builder.getCropLength();
+		this.cropMarker = builder.getCropMarker();
+		this.highlightPreTag = builder.getHighlightPreTag();
+		this.highlightPostTag = builder.getHighlightPostTag();
+		this.matchingStrategy = builder.getMatchingStrategy();
+		this.attributesToHighlight = builder.getAttributesToHighlight();
+		this.attributesToSearchOn = builder.getAttributesToSearchOn();
+		this.filter = builder.getFilter();
+		this.filterArray = builder.getFilterArray();
+		this.showMatchesPosition = builder.getShowMatchesPosition();
+		this.facets = builder.getFacets();
+		this.showRankingScore = builder.getShowRankingScore();
+		this.showRankingScoreDetails = builder.getShowRankingScoreDetails();
+		this.rankingScoreThreshold = builder.getRankingScoreThreshold();
+		this.locales = builder.getLocales();
+		this.distinct = builder.getDistinct();
+	}
+
+	public static BaseQueryBuilder builder() {
+		return new BaseQueryBuilder();
+	}
+
 	@Nullable
 	public Sort getSort() {
 		return this.sort;

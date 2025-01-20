@@ -20,12 +20,14 @@ import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
+import io.vanslog.spring.data.meilisearch.client.mlc.RequestConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
+import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,6 +60,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	private final MeilisearchClient meilisearchClient;
 	private final MeilisearchConverter meilisearchConverter;
 	private final ObjectMapper objectMapper;
+	private final RequestConverter requestConverter;
 
 	public MeilisearchTemplate(MeilisearchClient meilisearchClient) {
 		this(meilisearchClient, null);
@@ -69,6 +72,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 		this.objectMapper = new ObjectMapper();
+		this.requestConverter = new RequestConverter();
 	}
 
 	@Override
@@ -195,6 +199,11 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		return hits.stream() //
 				.map(hit -> (T) objectMapper.convertValue(hit, clazz)) //
 				.toList();
+	}
+
+	@Override
+	public <T> List<T> search(BaseQuery query, Class<?> clazz) {
+		return search(requestConverter.searchRequest(query), clazz);
 	}
 
 	public <T> void applySettings(Class<T> clazz) {

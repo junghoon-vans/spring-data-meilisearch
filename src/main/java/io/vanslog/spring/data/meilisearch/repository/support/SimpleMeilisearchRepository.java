@@ -16,21 +16,22 @@
 package io.vanslog.spring.data.meilisearch.repository.support;
 
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-
-import com.meilisearch.sdk.SearchRequest;
 
 /**
  * Meilisearch specific repository implementation.
@@ -127,37 +128,26 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 
 	@Override
 	public Iterable<T> findAll() {
-		SearchRequest searchRequest = SearchRequest.builder() //
-				.limit((int) meilisearchOperations.count(entityType)) //
-				.build();
+		int itemCount = (int) meilisearchOperations.count(entityType);
 
-		return meilisearchOperations.search(searchRequest, entityType);
+		if (itemCount == 0) {
+			return new PageImpl<>(Collections.emptyList());
+		}
+		return this.findAll(PageRequest.of(0, Math.max(1, itemCount)));
 	}
 
 	@Override
 	public Iterable<T> findAll(Sort sort) {
 		Assert.notNull(sort, "sort must not be null");
-
-		String[] sortOptions = convertSortToSortOptions(sort);
-		SearchRequest searchRequest = SearchRequest.builder() //
-				.limit((int) meilisearchOperations.count(entityType)) //
-				.sort(sortOptions).build();
-
-		return meilisearchOperations.search(searchRequest, entityType);
+		BaseQuery query = BaseQuery.builder().withSort(sort).build();
+		return meilisearchOperations.search(query, entityType);
 	}
 
 	@Override
 	public Page<T> findAll(Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
-
-		int intOffset = Math.toIntExact(pageable.getOffset());
-		String[] sortOptions = convertSortToSortOptions(pageable.getSort());
-		SearchRequest searchRequest = SearchRequest.builder() //
-				.limit(pageable.getPageSize()) //
-				.offset(intOffset) //
-				.sort(sortOptions).build();
-
-		List<T> entities = meilisearchOperations.search(searchRequest, entityType);
+		BaseQuery query = BaseQuery.builder().withPageable(pageable).build();
+		List<T> entities = meilisearchOperations.search(query, entityType);
 		return new PageImpl<>(entities, pageable, meilisearchOperations.count(entityType));
 	}
 
