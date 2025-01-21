@@ -15,12 +15,14 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
+import com.meilisearch.sdk.model.Searchable;
 import io.vanslog.spring.data.meilisearch.DocumentAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.client.mlc.RequestConverter;
+import io.vanslog.spring.data.meilisearch.client.mlc.ResponseConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
@@ -31,7 +33,6 @@ import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,7 +40,6 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.SearchRequest;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
@@ -59,8 +59,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	private final MeilisearchClient meilisearchClient;
 	private final MeilisearchConverter meilisearchConverter;
-	private final ObjectMapper objectMapper;
 	private final RequestConverter requestConverter;
+	private final ResponseConverter responseConverter;
 
 	public MeilisearchTemplate(MeilisearchClient meilisearchClient) {
 		this(meilisearchClient, null);
@@ -71,8 +71,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		this.meilisearchClient = meilisearchClient;
 		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
-		this.objectMapper = new ObjectMapper();
 		this.requestConverter = new RequestConverter();
+		this.responseConverter = new ResponseConverter();
 	}
 
 	@Override
@@ -190,15 +190,11 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		return isTaskSucceeded(indexUid, taskInfo);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> List<T> search(SearchRequest searchRequest, Class<?> clazz) {
 		String indexUid = getIndexUidFor(clazz);
-		List<HashMap<String, Object>> hits = execute(client -> client.index(indexUid).search(searchRequest)).getHits();
-
-		return hits.stream() //
-				.map(hit -> (T) objectMapper.convertValue(hit, clazz)) //
-				.toList();
+		Searchable result = execute(client -> client.index(indexUid).search(searchRequest));
+		return responseConverter.bySearchable(result, clazz);
 	}
 
 	@Override
