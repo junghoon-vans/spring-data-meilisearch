@@ -15,8 +15,12 @@
  */
 package io.vanslog.spring.data.meilisearch.client.mlc;
 
+import com.meilisearch.sdk.IndexSearchRequest;
+import com.meilisearch.sdk.MultiSearchRequest;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 
+import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
@@ -57,6 +61,44 @@ public class RequestConverter {
 				.locales(query.getLocales()) //
 				.distinct(query.getDistinct()) //
 				.build();
+	}
+
+	public <T> IndexSearchRequest searchRequest(IndexQuery query) {
+		Pageable pageable = query.getPageable();
+
+		return IndexSearchRequest.builder() //
+				.indexUid(query.getIndexUid()) //
+				.q(query.getQ()) //
+				.offset((int) pageable.getOffset()) //
+				.limit(pageable.getPageSize()) //
+				.page(pageable.getPageNumber()) //
+				.hitsPerPage(pageable.getPageSize()) //
+				.sort(convertSortToSortOptions(query.getSort())) //
+				.attributesToRetrieve(query.getAttributesToRetrieve()) //
+				.attributesToCrop(query.getAttributesToCrop()) //
+				.cropLength(query.getCropLength()) //
+				.cropMarker(query.getCropMarker()) //
+				.highlightPreTag(query.getHighlightPreTag()) //
+				.highlightPostTag(query.getHighlightPostTag()) //
+				.matchingStrategy(query.getMatchingStrategy()) //
+				.attributesToHighlight(query.getAttributesToHighlight()) //
+				.attributesToSearchOn(query.getAttributesToSearchOn()) //
+				.filter(query.getFilter()) //
+				.filterArray(query.getFilterArray()) //
+				.showMatchesPosition(query.isShowMatchesPosition()) //
+				.facets(query.getFacets()) //
+				.showRankingScore(query.isShowRankingScore()) //
+				.showRankingScoreDetails(query.isShowRankingScoreDetails()) //
+				.rankingScoreThreshold(query.getRankingScoreThreshold()) //
+				.locales(query.getLocales()) //
+				.distinct(query.getDistinct()) //
+				.build();
+	}
+
+	public <T> MultiSearchRequest searchRequest(List<IndexQuery> queries) {
+		MultiSearchRequest request = new MultiSearchRequest();
+		queries.forEach(query -> request.addQuery(searchRequest(query)));
+		return request;
 	}
 
 	@Nullable

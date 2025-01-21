@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.core;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 
+import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
@@ -201,6 +202,8 @@ public interface MeilisearchOperations {
 	 * @param <T> the type of the entity
 	 */
 	<T> List<T> search(BaseQuery query, Class<?> clazz);
+
+	<T> List<T> multiSearch(List<IndexQuery> queries, Class<?> clazz);
 
 	/**
 	 * Apply the default settings for the given entity class.

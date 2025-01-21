@@ -16,7 +16,10 @@
 package io.vanslog.spring.data.meilisearch.client.mlc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meilisearch.sdk.model.MultiSearchResult;
+import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.Searchable;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,6 +37,13 @@ public class ResponseConverter {
 	public <T> List<T> bySearchable(Searchable searchable, Class<?> clazz) {
 		return (List<T>) searchable.getHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
+				.toList();
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> List<T> byMultiSearchResults(Results<MultiSearchResult> results, Class<?> clazz) {
+		return (List<T>) Arrays.stream(results.getResults()) //
+				.flatMap(result -> bySearchable(result, clazz).stream())
 				.toList();
 	}
 }

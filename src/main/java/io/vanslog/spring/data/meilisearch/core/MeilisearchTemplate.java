@@ -15,7 +15,10 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
+import com.meilisearch.sdk.MultiSearchRequest;
+import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.Searchable;
+import com.meilisearch.sdk.model.MultiSearchResult;
 import io.vanslog.spring.data.meilisearch.DocumentAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
@@ -30,6 +33,7 @@ import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProp
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
+import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -200,6 +204,13 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Override
 	public <T> List<T> search(BaseQuery query, Class<?> clazz) {
 		return search(requestConverter.searchRequest(query), clazz);
+	}
+
+	@Override
+	public <T> List<T> multiSearch(List<IndexQuery> queries, Class<?> clazz) {
+		MultiSearchRequest request = requestConverter.searchRequest(queries);
+		Results<MultiSearchResult> results = execute(client -> client.multiSearch(request));
+		return responseConverter.byMultiSearchResults(results, clazz);
 	}
 
 	public <T> void applySettings(Class<T> clazz) {
