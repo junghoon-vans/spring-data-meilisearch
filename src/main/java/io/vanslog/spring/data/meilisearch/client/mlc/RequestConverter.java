@@ -15,6 +15,7 @@
  */
 package io.vanslog.spring.data.meilisearch.client.mlc;
 
+import com.meilisearch.sdk.FederationOptions;
 import com.meilisearch.sdk.IndexSearchRequest;
 import com.meilisearch.sdk.MultiSearchRequest;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
@@ -68,6 +69,7 @@ public class RequestConverter {
 
 		return IndexSearchRequest.builder() //
 				.indexUid(query.getIndexUid()) //
+				.federationOptions(convertFederationOptions(query.getFederationOptions())) //
 				.q(query.getQ()) //
 				.offset((int) pageable.getOffset()) //
 				.limit(pageable.getPageSize()) //
@@ -109,5 +111,17 @@ public class RequestConverter {
 
 		return sort.stream().map(order -> order.getProperty() + ":" + (order.isAscending() ? "asc" : "desc"))
 				.toArray(String[]::new);
+	}
+
+	@Nullable
+	private FederationOptions convertFederationOptions(
+			@Nullable io.vanslog.spring.data.meilisearch.core.query.FederationOptions federationOptions) {
+		if (federationOptions == null) {
+			return null;
+		}
+
+		FederationOptions options = new FederationOptions();
+		options.setWeight(federationOptions.getWeight());
+		return options;
 	}
 }
