@@ -32,7 +32,7 @@ import com.meilisearch.sdk.SearchRequest;
  */
 public class RequestConverter {
 
-	public <T> SearchRequest searchRequest(BaseQuery query) {
+	public SearchRequest searchRequest(BaseQuery query) {
 		Pageable pageable = query.getPageable();
 
 		return SearchRequest.builder() //
@@ -63,7 +63,7 @@ public class RequestConverter {
 				.build();
 	}
 
-	public <T> IndexSearchRequest searchRequest(IndexQuery query) {
+	public IndexSearchRequest searchRequest(IndexQuery query) {
 		Pageable pageable = query.getPageable();
 
 		return IndexSearchRequest.builder() //
@@ -95,7 +95,7 @@ public class RequestConverter {
 				.build();
 	}
 
-	public <T> MultiSearchRequest searchRequest(List<IndexQuery> queries) {
+	public MultiSearchRequest searchRequest(List<IndexQuery> queries) {
 		MultiSearchRequest request = new MultiSearchRequest();
 		queries.forEach(query -> request.addQuery(searchRequest(query)));
 		return request;
