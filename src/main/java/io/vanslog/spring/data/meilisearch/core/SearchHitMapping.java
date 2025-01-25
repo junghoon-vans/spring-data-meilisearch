@@ -13,27 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.vanslog.spring.data.meilisearch.client.mlc;
+package io.vanslog.spring.data.meilisearch.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.model.Searchable;
+import io.vanslog.spring.data.meilisearch.client.mlc.ResponseConverter;
+import java.time.Duration;
 import java.util.List;
 
-/**
- * Class to convert Meilisearch classes into Spring Data Meilisearch responses.
- */
-public class ResponseConverter {
+public class SearchHitMapping<T> {
 
-	private final ObjectMapper objectMapper;
+	private ResponseConverter responseConverter = new ResponseConverter();
 
-	public ResponseConverter() {
-		this.objectMapper = new ObjectMapper();
+	public SearchHits<T> mapHits(Searchable searchable) {
+
+		List<? extends SearchHit<T>> searchHits = responseConverter.typedList(searchable, T.class);
+		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
+		new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> List<T> typedList(Searchable searchable, Class<?> clazz) {
-		return (List<T>) searchable.getHits().stream() //
-				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.toList();
-	}
+	public SearchHit<T> mapHit() {}
 }
