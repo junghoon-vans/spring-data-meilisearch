@@ -38,8 +38,6 @@ public class RequestConverter {
 
 		return SearchRequest.builder() //
 				.q(query.getQ()) //
-				.offset((int) pageable.getOffset()) //
-				.limit(pageable.getPageSize()) //
 				.page(pageable.getPageNumber()) //
 				.hitsPerPage(pageable.getPageSize()) //
 				.sort(convertSortToSortOptions(query.getSort())) //
@@ -71,8 +69,6 @@ public class RequestConverter {
 				.indexUid(query.getIndexUid()) //
 				.federationOptions(convertFederationOptions(query.getFederationOptions())) //
 				.q(query.getQ()) //
-				.offset((int) pageable.getOffset()) //
-				.limit(pageable.getPageSize()) //
 				.page(pageable.getPageNumber()) //
 				.hitsPerPage(pageable.getPageSize()) //
 				.sort(convertSortToSortOptions(query.getSort())) //

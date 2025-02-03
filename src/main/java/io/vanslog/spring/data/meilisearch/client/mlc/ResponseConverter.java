@@ -15,12 +15,18 @@
  */
 package io.vanslog.spring.data.meilisearch.client.mlc;
 
+import io.vanslog.spring.data.meilisearch.core.SearchHit;
+import io.vanslog.spring.data.meilisearch.core.SearchHits;
+import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
+
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.Searchable;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Class to convert Meilisearch classes into Spring Data Meilisearch responses.
@@ -34,16 +40,29 @@ public class ResponseConverter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> List<T> bySearchable(Searchable searchable, Class<?> clazz) {
+	public <T> List<T> mapHitList(Searchable searchable, Class<?> clazz) {
 		return (List<T>) searchable.getHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
 				.toList();
 	}
 
+	public <T> SearchHits<T> mapHits(Searchable searchable, Class<?> clazz) {
+		List<? extends SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
+		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
+		return new SearchHitsImpl<>(executionDuration, searchHits);
+	}
+
 	@SuppressWarnings("unchecked")
-	public <T> List<T> byMultiSearchResults(Results<MultiSearchResult> results, Class<?> clazz) {
-		return (List<T>) Arrays.stream(results.getResults()) //
-				.flatMap(result -> bySearchable(result, clazz).stream())
-				.toList();
+	public <T> SearchHits<T> mapResults(Results<MultiSearchResult> results, Class<?> clazz) {
+		MultiSearchResult[] multiSearchResults = results.getResults();
+		List<? extends SearchHit<T>> searchHits = (List<? extends SearchHit<T>>) Arrays.stream(multiSearchResults)
+				.flatMap(result -> result.getHits().stream()) //
+				.map(hit -> objectMapper.convertValue(hit, clazz)).toList();
+
+		int maxProcessingTime = Arrays.stream(multiSearchResults) //
+				.mapToInt(MultiSearchResult::getProcessingTimeMs).max().orElse(0);
+		Duration executionDuration = Duration.ofMillis(maxProcessingTime);
+
+		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 }

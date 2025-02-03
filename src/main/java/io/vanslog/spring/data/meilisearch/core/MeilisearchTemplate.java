@@ -198,19 +198,22 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	public <T> List<T> search(SearchRequest searchRequest, Class<?> clazz) {
 		String indexUid = getIndexUidFor(clazz);
 		Searchable result = execute(client -> client.index(indexUid).search(searchRequest));
-		return responseConverter.bySearchable(result, clazz);
+		return responseConverter.mapHitList(result, clazz);
 	}
 
 	@Override
-	public <T> List<T> search(BaseQuery query, Class<?> clazz) {
-		return search(requestConverter.searchRequest(query), clazz);
+	public <T> SearchHits<T> search(BaseQuery query, Class<?> clazz) {
+			String indexUid = getIndexUidFor(clazz);
+			SearchRequest request = requestConverter.searchRequest(query);
+			Searchable result = execute(client -> client.index(indexUid).search(request));
+			return responseConverter.mapHits(result, clazz);
 	}
 
 	@Override
-	public <T> List<T> multiSearch(List<IndexQuery> queries, Class<?> clazz) {
+	public <T> SearchHits<T> multiSearch(List<IndexQuery> queries, Class<?> clazz) {
 		MultiSearchRequest request = requestConverter.searchRequest(queries);
 		Results<MultiSearchResult> results = execute(client -> client.multiSearch(request));
-		return responseConverter.byMultiSearchResults(results, clazz);
+		return responseConverter.mapResults(results, clazz);
 	}
 
 	public <T> void applySettings(Class<T> clazz) {

@@ -16,6 +16,10 @@
 package io.vanslog.spring.data.meilisearch.repository.support;
 
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.core.SearchHit;
+import io.vanslog.spring.data.meilisearch.core.SearchHitSupport;
+import io.vanslog.spring.data.meilisearch.core.SearchHits;
+import io.vanslog.spring.data.meilisearch.core.SearchPage;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
@@ -128,7 +132,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 
 	@Override
 	public Iterable<T> findAll() {
-		int itemCount = (int) meilisearchOperations.count(entityType);
+		int itemCount = (int) this.count();
 
 		if (itemCount == 0) {
 			return new PageImpl<>(Collections.emptyList());
@@ -136,24 +140,32 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 		return this.findAll(PageRequest.of(0, Math.max(1, itemCount)));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Iterable<T> findAll(Sort sort) {
 		Assert.notNull(sort, "sort must not be null");
+
+		int itemCount = (int) this.count();
+		if (itemCount == 0) {
+			return new PageImpl<>(Collections.emptyList());
+		}
+
 		BaseQuery query = BaseQuery.builder().withSort(sort).build();
-		return meilisearchOperations.search(query, entityType);
+		SearchHits<T> searchHits = meilisearchOperations.search(query, entityType);
+		List<SearchHit<T>> searchHitList = searchHits.getSearchHits();
+		// noinspection ConstantConditions
+		return (List<T>) SearchHitSupport.unwrapSearchHits(searchHitList);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Page<T> findAll(Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
 		BaseQuery query = BaseQuery.builder().withPageable(pageable).build();
-		List<T> entities = meilisearchOperations.search(query, entityType);
-		return new PageImpl<>(entities, pageable, meilisearchOperations.count(entityType));
-	}
-
-	private String[] convertSortToSortOptions(Sort sort) {
-		return sort.stream().map(order -> order.getProperty() + ":" + (order.isAscending() ? "asc" : "desc"))
-				.toArray(String[]::new);
+		SearchHits<T> searchHits = meilisearchOperations.search(query, entityType);
+		SearchPage<T> page = SearchHitSupport.searchPageFor(searchHits, query.getPageable());
+		// noinspection ConstantConditions
+		return (Page<T>) SearchHitSupport.unwrapSearchHits(page);
 	}
 
 	protected @Nullable String stringIdRepresentation(@Nullable ID id) {
