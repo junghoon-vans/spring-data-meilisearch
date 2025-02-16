@@ -206,14 +206,14 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 			String indexUid = getIndexUidFor(clazz);
 			SearchRequest request = requestConverter.searchRequest(query);
 			Searchable result = execute(client -> client.index(indexUid).search(request));
-			return responseConverter.mapHits(result, clazz);
+			return responseConverter.mapHits(result, clazz, this.count(clazz));
 	}
 
 	@Override
 	public <T> SearchHits<T> multiSearch(List<IndexQuery> queries, Class<?> clazz) {
 		MultiSearchRequest request = requestConverter.searchRequest(queries);
 		Results<MultiSearchResult> results = execute(client -> client.multiSearch(request));
-		return responseConverter.mapResults(results, clazz);
+		return responseConverter.mapResults(results, clazz, this.count(clazz));
 	}
 
 	public <T> void applySettings(Class<T> clazz) {

@@ -3,6 +3,7 @@ package io.vanslog.spring.data.meilisearch.core;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+
 import org.springframework.data.util.Lazy;
 
 public class SearchHitsImpl<T> implements SearchHits<T> {
@@ -12,10 +13,10 @@ public class SearchHitsImpl<T> implements SearchHits<T> {
 	private final List<? extends SearchHit<T>> searchHits;
 	private final Lazy<List<SearchHit<T>>> unmodifiableSearchHits;
 
-	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits) {
+	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits, long totalHits) {
 		this.executionDuration = executionDuration;
 		this.searchHits = searchHits;
-		this.totalHits = searchHits.size();
+		this.totalHits = totalHits;
 		this.unmodifiableSearchHits = Lazy.of(() -> Collections.unmodifiableList(searchHits));
 	}
 
