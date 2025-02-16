@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.util.ReactiveWrappers;
 import org.springframework.lang.Nullable;
 
 public class SearchHitSupport {

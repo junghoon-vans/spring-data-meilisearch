@@ -38,7 +38,7 @@ public class RequestConverter {
 
 		return SearchRequest.builder() //
 				.q(query.getQ()) //
-				.page(pageable.getPageNumber()) //
+				.page(pageable.getPageNumber() + 1) //
 				.hitsPerPage(pageable.getPageSize()) //
 				.sort(convertSortToSortOptions(query.getSort())) //
 				.attributesToRetrieve(query.getAttributesToRetrieve()) //
