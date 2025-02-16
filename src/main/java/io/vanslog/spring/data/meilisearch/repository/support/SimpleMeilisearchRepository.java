@@ -150,7 +150,11 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 			return new PageImpl<>(Collections.emptyList());
 		}
 
-		BaseQuery query = BaseQuery.builder().withSort(sort).build();
+		BaseQuery query = BaseQuery.builder() //
+				.withSort(sort) //
+				.withPageable(PageRequest.of(0, Math.max(1, itemCount))) //
+				.build();
+
 		SearchHits<T> searchHits = meilisearchOperations.search(query, entityType);
 		List<SearchHit<T>> searchHitList = searchHits.getSearchHits();
 		// noinspection ConstantConditions
