@@ -16,6 +16,7 @@
 package io.vanslog.spring.data.meilisearch.core;
 
 import java.util.List;
+
 import org.springframework.lang.Nullable;
 
 /**

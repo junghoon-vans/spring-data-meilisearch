@@ -15,17 +15,18 @@
  */
 package io.vanslog.spring.data.meilisearch.client.msc;
 
-import com.meilisearch.sdk.FederationOptions;
-import com.meilisearch.sdk.IndexSearchRequest;
-import com.meilisearch.sdk.MultiSearchRequest;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
-
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
+
 import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 
+import com.meilisearch.sdk.FederationOptions;
+import com.meilisearch.sdk.IndexSearchRequest;
+import com.meilisearch.sdk.MultiSearchRequest;
 import com.meilisearch.sdk.SearchRequest;
 
 /**

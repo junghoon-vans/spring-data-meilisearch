@@ -16,14 +16,6 @@
 package io.vanslog.spring.data.meilisearch.core;
 
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
-import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
-
-import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
-import java.util.List;
-
-import org.springframework.lang.Nullable;
-
-import com.meilisearch.sdk.SearchRequest;
 
 /**
  * The operations for <a href="https://www.meilisearch.com/docs/reference/api/overview">Meilisearch APIs</a>.

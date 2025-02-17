@@ -15,10 +15,11 @@
  */
 package io.vanslog.spring.data.meilisearch.core.query;
 
-import com.meilisearch.sdk.model.MatchingStrategy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
+
+import com.meilisearch.sdk.model.MatchingStrategy;
 
 public class BaseQueryBuilder extends QueryBuilder<BaseQuery, BaseQueryBuilder> {
 
@@ -42,7 +43,7 @@ public class BaseQueryBuilder extends QueryBuilder<BaseQuery, BaseQueryBuilder> 
 	@Nullable protected Double rankingScoreThreshold;
 	@Nullable protected String[] locales;
 	@Nullable protected String distinct;
-	
+
 	public BaseQueryBuilder() {}
 
 	public BaseQueryBuilder withSort(Sort sort) {

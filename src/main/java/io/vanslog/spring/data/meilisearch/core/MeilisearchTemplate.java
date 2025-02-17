@@ -15,10 +15,6 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
-import com.meilisearch.sdk.MultiSearchRequest;
-import com.meilisearch.sdk.model.Results;
-import com.meilisearch.sdk.model.Searchable;
-import com.meilisearch.sdk.model.MultiSearchResult;
 import io.vanslog.spring.data.meilisearch.DocumentAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
@@ -31,9 +27,9 @@ import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
-
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,10 +40,14 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.meilisearch.sdk.MultiSearchRequest;
 import com.meilisearch.sdk.SearchRequest;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.model.DocumentsQuery;
+import com.meilisearch.sdk.model.MultiSearchResult;
+import com.meilisearch.sdk.model.Results;
+import com.meilisearch.sdk.model.Searchable;
 import com.meilisearch.sdk.model.Settings;
 import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
@@ -203,10 +203,10 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public <T> SearchHits<T> search(BaseQuery query, Class<?> clazz) {
-			String indexUid = getIndexUidFor(clazz);
-			SearchRequest request = requestConverter.searchRequest(query);
-			Searchable result = execute(client -> client.index(indexUid).search(request));
-			return responseConverter.mapHits(result, clazz, this.count(clazz));
+		String indexUid = getIndexUidFor(clazz);
+		SearchRequest request = requestConverter.searchRequest(query);
+		Searchable result = execute(client -> client.index(indexUid).search(request));
+		return responseConverter.mapHits(result, clazz, this.count(clazz));
 	}
 
 	@Override

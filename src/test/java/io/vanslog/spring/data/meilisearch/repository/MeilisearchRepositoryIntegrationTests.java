@@ -168,7 +168,7 @@ class MeilisearchRepositoryIntegrationTests {
 		movieRepository.deleteAll(List.of(movie1, movie2));
 
 		// then
-		Iterable<Movie> saved =  movieRepository.findAll();
+		Iterable<Movie> saved = movieRepository.findAll();
 		assertThat(saved).hasSize(1);
 	}
 

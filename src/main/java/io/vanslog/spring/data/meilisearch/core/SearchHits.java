@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.core;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
+
 import org.springframework.data.util.Streamable;
 
 public interface SearchHits<T> extends Streamable<SearchHit<T>> {
