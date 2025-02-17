@@ -25,7 +25,7 @@ import com.meilisearch.sdk.model.MatchingStrategy;
 
 public class BaseQuery implements Query {
 
-	static int DEFAULT_PAGE_SIZE = 20; // Meilisearch default
+	static int DEFAULT_PAGE_SIZE = 10;
 	static Pageable DEFAULT_PAGE = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 
 	@Nullable protected String q;
