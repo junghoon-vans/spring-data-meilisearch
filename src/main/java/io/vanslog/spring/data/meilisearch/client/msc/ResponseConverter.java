@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.vanslog.spring.data.meilisearch.client.mlc;
+package io.vanslog.spring.data.meilisearch.client.msc;
 
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
