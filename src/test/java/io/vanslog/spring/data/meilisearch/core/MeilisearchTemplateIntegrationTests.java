@@ -15,17 +15,7 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Id;
-import org.springframework.test.context.ContextConfiguration;
-
-import com.meilisearch.sdk.SearchRequest;
-import com.meilisearch.sdk.exceptions.MeilisearchException;
+import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
@@ -34,6 +24,17 @@ import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
+
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.annotation.Id;
+import org.springframework.test.context.ContextConfiguration;
+
+import com.meilisearch.sdk.SearchRequest;
+import com.meilisearch.sdk.exceptions.MeilisearchException;
 
 /**
  * Integration tests for {@link MeilisearchTemplate}.
@@ -217,10 +218,8 @@ class MeilisearchTemplateIntegrationTests {
 	void shouldMultiSearchWithQuery() {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 
-		List<IndexQuery> queries = List.of(
-				IndexQuery.builder().withQ(movie1.getTitle()).build(),
-				IndexQuery.builder().withQ(movie2.getTitle()).build()
-		);
+		List<IndexQuery> queries = List.of(IndexQuery.builder().withQ(movie1.getTitle()).build(),
+				IndexQuery.builder().withQ(movie2.getTitle()).build());
 		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, Movie.class);
 
 		assertThat(result.getSearchHits()).isEqualTo(List.of(movie1, movie2));

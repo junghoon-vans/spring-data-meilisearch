@@ -17,11 +17,11 @@ package io.vanslog.spring.data.meilisearch.core.query;
 
 public class SimpleQuery extends BaseQuery {
 
-    public SimpleQuery(SimpleQueryBuilder builder) {
-        super(builder);
-    }
+	public SimpleQuery(SimpleQueryBuilder builder) {
+		super(builder);
+	}
 
-    public static SimpleQueryBuilder builder() {
-        return new SimpleQueryBuilder();
-    }
+	public static SimpleQueryBuilder builder() {
+		return new SimpleQueryBuilder();
+	}
 }
