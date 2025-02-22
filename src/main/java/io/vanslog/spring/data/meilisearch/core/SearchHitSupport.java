@@ -33,12 +33,7 @@ public class SearchHitSupport {
 	 * @return a corresponding object where the SearchHits are replaced by their content if possible, otherwise the
 	 *         original object
 	 */
-	@Nullable
-	public static Object unwrapSearchHits(@Nullable Object result) {
-
-		if (result == null) {
-			return null;
-		}
+	public static Object unwrapSearchHits(Object result) {
 
 		if (result instanceof SearchHit<?> searchHit) {
 			return searchHit.content();
