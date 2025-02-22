@@ -28,6 +28,10 @@ public class IndexQuery extends BaseQuery {
 		this.federationOptions = builder.getFederationOptions();
 	}
 
+	public static IndexQueryBuilder builder() {
+		return new IndexQueryBuilder();
+	}
+
 	@Nullable
 	public String getIndexUid() {
 		return indexUid;

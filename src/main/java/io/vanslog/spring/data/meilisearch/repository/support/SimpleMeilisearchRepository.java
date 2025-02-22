@@ -21,6 +21,7 @@ import io.vanslog.spring.data.meilisearch.core.SearchHitSupport;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.SearchPage;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
+import io.vanslog.spring.data.meilisearch.core.query.SimpleQuery;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
 import java.util.ArrayList;
@@ -150,7 +151,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 			return new PageImpl<>(Collections.emptyList());
 		}
 
-		BaseQuery query = BaseQuery.builder() //
+		BaseQuery query = SimpleQuery.builder() //
 				.withSort(sort) //
 				.withPageable(PageRequest.of(0, Math.max(1, itemCount))) //
 				.build();
@@ -165,7 +166,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	@Override
 	public Page<T> findAll(Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
-		BaseQuery query = BaseQuery.builder().withPageable(pageable).build();
+		BaseQuery query = SimpleQuery.builder().withPageable(pageable).build();
 		SearchHits<T> searchHits = meilisearchOperations.search(query, entityType);
 		SearchPage<T> page = SearchHitSupport.searchPageFor(searchHits, query.getPageable());
 		// noinspection ConstantConditions

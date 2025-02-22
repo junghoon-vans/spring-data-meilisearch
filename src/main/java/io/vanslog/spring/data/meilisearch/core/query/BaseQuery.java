@@ -56,7 +56,7 @@ public class BaseQuery implements Query {
 		this.q = q;
 	}
 
-	public BaseQuery(BaseQueryBuilder builder) {
+	public <Q extends BaseQuery, B extends BaseQueryBuilder<Q, B>> BaseQuery(BaseQueryBuilder<Q, B> builder) {
 		this.q = builder.getQ();
 		this.sort = builder.getSort();
 		setPageable(builder.getPageable() != null ? builder.getPageable() : DEFAULT_PAGE);
@@ -78,10 +78,6 @@ public class BaseQuery implements Query {
 		this.rankingScoreThreshold = builder.getRankingScoreThreshold();
 		this.locales = builder.getLocales();
 		this.distinct = builder.getDistinct();
-	}
-
-	public static BaseQueryBuilder builder() {
-		return new BaseQueryBuilder();
 	}
 
 	@Nullable

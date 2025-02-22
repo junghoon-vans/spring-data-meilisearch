@@ -15,28 +15,11 @@
  */
 package io.vanslog.spring.data.meilisearch.core.query;
 
-import org.springframework.lang.Nullable;
+public class SimpleQueryBuilder extends BaseQueryBuilder<SimpleQuery, SimpleQueryBuilder> {
 
-public abstract class QueryBuilder<Q extends Query, SELF extends QueryBuilder<Q, SELF>> {
+	public SimpleQueryBuilder() {}
 
-	@Nullable protected String q;
-
-	public QueryBuilder() {}
-
-	public SELF withQ(String q) {
-		this.q = q;
-		return self();
-	}
-
-	@Nullable
-	public String getQ() {
-		return q;
-	}
-
-	public abstract Q build();
-
-	protected final SELF self() {
-		// noinspection unchecked
-		return (SELF) this;
+	public SimpleQuery build() {
+		return new SimpleQuery(this);
 	}
 }

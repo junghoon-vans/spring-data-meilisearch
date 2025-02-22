@@ -2,7 +2,7 @@ package io.vanslog.spring.data.meilisearch.core.query;
 
 import org.springframework.lang.Nullable;
 
-public class IndexQueryBuilder extends BaseQueryBuilder {
+public class IndexQueryBuilder extends BaseQueryBuilder<IndexQuery, IndexQueryBuilder> {
 
 	@Nullable protected String indexUid;
 	@Nullable protected FederationOptions federationOptions;

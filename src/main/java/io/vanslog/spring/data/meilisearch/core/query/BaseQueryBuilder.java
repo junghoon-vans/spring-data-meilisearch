@@ -21,8 +21,9 @@ import org.springframework.lang.Nullable;
 
 import com.meilisearch.sdk.model.MatchingStrategy;
 
-public class BaseQueryBuilder extends QueryBuilder<BaseQuery, BaseQueryBuilder> {
+public abstract class BaseQueryBuilder<Q extends BaseQuery, SELF extends BaseQueryBuilder<Q, SELF>> {
 
+	@Nullable protected String q;
 	@Nullable protected Sort sort;
 	@Nullable protected Pageable pageable;
 	@Nullable protected String[] attributesToRetrieve;
@@ -46,7 +47,12 @@ public class BaseQueryBuilder extends QueryBuilder<BaseQuery, BaseQueryBuilder> 
 
 	public BaseQueryBuilder() {}
 
-	public BaseQueryBuilder withSort(Sort sort) {
+	public SELF withQ(String q) {
+		this.q = q;
+		return self();
+	}
+
+	public SELF withSort(Sort sort) {
 		if (this.sort == null) {
 			this.sort = sort;
 		} else {
@@ -55,99 +61,104 @@ public class BaseQueryBuilder extends QueryBuilder<BaseQuery, BaseQueryBuilder> 
 		return self();
 	}
 
-	public BaseQueryBuilder withPageable(Pageable pageable) {
+	public SELF withPageable(Pageable pageable) {
 		this.pageable = pageable;
 		return self();
 	}
 
-	public BaseQueryBuilder withAttributesToRetrieve(String... attributesToRetrieve) {
+	public SELF withAttributesToRetrieve(String... attributesToRetrieve) {
 		this.attributesToRetrieve = attributesToRetrieve;
 		return self();
 	}
 
-	public BaseQueryBuilder withAttributesToCrop(String... attributesToCrop) {
+	public SELF withAttributesToCrop(String... attributesToCrop) {
 		this.attributesToCrop = attributesToCrop;
 		return self();
 	}
 
-	public BaseQueryBuilder withCropLength(Integer cropLength) {
+	public SELF withCropLength(Integer cropLength) {
 		this.cropLength = cropLength;
 		return self();
 	}
 
-	public BaseQueryBuilder withCropMarker(String cropMarker) {
+	public SELF withCropMarker(String cropMarker) {
 		this.cropMarker = cropMarker;
 		return self();
 	}
 
-	public BaseQueryBuilder withHighlightPreTag(String highlightPreTag) {
+	public SELF withHighlightPreTag(String highlightPreTag) {
 		this.highlightPreTag = highlightPreTag;
 		return self();
 	}
 
-	public BaseQueryBuilder withHighlightPostTag(String highlightPostTag) {
+	public SELF withHighlightPostTag(String highlightPostTag) {
 		this.highlightPostTag = highlightPostTag;
 		return self();
 	}
 
-	public BaseQueryBuilder withMatchingStrategy(MatchingStrategy matchingStrategy) {
+	public SELF withMatchingStrategy(MatchingStrategy matchingStrategy) {
 		this.matchingStrategy = matchingStrategy;
 		return self();
 	}
 
-	public BaseQueryBuilder withAttributesToHighlight(String... attributesToHighlight) {
+	public SELF withAttributesToHighlight(String... attributesToHighlight) {
 		this.attributesToHighlight = attributesToHighlight;
 		return self();
 	}
 
-	public BaseQueryBuilder withAttributesToSearchOn(String... attributesToSearchOn) {
+	public SELF withAttributesToSearchOn(String... attributesToSearchOn) {
 		this.attributesToSearchOn = attributesToSearchOn;
 		return self();
 	}
 
-	public BaseQueryBuilder withFilter(String... filter) {
+	public SELF withFilter(String... filter) {
 		this.filter = filter;
 		return self();
 	}
 
-	public BaseQueryBuilder withFilterArray(String[][] filterArray) {
+	public SELF withFilterArray(String[][] filterArray) {
 		this.filterArray = filterArray;
 		return self();
 	}
 
-	public BaseQueryBuilder withShowMatchesPosition(boolean showMatchesPosition) {
+	public SELF withShowMatchesPosition(boolean showMatchesPosition) {
 		this.showMatchesPosition = showMatchesPosition;
 		return self();
 	}
 
-	public BaseQueryBuilder withFacets(String... facets) {
+	public SELF withFacets(String... facets) {
 		this.facets = facets;
 		return self();
 	}
 
-	public BaseQueryBuilder withShowRankingScore(boolean showRankingScore) {
+	public SELF withShowRankingScore(boolean showRankingScore) {
 		this.showRankingScore = showRankingScore;
 		return self();
 	}
 
-	public BaseQueryBuilder withShowRankingScoreDetails(boolean showRankingScoreDetails) {
+	public SELF withShowRankingScoreDetails(boolean showRankingScoreDetails) {
 		this.showRankingScoreDetails = showRankingScoreDetails;
 		return self();
 	}
 
-	public BaseQueryBuilder withRankingScoreThreshold(Double rankingScoreThreshold) {
+	public SELF withRankingScoreThreshold(Double rankingScoreThreshold) {
 		this.rankingScoreThreshold = rankingScoreThreshold;
 		return self();
 	}
 
-	public BaseQueryBuilder withLocales(String... locales) {
+	public SELF withLocales(String... locales) {
 		this.locales = locales;
 		return self();
 	}
 
-	public BaseQueryBuilder withDistinct(String distinct) {
+	public SELF withDistinct(String distinct) {
 		this.distinct = distinct;
 		return self();
+	}
+
+	@Nullable
+	public String getQ() {
+		return q;
 	}
 
 	@Nullable
@@ -247,7 +258,10 @@ public class BaseQueryBuilder extends QueryBuilder<BaseQuery, BaseQueryBuilder> 
 		return distinct;
 	}
 
-	public BaseQuery build() {
-		return new BaseQuery(this);
+	public abstract Q build();
+
+	private SELF self() {
+		// noinspection unchecked
+		return (SELF) this;
 	}
 }
