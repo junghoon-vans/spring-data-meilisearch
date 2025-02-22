@@ -48,7 +48,7 @@ public class SearchHitSupport {
 		if (result instanceof List<?> list) {
 			return list.stream() //
 					.map(SearchHitSupport::unwrapSearchHits) //
-					.collect(Collectors.toList());
+					.toList();
 		}
 
 		if (result instanceof Stream<?> stream) {

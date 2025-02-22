@@ -70,7 +70,7 @@ public class RequestConverter {
 				.indexUid(query.getIndexUid()) //
 				.federationOptions(convertFederationOptions(query.getFederationOptions())) //
 				.q(query.getQ()) //
-				.page(pageable.getPageNumber()) //
+				.page(pageable.getPageNumber() + 1) //
 				.hitsPerPage(pageable.getPageSize()) //
 				.sort(convertSortToSortOptions(query.getSort())) //
 				.attributesToRetrieve(query.getAttributesToRetrieve()) //
