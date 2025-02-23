@@ -218,8 +218,8 @@ class MeilisearchTemplateIntegrationTests {
 	void shouldMultiSearchWithQuery() {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 
-		List<IndexQuery> queries = List.of(IndexQuery.builder().withQ(movie1.getTitle()).build(),
-				IndexQuery.builder().withQ(movie2.getTitle()).build());
+		List<IndexQuery> queries = List.of(new IndexQuery(movie1.getTitle()),
+				new IndexQuery(movie2.getTitle()));
 		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, Movie.class);
 
 		assertThat(result.getSearchHits()).isEqualTo(List.of(movie1, movie2));
