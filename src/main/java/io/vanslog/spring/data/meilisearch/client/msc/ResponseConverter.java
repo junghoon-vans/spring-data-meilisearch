@@ -15,6 +15,7 @@
  */
 package io.vanslog.spring.data.meilisearch.client.msc;
 
+import com.meilisearch.sdk.model.FacetSearchable;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
@@ -46,7 +47,21 @@ public class ResponseConverter {
 				.toList();
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> List<T> mapHitList(FacetSearchable searchable, Class<?> clazz) {
+		return (List<T>) searchable.getFacetHits().stream() //
+				.map(hit -> objectMapper.convertValue(hit, clazz)) //
+				.toList();
+	}
+
 	public <T> SearchHits<T> mapHits(Searchable searchable, Class<T> clazz) {
+		List<? extends SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
+		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
+		return new SearchHitsImpl<>(executionDuration, searchHits);
+	}
+
+
+	public <T> SearchHits<T> mapHits(FacetSearchable searchable, Class<T> clazz) {
 		List<? extends SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
 		return new SearchHitsImpl<>(executionDuration, searchHits);

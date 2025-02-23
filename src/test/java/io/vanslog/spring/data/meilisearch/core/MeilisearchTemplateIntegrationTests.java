@@ -21,6 +21,7 @@ import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
+import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
@@ -217,7 +218,7 @@ class MeilisearchTemplateIntegrationTests {
 
 	@Test
 	void shouldSearchWithFilter() {
-		meilisearchTemplate.applySettings(Movie.class); // make filterable
+		meilisearchTemplate.applySettings(Movie.class); // make genres filterable
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 
 		BaseQuery query = BasicQuery.builder()
@@ -239,6 +240,17 @@ class MeilisearchTemplateIntegrationTests {
 		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, Movie.class);
 
 		assertThat(result.getSearchHits()).isEqualTo(List.of(movie1, movie2));
+	}
+
+	@Test
+	void shouldFacetSearchWithQuery() {
+		meilisearchTemplate.applySettings(Movie.class); // make genres filterable
+		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
+
+		FacetQuery query = new FacetQuery("genres");
+		SearchHits<FacetHit> result = meilisearchTemplate.facetSearch(query, Movie.class);
+
+		assertThat(result.getSearchHits()).hasSize(4);
 	}
 
 	@Test

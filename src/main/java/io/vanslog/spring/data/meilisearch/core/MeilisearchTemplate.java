@@ -15,6 +15,8 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
+import com.meilisearch.sdk.FacetSearchRequest;
+import com.meilisearch.sdk.model.FacetSearchable;
 import io.vanslog.spring.data.meilisearch.DocumentAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
@@ -28,6 +30,7 @@ import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEnti
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
+import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 
 import java.lang.reflect.Method;
@@ -216,6 +219,14 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		MultiSearchRequest request = requestConverter.searchRequest(queries);
 		Results<MultiSearchResult> results = execute(client -> client.multiSearch(request));
 		return responseConverter.mapResults(results, clazz);
+	}
+
+	@Override
+	public SearchHits<FacetHit> facetSearch(FacetQuery query, Class<T> clazz) {
+		String indexUid = getIndexUidFor(clazz);
+		FacetSearchRequest request = requestConverter.searchRequest(query);
+		FacetSearchable result = execute(client -> client.index(indexUid).facetSearch(request));
+		return responseConverter.mapHits(result, FacetHit.class);
 	}
 
 	public <T> void applySettings(Class<T> clazz) {
