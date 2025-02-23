@@ -19,8 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 
-import com.meilisearch.sdk.model.MatchingStrategy;
-
 public abstract class BaseQueryBuilder<Q extends BaseQuery, SELF extends BaseQueryBuilder<Q, SELF>> {
 
 	@Nullable protected String q;
@@ -97,8 +95,8 @@ public abstract class BaseQueryBuilder<Q extends BaseQuery, SELF extends BaseQue
 	}
 
 	public SELF withMatchingStrategy(MatchingStrategy matchingStrategy) {
-		this.matchingStrategy = matchingStrategy;
-		return self();
+	    this.matchingStrategy = matchingStrategy;
+	    return self();
 	}
 
 	public SELF withAttributesToHighlight(String... attributesToHighlight) {

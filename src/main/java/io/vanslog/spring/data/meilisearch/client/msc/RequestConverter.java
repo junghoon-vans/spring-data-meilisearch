@@ -17,6 +17,7 @@ package io.vanslog.spring.data.meilisearch.client.msc;
 
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
+import io.vanslog.spring.data.meilisearch.core.query.MatchingStrategy;
 
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class RequestConverter {
 				.cropMarker(query.getCropMarker()) //
 				.highlightPreTag(query.getHighlightPreTag()) //
 				.highlightPostTag(query.getHighlightPostTag()) //
-				.matchingStrategy(query.getMatchingStrategy()) //
+				.matchingStrategy(convertMatchingStrategy(query.getMatchingStrategy())) //
 				.attributesToHighlight(query.getAttributesToHighlight()) //
 				.attributesToSearchOn(query.getAttributesToSearchOn()) //
 				.filter(query.getFilter()) //
@@ -79,7 +80,7 @@ public class RequestConverter {
 				.cropMarker(query.getCropMarker()) //
 				.highlightPreTag(query.getHighlightPreTag()) //
 				.highlightPostTag(query.getHighlightPostTag()) //
-				.matchingStrategy(query.getMatchingStrategy()) //
+				.matchingStrategy(convertMatchingStrategy(query.getMatchingStrategy())) //
 				.attributesToHighlight(query.getAttributesToHighlight()) //
 				.attributesToSearchOn(query.getAttributesToSearchOn()) //
 				.filter(query.getFilter()) //
@@ -120,5 +121,19 @@ public class RequestConverter {
 		FederationOptions options = new FederationOptions();
 		options.setWeight(federationOptions.getWeight());
 		return options;
+	}
+
+	@Nullable
+	private com.meilisearch.sdk.model.MatchingStrategy convertMatchingStrategy(
+			@Nullable MatchingStrategy matchingStrategy) {
+		if (matchingStrategy == null) {
+			return null;
+		}
+
+		return switch (matchingStrategy) {
+			case ALL -> com.meilisearch.sdk.model.MatchingStrategy.ALL;
+			case LAST -> com.meilisearch.sdk.model.MatchingStrategy.LAST;
+			case FREQUENCY -> com.meilisearch.sdk.model.MatchingStrategy.FREQUENCY;
+		};
 	}
 }

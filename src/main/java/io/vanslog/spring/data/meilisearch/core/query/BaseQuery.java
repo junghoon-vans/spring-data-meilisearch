@@ -21,8 +21,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-import com.meilisearch.sdk.model.MatchingStrategy;
-
 public class BaseQuery implements Query {
 
 	static int DEFAULT_PAGE_SIZE = 10;
