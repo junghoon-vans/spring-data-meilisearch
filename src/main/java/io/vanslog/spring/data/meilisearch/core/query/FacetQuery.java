@@ -83,38 +83,46 @@ public class FacetQuery implements Query {
 		this.q = q;
 	}
 
+	@Override
 	@Nullable
 	public String[] getFilter() {
 		return filter;
 	}
 
+	@Override
 	public void setFilter(@Nullable String[] filter) {
 		this.filter = filter;
 	}
 
+	@Override
 	@Nullable
 	public String[][] getFilterArray() {
 		return filterArray;
 	}
 
+	@Override
 	public void setFilterArray(@Nullable String[][] filterArray) {
 		this.filterArray = filterArray;
 	}
 
+	@Override
 	@Nullable
 	public MatchingStrategy getMatchingStrategy() {
 		return matchingStrategy;
 	}
 
+	@Override
 	public void setMatchingStrategy(@Nullable MatchingStrategy matchingStrategy) {
 		this.matchingStrategy = matchingStrategy;
 	}
 
+	@Override
 	@Nullable
 	public String[] getAttributesToSearchOn() {
 		return attributesToSearchOn;
 	}
 
+	@Override
 	public void setAttributesToSearchOn(@Nullable String[] attributesToSearchOn) {
 		this.attributesToSearchOn = attributesToSearchOn;
 	}
