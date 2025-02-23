@@ -46,14 +46,14 @@ public class ResponseConverter {
 				.toList();
 	}
 
-	public <T> SearchHits<T> mapHits(Searchable searchable, Class<?> clazz, long count) {
+	public <T> SearchHits<T> mapHits(Searchable searchable, Class<?> clazz) {
 		List<? extends SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
-		return new SearchHitsImpl<>(executionDuration, searchHits, count);
+		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> SearchHits<T> mapResults(Results<MultiSearchResult> results, Class<?> clazz, long count) {
+	public <T> SearchHits<T> mapResults(Results<MultiSearchResult> results, Class<?> clazz) {
 		MultiSearchResult[] multiSearchResults = results.getResults();
 		List<? extends SearchHit<T>> searchHits = (List<? extends SearchHit<T>>) Arrays.stream(multiSearchResults)
 				.flatMap(result -> result.getHits().stream()) //
@@ -63,6 +63,6 @@ public class ResponseConverter {
 				.mapToInt(MultiSearchResult::getProcessingTimeMs).max().orElse(0);
 		Duration executionDuration = Duration.ofMillis(maxProcessingTime);
 
-		return new SearchHitsImpl<>(executionDuration, searchHits, count);
+		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 }

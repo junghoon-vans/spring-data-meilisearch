@@ -8,21 +8,14 @@ import org.springframework.data.util.Lazy;
 
 public class SearchHitsImpl<T> implements SearchHits<T> {
 
-	private final long totalHits;
 	private final Duration executionDuration;
 	private final List<? extends SearchHit<T>> searchHits;
 	private final Lazy<List<SearchHit<T>>> unmodifiableSearchHits;
 
-	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits, long totalHits) {
+	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits) {
 		this.executionDuration = executionDuration;
 		this.searchHits = searchHits;
-		this.totalHits = totalHits;
 		this.unmodifiableSearchHits = Lazy.of(() -> Collections.unmodifiableList(searchHits));
-	}
-
-	@Override
-	public long getTotalHits() {
-		return totalHits;
 	}
 
 	@Override
@@ -43,8 +36,7 @@ public class SearchHitsImpl<T> implements SearchHits<T> {
 	@Override
 	public String toString() {
 		return "SearchHits{" + //
-				"totalHits=" + totalHits + //
-				", executionDuration=" + executionDuration + //
+				"executionDuration=" + executionDuration + //
 				", searchHits={" + searchHits.size() + " elements}" + //
 				'}';
 	}
