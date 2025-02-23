@@ -168,8 +168,8 @@ class MeilisearchRepositoryIntegrationTests {
 		movieRepository.deleteAll(List.of(movie1, movie2));
 
 		// then
-		List<Movie> saved = (List<Movie>) movieRepository.findAll();
-		assertThat(saved.size()).isEqualTo(1);
+		Iterable<Movie> saved = movieRepository.findAll();
+		assertThat(saved).hasSize(1);
 	}
 
 	@Test
@@ -203,8 +203,8 @@ class MeilisearchRepositoryIntegrationTests {
 		movieRepository.deleteAllById(List.of(documentId1, documentId2));
 
 		// then
-		List<Movie> saved = (List<Movie>) movieRepository.findAll();
-		assertThat(saved.size()).isEqualTo(1);
+		Iterable<Movie> saved = movieRepository.findAll();
+		assertThat(saved).hasSize(1);
 	}
 
 	@Test

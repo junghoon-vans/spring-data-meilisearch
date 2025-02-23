@@ -46,8 +46,8 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 	private final StandardEvaluationContext context;
 	@Nullable private final Document document;
 	private final Lazy<SettingsParameter> settingParameter;
-	@Nullable private String indexUid;
 	private final boolean applySettings;
+	@Nullable private String indexUid;
 
 	/**
 	 * Creates a new {@link SimpleMeilisearchPersistentEntity} with the given {@link TypeInformation}.

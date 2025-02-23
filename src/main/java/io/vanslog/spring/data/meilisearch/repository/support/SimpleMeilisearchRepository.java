@@ -16,21 +16,27 @@
 package io.vanslog.spring.data.meilisearch.repository.support;
 
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.core.SearchHit;
+import io.vanslog.spring.data.meilisearch.core.SearchHitSupport;
+import io.vanslog.spring.data.meilisearch.core.SearchHits;
+import io.vanslog.spring.data.meilisearch.core.SearchPage;
+import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
+import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-
-import com.meilisearch.sdk.SearchRequest;
 
 /**
  * Meilisearch specific repository implementation.
@@ -127,43 +133,44 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 
 	@Override
 	public Iterable<T> findAll() {
-		SearchRequest searchRequest = SearchRequest.builder() //
-				.limit((int) meilisearchOperations.count(entityType)) //
-				.build();
+		int itemCount = (int) this.count();
 
-		return meilisearchOperations.search(searchRequest, entityType);
+		if (itemCount == 0) {
+			return new PageImpl<>(Collections.emptyList());
+		}
+		return this.findAll(PageRequest.of(0, Math.max(1, itemCount)));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Iterable<T> findAll(Sort sort) {
 		Assert.notNull(sort, "sort must not be null");
 
-		String[] sortOptions = convertSortToSortOptions(sort);
-		SearchRequest searchRequest = SearchRequest.builder() //
-				.limit((int) meilisearchOperations.count(entityType)) //
-				.sort(sortOptions).build();
+		int itemCount = (int) this.count();
+		if (itemCount == 0) {
+			return new PageImpl<>(Collections.emptyList());
+		}
 
-		return meilisearchOperations.search(searchRequest, entityType);
+		BaseQuery query = BasicQuery.builder() //
+				.withSort(sort) //
+				.withPageable(PageRequest.of(0, Math.max(1, itemCount))) //
+				.build();
+
+		SearchHits<T> searchHits = meilisearchOperations.search(query, entityType);
+		List<SearchHit<T>> searchHitList = searchHits.getSearchHits();
+		// noinspection ConstantConditions
+		return (List<T>) SearchHitSupport.unwrapSearchHits(searchHitList);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Page<T> findAll(Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
-
-		int intOffset = Math.toIntExact(pageable.getOffset());
-		String[] sortOptions = convertSortToSortOptions(pageable.getSort());
-		SearchRequest searchRequest = SearchRequest.builder() //
-				.limit(pageable.getPageSize()) //
-				.offset(intOffset) //
-				.sort(sortOptions).build();
-
-		List<T> entities = meilisearchOperations.search(searchRequest, entityType);
-		return new PageImpl<>(entities, pageable, meilisearchOperations.count(entityType));
-	}
-
-	private String[] convertSortToSortOptions(Sort sort) {
-		return sort.stream().map(order -> order.getProperty() + ":" + (order.isAscending() ? "asc" : "desc"))
-				.toArray(String[]::new);
+		BaseQuery query = BasicQuery.builder().withPageable(pageable).build();
+		SearchHits<T> searchHits = meilisearchOperations.search(query, entityType);
+		SearchPage<T> page = SearchHitSupport.searchPageFor(searchHits, query.getPageable());
+		// noinspection ConstantConditions
+		return (Page<T>) SearchHitSupport.unwrapSearchHits(page);
 	}
 
 	protected @Nullable String stringIdRepresentation(@Nullable ID id) {
