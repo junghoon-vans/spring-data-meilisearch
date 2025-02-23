@@ -24,11 +24,6 @@ import org.springframework.data.util.Streamable;
 public interface SearchHits<T> extends Streamable<SearchHit<T>> {
 
 	/**
-	 * @return the number of total hits.
-	 */
-	long getTotalHits();
-
-	/**
 	 * @return whether the {@link SearchHits} has search hits.
 	 */
 	default boolean hasSearchHits() {

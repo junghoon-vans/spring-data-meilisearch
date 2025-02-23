@@ -61,16 +61,16 @@ public class SearchHitSupport {
 		return result;
 	}
 
-	public static <T> SearchPage<T> searchPageFor(SearchHits<T> searchHits, @Nullable Pageable pageable) {
-		return new SearchPageImpl<>(searchHits, (pageable != null) ? pageable : Pageable.unpaged());
+	public static <T> SearchPage<T> searchPageFor(SearchHits<T> searchHits, @Nullable Pageable pageable, long total) {
+		return new SearchPageImpl<>(searchHits, (pageable != null) ? pageable : Pageable.unpaged(), total);
 	}
 
 	static class SearchPageImpl<T> extends PageImpl<SearchHit<T>> implements SearchPage<T> {
 
 		private final SearchHits<T> searchHits;
 
-		public SearchPageImpl(SearchHits<T> searchHits, Pageable pageable) {
-			super(searchHits.getSearchHits(), pageable, searchHits.getTotalHits());
+		public SearchPageImpl(SearchHits<T> searchHits, Pageable pageable, long total) {
+			super(searchHits.getSearchHits(), pageable, total);
 			this.searchHits = searchHits;
 		}
 

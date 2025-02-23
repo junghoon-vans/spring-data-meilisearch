@@ -168,7 +168,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 		Assert.notNull(pageable, "pageable must not be null");
 		BaseQuery query = BasicQuery.builder().withPageable(pageable).build();
 		SearchHits<T> searchHits = meilisearchOperations.search(query, entityType);
-		SearchPage<T> page = SearchHitSupport.searchPageFor(searchHits, query.getPageable());
+		SearchPage<T> page = SearchHitSupport.searchPageFor(searchHits, query.getPageable(), this.count());
 		// noinspection ConstantConditions
 		return (Page<T>) SearchHitSupport.unwrapSearchHits(page);
 	}
