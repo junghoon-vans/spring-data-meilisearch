@@ -11,12 +11,9 @@ Spring Data Meilisearch provides basic search functionality through the `search`
 ====
 [source,java]
 ----
-private MeilisearchOperations operations;
+import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;private MeilisearchOperations operations;
 
-BaseQuery query = SimpleQuery.builder()
-    .withQ("action")
-    .build();
-
+BaseQuery query = new BasicQuery("action");
 SearchHits<Movie> results = operations.search(query, Movie.class);
 ----
 ====
@@ -29,15 +26,11 @@ For scenarios where multiple search queries need to be executed in a single requ
 ====
 [source,java]
 ----
-private MeilisearchOperations operations;
+import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;private MeilisearchOperations operations;
 
 List<IndexQuery> queries = List.of(
-    IndexQuery.builder()
-        .withQ("action")
-        .build(),
-    IndexQuery.builder()
-        .withQ("drama")
-        .build()
+    new IndexQuery("action"),
+    new IndexQuery("drama")
 );
 
 SearchHits<Movie> results = operations.multiSearch(queries, Movie.class);

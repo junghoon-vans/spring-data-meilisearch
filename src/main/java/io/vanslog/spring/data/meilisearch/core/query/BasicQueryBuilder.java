@@ -15,11 +15,11 @@
  */
 package io.vanslog.spring.data.meilisearch.core.query;
 
-public class SimpleQueryBuilder extends BaseQueryBuilder<SimpleQuery, SimpleQueryBuilder> {
+public class BasicQueryBuilder extends BaseQueryBuilder<BasicQuery, BasicQueryBuilder> {
 
-	public SimpleQueryBuilder() {}
+	public BasicQueryBuilder() {}
 
-	public SimpleQuery build() {
-		return new SimpleQuery(this);
+	public BasicQuery build() {
+		return new BasicQuery(this);
 	}
 }

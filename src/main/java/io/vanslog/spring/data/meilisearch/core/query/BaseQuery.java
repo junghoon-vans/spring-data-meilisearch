@@ -21,7 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-public class BaseQuery implements Query {
+public abstract class BaseQuery implements Query {
 
 	static int DEFAULT_PAGE_SIZE = 10;
 	static Pageable DEFAULT_PAGE = PageRequest.of(0, DEFAULT_PAGE_SIZE);
