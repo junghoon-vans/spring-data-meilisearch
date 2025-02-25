@@ -29,14 +29,11 @@ public class FacetQuery implements Query {
 	@Nullable protected String[] attributesToSearchOn;
 
 	public FacetQuery(String facetName) {
-		Assert.notNull(facetName, "facetName must not be null");
-		this.facetName = facetName;
+		this(builder().withFacetName(facetName));
 	}
 
 	public FacetQuery(String facetName, String q) {
-		Assert.notNull(facetName, "facetName must not be null");
-		this.facetName = facetName;
-		this.q = q;
+		this(builder().withFacetName(facetName).withQ(q));
 	}
 
 	public FacetQuery(FacetQueryBuilder builder) {
