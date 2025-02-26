@@ -1,38 +1,123 @@
-[[meilisearch.misc]]
-= Meilisearch Operation Support
+[[meilisearch.operations]]
+= Meilisearch Operations
 
-This chapter covers additional support for Meilisearch operations that cannot be directly accessed via the repository interface.
+Spring Data Meilisearch uses several interfaces to define the operations that can be called against a Meilisearch index.
 
-[[meilisearch.operations.search]]
-== Basic Search
+* `DocumentOperations` defines actions to store, update and retrieve entities based on their id.
+* `SearchOperations` define the actions to search for multiple entities using queries
+* `MeilisearchOperations` combines the `DocumentOperations` and `SearchOperations` interfaces.
 
-Spring Data Meilisearch provides basic search functionality through the `search` method:
+These interfaces correspond to the structuring of the https://www.meilisearch.com/docs/reference/api/overview[Meilisearch API].
+
+The default implementations of the interfaces offer:
+
+* Read/Write mapping support for domain types
+* A rich query API
+* Resource management and Exception translation
+
+[[meilisearch.operations.usage]]
+== Usage examples
+
+The example shows how to use an injected `MeilisearchOperations` instance in a Spring REST controller.
+The example assumes that `Movie` is a class that is annotated with `@Document`, `@Id` etc.
+
+.MeilisearchOperations usage
+====
+[source,java]
+----
+@RestController
+@RequestMapping("/")
+public class MovieController {
+
+  private MeilisearchOperations meilisearchOperations;
+
+  public MovieController(MeilisearchOperations meilisearchOperations) { <.>
+    this.meilisearchOperations = meilisearchOperations;
+  }
+
+  @PostMapping("/movie")
+  public String save(@RequestBody Movie movie) {                        <.>
+    Movie savedEntity = meilisearchOperations.save(movie);
+    return savedEntity.getId();
+  }
+
+  @GetMapping("/movie/{id}")
+  public Movie findById(@PathVariable("id") String id) {               <.>
+    return meilisearchOperations.get(id, Movie.class);
+  }
+}
+----
+
+<.> Let Spring inject the provided `MeilisearchOperations` bean in the constructor
+<.> Store a movie in the Meilisearch instance
+<.> Retrieve the movie with a get by id
+====
+
+[[meilisearch.operations.searchresulttypes]]
+== Search Result Types
+
+When searching with the methods of the `SearchOperations` interface, additional information is available for each entity.
+
+The following classes and interfaces are available:
+
+.SearchHit<T>
+Contains the following information:
+
+* The retrieved entity of type <T>
+
+.SearchHits<T>
+Contains the following information:
+
+* A list of `SearchHit<T>` objects
+* Processing time
+* Query information
+
+[[meilisearch.operations.queries]]
+== Queries
+
+The `SearchOperations` interface methods take different `Query` parameters that define the query to execute. Spring Data Meilisearch provides several implementations: `BasicQuery`, `IndexQuery`, and `FacetQuery`.
+
+[[meilisearch.operations.basicquery]]
+=== BasicQuery
+
+`BasicQuery` is the standard implementation for simple search queries:
+
+.Search for movies with a given title
+====
+[source,java]
+----
+Query query = BasicQuery.builder()
+    .withQ("Wonder Woman")
+    .build();
+----
+====
+
+[[meilisearch.operations.indexquery]]
+=== IndexQuery
+
+`IndexQuery` is used for multi-search operations:
 
 ====
 [source,java]
 ----
-import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;private MeilisearchOperations operations;
-
-BaseQuery query = new BasicQuery("action");
-SearchHits<Movie> results = operations.search(query, Movie.class);
-----
-====
-
-[[meilisearch.operations.multi-search]]
-== Multi-Search Support
-
-For scenarios where multiple search queries need to be executed in a single request, you can use the multi-search API:
-
-====
-[source,java]
-----
-import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;private MeilisearchOperations operations;
-
 List<IndexQuery> queries = List.of(
-    new IndexQuery("action"),
-    new IndexQuery("drama")
+    new IndexQuery("Wonder Woman"),
+    new IndexQuery("Batman")
 );
+----
+====
 
-SearchHits<Movie> results = operations.multiSearch(queries, Movie.class);
+[[meilisearch.operations.facetquery]]
+=== FacetQuery
+
+`FacetQuery` is used for faceted search operations:
+
+====
+[source,java]
+----
+FacetQuery query = FacetQuery.builder()
+    .withFacetName("genres")
+    .withFacetQuery("act")
+    .build();
 ----
 ====

@@ -113,12 +113,14 @@ public abstract class BaseQuery implements Query {
 		return (T) this;
 	}
 
+	@Override
 	@Nullable
 	public String getQ() {
 		return q;
 	}
 
-	public void setQ(String q) {
+	@Override
+	public void setQ(@Nullable String q) {
 		this.q = q;
 	}
 
@@ -176,11 +178,13 @@ public abstract class BaseQuery implements Query {
 		this.highlightPostTag = highlightPostTag;
 	}
 
+	@Override
 	@Nullable
 	public MatchingStrategy getMatchingStrategy() {
 		return matchingStrategy;
 	}
 
+	@Override
 	public void setMatchingStrategy(MatchingStrategy matchingStrategy) {
 		this.matchingStrategy = matchingStrategy;
 	}
@@ -194,29 +198,35 @@ public abstract class BaseQuery implements Query {
 		this.attributesToHighlight = attributesToHighlight;
 	}
 
+	@Override
 	@Nullable
 	public String[] getAttributesToSearchOn() {
 		return attributesToSearchOn;
 	}
 
+	@Override
 	public void setAttributesToSearchOn(String[] attributesToSearchOn) {
 		this.attributesToSearchOn = attributesToSearchOn;
 	}
 
+	@Override
 	@Nullable
 	public String[] getFilter() {
 		return filter;
 	}
 
+	@Override
 	public void setFilter(String[] filter) {
 		this.filter = filter;
 	}
 
+	@Override
 	@Nullable
 	public String[][] getFilterArray() {
 		return filterArray;
 	}
 
+	@Override
 	public void setFilterArray(String[][] filterArray) {
 		this.filterArray = filterArray;
 	}

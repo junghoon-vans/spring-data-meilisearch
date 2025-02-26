@@ -15,7 +15,9 @@
  */
 package io.vanslog.spring.data.meilisearch.client.msc;
 
+import com.meilisearch.sdk.FacetSearchRequest;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
+import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 import io.vanslog.spring.data.meilisearch.core.query.MatchingStrategy;
 
@@ -99,6 +101,18 @@ public class RequestConverter {
 		MultiSearchRequest request = new MultiSearchRequest();
 		queries.forEach(query -> request.addQuery(searchRequest(query)));
 		return request;
+	}
+
+	public FacetSearchRequest searchRequest(FacetQuery query) {
+		return FacetSearchRequest.builder() //
+				.facetName(query.getFacetName()) //
+				.facetQuery(query.getFacetQuery()) //
+				.q(query.getQ()) //
+				.filter(query.getFilter()) //
+				.filterArray(query.getFilterArray()) //
+				.matchingStrategy(convertMatchingStrategy(query.getMatchingStrategy()))
+				.attributesToSearchOn(query.getAttributesToSearchOn()) //
+				.build();
 	}
 
 	@Nullable

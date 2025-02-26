@@ -37,5 +37,65 @@ public interface Query {
 	 *
 	 * @param q search query text
 	 */
-	void setQ(String q);
+	void setQ(@Nullable String q);
+
+	/**
+	 * Get the search filter
+	 * 
+	 * @return null if not set
+	 */
+	@Nullable
+	String[] getFilter();
+
+	/**
+	 * Set the search filter
+	 *
+	 * @param filter search filter
+	 */
+	void setFilter(@Nullable String[] filter);
+
+	/**
+	 * Get the search filter array
+	 * 
+	 * @return null if not set
+	 */
+	@Nullable
+	String[][] getFilterArray();
+
+	/**
+	 * Set the search filter array
+	 *
+	 * @param filterArray search filter array
+	 */
+	void setFilterArray(@Nullable String[][] filterArray);
+
+	/**
+	 * Get the search sort
+	 *
+	 * @return null if not set
+	 */
+	@Nullable
+	MatchingStrategy getMatchingStrategy();
+
+	/**
+	 * Set the search sort
+	 *
+	 * @param matchingStrategy search sort
+	 */
+	void setMatchingStrategy(@Nullable MatchingStrategy matchingStrategy);
+
+	/**
+	 * Get the search attributes
+	 *
+	 * @return null if not set
+	 */
+	@Nullable
+	String[] getAttributesToSearchOn();
+
+	/**
+	 * Set the search attributes
+	 *
+	 * @param attributesToSearchOn search attributes
+	 */
+	void setAttributesToSearchOn(@Nullable String[] attributesToSearchOn);
 }
