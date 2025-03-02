@@ -15,11 +15,13 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
+import java.util.List;
+
+import com.meilisearch.sdk.MultiSearchFederation;
+
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
-
-import java.util.List;
 
 /**
  * The operations for the below Meilisearch APIs.
@@ -65,6 +67,20 @@ public interface SearchOperations {
 	 * @return the list of entities found by the queries
 	 */
 	<T, Q extends BaseQuery> SearchHits<T> multiSearch(List<Q> queries, Class<T> clazz);
+
+	/**
+	 * Execute the multi search query against meilisearch and return the result.
+	 *
+	 * @param queries the list of queries to execute
+	 * @param federation the federation to execute
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @param <T> the type of the entity
+	 * @param <Q> the type of query extending BaseQuery. When using {@link IndexQuery}, multi-index search and federated
+	 *          search capabilities are available.
+	 * @return the list of entities found by the queries
+	 */
+	<T, Q extends BaseQuery> SearchHits<T> multiSearch(List<Q> queries, MultiSearchFederation federation, Class<T> clazz);
 
 	/**
 	 * Execute the facet search query against meilisearch and return the result.

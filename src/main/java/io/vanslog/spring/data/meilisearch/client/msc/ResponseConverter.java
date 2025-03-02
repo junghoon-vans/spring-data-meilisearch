@@ -15,10 +15,6 @@
  */
 package io.vanslog.spring.data.meilisearch.client.msc;
 
-import io.vanslog.spring.data.meilisearch.core.SearchHit;
-import io.vanslog.spring.data.meilisearch.core.SearchHits;
-import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +24,10 @@ import com.meilisearch.sdk.model.FacetSearchable;
 import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.Searchable;
+
+import io.vanslog.spring.data.meilisearch.core.SearchHit;
+import io.vanslog.spring.data.meilisearch.core.SearchHits;
+import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
 
 /**
  * Class to convert Meilisearch classes into Spring Data Meilisearch responses.
@@ -66,6 +66,15 @@ public class ResponseConverter {
 	public <T> SearchHits<T> mapHits(FacetSearchable searchable, Class<T> clazz) {
 		List<SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
+		return new SearchHitsImpl<>(executionDuration, searchHits);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> SearchHits<T> mapResult(MultiSearchResult result, Class<T> clazz) {
+		List<? extends SearchHit<T>> searchHits = (List<? extends SearchHit<T>>) result.getHits().stream()
+				.map(hit -> objectMapper.convertValue(hit, clazz)).toList();
+
+		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
 		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 
