@@ -54,7 +54,7 @@ public interface SearchOperations {
 	 * @param <T> the type of the entity
 	 */
 	@Deprecated
-	<T> List<T> search(SearchRequest searchRequest, Class<?> clazz);
+	<T> List<T> search(SearchRequest searchRequest, Class<T> clazz);
 
 	/**
 	 * Search for entities that meet the criteria using Spring Data style query. Note that by default,
@@ -67,7 +67,7 @@ public interface SearchOperations {
 	 * @return the entities found by the query
 	 * @param <T> the type of the entity
 	 */
-	<T> SearchHits<T> search(BaseQuery query, Class<?> clazz);
+	<T> SearchHits<T> search(BaseQuery query, Class<T> clazz);
 
 	/**
 	 * Execute the multi search query against meilisearch and return the result.
@@ -77,5 +77,5 @@ public interface SearchOperations {
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
 	 * @return the list of entities found by the queries
 	 */
-	<T> SearchHits<T> multiSearch(List<IndexQuery> queries, Class<?> clazz);
+	<T> SearchHits<T> multiSearch(List<IndexQuery> queries, Class<T> clazz);
 }
