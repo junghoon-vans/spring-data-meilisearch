@@ -221,22 +221,18 @@ class MeilisearchTemplateIntegrationTests {
 		meilisearchTemplate.applySettings(Movie.class); // make genres filterable
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 
-		BaseQuery query = BasicQuery.builder()
-				.withFilter(new String[]{"genres = Drama"})
-				.build();
+		BaseQuery query = BasicQuery.builder().withFilter(new String[] { "genres = Drama" }).build();
 
 		SearchHits<Movie> result = meilisearchTemplate.search(query, Movie.class);
 
 		assertThat(result.getSearchHits()).isEqualTo(List.of(movie1, movie3));
 	}
 
-
 	@Test
 	void shouldMultiSearchWithQuery() {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 
-		List<IndexQuery> queries = List.of(new IndexQuery(movie1.getTitle()),
-				new IndexQuery(movie2.getTitle()));
+		List<IndexQuery> queries = List.of(new IndexQuery(movie1.getTitle()), new IndexQuery(movie2.getTitle()));
 		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, Movie.class);
 
 		assertThat(result.getSearchHits()).isEqualTo(List.of(movie1, movie2));

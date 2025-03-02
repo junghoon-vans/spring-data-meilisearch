@@ -16,9 +16,9 @@
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
 import org.springframework.data.mapping.PersistentEntity;
+import org.springframework.lang.Nullable;
 
 import com.meilisearch.sdk.model.Settings;
-import org.springframework.lang.Nullable;
 
 /**
  * Meilisearch specific {@link org.springframework.data.mapping.PersistentEntity} abstraction.

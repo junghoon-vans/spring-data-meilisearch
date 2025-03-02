@@ -18,6 +18,8 @@ package io.vanslog.spring.data.meilisearch.core.query;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.meilisearch.sdk.model.MatchingStrategy;
+
 public class FacetQuery implements Query {
 
 	@Nullable protected String facetName;

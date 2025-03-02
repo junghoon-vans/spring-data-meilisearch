@@ -75,7 +75,8 @@ Contains the following information:
 [[meilisearch.operations.queries]]
 == Queries
 
-The `SearchOperations` interface methods take different `Query` parameters that define the query to execute. Spring Data Meilisearch provides several implementations: `BasicQuery`, `IndexQuery`, and `FacetQuery`.
+The `SearchOperations` interface methods take different `Query` parameters that define the query to execute.
+Spring Data Meilisearch provides several implementations: `BasicQuery`, `IndexQuery`, and `FacetQuery`.
 
 [[meilisearch.operations.basicquery]]
 === BasicQuery

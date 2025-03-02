@@ -17,87 +17,89 @@ package io.vanslog.spring.data.meilisearch.core.query;
 
 import org.springframework.lang.Nullable;
 
+import com.meilisearch.sdk.model.MatchingStrategy;
+
 public class FacetQueryBuilder {
 
-    @Nullable protected String facetName;
-    @Nullable protected String facetQuery;
-    @Nullable protected String q;
-    @Nullable protected String[] filter;
-    @Nullable protected String[][] filterArray;
-    @Nullable protected MatchingStrategy matchingStrategy;
-    @Nullable protected String[] attributesToSearchOn;
+	@Nullable protected String facetName;
+	@Nullable protected String facetQuery;
+	@Nullable protected String q;
+	@Nullable protected String[] filter;
+	@Nullable protected String[][] filterArray;
+	@Nullable protected MatchingStrategy matchingStrategy;
+	@Nullable protected String[] attributesToSearchOn;
 
-    public FacetQueryBuilder() {}
+	public FacetQueryBuilder() {}
 
-    public FacetQueryBuilder withFacetName(String facetName) {
-        this.facetName = facetName;
-        return this;
-    }
+	public FacetQueryBuilder withFacetName(String facetName) {
+		this.facetName = facetName;
+		return this;
+	}
 
-    public FacetQueryBuilder withFacetQuery(String facetQuery) {
-        this.facetQuery = facetQuery;
-        return this;
-    }
+	public FacetQueryBuilder withFacetQuery(String facetQuery) {
+		this.facetQuery = facetQuery;
+		return this;
+	}
 
-    public FacetQueryBuilder withQ(String q) {
-        this.q = q;
-        return this;
-    }
+	public FacetQueryBuilder withQ(String q) {
+		this.q = q;
+		return this;
+	}
 
-    public FacetQueryBuilder withFilter(String[] filter) {
-        this.filter = filter;
-        return this;
-    }
+	public FacetQueryBuilder withFilter(String[] filter) {
+		this.filter = filter;
+		return this;
+	}
 
-    public FacetQueryBuilder withFilterArray(String[][] filterArray) {
-        this.filterArray = filterArray;
-        return this;
-    }
+	public FacetQueryBuilder withFilterArray(String[][] filterArray) {
+		this.filterArray = filterArray;
+		return this;
+	}
 
-    public FacetQueryBuilder withMatchingStrategy(MatchingStrategy matchingStrategy) {
-        this.matchingStrategy = matchingStrategy;
-        return this;
-    }
+	public FacetQueryBuilder withMatchingStrategy(MatchingStrategy matchingStrategy) {
+		this.matchingStrategy = matchingStrategy;
+		return this;
+	}
 
-    public FacetQueryBuilder withAttributesToSearchOn(String[] attributesToSearchOn) {
-        this.attributesToSearchOn = attributesToSearchOn;
-        return this;
-    }
+	public FacetQueryBuilder withAttributesToSearchOn(String[] attributesToSearchOn) {
+		this.attributesToSearchOn = attributesToSearchOn;
+		return this;
+	}
 
-    @Nullable
-    public String getFacetName() {
-        return facetName;
-    }
+	@Nullable
+	public String getFacetName() {
+		return facetName;
+	}
 
-    @Nullable
-    public String getFacetQuery() {
-        return facetQuery;
-    }
+	@Nullable
+	public String getFacetQuery() {
+		return facetQuery;
+	}
 
-    @Nullable
-    public String getQ() {
-        return q;
-    }
+	@Nullable
+	public String getQ() {
+		return q;
+	}
 
-    @Nullable
-    public String[] getFilter() {
-        return filter;
-    }
+	@Nullable
+	public String[] getFilter() {
+		return filter;
+	}
 
-    @Nullable
-    public String[][] getFilterArray() {
-        return filterArray;
-    }
+	@Nullable
+	public String[][] getFilterArray() {
+		return filterArray;
+	}
 
-    @Nullable
-    public MatchingStrategy getMatchingStrategy() {
-        return matchingStrategy;
-    }
+	@Nullable
+	public MatchingStrategy getMatchingStrategy() {
+		return matchingStrategy;
+	}
 
-    @Nullable
-    public String[] getAttributesToSearchOn() {
-        return attributesToSearchOn;
-    }
+	@Nullable
+	public String[] getAttributesToSearchOn() {
+		return attributesToSearchOn;
+	}
 
 	public FacetQuery build() {
 		return new FacetQuery(this);

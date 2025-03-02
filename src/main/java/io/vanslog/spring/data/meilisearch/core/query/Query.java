@@ -17,6 +17,8 @@ package io.vanslog.spring.data.meilisearch.core.query;
 
 import org.springframework.lang.Nullable;
 
+import com.meilisearch.sdk.model.MatchingStrategy;
+
 /**
  * Query interface for Meilisearch operations
  *

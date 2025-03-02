@@ -43,7 +43,12 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = SortableMeilisearchRepositoryIntegrationTests.Config.class)
 class SortableMeilisearchRepositoryIntegrationTests {
 
-	@Autowired private SortableMovieRepository movieRepository;
+	private SortableMovieRepository movieRepository;
+
+	@Autowired
+	void SortableMeilisearchRepositoryIntegrationTests(SortableMovieRepository movieRepository) {
+		this.movieRepository = movieRepository;
+	}
 
 	@BeforeEach
 	void setUp() {

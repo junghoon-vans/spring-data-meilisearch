@@ -1,3 +1,4 @@
 package io.vanslog.spring.data.meilisearch.core;
 
-public record FacetHit(String value, int count) {}
+public record FacetHit(String value, int count) {
+}
