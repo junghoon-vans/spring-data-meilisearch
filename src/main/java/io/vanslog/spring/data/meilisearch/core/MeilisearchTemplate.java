@@ -226,7 +226,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		TaskInfo taskInfo = execute(client -> client.index(indexUid).updateSettings(settings));
 
 		if (!isTaskSucceeded(indexUid, taskInfo)) {
-			throw new TaskStatusException(taskInfo.getStatus(), "Failed to create index.");
+			throw new TaskStatusException(taskInfo.getStatus(), "Failed to apply settings");
 		}
 	}
 
