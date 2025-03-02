@@ -16,6 +16,7 @@
 package io.vanslog.spring.data.meilisearch.core;
 
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
+import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 
 import java.util.List;
@@ -78,4 +79,14 @@ public interface SearchOperations {
 	 * @return the list of entities found by the queries
 	 */
 	<T> SearchHits<T> multiSearch(List<IndexQuery> queries, Class<T> clazz);
+
+	/**
+	 * Execute the facet search query against meilisearch and return the result.
+	 *
+	 * @param query the facet query to execute
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @return the list of entities found by the query
+	 */
+	SearchHits<FacetHit> facetSearch(FacetQuery query, Class<?> clazz);
 }
