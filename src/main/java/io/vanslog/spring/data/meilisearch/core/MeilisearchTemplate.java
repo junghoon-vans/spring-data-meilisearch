@@ -42,6 +42,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.meilisearch.sdk.FacetSearchRequest;
+import com.meilisearch.sdk.MultiSearchFederation;
 import com.meilisearch.sdk.MultiSearchRequest;
 import com.meilisearch.sdk.SearchRequest;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
@@ -219,6 +220,14 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		MultiSearchRequest request = requestConverter.searchRequest(queries);
 		Results<MultiSearchResult> results = execute(client -> client.multiSearch(request));
 		return responseConverter.mapResults(results, clazz);
+	}
+
+	public <T> SearchHits<T> multiSearch(List<IndexQuery> queries, MultiSearchFederation federation, Class<T> clazz) {
+		String indexUid = getIndexUidFor(clazz);
+		queries.forEach(query -> query.setIndexUid(indexUid));
+		MultiSearchRequest request = requestConverter.searchRequest(queries);
+		MultiSearchResult result = execute(client -> client.multiSearch(request, federation));
+		return responseConverter.mapResult(result, clazz);
 	}
 
 	@Override
