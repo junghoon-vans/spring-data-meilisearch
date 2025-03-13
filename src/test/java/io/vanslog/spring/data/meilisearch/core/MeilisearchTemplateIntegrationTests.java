@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 
-import com.meilisearch.sdk.SearchRequest;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 
 /**
@@ -196,24 +195,15 @@ class MeilisearchTemplateIntegrationTests {
 	}
 
 	@Test
-	void shouldSearchDocuments() {
-
-		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
-
-		SearchRequest searchRequest = new SearchRequest("Wonder");
-		List<Movie> result = meilisearchTemplate.search(searchRequest, Movie.class);
-
-		assertThat(result).containsExactlyInAnyOrder(movie2);
-	}
-
-	@Test
 	void shouldSearchWithQuery() {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 
 		BaseQuery query = new BasicQuery(movie2.getTitle());
 		SearchHits<Movie> result = meilisearchTemplate.search(query, Movie.class);
+		List<SearchHit<Movie>> searchHits = result.getSearchHits();
+		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
 
-		assertThat(result.getSearchHits()).isEqualTo(List.of(movie2));
+		assertThat(movies).isEqualTo(List.of(movie2));
 	}
 
 	@Test
@@ -224,8 +214,10 @@ class MeilisearchTemplateIntegrationTests {
 		BaseQuery query = BasicQuery.builder().withFilter(new String[] { "genres = Drama" }).build();
 
 		SearchHits<Movie> result = meilisearchTemplate.search(query, Movie.class);
+		List<SearchHit<Movie>> searchHits = result.getSearchHits();
+		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
 
-		assertThat(result.getSearchHits()).isEqualTo(List.of(movie1, movie3));
+		assertThat(movies).isEqualTo(List.of(movie1, movie3));
 	}
 
 	@Test
@@ -233,9 +225,12 @@ class MeilisearchTemplateIntegrationTests {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 
 		List<IndexQuery> queries = List.of(new IndexQuery(movie1.getTitle()), new IndexQuery(movie2.getTitle()));
-		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, Movie.class);
 
-		assertThat(result.getSearchHits()).isEqualTo(List.of(movie1, movie2));
+		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, Movie.class);
+		List<SearchHit<Movie>> searchHits = result.getSearchHits();
+		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
+
+		assertThat(movies).isEqualTo(List.of(movie1, movie2));
 	}
 
 	@Test

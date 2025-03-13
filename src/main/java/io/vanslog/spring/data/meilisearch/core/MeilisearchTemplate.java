@@ -198,13 +198,6 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	}
 
 	@Override
-	public <T> List<T> search(SearchRequest searchRequest, Class<T> clazz) {
-		String indexUid = getIndexUidFor(clazz);
-		Searchable result = execute(client -> client.index(indexUid).search(searchRequest));
-		return responseConverter.mapHitList(result, clazz);
-	}
-
-	@Override
 	public <T> SearchHits<T> search(BaseQuery query, Class<T> clazz) {
 		String indexUid = getIndexUidFor(clazz);
 		SearchRequest request = requestConverter.searchRequest(query);

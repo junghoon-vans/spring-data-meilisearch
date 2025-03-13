@@ -44,6 +44,8 @@ public class ResponseConverter {
 	public <T> List<T> mapHitList(Searchable searchable, Class<?> clazz) {
 		return (List<T>) searchable.getHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
+				.map(hit -> new SearchHit<>(hit, searchable.getProcessingTimeMs(), searchable.getQuery(),
+						searchable.getFacetStats(), searchable.getFacetDistribution())) //
 				.toList();
 	}
 
@@ -51,17 +53,18 @@ public class ResponseConverter {
 	public <T> List<T> mapHitList(FacetSearchable searchable, Class<?> clazz) {
 		return (List<T>) searchable.getFacetHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
+				.map(hit -> new SearchHit<>(hit, searchable.getProcessingTimeMs(), searchable.getFacetQuery())) //
 				.toList();
 	}
 
 	public <T> SearchHits<T> mapHits(Searchable searchable, Class<T> clazz) {
-		List<? extends SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
+		List<SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
 		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 
 	public <T> SearchHits<T> mapHits(FacetSearchable searchable, Class<T> clazz) {
-		List<? extends SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
+		List<SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
 		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
@@ -69,9 +72,12 @@ public class ResponseConverter {
 	@SuppressWarnings("unchecked")
 	public <T> SearchHits<T> mapResults(Results<MultiSearchResult> results, Class<T> clazz) {
 		MultiSearchResult[] multiSearchResults = results.getResults();
-		List<? extends SearchHit<T>> searchHits = (List<? extends SearchHit<T>>) Arrays.stream(multiSearchResults)
-				.flatMap(result -> result.getHits().stream()) //
-				.map(hit -> objectMapper.convertValue(hit, clazz)).toList();
+		List<SearchHit<T>> searchHits = Arrays.stream(multiSearchResults) //
+				.flatMap(result -> result.getHits().stream() //
+						.map(hit -> objectMapper.convertValue(hit, clazz)).map(hit -> new SearchHit<>( //
+								hit, result.getProcessingTimeMs(), result.getQuery(), result.getFacetStats(),
+								result.getFacetDistribution())))
+				.toList();
 
 		int maxProcessingTime = Arrays.stream(multiSearchResults) //
 				.mapToInt(MultiSearchResult::getProcessingTimeMs).max().orElse(0);

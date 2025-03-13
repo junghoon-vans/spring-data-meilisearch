@@ -36,7 +36,7 @@ public class SearchHitSupport {
 	public static Object unwrapSearchHits(Object result) {
 
 		if (result instanceof SearchHit<?> searchHit) {
-			return searchHit.content();
+			return searchHit.getContent();
 		}
 
 		if (result instanceof List<?> list) {
