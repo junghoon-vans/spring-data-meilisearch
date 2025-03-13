@@ -15,11 +15,5 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import com.meilisearch.sdk.model.FacetRating;
-
-public record SearchHit<T>(ArrayList<HashMap<String, T>> hits, Object facetDistribution,
-		HashMap<String, FacetRating> facetStats, int processingTimeMs, String query, T content) {
+public record SearchHit<T>(int processingTimeMs, String query, T content) {
 }
