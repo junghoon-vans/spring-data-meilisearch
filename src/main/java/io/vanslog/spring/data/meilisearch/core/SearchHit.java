@@ -15,5 +15,50 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
-public record SearchHit<T>(int processingTimeMs, String query, T content) {
+import com.meilisearch.sdk.model.FacetRating;
+import java.util.HashMap;
+import org.springframework.lang.Nullable;
+
+public class SearchHit<T> {
+
+	private final T content;
+	private final int processingTimeMs;
+	private final String query;
+	@Nullable private final HashMap<String, FacetRating> facetStats;
+	@Nullable private final Object facetDistribution;
+
+	public SearchHit(T content, int processingTimeMs, String query, @Nullable HashMap<String, FacetRating> facetStats,
+			@Nullable Object facetDistribution) {
+		this.content = content;
+		this.processingTimeMs = processingTimeMs;
+		this.query = query;
+		this.facetStats = facetStats;
+		this.facetDistribution = facetDistribution;
+	}
+
+	public SearchHit(T content, int processingTimeMs, String query) {
+		this(content, processingTimeMs, query, null, null);
+	}
+
+	public T getContent() {
+		return content;
+	}
+
+	public int getProcessingTimeMs() {
+		return processingTimeMs;
+	}
+
+	public String getQuery() {
+		return query;
+	}
+
+	@Nullable
+	public HashMap<String, FacetRating> getFacetStats() {
+		return facetStats;
+	}
+
+	@Nullable
+	public Object getFacetDistribution() {
+		return facetDistribution;
+	}
 }

@@ -44,7 +44,8 @@ public class ResponseConverter {
 	public <T> List<T> mapHitList(Searchable searchable, Class<?> clazz) {
 		return (List<T>) searchable.getHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.map(hit -> new SearchHit<>(searchable.getProcessingTimeMs(), searchable.getQuery(), hit)) //
+				.map(hit -> new SearchHit<>(hit, searchable.getProcessingTimeMs(), searchable.getQuery(),
+						searchable.getFacetStats(), searchable.getFacetDistribution())) //
 				.toList();
 	}
 
@@ -52,7 +53,7 @@ public class ResponseConverter {
 	public <T> List<T> mapHitList(FacetSearchable searchable, Class<?> clazz) {
 		return (List<T>) searchable.getFacetHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.map(hit -> new SearchHit<>(searchable.getProcessingTimeMs(), searchable.getFacetQuery(), hit)) //
+				.map(hit -> new SearchHit<>(hit, searchable.getProcessingTimeMs(), searchable.getFacetQuery())) //
 				.toList();
 	}
 
@@ -73,8 +74,9 @@ public class ResponseConverter {
 		MultiSearchResult[] multiSearchResults = results.getResults();
 		List<SearchHit<T>> searchHits = Arrays.stream(multiSearchResults) //
 				.flatMap(result -> result.getHits().stream() //
-						.map(hit -> new SearchHit<>( //
-								result.getProcessingTimeMs(), result.getQuery(), objectMapper.convertValue(hit, clazz))))
+						.map(hit -> objectMapper.convertValue(hit, clazz)).map(hit -> new SearchHit<>( //
+								hit, result.getProcessingTimeMs(), result.getQuery(), result.getFacetStats(),
+								result.getFacetDistribution())))
 				.toList();
 
 		int maxProcessingTime = Arrays.stream(multiSearchResults) //

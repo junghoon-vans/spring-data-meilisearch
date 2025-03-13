@@ -42,22 +42,6 @@ public interface SearchOperations {
 	long count(Class<?> clazz);
 
 	/**
-	 * Search for entities that meet the criteria using the given {@link SearchRequest}. Note that by default,
-	 * {@literal MaxTotalHits} in {@link io.vanslog.spring.data.meilisearch.annotations.Pagination} is 1000. If you want
-	 * to change the value, you can use {@link io.vanslog.spring.data.meilisearch.annotations.Setting}.
-	 *
-	 * @deprecated use {@link #search(BaseQuery, Class)} instead. BaseQuery supports Spring Data's Pageable interface and
-	 *             provides more Spring Data integration.
-	 * @param searchRequest the search request from Meilisearch SDK
-	 * @param clazz the entity class, must be annotated with
-	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
-	 * @return the entities found by the search request
-	 * @param <T> the type of the entity
-	 */
-	@Deprecated
-	<T> List<T> search(SearchRequest searchRequest, Class<T> clazz);
-
-	/**
 	 * Search for entities that meet the criteria using Spring Data style query. Note that by default,
 	 * {@literal MaxTotalHits} in {@link io.vanslog.spring.data.meilisearch.annotations.Pagination} is 1000. If you want
 	 * to change the value, you can use {@link io.vanslog.spring.data.meilisearch.annotations.Setting}.
