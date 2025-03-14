@@ -21,6 +21,7 @@ import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 
 import java.util.List;
 
+import com.meilisearch.sdk.MultiSearchFederation;
 import com.meilisearch.sdk.SearchRequest;
 
 /**
@@ -63,6 +64,17 @@ public interface SearchOperations {
 	 * @return the list of entities found by the queries
 	 */
 	<T> SearchHits<T> multiSearch(List<IndexQuery> queries, Class<T> clazz);
+
+	/**
+	 * Execute the multi search query against meilisearch and return the result.
+	 *
+	 * @param queries the list of queries to execute
+	 * @param federation the federation to execute
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @return the list of entities found by the queries
+	 */
+	<T> SearchHits<T> multiSearch(List<IndexQuery> queries, MultiSearchFederation federation, Class<T> clazz);
 
 	/**
 	 * Execute the facet search query against meilisearch and return the result.
