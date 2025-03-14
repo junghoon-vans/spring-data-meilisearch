@@ -18,6 +18,6 @@ package io.vanslog.spring.data.meilisearch.entities;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
 
-@Setting(sortAttributes = { "title" })
+@Setting(sortableAttributes = { "title" })
 @Document(indexUid = "movies")
 public class SortableMovie extends Movie {}

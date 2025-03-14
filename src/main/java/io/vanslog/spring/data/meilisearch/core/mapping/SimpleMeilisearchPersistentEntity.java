@@ -115,7 +115,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 			return null;
 		}
 
-		settingsParameter.sortAttributes = settingAnnotation.sortAttributes();
+		settingsParameter.sortableAttributes = settingAnnotation.sortableAttributes();
 		settingsParameter.distinctAttribute = settingAnnotation.distinctAttribute();
 		settingsParameter.searchableAttributes = settingAnnotation.searchableAttributes();
 		settingsParameter.displayedAttributes = settingAnnotation.displayedAttributes();
@@ -136,7 +136,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 	}
 
 	private static class SettingsParameter {
-		@Nullable private String[] sortAttributes;
+		@Nullable private String[] sortableAttributes;
 		@Nullable private String distinctAttribute;
 		@Nullable private String[] searchableAttributes;
 		@Nullable private String[] displayedAttributes;
@@ -156,7 +156,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		Settings toSettings() {
 			Settings settings = new Settings();
 
-			Optional.ofNullable(sortAttributes).ifPresent(settings::setSortableAttributes);
+			Optional.ofNullable(sortableAttributes).ifPresent(settings::setSortableAttributes);
 			Optional.ofNullable(distinctAttribute).ifPresent(settings::setDistinctAttribute);
 			Optional.ofNullable(searchableAttributes).ifPresent(settings::setSearchableAttributes);
 			Optional.ofNullable(displayedAttributes).ifPresent(settings::setDisplayedAttributes);
