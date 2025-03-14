@@ -9,18 +9,98 @@ This chapter covers how to modify search https://www.meilisearch.com/docs/refere
 Meilisearch settings are used to define the behavior of the search engine.
 Using `@Setting` annotation, you can define the settings for the index.
 
+[[meilisearch.settings.search]]
+== Search Settings
+
+These settings control how documents are searched and ranked in Meilisearch.
+
+[[meilisearch.settings.search.attributes]]
+=== Searchable and Displayed Attributes
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
+  searchableAttributes = { "description", "brand", "color" },        <.>
+  displayedAttributes = { "description", "brand", "color", "productId" } <.>
+)
+class Product {
+    @Id private String id;
+    private String description;
+    private String brand;
+    private String color;
+    private String productId;
+}
+----
+
+<.> The `searchableAttributes` attribute is used to define the fields that must be used for searching the results.
+<.> The `displayedAttributes` attribute is used to define the fields that must be displayed in the results.
+====
+
+[[meilisearch.settings.search.ranking]]
+=== Ranking and Sorting
+
 ====
 [source,java]
 ----
 @Document(indexUid = "products")
 @Setting(
   sortableAttributes = { "productId" },                                              <.>
-  distinctAttribute = "productId",                                                   <.>
-  searchableAttributes = { "description", "brand", "color" },                        <.>
-  displayedAttributes = { "description", "brand", "color", "productId" },            <.>
   rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" }, <.>
-  stopWords = { "a", "an", "the" },                                                  <.>
+  distinctAttribute = "productId"                                                    <.>
+)
+class Product {
+    @Id private String id;
+    private String productId;
+    // other fields...
+}
+----
+
+<.> The `sortableAttributes` attribute is used to define the fields that can be used for sorting the results.
+<.> The `rankingRules` attribute is used to define the ranking rules that must be used for sorting the results.
+<.> The `distinctAttribute` attribute is used to define the field that must be used to remove duplicates from the results.
+====
+
+[[meilisearch.settings.search.filtering]]
+=== Filtering and Faceting
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
   filterableAttributes = { "brand", "color", "price" },                              <.>
+  faceting = @Faceting(                                                              <.>
+    maxValuesPerFacet = 100
+  )
+)
+class Product {
+    @Id private String id;
+    private String brand;
+    private String color;
+    private double price;
+    // other fields...
+}
+----
+
+<.> The `filterableAttributes` attribute defines which fields can be used for filtering and faceted search.
+<.> The `faceting` attribute configures faceted search behavior.
+====
+
+[[meilisearch.settings.search.text]]
+== Text Processing Settings
+
+These settings control how Meilisearch processes text during indexing and searching.
+
+[[meilisearch.settings.search.text.synonyms]]
+=== Synonyms and Dictionary
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
   synonyms = {                                                                       <.>
         @Synonym(
             word = "phone",
@@ -31,6 +111,28 @@ Using `@Setting` annotation, you can define the settings for the index.
             synonyms = { "notebook" }
         )
   },
+  dictionary = { "netflix", "spotify" },                                             <.>
+  stopWords = { "a", "an", "the" }                                                   <.>
+)
+class Product {
+    @Id private String id;
+    // fields...
+}
+----
+
+<.> The `synonyms` attribute defines groups of words that should be considered equivalent in search.
+<.> The `dictionary` attribute adds custom words to the internal dictionary.
+<.> The `stopWords` attribute is used to define the stop words that must be used for searching the results.
+====
+
+[[meilisearch.settings.search.text.typo]]
+=== Typo Tolerance
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
   typoTolerance = @TypoTolerance(                                                    <.>
     enabled = true,
     minWordSizeForTypos = @MinWordSizeForTypos(
@@ -39,41 +141,59 @@ Using `@Setting` annotation, you can define the settings for the index.
     ),
     disableOnWords = {"skype", "zoom"},
     disableOnAttributes = {"serial_number"}
-  ),
-  faceting = @Faceting(                                                              <.>
-    maxValuesPerFacet = 100
-  ),
-  dictionary = { "netflix", "spotify" },                                             <.>
-  proximityPrecision = "byWord",                                                     <.>
-  searchCutoffMs = 50,                                                               <.>
+  )
+)
+class Product {
+    @Id private String id;
+    // fields...
+}
+----
+
+<.> The `typoTolerance` attribute configures the typo tolerance behavior of the search engine.
+====
+
+[[meilisearch.settings.search.text.tokenization]]
+=== Tokenization
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
   separatorTokens = { "-", "_", "@" },                                               <.>
   nonSeparatorTokens = { ".", "#" }                                                  <.>
 )
 class Product {
     @Id private String id;
-    private String description;
-    private String brand;
-    private String color;
-    private String productId;
-    private double price;
+    // fields...
 }
 ----
 
-<.> The `sortableAttributes` attribute is used to define the fields that can be used for sorting the results.
-<.> The `distinctAttribute` attribute is used to define the field that must be used to remove duplicates from the results.
-<.> The `searchableAttributes` attribute is used to define the fields that must be used for searching the results.
-<.> The `displayedAttributes` attribute is used to define the fields that must be displayed in the results.
-<.> The `rankingRules` attribute is used to define the ranking rules that must be used for sorting the results.
-<.> The `stopWords` attribute is used to define the stop words that must be used for searching the results.
-<.> The `filterableAttributes` attribute defines which fields can be used for filtering and faceted search.
-<.> The `synonyms` attribute defines groups of words that should be considered equivalent in search.
-<.> The `typoTolerance` attribute configures the typo tolerance behavior of the search engine.
-<.> The `faceting` attribute configures faceted search behavior.
-<.> The `dictionary` attribute adds custom words to the internal dictionary.
-<.> The `proximityPrecision` attribute defines how word proximity is calculated ("byWord", "byAttribute")
-<.> The `searchCutoffMs` attribute sets the maximum processing time for a search query in milliseconds.
 <.> The `separatorTokens` attribute defines which characters should be considered as word separators.
 <.> The `nonSeparatorTokens` attribute defines which characters should not be considered as word separators.
+====
+
+[[meilisearch.settings.performance]]
+== Performance Settings
+
+These settings control the performance aspects of Meilisearch.
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
+  proximityPrecision = "byWord",                                                     <.>
+  searchCutoffMs = 50                                                                <.>
+)
+class Product {
+    @Id private String id;
+    // fields...
+}
+----
+
+<.> The `proximityPrecision` attribute defines how word proximity is calculated ("byWord", "byAttribute")
+<.> The `searchCutoffMs` attribute sets the maximum processing time for a search query in milliseconds.
 ====
 
 [[meilisearch.settings.pagination]]
@@ -93,6 +213,65 @@ If you have more than 1,000 results, you must use `@Pagination` annotation to ex
 )
 class Product {
     @Id private String id;
+    // fields...
+}
+----
+
+<.> The `maxTotalHits` is used to define the maximum number of results that can be returned by the search engine.
+====
+
+[[meilisearch.settings.complete]]
+== Complete Example
+
+Here's a complete example showing all available settings:
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
+  // Search attributes
+  searchableAttributes = { "description", "brand", "color" },
+  displayedAttributes = { "description", "brand", "color", "productId" },
+  
+  // Ranking and sorting
+  sortableAttributes = { "productId" },
+  rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" },
+  distinctAttribute = "productId",
+  
+  // Filtering and faceting
+  filterableAttributes = { "brand", "color", "price" },
+  faceting = @Faceting(maxValuesPerFacet = 100),
+  
+  // Text processing
+  synonyms = {
+        @Synonym(word = "phone", synonyms = { "mobile", "cellphone" }),
+        @Synonym(word = "laptop", synonyms = { "notebook" })
+  },
+  dictionary = { "netflix", "spotify" },
+  stopWords = { "a", "an", "the" },
+  
+  // Typo tolerance
+  typoTolerance = @TypoTolerance(
+    enabled = true,
+    minWordSizeForTypos = @MinWordSizeForTypos(oneTypo = 5, twoTypos = 9),
+    disableOnWords = {"skype", "zoom"},
+    disableOnAttributes = {"serial_number"}
+  ),
+  
+  // Tokenization
+  separatorTokens = { "-", "_", "@" },
+  nonSeparatorTokens = { ".", "#" },
+  
+  // Performance
+  proximityPrecision = "byWord",
+  searchCutoffMs = 50,
+  
+  // Pagination
+  pagination = @Pagination(maxTotalHits = 2000)
+)
+class Product {
+    @Id private String id;
     private String description;
     private String brand;
     private String color;
@@ -100,6 +279,4 @@ class Product {
     private double price;
 }
 ----
-
-<.> The `maxTotalHits` is used to define the maximum number of results that can be returned by the search engine.
 ====
