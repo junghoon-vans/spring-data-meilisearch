@@ -14,12 +14,40 @@ Using `@Setting` annotation, you can define the settings for the index.
 ----
 @Document(indexUid = "products")
 @Setting(
-  sortAttributes = { "productId" },                                                  <.>
+  sortableAttributes = { "productId" },                                              <.>
   distinctAttribute = "productId",                                                   <.>
   searchableAttributes = { "description", "brand", "color" },                        <.>
   displayedAttributes = { "description", "brand", "color", "productId" },            <.>
   rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" }, <.>
   stopWords = { "a", "an", "the" },                                                  <.>
+  filterableAttributes = { "brand", "color", "price" },                              <.>
+  synonyms = {                                                                       <.>
+        @Synonym(
+            word = "phone",
+            synonyms = { "mobile", "cellphone" }
+        ),
+        @Synonym(
+            word = "laptop",
+            synonyms = { "notebook" }
+        )
+  },
+  typoTolerance = @TypoTolerance(                                                    <.>
+    enabled = true,
+    minWordSizeForTypos = @MinWordSizeForTypos(
+      oneTypo = 5,
+      twoTypos = 9
+    ),
+    disableOnWords = {"skype", "zoom"},
+    disableOnAttributes = {"serial_number"}
+  ),
+  faceting = @Faceting(                                                              <.>
+    maxValuesPerFacet = 100
+  ),
+  dictionary = { "netflix", "spotify" },                                             <.>
+  proximityPrecision = "byWord",                                                     <.>
+  searchCutoffMs = 50,                                                               <.>
+  separatorTokens = { "-", "_", "@" },                                               <.>
+  nonSeparatorTokens = { ".", "#" }                                                  <.>
 )
 class Product {
     @Id private String id;
@@ -27,15 +55,25 @@ class Product {
     private String brand;
     private String color;
     private String productId;
+    private double price;
 }
 ----
 
-<.> The `sortAttributes` attribute is used to define the fields that must be used for sorting the results.
+<.> The `sortableAttributes` attribute is used to define the fields that can be used for sorting the results.
 <.> The `distinctAttribute` attribute is used to define the field that must be used to remove duplicates from the results.
 <.> The `searchableAttributes` attribute is used to define the fields that must be used for searching the results.
 <.> The `displayedAttributes` attribute is used to define the fields that must be displayed in the results.
 <.> The `rankingRules` attribute is used to define the ranking rules that must be used for sorting the results.
 <.> The `stopWords` attribute is used to define the stop words that must be used for searching the results.
+<.> The `filterableAttributes` attribute defines which fields can be used for filtering and faceted search.
+<.> The `synonyms` attribute defines groups of words that should be considered equivalent in search.
+<.> The `typoTolerance` attribute configures the typo tolerance behavior of the search engine.
+<.> The `faceting` attribute configures faceted search behavior.
+<.> The `dictionary` attribute adds custom words to the internal dictionary.
+<.> The `proximityPrecision` attribute defines how word proximity is calculated ("byWord", "byAttribute")
+<.> The `searchCutoffMs` attribute sets the maximum processing time for a search query in milliseconds.
+<.> The `separatorTokens` attribute defines which characters should be considered as word separators.
+<.> The `nonSeparatorTokens` attribute defines which characters should not be considered as word separators.
 ====
 
 [[meilisearch.settings.pagination]]
@@ -59,8 +97,9 @@ class Product {
     private String brand;
     private String color;
     private String productId;
+    private double price;
 }
 ----
 
-<.> The `maxTotalHits` is used to define the maximum number of results that must be returned by the search engine.
+<.> The `maxTotalHits` is used to define the maximum number of results that can be returned by the search engine.
 ====

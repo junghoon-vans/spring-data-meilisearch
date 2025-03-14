@@ -25,7 +25,7 @@ import org.springframework.data.annotation.Id;
  * Pagination entity for tests. It is set to have a maximum of 10 total hits.
  */
 @Document(indexUid = "total-hits-limited")
-@Setting(sortAttributes = { "name" }, pagination = @Pagination(maxTotalHits = 10))
+@Setting(sortableAttributes = { "name" }, pagination = @Pagination(maxTotalHits = 10))
 public class TotalHitsLimited {
 	@Id public int id;
 	public String name;
