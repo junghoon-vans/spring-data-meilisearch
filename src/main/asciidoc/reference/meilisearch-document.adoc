@@ -31,7 +31,33 @@ public class Movie {
 == Index UID
 
 The https://www.meilisearch.com/docs/learn/core_concepts/indexes#index-uid[Index UID] is a unique identifier for an index.
-It must be defined for each document with `@Document` annotation.
+It can be defined explicitly with the `indexUid` attribute in the `@Document` annotation.
+
+.Explicit Index UID
+====
+[source,java]
+----
+@Document(indexUid = "movies")
+public class Movie {
+    // fields
+}
+----
+====
+
+If the `indexUid` is not specified or the class is not annotated with `@Document`, the class name will be used as the index UID by default.
+
+.Default Index UID (using class name)
+====
+[source,java]
+----
+// No @Document annotation or no indexUid specified
+public class Movie {
+    // fields
+}
+----
+====
+
+In this case, "Movie" will be used as the index UID
 
 [[meilisearch.document.id]]
 == Document id
