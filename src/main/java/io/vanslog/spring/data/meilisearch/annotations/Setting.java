@@ -55,7 +55,7 @@ public @interface Setting {
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#searchable-attributes">Searchable
 	 *      attributes</a>
 	 */
-	String[] searchableAttributes() default { "*" };
+	String[] searchableAttributes() default {};
 
 	/**
 	 * attributes to be displayed in the search results
@@ -63,14 +63,14 @@ public @interface Setting {
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#displayed-attributes">Displayed
 	 *      attributes</a>
 	 */
-	String[] displayedAttributes() default { "*" };
+	String[] displayedAttributes() default {};
 
 	/**
 	 * defines the ranking rules
 	 *
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#ranking-rules">Ranking rules</a>
 	 */
-	String[] rankingRules() default { "words", "typo", "proximity", "attribute", "sort", "exactness" };
+	String[] rankingRules() default {};
 
 	/**
 	 * defines the stop words
@@ -127,7 +127,7 @@ public @interface Setting {
 	 *
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#proximity-precision">Proximity precision</a>
 	 */
-	String proximityPrecision() default "byWord";
+	String proximityPrecision() default "";
 
 	/**
 	 * defines the search cutoff time in milliseconds if value is -1, this setting will be disabled
