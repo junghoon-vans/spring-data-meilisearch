@@ -107,71 +107,118 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 
 	@Nullable
 	private SettingsParameter buildSettingsParameter(Class<?> clazz) {
-
-		SettingsParameter settingsParameter = new SettingsParameter();
 		Setting settingAnnotation = AnnotatedElementUtils.findMergedAnnotation(clazz, Setting.class);
 
 		if (settingAnnotation == null) {
 			return null;
 		}
 
-		settingsParameter.sortableAttributes = settingAnnotation.sortableAttributes();
-		settingsParameter.distinctAttribute = settingAnnotation.distinctAttribute();
-		settingsParameter.searchableAttributes = settingAnnotation.searchableAttributes();
-		settingsParameter.displayedAttributes = settingAnnotation.displayedAttributes();
-		settingsParameter.rankingRules = settingAnnotation.rankingRules();
-		settingsParameter.stopWords = settingAnnotation.stopWords();
-		settingsParameter.pagination = settingAnnotation.pagination();
-		settingsParameter.filterableAttributes = settingAnnotation.filterableAttributes();
-		settingsParameter.synonyms = settingAnnotation.synonyms();
-		settingsParameter.typoTolerance = settingAnnotation.typoTolerance();
-		settingsParameter.faceting = settingAnnotation.faceting();
-		settingsParameter.dictionary = settingAnnotation.dictionary();
-		settingsParameter.proximityPrecision = settingAnnotation.proximityPrecision();
-		settingsParameter.searchCutoffMs = settingAnnotation.searchCutoffMs();
-		settingsParameter.separatorTokens = settingAnnotation.separatorTokens();
-		settingsParameter.nonSeparatorTokens = settingAnnotation.nonSeparatorTokens();
-
-		return settingsParameter;
+		return new SettingsParameter(settingAnnotation);
 	}
 
 	private static class SettingsParameter {
-		@Nullable private String[] sortableAttributes;
-		@Nullable private String distinctAttribute;
-		@Nullable private String[] searchableAttributes;
-		@Nullable private String[] displayedAttributes;
-		@Nullable private String[] rankingRules;
-		@Nullable private String[] stopWords;
-		@Nullable private Pagination pagination;
-		@Nullable private String[] filterableAttributes;
-		@Nullable private Synonym[] synonyms;
-		@Nullable private TypoTolerance typoTolerance;
-		@Nullable private Faceting faceting;
-		@Nullable private String[] dictionary;
-		@Nullable private String proximityPrecision;
-		@Nullable private Integer searchCutoffMs;
-		@Nullable private String[] separatorTokens;
-		@Nullable private String[] nonSeparatorTokens;
+		private final String[] sortableAttributes;
+		private final String distinctAttribute;
+		private final String[] searchableAttributes;
+		private final String[] displayedAttributes;
+		private final String[] rankingRules;
+		private final String[] stopWords;
+		@Nullable private final Pagination pagination;
+		private final String[] filterableAttributes;
+		private final Synonym[] synonyms;
+		@Nullable private final TypoTolerance typoTolerance;
+		@Nullable private final Faceting faceting;
+		private final String[] dictionary;
+		private final String proximityPrecision;
+		private final Integer searchCutoffMs;
+		private final String[] separatorTokens;
+		private final String[] nonSeparatorTokens;
+
+		public SettingsParameter(Setting settingAnnotation) {
+			this.sortableAttributes = settingAnnotation.sortableAttributes();
+			this.distinctAttribute = settingAnnotation.distinctAttribute();
+			this.searchableAttributes = settingAnnotation.searchableAttributes();
+			this.displayedAttributes = settingAnnotation.displayedAttributes();
+			this.rankingRules = settingAnnotation.rankingRules();
+			this.stopWords = settingAnnotation.stopWords();
+			this.pagination = settingAnnotation.pagination();
+			this.filterableAttributes = settingAnnotation.filterableAttributes();
+			this.synonyms = settingAnnotation.synonyms();
+			this.typoTolerance = settingAnnotation.typoTolerance();
+			this.faceting = settingAnnotation.faceting();
+			this.dictionary = settingAnnotation.dictionary();
+			this.proximityPrecision = settingAnnotation.proximityPrecision();
+			this.searchCutoffMs = settingAnnotation.searchCutoffMs();
+			this.separatorTokens = settingAnnotation.separatorTokens();
+			this.nonSeparatorTokens = settingAnnotation.nonSeparatorTokens();
+		}
 
 		Settings toSettings() {
 			Settings settings = new Settings();
 
-			Optional.ofNullable(sortableAttributes).ifPresent(settings::setSortableAttributes);
-			Optional.ofNullable(distinctAttribute).ifPresent(settings::setDistinctAttribute);
-			Optional.ofNullable(searchableAttributes).ifPresent(settings::setSearchableAttributes);
-			Optional.ofNullable(displayedAttributes).ifPresent(settings::setDisplayedAttributes);
-			Optional.ofNullable(rankingRules).ifPresent(settings::setRankingRules);
-			Optional.ofNullable(stopWords).ifPresent(settings::setStopWords);
-			Optional.ofNullable(filterableAttributes).ifPresent(settings::setFilterableAttributes);
-			Optional.ofNullable(dictionary).ifPresent(settings::setDictionary);
-			Optional.ofNullable(proximityPrecision).ifPresent(settings::setProximityPrecision);
-			Optional.ofNullable(separatorTokens).ifPresent(settings::setSeparatorTokens);
-			Optional.ofNullable(nonSeparatorTokens).ifPresent(settings::setNonSeparatorTokens);
-			Optional.ofNullable(pagination).map(this::createMeiliPagination).ifPresent(settings::setPagination);
-			Optional.ofNullable(synonyms).map(this::createSynonymMap).ifPresent(settings::setSynonyms);
-			Optional.ofNullable(typoTolerance).map(this::createMeiliTypoTolerance).ifPresent(settings::setTypoTolerance);
-			Optional.ofNullable(faceting).map(this::createMeiliFaceting).ifPresent(settings::setFaceting);
-			Optional.ofNullable(searchCutoffMs).filter(ms -> ms != -1).ifPresent(settings::setSearchCutoffMs);
+			if (sortableAttributes.length > 0) {
+				settings.setSortableAttributes(sortableAttributes);
+			}
+			
+			if (!distinctAttribute.isEmpty()) {
+				settings.setDistinctAttribute(distinctAttribute);
+			}
+			
+			if (searchableAttributes.length > 0) {
+				settings.setSearchableAttributes(searchableAttributes);
+			}
+			
+			if (displayedAttributes.length > 0) {
+				settings.setDisplayedAttributes(displayedAttributes);
+			}
+			
+			if (rankingRules.length > 0) {
+				settings.setRankingRules(rankingRules);
+			}
+			
+			if (stopWords.length > 0) {
+				settings.setStopWords(stopWords);
+			}
+			
+			if (filterableAttributes.length > 0) {
+				settings.setFilterableAttributes(filterableAttributes);
+			}
+			
+			if (dictionary.length > 0) {
+				settings.setDictionary(dictionary);
+			}
+			
+			if (!proximityPrecision.isEmpty()) {
+				settings.setProximityPrecision(proximityPrecision);
+			}
+			
+			if (separatorTokens.length > 0) {
+				settings.setSeparatorTokens(separatorTokens);
+			}
+			
+			if (nonSeparatorTokens.length > 0) {
+				settings.setNonSeparatorTokens(nonSeparatorTokens);
+			}
+			
+			if (pagination != null) {
+				settings.setPagination(createMeiliPagination(pagination));
+			}
+			
+			if (synonyms.length > 0) {
+				settings.setSynonyms(createSynonymMap(synonyms));
+			}
+			
+			if (typoTolerance != null) {
+				settings.setTypoTolerance(createMeiliTypoTolerance(typoTolerance));
+			}
+			
+			if (faceting != null) {
+				settings.setFaceting(createMeiliFaceting(faceting));
+			}
+
+			if (searchCutoffMs != -1) {
+				settings.setSearchCutoffMs(searchCutoffMs);
+			}
 
 			return settings;
 		}
