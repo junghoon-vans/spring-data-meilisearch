@@ -46,6 +46,57 @@ class SimpleMeilisearchPersistentEntityUnitTests {
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
+	@Test
+	void shouldUseClassNameAsIndexUidWhenNotSpecified() {
+		// given
+		SimpleMeilisearchPersistentEntity<EntityWithoutExplicitIndexUid> entity = //
+				new SimpleMeilisearchPersistentEntity<>(TypeInformation.of(EntityWithoutExplicitIndexUid.class));
+
+		// when
+		String indexUid = entity.getIndexUid();
+
+		// then
+		assertThat(indexUid).isEqualTo("EntityWithoutExplicitIndexUid");
+	}
+
+	@Test
+	void shouldUseSpecifiedIndexUid() {
+		// given
+		SimpleMeilisearchPersistentEntity<EntityWithExplicitIndexUid> entity = new SimpleMeilisearchPersistentEntity<>(
+				TypeInformation.of(EntityWithExplicitIndexUid.class));
+
+		// when
+		String indexUid = entity.getIndexUid();
+
+		// then
+		assertThat(indexUid).isEqualTo("custom-index");
+	}
+
 	@Document(indexUid = "")
 	static class EmptyIndexUidDocument {}
+
+	static class EntityWithoutExplicitIndexUid {
+		private String field;
+
+		public String getField() {
+			return field;
+		}
+
+		public void setField(String field) {
+			this.field = field;
+		}
+	}
+
+	@Document(indexUid = "custom-index")
+	static class EntityWithExplicitIndexUid {
+		private String field;
+
+		public String getField() {
+			return field;
+		}
+
+		public void setField(String field) {
+			this.field = field;
+		}
+	}
 }

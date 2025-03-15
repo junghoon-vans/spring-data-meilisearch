@@ -84,9 +84,8 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 	}
 
 	@Override
-	@Nullable
 	public String getIndexUid() {
-		return indexUid;
+		return indexUid != null ? indexUid : getTypeInformation().getType().getSimpleName();
 	}
 
 	@Override
