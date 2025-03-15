@@ -49,8 +49,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		implements MeilisearchPersistentEntity<T>, ApplicationContextAware {
 
 	private final StandardEvaluationContext context;
-	@Nullable private final Document document;
-	@Nullable private final SettingsParameter settingParameter;
+	private final SettingsParameter settingParameter;
 	private final boolean applySettings;
 	@Nullable private String indexUid;
 
@@ -64,17 +63,16 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		this.context = new StandardEvaluationContext();
 
 		Class<T> rawType = information.getType();
-		document = AnnotatedElementUtils.findMergedAnnotation(rawType, Document.class);
+		Document document = AnnotatedElementUtils.findMergedAnnotation(rawType, Document.class);
+		this.settingParameter = buildSettingsParameter(rawType);
 
 		if (document != null) {
 			Assert.hasText(document.indexUid(),
 					"Unknown indexUid. Make sure the indexUid is defined." + "e.g @Document(indexUid=\"foo\")");
 			this.indexUid = document.indexUid();
 			this.applySettings = document.applySettings();
-			this.settingParameter = buildSettingsParameter(rawType);
 		} else {
 			this.applySettings = false;
-			this.settingParameter = null;
 		}
 	}
 
@@ -86,53 +84,24 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 	}
 
 	@Override
+	@Nullable
 	public String getIndexUid() {
 		return indexUid;
 	}
 
 	@Override
 	public boolean isApplySettings() {
-		return applySettings && settingParameter != null;
+		return applySettings;
 	}
 
 	@Override
-	@Nullable
 	public Settings getDefaultSettings() {
-		if (settingParameter == null) {
-			return null;
-		}
-
 		return settingParameter.toSettings();
 	}
 
-	@Nullable
 	private SettingsParameter buildSettingsParameter(Class<?> clazz) {
-
-		SettingsParameter settingsParameter = new SettingsParameter();
 		Setting settingAnnotation = AnnotatedElementUtils.findMergedAnnotation(clazz, Setting.class);
-
-		if (settingAnnotation == null) {
-			return null;
-		}
-
-		settingsParameter.sortableAttributes = settingAnnotation.sortableAttributes();
-		settingsParameter.distinctAttribute = settingAnnotation.distinctAttribute();
-		settingsParameter.searchableAttributes = settingAnnotation.searchableAttributes();
-		settingsParameter.displayedAttributes = settingAnnotation.displayedAttributes();
-		settingsParameter.rankingRules = settingAnnotation.rankingRules();
-		settingsParameter.stopWords = settingAnnotation.stopWords();
-		settingsParameter.pagination = settingAnnotation.pagination();
-		settingsParameter.filterableAttributes = settingAnnotation.filterableAttributes();
-		settingsParameter.synonyms = settingAnnotation.synonyms();
-		settingsParameter.typoTolerance = settingAnnotation.typoTolerance();
-		settingsParameter.faceting = settingAnnotation.faceting();
-		settingsParameter.dictionary = settingAnnotation.dictionary();
-		settingsParameter.proximityPrecision = settingAnnotation.proximityPrecision();
-		settingsParameter.searchCutoffMs = settingAnnotation.searchCutoffMs();
-		settingsParameter.separatorTokens = settingAnnotation.separatorTokens();
-		settingsParameter.nonSeparatorTokens = settingAnnotation.nonSeparatorTokens();
-
-		return settingsParameter;
+		return new SettingsParameter(settingAnnotation);
 	}
 
 	private static class SettingsParameter {
@@ -153,25 +122,50 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		@Nullable private String[] separatorTokens;
 		@Nullable private String[] nonSeparatorTokens;
 
+		public SettingsParameter(@Nullable Setting settingAnnotation) {
+
+			if (settingAnnotation != null) {
+				this.sortableAttributes = settingAnnotation.sortableAttributes();
+				this.distinctAttribute = settingAnnotation.distinctAttribute();
+				this.searchableAttributes = settingAnnotation.searchableAttributes();
+				this.displayedAttributes = settingAnnotation.displayedAttributes();
+				this.rankingRules = settingAnnotation.rankingRules();
+				this.stopWords = settingAnnotation.stopWords();
+				this.pagination = settingAnnotation.pagination();
+				this.filterableAttributes = settingAnnotation.filterableAttributes();
+				this.synonyms = settingAnnotation.synonyms();
+				this.typoTolerance = settingAnnotation.typoTolerance();
+				this.faceting = settingAnnotation.faceting();
+				this.dictionary = settingAnnotation.dictionary();
+				this.proximityPrecision = settingAnnotation.proximityPrecision();
+				this.searchCutoffMs = settingAnnotation.searchCutoffMs();
+				this.separatorTokens = settingAnnotation.separatorTokens();
+				this.nonSeparatorTokens = settingAnnotation.nonSeparatorTokens();
+			}
+		}
+
 		Settings toSettings() {
 			Settings settings = new Settings();
 
-			Optional.ofNullable(sortableAttributes).ifPresent(settings::setSortableAttributes);
-			Optional.ofNullable(distinctAttribute).ifPresent(settings::setDistinctAttribute);
-			Optional.ofNullable(searchableAttributes).ifPresent(settings::setSearchableAttributes);
-			Optional.ofNullable(displayedAttributes).ifPresent(settings::setDisplayedAttributes);
-			Optional.ofNullable(rankingRules).ifPresent(settings::setRankingRules);
-			Optional.ofNullable(stopWords).ifPresent(settings::setStopWords);
-			Optional.ofNullable(filterableAttributes).ifPresent(settings::setFilterableAttributes);
-			Optional.ofNullable(dictionary).ifPresent(settings::setDictionary);
-			Optional.ofNullable(proximityPrecision).ifPresent(settings::setProximityPrecision);
-			Optional.ofNullable(separatorTokens).ifPresent(settings::setSeparatorTokens);
-			Optional.ofNullable(nonSeparatorTokens).ifPresent(settings::setNonSeparatorTokens);
-			Optional.ofNullable(pagination).map(this::createMeiliPagination).ifPresent(settings::setPagination);
-			Optional.ofNullable(synonyms).map(this::createSynonymMap).ifPresent(settings::setSynonyms);
-			Optional.ofNullable(typoTolerance).map(this::createMeiliTypoTolerance).ifPresent(settings::setTypoTolerance);
-			Optional.ofNullable(faceting).map(this::createMeiliFaceting).ifPresent(settings::setFaceting);
-			Optional.ofNullable(searchCutoffMs).filter(ms -> ms != -1).ifPresent(settings::setSearchCutoffMs);
+			Optional.ofNullable(sortableAttributes).filter(it -> it.length > 0).ifPresent(settings::setSortableAttributes);
+			Optional.ofNullable(distinctAttribute).filter(it -> !it.isEmpty()).ifPresent(settings::setDistinctAttribute);
+			Optional.ofNullable(searchableAttributes).filter(it -> it.length > 0)
+					.ifPresent(settings::setSearchableAttributes);
+			Optional.ofNullable(displayedAttributes).filter(it -> it.length > 0).ifPresent(settings::setDisplayedAttributes);
+			Optional.ofNullable(rankingRules).filter(it -> it.length > 0).ifPresent(settings::setRankingRules);
+			Optional.ofNullable(stopWords).filter(it -> it.length > 0).ifPresent(settings::setStopWords);
+			Optional.ofNullable(pagination).ifPresent(it -> settings.setPagination(createMeiliPagination(it)));
+			Optional.ofNullable(filterableAttributes).filter(it -> it.length > 0)
+					.ifPresent(settings::setFilterableAttributes);
+			Optional.ofNullable(synonyms).filter(it -> it.length > 0)
+					.ifPresent(it -> settings.setSynonyms(createSynonymMap(it)));
+			Optional.ofNullable(typoTolerance).ifPresent(it -> settings.setTypoTolerance(createMeiliTypoTolerance(it)));
+			Optional.ofNullable(faceting).ifPresent(it -> settings.setFaceting(createMeiliFaceting(it)));
+			Optional.ofNullable(dictionary).filter(it -> it.length > 0).ifPresent(settings::setDictionary);
+			Optional.ofNullable(proximityPrecision).filter(it -> !it.isEmpty()).ifPresent(settings::setProximityPrecision);
+			Optional.ofNullable(searchCutoffMs).filter(it -> it > 0).ifPresent(settings::setSearchCutoffMs);
+			Optional.ofNullable(separatorTokens).filter(it -> it.length > 0).ifPresent(settings::setSeparatorTokens);
+			Optional.ofNullable(nonSeparatorTokens).filter(it -> it.length > 0).ifPresent(settings::setNonSeparatorTokens);
 
 			return settings;
 		}
