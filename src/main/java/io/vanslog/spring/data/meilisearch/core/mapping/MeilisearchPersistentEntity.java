@@ -33,6 +33,7 @@ public interface MeilisearchPersistentEntity<T> extends PersistentEntity<T, Meil
 	 * 
 	 * @return Index UID
 	 */
+	@Nullable
 	String getIndexUid();
 
 	/**

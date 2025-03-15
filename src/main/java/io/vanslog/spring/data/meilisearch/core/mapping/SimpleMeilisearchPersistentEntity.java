@@ -49,7 +49,6 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		implements MeilisearchPersistentEntity<T>, ApplicationContextAware {
 
 	private final StandardEvaluationContext context;
-	@Nullable private final Document document;
 	private final SettingsParameter settingParameter;
 	private final boolean applySettings;
 	@Nullable private String indexUid;
@@ -64,7 +63,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		this.context = new StandardEvaluationContext();
 
 		Class<T> rawType = information.getType();
-		document = AnnotatedElementUtils.findMergedAnnotation(rawType, Document.class);
+		Document document = AnnotatedElementUtils.findMergedAnnotation(rawType, Document.class);
 		this.settingParameter = buildSettingsParameter(rawType);
 
 		if (document != null) {
@@ -85,6 +84,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 	}
 
 	@Override
+	@Nullable
 	public String getIndexUid() {
 		return indexUid;
 	}
