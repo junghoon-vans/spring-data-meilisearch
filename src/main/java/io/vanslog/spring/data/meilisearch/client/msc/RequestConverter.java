@@ -64,13 +64,11 @@ public class RequestConverter {
 				.build();
 	}
 
-	public IndexSearchRequest searchRequest(IndexQuery query) {
+	public IndexSearchRequest indexSearchRequest(BaseQuery query, String indexUid) {
+		IndexSearchRequest.IndexSearchRequestBuilder builder = IndexSearchRequest.builder();
 		Pageable pageable = query.getPageable();
 
-		return IndexSearchRequest.builder() //
-				.indexUid(query.getIndexUid()) //
-				.federationOptions(query.getFederationOptions()) //
-				.q(query.getQ()) //
+		builder.q(query.getQ()) //
 				.page(pageable.getPageNumber() + 1) //
 				.hitsPerPage(pageable.getPageSize()) //
 				.sort(convertSortToSortOptions(query.getSort())) //
@@ -91,13 +89,21 @@ public class RequestConverter {
 				.showRankingScoreDetails(query.isShowRankingScoreDetails()) //
 				.rankingScoreThreshold(query.getRankingScoreThreshold()) //
 				.locales(query.getLocales()) //
-				.distinct(query.getDistinct()) //
-				.build();
+				.distinct(query.getDistinct());
+
+		if (query instanceof IndexQuery indexQuery) {
+			builder.indexUid(indexQuery.getIndexUid() != null ? indexQuery.getIndexUid() : indexUid) //
+					.federationOptions(indexQuery.getFederationOptions());
+		} else {
+			builder.indexUid(indexUid);
+		}
+
+		return builder.build();
 	}
 
-	public MultiSearchRequest searchRequest(List<IndexQuery> queries) {
+	public MultiSearchRequest multiSearchRequest(List<? extends BaseQuery> queries, String indexUid) {
 		MultiSearchRequest request = new MultiSearchRequest();
-		queries.forEach(query -> request.addQuery(searchRequest(query)));
+		queries.forEach(query -> request.addQuery(indexSearchRequest(query, indexUid)));
 		return request;
 	}
 

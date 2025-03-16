@@ -60,7 +60,7 @@ public interface SearchOperations {
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
 	 * @return the list of entities found by the queries
 	 */
-	<T> SearchHits<T> multiSearch(List<IndexQuery> queries, Class<T> clazz);
+	<T> SearchHits<T> multiSearch(List<? extends BaseQuery> queries, Class<T> clazz);
 
 	/**
 	 * Execute the facet search query against meilisearch and return the result.
