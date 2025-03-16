@@ -80,13 +80,6 @@ public @interface Setting {
 	String[] stopWords() default {};
 
 	/**
-	 * defines the pagination behavior
-	 *
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#pagination">Pagination</a>
-	 */
-	Pagination pagination() default @Pagination();
-
-	/**
 	 * defines the filterable attributes
 	 *
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#filterable-attributes">Filterable
@@ -100,20 +93,6 @@ public @interface Setting {
 	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#synonyms">Synonyms</a>
 	 */
 	Synonym[] synonyms() default {};
-
-	/**
-	 * defines the typo tolerance settings
-	 *
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#typo-tolerance">Typo tolerance</a>
-	 */
-	TypoTolerance typoTolerance() default @TypoTolerance();
-
-	/**
-	 * defines the faceting settings
-	 *
-	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#faceting">Faceting</a>
-	 */
-	Faceting faceting() default @Faceting();
 
 	/**
 	 * defines the dictionary

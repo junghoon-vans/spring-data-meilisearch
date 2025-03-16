@@ -7,7 +7,48 @@ This chapter covers how to modify search https://www.meilisearch.com/docs/refere
 == Overview
 
 Meilisearch settings are used to define the behavior of the search engine.
-Using `@Setting` annotation, you can define the settings for the index.
+Using `@Setting` annotation, you can define the basic settings for the index, while complex settings are defined using separate annotations like `@TypoTolerance`, `@Faceting`, and `@Pagination`.
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
+  searchableAttributes = { "description", "brand", "color" },
+  displayedAttributes = { "description", "brand", "color", "productId" },
+  sortableAttributes = { "productId" },
+  rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" },
+  distinctAttribute = "productId",
+  filterableAttributes = { "brand", "color", "price" },
+  synonyms = {
+        @Synonym(word = "phone", synonyms = { "mobile", "cellphone" }),
+        @Synonym(word = "laptop", synonyms = { "notebook" })
+  },
+  dictionary = { "netflix", "spotify" },
+  stopWords = { "a", "an", "the" },
+  separatorTokens = { "-", "_", "@" },
+  nonSeparatorTokens = { ".", "#" },
+  proximityPrecision = "byWord",
+  searchCutoffMs = 50
+)
+@TypoTolerance(
+  enabled = true,
+  minWordSizeForTypos = @MinWordSizeForTypos(oneTypo = 5, twoTypos = 9),
+  disableOnWords = {"skype", "zoom"},
+  disableOnAttributes = {"serial_number"}
+)
+@Faceting(maxValuesPerFacet = 100)
+@Pagination(maxTotalHits = 2000)
+class Product {
+    @Id private String id;
+    private String description;
+    private String brand;
+    private String color;
+    private String productId;
+    private double price;
+}
+----
+====
 
 [[meilisearch.settings.search]]
 == Search Settings
@@ -70,11 +111,9 @@ class Product {
 ----
 @Document(indexUid = "products")
 @Setting(
-  filterableAttributes = { "brand", "color", "price" },                              <.>
-  faceting = @Faceting(                                                              <.>
-    maxValuesPerFacet = 100
-  )
+  filterableAttributes = { "brand", "color", "price" }                               <.>
 )
+@Faceting(maxValuesPerFacet = 100)                                                   <.>
 class Product {
     @Id private String id;
     private String brand;
@@ -85,7 +124,7 @@ class Product {
 ----
 
 <.> The `filterableAttributes` attribute defines which fields can be used for filtering and faceted search.
-<.> The `faceting` attribute configures faceted search behavior.
+<.> The `@Faceting` annotation configures faceted search behavior.
 ====
 
 [[meilisearch.settings.search.text]]
@@ -132,16 +171,14 @@ class Product {
 [source,java]
 ----
 @Document(indexUid = "products")
-@Setting(
-  typoTolerance = @TypoTolerance(                                                    <.>
-    enabled = true,
-    minWordSizeForTypos = @MinWordSizeForTypos(
-      oneTypo = 5,
-      twoTypos = 9
-    ),
-    disableOnWords = {"skype", "zoom"},
-    disableOnAttributes = {"serial_number"}
-  )
+@TypoTolerance(                                                                      <.>
+  enabled = true,
+  minWordSizeForTypos = @MinWordSizeForTypos(
+    oneTypo = 5,
+    twoTypos = 9
+  ),
+  disableOnWords = {"skype", "zoom"},
+  disableOnAttributes = {"serial_number"}
 )
 class Product {
     @Id private String id;
@@ -149,7 +186,7 @@ class Product {
 }
 ----
 
-<.> The `typoTolerance` attribute configures the typo tolerance behavior of the search engine.
+<.> The `@TypoTolerance` annotation configures the typo tolerance behavior of the search engine.
 ====
 
 [[meilisearch.settings.search.text.tokenization]]
@@ -208,9 +245,7 @@ If you have more than 1,000 results, you must use `@Pagination` annotation to ex
 [source,java]
 ----
 @Document(indexUid = "products")
-@Setting(
-  pagination = @Pagination(maxTotalHits = 2000)                                       <.>
-)
+@Pagination(maxTotalHits = 2000)                                                     <.>
 class Product {
     @Id private String id;
     // fields...
@@ -218,65 +253,4 @@ class Product {
 ----
 
 <.> The `maxTotalHits` is used to define the maximum number of results that can be returned by the search engine.
-====
-
-[[meilisearch.settings.complete]]
-== Complete Example
-
-Here's a complete example showing all available settings:
-
-====
-[source,java]
-----
-@Document(indexUid = "products")
-@Setting(
-  // Search attributes
-  searchableAttributes = { "description", "brand", "color" },
-  displayedAttributes = { "description", "brand", "color", "productId" },
-  
-  // Ranking and sorting
-  sortableAttributes = { "productId" },
-  rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" },
-  distinctAttribute = "productId",
-  
-  // Filtering and faceting
-  filterableAttributes = { "brand", "color", "price" },
-  faceting = @Faceting(maxValuesPerFacet = 100),
-  
-  // Text processing
-  synonyms = {
-        @Synonym(word = "phone", synonyms = { "mobile", "cellphone" }),
-        @Synonym(word = "laptop", synonyms = { "notebook" })
-  },
-  dictionary = { "netflix", "spotify" },
-  stopWords = { "a", "an", "the" },
-  
-  // Typo tolerance
-  typoTolerance = @TypoTolerance(
-    enabled = true,
-    minWordSizeForTypos = @MinWordSizeForTypos(oneTypo = 5, twoTypos = 9),
-    disableOnWords = {"skype", "zoom"},
-    disableOnAttributes = {"serial_number"}
-  ),
-  
-  // Tokenization
-  separatorTokens = { "-", "_", "@" },
-  nonSeparatorTokens = { ".", "#" },
-  
-  // Performance
-  proximityPrecision = "byWord",
-  searchCutoffMs = 50,
-  
-  // Pagination
-  pagination = @Pagination(maxTotalHits = 2000)
-)
-class Product {
-    @Id private String id;
-    private String description;
-    private String brand;
-    private String color;
-    private String productId;
-    private double price;
-}
-----
 ====
