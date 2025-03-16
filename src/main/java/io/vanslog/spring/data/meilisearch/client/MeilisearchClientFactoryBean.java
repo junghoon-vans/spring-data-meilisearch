@@ -35,8 +35,8 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 	@Nullable private String apiKey;
 	@Nullable private JsonHandler jsonHandler;
 	private String[] clientAgents;
-	@Nullable private int requestTimeout;
-	@Nullable private int requestInterval;
+	private int requestTimeout;
+	private int requestInterval;
 	@Nullable private MeilisearchClient meilisearchClient;
 
 	private MeilisearchClientFactoryBean() {

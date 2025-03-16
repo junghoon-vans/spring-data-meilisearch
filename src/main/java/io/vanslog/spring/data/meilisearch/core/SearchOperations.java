@@ -15,13 +15,11 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
+import java.util.List;
+
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
-
-import java.util.List;
-
-import com.meilisearch.sdk.SearchRequest;
 
 /**
  * The operations for the below Meilisearch APIs.

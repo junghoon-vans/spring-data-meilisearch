@@ -47,6 +47,7 @@ public interface SearchHits<T> extends Streamable<SearchHit<T>> {
 	 */
 	List<SearchHit<T>> getSearchHits();
 
+	@Override
 	default Iterator<SearchHit<T>> iterator() {
 		return getSearchHits().iterator();
 	}

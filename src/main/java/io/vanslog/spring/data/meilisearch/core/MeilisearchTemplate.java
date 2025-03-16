@@ -222,6 +222,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		return responseConverter.mapHits(result, FacetHit.class);
 	}
 
+	@Override
 	public <T> void applySettings(Class<T> clazz) {
 		String indexUid = getIndexUidFor(clazz);
 		MeilisearchPersistentEntity<?> persistentEntity = getPersistentEntityFor(clazz);

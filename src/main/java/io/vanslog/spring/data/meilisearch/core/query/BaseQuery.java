@@ -52,7 +52,8 @@ public abstract class BaseQuery implements Query {
 
 	public BaseQuery() {}
 
-	public BaseQuery(String q) {
+	public BaseQuery(@Nullable String q) {
+		Assert.notNull(q, "Q must not be null!");
 		this.q = q;
 	}
 
@@ -93,7 +94,6 @@ public abstract class BaseQuery implements Query {
 		return this.pageable;
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T extends Query> T setPageable(Pageable pageable) {
 		Assert.notNull(pageable, "Pageable must not be null!");
 		this.pageable = pageable;
@@ -123,6 +123,7 @@ public abstract class BaseQuery implements Query {
 
 	@Override
 	public void setQ(@Nullable String q) {
+		Assert.notNull(q, "Q must not be null!");
 		this.q = q;
 	}
 
@@ -131,7 +132,7 @@ public abstract class BaseQuery implements Query {
 		return attributesToRetrieve;
 	}
 
-	public void setAttributesToRetrieve(String[] attributesToRetrieve) {
+	public void setAttributesToRetrieve(@Nullable String[] attributesToRetrieve) {
 		this.attributesToRetrieve = attributesToRetrieve;
 	}
 
@@ -140,7 +141,7 @@ public abstract class BaseQuery implements Query {
 		return attributesToCrop;
 	}
 
-	public void setAttributesToCrop(String[] attributesToCrop) {
+	public void setAttributesToCrop(@Nullable String[] attributesToCrop) {
 		this.attributesToCrop = attributesToCrop;
 	}
 
@@ -149,7 +150,7 @@ public abstract class BaseQuery implements Query {
 		return cropLength;
 	}
 
-	public void setCropLength(Integer cropLength) {
+	public void setCropLength(@Nullable Integer cropLength) {
 		this.cropLength = cropLength;
 	}
 
@@ -158,7 +159,7 @@ public abstract class BaseQuery implements Query {
 		return cropMarker;
 	}
 
-	public void setCropMarker(String cropMarker) {
+	public void setCropMarker(@Nullable String cropMarker) {
 		this.cropMarker = cropMarker;
 	}
 
@@ -167,7 +168,7 @@ public abstract class BaseQuery implements Query {
 		return highlightPreTag;
 	}
 
-	public void setHighlightPreTag(String highlightPreTag) {
+	public void setHighlightPreTag(@Nullable String highlightPreTag) {
 		this.highlightPreTag = highlightPreTag;
 	}
 
@@ -176,7 +177,7 @@ public abstract class BaseQuery implements Query {
 		return highlightPostTag;
 	}
 
-	public void setHighlightPostTag(String highlightPostTag) {
+	public void setHighlightPostTag(@Nullable String highlightPostTag) {
 		this.highlightPostTag = highlightPostTag;
 	}
 
@@ -187,7 +188,7 @@ public abstract class BaseQuery implements Query {
 	}
 
 	@Override
-	public void setMatchingStrategy(MatchingStrategy matchingStrategy) {
+	public void setMatchingStrategy(@Nullable MatchingStrategy matchingStrategy) {
 		this.matchingStrategy = matchingStrategy;
 	}
 
@@ -196,7 +197,7 @@ public abstract class BaseQuery implements Query {
 		return attributesToHighlight;
 	}
 
-	public void setAttributesToHighlight(String[] attributesToHighlight) {
+	public void setAttributesToHighlight(@Nullable String[] attributesToHighlight) {
 		this.attributesToHighlight = attributesToHighlight;
 	}
 
@@ -207,7 +208,7 @@ public abstract class BaseQuery implements Query {
 	}
 
 	@Override
-	public void setAttributesToSearchOn(String[] attributesToSearchOn) {
+	public void setAttributesToSearchOn(@Nullable String[] attributesToSearchOn) {
 		this.attributesToSearchOn = attributesToSearchOn;
 	}
 
@@ -218,7 +219,7 @@ public abstract class BaseQuery implements Query {
 	}
 
 	@Override
-	public void setFilter(String[] filter) {
+	public void setFilter(@Nullable String[] filter) {
 		this.filter = filter;
 	}
 
@@ -229,7 +230,7 @@ public abstract class BaseQuery implements Query {
 	}
 
 	@Override
-	public void setFilterArray(String[][] filterArray) {
+	public void setFilterArray(@Nullable String[][] filterArray) {
 		this.filterArray = filterArray;
 	}
 
@@ -246,7 +247,7 @@ public abstract class BaseQuery implements Query {
 		return facets;
 	}
 
-	public void setFacets(String[] facets) {
+	public void setFacets(@Nullable String[] facets) {
 		this.facets = facets;
 	}
 
@@ -271,7 +272,7 @@ public abstract class BaseQuery implements Query {
 		return rankingScoreThreshold;
 	}
 
-	public void setRankingScoreThreshold(Double rankingScoreThreshold) {
+	public void setRankingScoreThreshold(@Nullable Double rankingScoreThreshold) {
 		this.rankingScoreThreshold = rankingScoreThreshold;
 	}
 
@@ -280,7 +281,7 @@ public abstract class BaseQuery implements Query {
 		return locales;
 	}
 
-	public void setLocales(String[] locales) {
+	public void setLocales(@Nullable String[] locales) {
 		this.locales = locales;
 	}
 
@@ -289,7 +290,7 @@ public abstract class BaseQuery implements Query {
 		return distinct;
 	}
 
-	public void setDistinct(String distinct) {
+	public void setDistinct(@Nullable String distinct) {
 		this.distinct = distinct;
 	}
 }
