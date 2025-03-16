@@ -18,9 +18,17 @@ package io.vanslog.spring.data.meilisearch.core.mapping;
 import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
-import io.vanslog.spring.data.meilisearch.entities.Movie;
+import io.vanslog.spring.data.meilisearch.annotations.Faceting;
+import io.vanslog.spring.data.meilisearch.annotations.MinWordSizeForTypos;
+import io.vanslog.spring.data.meilisearch.annotations.Pagination;
+import io.vanslog.spring.data.meilisearch.annotations.Setting;
+import io.vanslog.spring.data.meilisearch.annotations.Synonym;
+import io.vanslog.spring.data.meilisearch.annotations.TypoTolerance;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.util.TypeInformation;
 
 /**
@@ -30,50 +38,130 @@ import org.springframework.data.util.TypeInformation;
  */
 class SimpleMeilisearchPersistentEntityUnitTests {
 
-	@Test
-	void shouldReturnIndexUid() {
-		TypeInformation<Movie> entityTypeInfo = TypeInformation.of(Movie.class);
-		SimpleMeilisearchPersistentEntity<Movie> entityPersistentEntity = new SimpleMeilisearchPersistentEntity<>(
-				entityTypeInfo);
-		String indexUid = entityPersistentEntity.getIndexUid();
-		assertThat(indexUid).isEqualTo("movies");
+	@Nested
+	@DisplayName("index uid")
+	class IndexUidTests {
+		@Test
+		void shouldThrowExceptionWhenIndexUidIsBlank() {
+			TypeInformation<EntityWithEmptyIndexUid> entityTypeInfo = TypeInformation.of(EntityWithEmptyIndexUid.class);
+			assertThatThrownBy(() -> new SimpleMeilisearchPersistentEntity<>(entityTypeInfo))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		void shouldUseClassNameAsIndexUidWhenNotSpecified() {
+			// given
+			SimpleMeilisearchPersistentEntity<EntityWithoutExplicitIndexUid> entity = //
+					new SimpleMeilisearchPersistentEntity<>(TypeInformation.of(EntityWithoutExplicitIndexUid.class));
+
+			// when
+			String indexUid = entity.getIndexUid();
+
+			// then
+			assertThat(indexUid).isEqualTo("EntityWithoutExplicitIndexUid");
+		}
+
+		@Test
+		void shouldUseSpecifiedIndexUid() {
+			// given
+			SimpleMeilisearchPersistentEntity<EntityWithExplicitIndexUid> entity = new SimpleMeilisearchPersistentEntity<>(
+					TypeInformation.of(EntityWithExplicitIndexUid.class));
+
+			// when
+			String indexUid = entity.getIndexUid();
+
+			// then
+			assertThat(indexUid).isEqualTo("custom-index");
+		}
 	}
 
-	@Test
-	void shouldThrowExceptionWhenIndexUidIsBlank() {
-		TypeInformation<EmptyIndexUidDocument> entityTypeInfo = TypeInformation.of(EmptyIndexUidDocument.class);
-		assertThatThrownBy(() -> new SimpleMeilisearchPersistentEntity<>(entityTypeInfo))
-				.isInstanceOf(IllegalArgumentException.class);
+	@Nested
+	@DisplayName("index settings")
+	class SettingsTests {
+
+		@Test
+		void shouldReturnSimpleSettings() {
+			// given
+			SimpleMeilisearchPersistentEntity<EntityWithoutComplexSettings> entity = new SimpleMeilisearchPersistentEntity<>(
+					TypeInformation.of(EntityWithoutComplexSettings.class));
+
+			// when
+			var settings = entity.getDefaultSettings();
+			var typoTolerance = settings.getTypoTolerance();
+			var faceting = settings.getFaceting();
+			var pagination = settings.getPagination();
+
+			// then
+			assertThat(settings).isNotNull();
+
+			// Check basic settings
+			assertThat(settings.getSearchableAttributes()).containsExactly("description", "brand", "color");
+			assertThat(settings.getDisplayedAttributes()).containsExactly("description", "brand", "color", "productId");
+			assertThat(settings.getSortableAttributes()).containsExactly("productId");
+			assertThat(settings.getRankingRules()).containsExactly("typo", "words", "proximity", "attribute", "sort",
+					"exactness");
+			assertThat(settings.getDistinctAttribute()).isEqualTo("productId");
+			assertThat(settings.getFilterableAttributes()).containsExactly("brand", "color", "price");
+
+			// Check synonyms
+			assertThat(settings.getSynonyms()).hasSize(2);
+			assertThat(settings.getSynonyms().get("phone")).containsExactly("mobile", "cellphone");
+			assertThat(settings.getSynonyms().get("laptop")).containsExactly("notebook");
+
+			// Check dictionary and stop words
+			assertThat(settings.getDictionary()).containsExactly("netflix", "spotify");
+			assertThat(settings.getStopWords()).containsExactly("a", "an", "the");
+
+			// Check tokenization settings
+			assertThat(settings.getSeparatorTokens()).containsExactly("-", "_", "@");
+			assertThat(settings.getNonSeparatorTokens()).containsExactly(".", "#");
+
+			// Check performance settings
+			assertThat(settings.getProximityPrecision()).isEqualTo("byWord");
+			assertThat(settings.getSearchCutoffMs()).isEqualTo(50);
+
+			// Check complex settings
+			assertThat(typoTolerance).isNull();
+			assertThat(faceting).isNull();
+			assertThat(pagination).isNull();
+		}
+
+		@Test
+		void shouldReturnComplexSettings() {
+			// given
+			SimpleMeilisearchPersistentEntity<EntityWithComplexSettings> entity = new SimpleMeilisearchPersistentEntity<>(
+					TypeInformation.of(EntityWithComplexSettings.class));
+
+			// when
+			var settings = entity.getDefaultSettings();
+			var typoTolerance = settings.getTypoTolerance();
+			var faceting = settings.getFaceting();
+			var pagination = settings.getPagination();
+
+			// then
+			assertThat(settings).isNotNull();
+
+			// Check typo tolerance settings
+			assertThat(typoTolerance).isNotNull();
+			assertThat(typoTolerance.isEnabled()).isTrue();
+			assertThat(typoTolerance.getMinWordSizeForTypos()).containsEntry("oneTypo", 5);
+			assertThat(typoTolerance.getMinWordSizeForTypos()).containsEntry("twoTypos", 9);
+			assertThat(typoTolerance.getDisableOnWords()).containsExactly("skype", "zoom");
+			assertThat(typoTolerance.getDisableOnAttributes()).containsExactly("serial_number");
+
+			// Check faceting settings
+			assertThat(faceting).isNotNull();
+			assertThat(faceting.getMaxValuesPerFacet()).isEqualTo(200);
+
+			// Check pagination settings
+			assertThat(pagination).isNotNull();
+			assertThat(pagination.getMaxTotalHits()).isEqualTo(2000);
+		}
 	}
 
-	@Test
-	void shouldUseClassNameAsIndexUidWhenNotSpecified() {
-		// given
-		SimpleMeilisearchPersistentEntity<EntityWithoutExplicitIndexUid> entity = //
-				new SimpleMeilisearchPersistentEntity<>(TypeInformation.of(EntityWithoutExplicitIndexUid.class));
-
-		// when
-		String indexUid = entity.getIndexUid();
-
-		// then
-		assertThat(indexUid).isEqualTo("EntityWithoutExplicitIndexUid");
-	}
-
-	@Test
-	void shouldUseSpecifiedIndexUid() {
-		// given
-		SimpleMeilisearchPersistentEntity<EntityWithExplicitIndexUid> entity = new SimpleMeilisearchPersistentEntity<>(
-				TypeInformation.of(EntityWithExplicitIndexUid.class));
-
-		// when
-		String indexUid = entity.getIndexUid();
-
-		// then
-		assertThat(indexUid).isEqualTo("custom-index");
-	}
-
+	// region entities
 	@Document(indexUid = "")
-	static class EmptyIndexUidDocument {}
+	static class EntityWithEmptyIndexUid {}
 
 	static class EntityWithoutExplicitIndexUid {
 		private String field;
@@ -99,4 +187,50 @@ class SimpleMeilisearchPersistentEntityUnitTests {
 			this.field = field;
 		}
 	}
+
+	@Document(indexUid = "products")
+	@Setting( //
+			searchableAttributes = { "description", "brand", "color" }, //
+			displayedAttributes = { "description", "brand", "color", "productId" }, //
+			sortableAttributes = { "productId" }, //
+			rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" }, //
+			distinctAttribute = "productId", //
+			filterableAttributes = { "brand", "color", "price" }, //
+			synonyms = { //
+					@Synonym(word = "phone", synonyms = { "mobile", "cellphone" }), //
+					@Synonym(word = "laptop", synonyms = { "notebook" }) //
+			}, //
+			dictionary = { "netflix", "spotify" }, //
+			stopWords = { "a", "an", "the" }, //
+			separatorTokens = { "-", "_", "@" }, //
+			nonSeparatorTokens = { ".", "#" }, //
+			proximityPrecision = "byWord", //
+			searchCutoffMs = 50 //
+	)
+	static class EntityWithoutComplexSettings {
+		@Id private String id;
+		private String description;
+		private String brand;
+		private String color;
+		private String productId;
+		private double price;
+	}
+
+	@Document(indexUid = "products")
+	@TypoTolerance( //
+			enabled = true, minWordSizeForTypos = @MinWordSizeForTypos(oneTypo = 5, twoTypos = 9), //
+			disableOnWords = { "skype", "zoom" }, //
+			disableOnAttributes = { "serial_number" } //
+	) //
+	@Faceting(maxValuesPerFacet = 200) //
+	@Pagination(maxTotalHits = 2000) //
+	static class EntityWithComplexSettings {
+		@Id private String id;
+		private String description;
+		private String brand;
+		private String color;
+		private String productId;
+		private double price;
+	}
+	// endregion
 }
