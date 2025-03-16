@@ -23,6 +23,7 @@ import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
 import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
+import io.vanslog.spring.data.meilisearch.entities.ComicsMovie;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
@@ -52,6 +53,9 @@ class MeilisearchTemplateIntegrationTests {
 	Movie movie1 = new Movie(1, "Carol", "A love story", new String[] { "Romance", "Drama" });
 	Movie movie2 = new Movie(2, "Wonder Woman", "A superhero film", new String[] { "Action", "Adventure" });
 	Movie movie3 = new Movie(3, "Life of Pi", "A survival film", new String[] { "Adventure", "Drama" });
+
+	ComicsMovie comics1 = new ComicsMovie(1, "Wonder Woman", "A superhero comic", new String[] { "Comics", "Action" });
+	ComicsMovie comics2 = new ComicsMovie(2, "Batman", "A superhero comic", new String[] { "Comics", "Action" });
 
 	@BeforeEach
 	void setUp() throws MeilisearchException {
@@ -195,10 +199,22 @@ class MeilisearchTemplateIntegrationTests {
 	}
 
 	@Test
-	void shouldSearchWithQuery() {
+	void shouldSearchWithBasicQuery() {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 
 		BaseQuery query = new BasicQuery(movie2.getTitle());
+		SearchHits<Movie> result = meilisearchTemplate.search(query, Movie.class);
+		List<SearchHit<Movie>> searchHits = result.getSearchHits();
+		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
+
+		assertThat(movies).isEqualTo(List.of(movie2));
+	}
+
+	@Test
+	void shouldSearchWithIndexQuery() {
+		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
+
+		BaseQuery query = new IndexQuery(movie2.getTitle());
 		SearchHits<Movie> result = meilisearchTemplate.search(query, Movie.class);
 		List<SearchHit<Movie>> searchHits = result.getSearchHits();
 		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
@@ -221,16 +237,64 @@ class MeilisearchTemplateIntegrationTests {
 	}
 
 	@Test
-	void shouldMultiSearchWithQuery() {
+	void shouldMultiSearchWithIndexQuery() {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 
-		List<IndexQuery> queries = List.of(new IndexQuery(movie1.getTitle()), new IndexQuery(movie2.getTitle()));
+		List<BaseQuery> queries = List.of(new IndexQuery(movie1.getTitle()), new IndexQuery(movie2.getTitle()));
 
 		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, Movie.class);
 		List<SearchHit<Movie>> searchHits = result.getSearchHits();
 		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
 
 		assertThat(movies).isEqualTo(List.of(movie1, movie2));
+	}
+
+	@Test
+	void shouldMultiSearchWithBasicQuery() {
+		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
+
+		List<BaseQuery> queries = List.of(new BasicQuery(movie1.getTitle()), new BasicQuery(movie2.getTitle()));
+
+		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, Movie.class);
+		List<SearchHit<Movie>> searchHits = result.getSearchHits();
+		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
+
+		assertThat(movies).isEqualTo(List.of(movie1, movie2));
+	}
+
+	@Test
+	void shouldMultiSearchWithMixedQuery() {
+		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
+
+		List<BaseQuery> queries = List.of(new BasicQuery(movie1.getTitle()), new IndexQuery(movie2.getTitle()));
+
+		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, Movie.class);
+		List<SearchHit<Movie>> searchHits = result.getSearchHits();
+		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
+
+		assertThat(movies).isEqualTo(List.of(movie1, movie2));
+	}
+
+	@Test
+	void shouldMultiSearchWithMultiIndexedQuery() {
+		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
+		meilisearchTemplate.save(List.of(comics1, comics2));
+
+		List<BaseQuery> queries = List.of( //
+				IndexQuery.builder().withQ(movie1.getTitle()).withIndexUid("movies").build(), //
+				IndexQuery.builder().withQ(comics1.getTitle()).withIndexUid("comics").build() //
+		);
+
+		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, Movie.class);
+		List<SearchHit<Movie>> searchHits = result.getSearchHits();
+		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
+
+		assertThat(movies).hasSize(2);
+		assertThat(movies).extracting("id", "title") //
+				.containsExactlyInAnyOrder( //
+						tuple(movie1.getId(), movie1.getTitle()), //
+						tuple(comics1.getId(), comics1.getTitle()) //
+				);
 	}
 
 	@Test
