@@ -15,9 +15,11 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
-import com.meilisearch.sdk.model.FacetRating;
 import java.util.HashMap;
+
 import org.springframework.lang.Nullable;
+
+import com.meilisearch.sdk.model.FacetRating;
 
 public class SearchHit<T> {
 
