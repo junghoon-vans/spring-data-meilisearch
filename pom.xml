@@ -26,7 +26,7 @@
 
     <properties>
         <springdata.commons>3.2.0-SNAPSHOT</springdata.commons>
-        <meilisearch-java>0.14.2</meilisearch-java>
+        <meilisearch-java>0.14.3</meilisearch-java>
         <testcontainers-meilisearch>1.0.5</testcontainers-meilisearch>
 
         <java-module-name>spring.data.meilisearch</java-module-name>
