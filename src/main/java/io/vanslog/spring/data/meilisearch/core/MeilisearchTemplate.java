@@ -208,7 +208,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Override
 	public <T, Q extends BaseQuery> SearchHits<T> multiSearch(List<Q> queries, Class<T> clazz) {
 		String indexUid = getIndexUidFor(clazz);
-		MultiSearchRequest request = requestConverter.multiSearchRequest(queries, indexUid);
+		MultiSearchRequest request = requestConverter.multiSearchRequest(queries, indexUid, false);
 		Results<MultiSearchResult> results = execute(client -> client.multiSearch(request));
 		return responseConverter.mapResults(results, clazz);
 	}
@@ -216,7 +216,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Override
 	public <T, Q extends BaseQuery> SearchHits<T> multiSearch(List<Q> queries, MultiSearchFederation federation, Class<T> clazz) {
 		String indexUid = getIndexUidFor(clazz);
-		MultiSearchRequest request = requestConverter.multiSearchRequest(queries, indexUid);
+		MultiSearchRequest request = requestConverter.multiSearchRequest(queries, indexUid, true);
 		MultiSearchResult result = execute(client -> client.multiSearch(request, federation));
 		return responseConverter.mapResult(result, clazz);
 	}
