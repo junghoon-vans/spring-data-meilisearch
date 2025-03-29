@@ -28,6 +28,7 @@ import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.meilisearch.sdk.MergeFacets;
+import com.meilisearch.sdk.MultiSearchFederation;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 
 /**
@@ -306,6 +309,38 @@ class MeilisearchTemplateIntegrationTests {
 		SearchHits<FacetHit> result = meilisearchTemplate.facetSearch(query, Movie.class);
 
 		assertThat(result.getSearchHits()).hasSize(4);
+	}
+
+	@Test
+	void shouldSearchWithFederation() {
+		meilisearchTemplate.applySettings(Movie.class); // make genres filterable
+		meilisearchTemplate.applySettings(ComicsMovie.class); // make genres filterable
+		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
+		meilisearchTemplate.save(List.of(comics1, comics2));
+
+		List<BaseQuery> queries = List.of(
+				IndexQuery.builder().withQ("Wonder").withIndexUid("movies").build(),
+				IndexQuery.builder().withQ("Wonder").withIndexUid("comics").build()
+		);
+
+		MultiSearchFederation federation = new MultiSearchFederation();
+		federation.setLimit(10);
+		federation.setOffset(0);
+		MergeFacets mergeFacets = new MergeFacets();
+		mergeFacets.setMaxValuesPerFacet(10);
+		federation.setMergeFacets(mergeFacets);
+ 		federation.setFacetsByIndex(new HashMap<>());
+
+		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, federation, Movie.class);
+		List<SearchHit<Movie>> searchHits = result.getSearchHits();
+		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
+
+		assertThat(movies).hasSize(2);
+		assertThat(movies).extracting("id", "title")
+				.containsExactlyInAnyOrder(
+						tuple(movie2.getId(), movie2.getTitle()),
+						tuple(comics1.getId(), comics1.getTitle())
+				);
 	}
 
 	@Test

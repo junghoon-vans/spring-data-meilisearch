@@ -15,6 +15,31 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.data.mapping.PersistentProperty;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
+import com.meilisearch.sdk.FacetSearchRequest;
+import com.meilisearch.sdk.MultiSearchFederation;
+import com.meilisearch.sdk.MultiSearchRequest;
+import com.meilisearch.sdk.SearchRequest;
+import com.meilisearch.sdk.exceptions.MeilisearchApiException;
+import com.meilisearch.sdk.exceptions.MeilisearchException;
+import com.meilisearch.sdk.model.DocumentsQuery;
+import com.meilisearch.sdk.model.FacetSearchable;
+import com.meilisearch.sdk.model.MultiSearchResult;
+import com.meilisearch.sdk.model.Results;
+import com.meilisearch.sdk.model.Searchable;
+import com.meilisearch.sdk.model.Settings;
+import com.meilisearch.sdk.model.TaskInfo;
+import com.meilisearch.sdk.model.TaskStatus;
+
 import io.vanslog.spring.data.meilisearch.DocumentAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
@@ -29,30 +54,6 @@ import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProp
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
-import org.springframework.data.mapping.PersistentProperty;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-
-import com.meilisearch.sdk.FacetSearchRequest;
-import com.meilisearch.sdk.MultiSearchRequest;
-import com.meilisearch.sdk.SearchRequest;
-import com.meilisearch.sdk.exceptions.MeilisearchApiException;
-import com.meilisearch.sdk.exceptions.MeilisearchException;
-import com.meilisearch.sdk.model.DocumentsQuery;
-import com.meilisearch.sdk.model.FacetSearchable;
-import com.meilisearch.sdk.model.MultiSearchResult;
-import com.meilisearch.sdk.model.Results;
-import com.meilisearch.sdk.model.Searchable;
-import com.meilisearch.sdk.model.Settings;
-import com.meilisearch.sdk.model.TaskInfo;
-import com.meilisearch.sdk.model.TaskStatus;
 
 /**
  * Implementation of {@link io.vanslog.spring.data.meilisearch.core.MeilisearchOperations}.
@@ -207,9 +208,17 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	@Override
 	public <T, Q extends BaseQuery> SearchHits<T> multiSearch(List<Q> queries, Class<T> clazz) {
 		String indexUid = getIndexUidFor(clazz);
-		MultiSearchRequest request = requestConverter.multiSearchRequest(queries, indexUid);
+		MultiSearchRequest request = requestConverter.multiSearchRequest(queries, indexUid, false);
 		Results<MultiSearchResult> results = execute(client -> client.multiSearch(request));
 		return responseConverter.mapResults(results, clazz);
+	}
+
+	@Override
+	public <T, Q extends BaseQuery> SearchHits<T> multiSearch(List<Q> queries, MultiSearchFederation federation, Class<T> clazz) {
+		String indexUid = getIndexUidFor(clazz);
+		MultiSearchRequest request = requestConverter.multiSearchRequest(queries, indexUid, true);
+		MultiSearchResult result = execute(client -> client.multiSearch(request, federation));
+		return responseConverter.mapResult(result, clazz);
 	}
 
 	@Override

@@ -15,10 +15,6 @@
  */
 package io.vanslog.spring.data.meilisearch.client.msc;
 
-import io.vanslog.spring.data.meilisearch.core.SearchHit;
-import io.vanslog.spring.data.meilisearch.core.SearchHits;
-import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +24,10 @@ import com.meilisearch.sdk.model.FacetSearchable;
 import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.Searchable;
+
+import io.vanslog.spring.data.meilisearch.core.SearchHit;
+import io.vanslog.spring.data.meilisearch.core.SearchHits;
+import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
 
 /**
  * Class to convert Meilisearch classes into Spring Data Meilisearch responses.
@@ -44,8 +44,7 @@ public class ResponseConverter {
 	public <T> List<T> mapHitList(Searchable searchable, Class<?> clazz) {
 		return (List<T>) searchable.getHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.map(hit -> new SearchHit<>(hit, searchable.getProcessingTimeMs(), searchable.getQuery(),
-						searchable.getFacetStats(), searchable.getFacetDistribution())) //
+				.map(content -> new SearchHit<>(content, searchable)) //
 				.toList();
 	}
 
@@ -53,7 +52,7 @@ public class ResponseConverter {
 	public <T> List<T> mapHitList(FacetSearchable searchable, Class<?> clazz) {
 		return (List<T>) searchable.getFacetHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.map(hit -> new SearchHit<>(hit, searchable.getProcessingTimeMs(), searchable.getFacetQuery())) //
+				.map(content -> new SearchHit<>(content, searchable)) //
 				.toList();
 	}
 
@@ -69,13 +68,24 @@ public class ResponseConverter {
 		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 
+	public <T> SearchHits<T> mapResult(MultiSearchResult result, Class<T> clazz) {
+		List<? extends SearchHit<T>> searchHits = result.getHits().stream() //
+				.map(hit -> {
+					Object federation = hit.get("_federation");
+					hit.remove("_federation");
+					return new SearchHit<>(objectMapper.convertValue(hit, clazz), result, federation);
+				}).toList();
+
+		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
+		return new SearchHitsImpl<>(executionDuration, searchHits);
+	}
+
 	public <T> SearchHits<T> mapResults(Results<MultiSearchResult> results, Class<T> clazz) {
 		MultiSearchResult[] multiSearchResults = results.getResults();
 		List<SearchHit<T>> searchHits = Arrays.stream(multiSearchResults) //
 				.flatMap(result -> result.getHits().stream() //
-						.map(hit -> objectMapper.convertValue(hit, clazz)).map(hit -> new SearchHit<>( //
-								hit, result.getProcessingTimeMs(), result.getQuery(), result.getFacetStats(),
-								result.getFacetDistribution())))
+						.map(hit -> objectMapper.convertValue(hit, clazz)) //
+						.map(content -> new SearchHit<>(content, result)))
 				.toList();
 
 		int maxProcessingTime = Arrays.stream(multiSearchResults) //

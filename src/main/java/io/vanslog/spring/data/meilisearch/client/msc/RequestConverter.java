@@ -15,10 +15,6 @@
  */
 package io.vanslog.spring.data.meilisearch.client.msc;
 
-import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
-import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
-import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
-
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -29,6 +25,10 @@ import com.meilisearch.sdk.FacetSearchRequest;
 import com.meilisearch.sdk.IndexSearchRequest;
 import com.meilisearch.sdk.MultiSearchRequest;
 import com.meilisearch.sdk.SearchRequest;
+
+import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
+import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
+import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 
 /**
  * Class to convert Spring Data Meilisearch classes into Meilisearch requests.
@@ -64,13 +64,10 @@ public class RequestConverter {
 				.build();
 	}
 
-	public IndexSearchRequest indexSearchRequest(BaseQuery query, String indexUid) {
+	public IndexSearchRequest indexSearchRequest(BaseQuery query, String indexUid, boolean federated) {
 		IndexSearchRequest.IndexSearchRequestBuilder builder = IndexSearchRequest.builder();
-		Pageable pageable = query.getPageable();
 
 		builder.q(query.getQ()) //
-				.page(pageable.getPageNumber() + 1) //
-				.hitsPerPage(pageable.getPageSize()) //
 				.sort(convertSortToSortOptions(query.getSort())) //
 				.attributesToRetrieve(query.getAttributesToRetrieve()) //
 				.attributesToCrop(query.getAttributesToCrop()) //
@@ -91,6 +88,12 @@ public class RequestConverter {
 				.locales(query.getLocales()) //
 				.distinct(query.getDistinct());
 
+		if (!federated) {
+			Pageable pageable = query.getPageable();
+			builder.page(pageable.getPageNumber() + 1) //
+				.hitsPerPage(pageable.getPageSize());
+		}
+
 		if (query instanceof IndexQuery indexQuery) {
 			builder.indexUid(indexQuery.getIndexUid() != null ? indexQuery.getIndexUid() : indexUid) //
 					.federationOptions(indexQuery.getFederationOptions());
@@ -101,9 +104,9 @@ public class RequestConverter {
 		return builder.build();
 	}
 
-	public MultiSearchRequest multiSearchRequest(List<? extends BaseQuery> queries, String indexUid) {
+	public MultiSearchRequest multiSearchRequest(List<? extends BaseQuery> queries, String indexUid, boolean federated) {
 		MultiSearchRequest request = new MultiSearchRequest();
-		queries.forEach(query -> request.addQuery(indexSearchRequest(query, indexUid)));
+		queries.forEach(query -> request.addQuery(indexSearchRequest(query, indexUid, federated)));
 		return request;
 	}
 

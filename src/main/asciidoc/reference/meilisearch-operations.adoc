@@ -151,7 +151,11 @@ SearchHits<Movie> filterResult = meilisearchOperations.search(filterQuery, Movie
 [[meilisearch.operations.multi-search]]
 === Multi-Search
 
-Multi-search allows you to execute multiple search queries in a single request.
+Spring Data Meilisearch supports two types of multi-search operations: non-federated and federated multi-search.
+
+==== Non-Federated Multi-Search
+
+Non-federated multi-search allows you to execute multiple search queries in a single request.
 This can be done with homogeneous query types, mixed query types, or across multiple indices:
 
 ====
@@ -173,8 +177,33 @@ SearchHits<Movie> multiIndexResults = meilisearchOperations.multiSearch(multiInd
 ----
 ====
 
+==== Federated Multi-Search
+
+Federated multi-search allows you to combine and process results from multiple indices using different strategies like merging or joining the results.
+This is particularly useful when you need to search across multiple indices and want to control how the results are combined:
+
+====
+[source,java]
+----
+// Configure federation options
+MultiSearchFederation federation = new MultiSearchFederation();
+federation.setLimit(20);  // Total number of results to return
+federation.setOffset(0);  // Starting position for results
+federation.setMergeFacets(true);  // Combine facets from all indices
+
+// Perform federated search across multiple indices
+List<BaseQuery> multiIndexQueries = List.of(
+    IndexQuery.builder().withQ("Wonder Woman").withIndexUid("movies").build(),
+    IndexQuery.builder().withQ("Wonder Woman").withIndexUid("comics").build()
+);
+SearchHits<Movie> federatedResults = meilisearchOperations.multiSearch(multiIndexQueries, federation, Movie.class);
+----
+====
+
+NOTE: The pageable option in query is not supported in federated multi-search. Instead, use the `limit` and `offset` parameters in the federation configuration.
+
 While both `BasicQuery` and `IndexQuery` can be used for multi-search operations, `IndexQuery` is required when you need to specify different index UIDs or configure federation options.
-Only `IndexQuery` provides methods like `withIndexUid()` and `withFederationOptions()` that allow you to search across multiple indices or configure federated search behavior.
+Only `IndexQuery` provides methods like `withIndexUid()` that allow you to search across multiple indices.
 
 When performing multi-index searches, all results are converted to the specified class type (`Movie.class` in the example).
 If you need to preserve the original types, you should extract and compare specific fields rather than entire objects.
