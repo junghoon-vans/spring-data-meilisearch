@@ -44,8 +44,7 @@ public class ResponseConverter {
 	public <T> List<T> mapHitList(Searchable searchable, Class<?> clazz) {
 		return (List<T>) searchable.getHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.map(hit -> new SearchHit<>(hit, searchable.getProcessingTimeMs(), searchable.getQuery(),
-						searchable.getFacetStats(), searchable.getFacetDistribution())) //
+				.map(hit -> new SearchHit<>(hit, searchable)) //
 				.toList();
 	}
 
@@ -53,7 +52,7 @@ public class ResponseConverter {
 	public <T> List<T> mapHitList(FacetSearchable searchable, Class<?> clazz) {
 		return (List<T>) searchable.getFacetHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.map(hit -> new SearchHit<>(hit, searchable.getProcessingTimeMs(), searchable.getFacetQuery())) //
+				.map(hit -> new SearchHit<>(hit, searchable)) //
 				.toList();
 	}
 
@@ -72,8 +71,7 @@ public class ResponseConverter {
 	public <T> SearchHits<T> mapResult(MultiSearchResult result, Class<T> clazz) {
 		List<? extends SearchHit<T>> searchHits = result.getHits().stream() //
 				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.map(hit -> new SearchHit<>(hit, result.getProcessingTimeMs(), result.getQuery(), //
-						result.getFacetStats(), result.getFacetDistribution())) //
+				.map(hit -> new SearchHit<>(hit, result)) //
 				.toList();
 
 		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
@@ -84,9 +82,8 @@ public class ResponseConverter {
 		MultiSearchResult[] multiSearchResults = results.getResults();
 		List<SearchHit<T>> searchHits = Arrays.stream(multiSearchResults) //
 				.flatMap(result -> result.getHits().stream() //
-						.map(hit -> objectMapper.convertValue(hit, clazz)).map(hit -> new SearchHit<>( //
-								hit, result.getProcessingTimeMs(), result.getQuery(), result.getFacetStats(),
-								result.getFacetDistribution())))
+						.map(hit -> objectMapper.convertValue(hit, clazz)) //
+						.map(hit -> new SearchHit<>(hit, result)))
 				.toList();
 
 		int maxProcessingTime = Arrays.stream(multiSearchResults) //

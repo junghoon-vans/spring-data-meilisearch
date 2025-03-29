@@ -20,6 +20,9 @@ import java.util.HashMap;
 import org.springframework.lang.Nullable;
 
 import com.meilisearch.sdk.model.FacetRating;
+import com.meilisearch.sdk.model.FacetSearchable;
+import com.meilisearch.sdk.model.MultiSearchResult;
+import com.meilisearch.sdk.model.Searchable;
 
 public class SearchHit<T> {
 
@@ -38,8 +41,18 @@ public class SearchHit<T> {
 		this.facetDistribution = facetDistribution;
 	}
 
-	public SearchHit(T content, int processingTimeMs, String query) {
-		this(content, processingTimeMs, query, null, null);
+	public SearchHit(T content, Searchable result) {
+		this(content, result.getProcessingTimeMs(), result.getQuery(), result.getFacetStats(),
+				result.getFacetDistribution());
+	}
+
+	public SearchHit(T content, FacetSearchable result) {
+		this(content, result.getProcessingTimeMs(), result.getFacetQuery(), null, null);
+	}
+
+	public SearchHit(T content, MultiSearchResult result) {
+		this(content, result.getProcessingTimeMs(), result.getQuery(), result.getFacetStats(),
+				result.getFacetDistribution());
 	}
 
 	public T getContent() {
