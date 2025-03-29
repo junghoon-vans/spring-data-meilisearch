@@ -15,7 +15,7 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.lang.Nullable;
 
@@ -28,11 +28,11 @@ public class SearchHit<T> {
 	private final T content;
 	private final int processingTimeMs;
 	private final String query;
-	@Nullable private final HashMap<String, FacetRating> facetStats;
+	@Nullable private final Map<String, FacetRating> facetStats;
 	@Nullable private final Object facetDistribution;
 	@Nullable private final Object faderation;
 
-	public SearchHit(T content, int processingTimeMs, String query, @Nullable HashMap<String, FacetRating> facetStats,
+	public SearchHit(T content, int processingTimeMs, String query, @Nullable Map<String, FacetRating> facetStats,
 			@Nullable Object facetDistribution, @Nullable Object faderation) {
 		this.content = content;
 		this.processingTimeMs = processingTimeMs;
@@ -69,7 +69,7 @@ public class SearchHit<T> {
 	}
 
 	@Nullable
-	public HashMap<String, FacetRating> getFacetStats() {
+	public Map<String, FacetRating> getFacetStats() {
 		return facetStats;
 	}
 
