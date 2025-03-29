@@ -63,14 +63,19 @@ The following classes and interfaces are available:
 .SearchHit<T>
 Contains the following information:
 
-* The retrieved entity of type <T>
+* The retrieved entity of type <T> (content)
+* Processing time in milliseconds (processingTimeMs)
+* The search query string (query)
+* Facet statistics if available (facetStats)
+* Facet distribution information if available (facetDistribution)
+* Federation information for multi-search operations if available (federation)
 
 .SearchHits<T>
 Contains the following information:
 
-* A list of `SearchHit<T>` objects
-* Processing time
-* Query information
+* An unmodifiable list of `SearchHit<T>` objects
+* Execution duration
+* Methods to access individual search hits and check if results exist
 
 [[meilisearch.operations.queries]]
 == Queries
