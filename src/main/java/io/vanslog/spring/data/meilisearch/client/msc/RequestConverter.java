@@ -91,7 +91,7 @@ public class RequestConverter {
 		if (!federated) {
 			Pageable pageable = query.getPageable();
 			builder.page(pageable.getPageNumber() + 1) //
-				.hitsPerPage(pageable.getPageSize());
+					.hitsPerPage(pageable.getPageSize());
 		}
 
 		if (query instanceof IndexQuery indexQuery) {

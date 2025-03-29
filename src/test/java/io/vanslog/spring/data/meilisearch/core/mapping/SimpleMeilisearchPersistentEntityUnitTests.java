@@ -38,6 +38,80 @@ import org.springframework.data.util.TypeInformation;
  */
 class SimpleMeilisearchPersistentEntityUnitTests {
 
+	// region entities
+	@Document(indexUid = "")
+	static class EntityWithEmptyIndexUid {}
+
+	static class EntityWithoutExplicitIndexUid {
+		private String field;
+
+		public String getField() {
+			return field;
+		}
+
+		public void setField(String field) {
+			this.field = field;
+		}
+	}
+
+	@Document(indexUid = "custom-index")
+	static class EntityWithExplicitIndexUid {
+		private String field;
+
+		public String getField() {
+			return field;
+		}
+
+		public void setField(String field) {
+			this.field = field;
+		}
+	}
+
+	@Document(indexUid = "products")
+	@Setting( //
+			searchableAttributes = { "description", "brand", "color" }, //
+			displayedAttributes = { "description", "brand", "color", "productId" }, //
+			sortableAttributes = { "productId" }, //
+			rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" }, //
+			distinctAttribute = "productId", //
+			filterableAttributes = { "brand", "color", "price" }, //
+			synonyms = { //
+					@Synonym(word = "phone", synonyms = { "mobile", "cellphone" }), //
+					@Synonym(word = "laptop", synonyms = { "notebook" }) //
+			}, //
+			dictionary = { "netflix", "spotify" }, //
+			stopWords = { "a", "an", "the" }, //
+			separatorTokens = { "-", "_", "@" }, //
+			nonSeparatorTokens = { ".", "#" }, //
+			proximityPrecision = "byWord", //
+			searchCutoffMs = 50 //
+	)
+	static class EntityWithoutComplexSettings {
+		@Id private String id;
+		private String description;
+		private String brand;
+		private String color;
+		private String productId;
+		private double price;
+	}
+
+	@Document(indexUid = "products")
+	@TypoTolerance( //
+			enabled = true, minWordSizeForTypos = @MinWordSizeForTypos(oneTypo = 5, twoTypos = 9), //
+			disableOnWords = { "skype", "zoom" }, //
+			disableOnAttributes = { "serial_number" } //
+	) //
+	@Faceting(maxValuesPerFacet = 200) //
+	@Pagination(maxTotalHits = 2000) //
+	static class EntityWithComplexSettings {
+		@Id private String id;
+		private String description;
+		private String brand;
+		private String color;
+		private String productId;
+		private double price;
+	}
+
 	@Nested
 	@DisplayName("index uid")
 	class IndexUidTests {
@@ -157,80 +231,6 @@ class SimpleMeilisearchPersistentEntityUnitTests {
 			assertThat(pagination).isNotNull();
 			assertThat(pagination.getMaxTotalHits()).isEqualTo(2000);
 		}
-	}
-
-	// region entities
-	@Document(indexUid = "")
-	static class EntityWithEmptyIndexUid {}
-
-	static class EntityWithoutExplicitIndexUid {
-		private String field;
-
-		public String getField() {
-			return field;
-		}
-
-		public void setField(String field) {
-			this.field = field;
-		}
-	}
-
-	@Document(indexUid = "custom-index")
-	static class EntityWithExplicitIndexUid {
-		private String field;
-
-		public String getField() {
-			return field;
-		}
-
-		public void setField(String field) {
-			this.field = field;
-		}
-	}
-
-	@Document(indexUid = "products")
-	@Setting( //
-			searchableAttributes = { "description", "brand", "color" }, //
-			displayedAttributes = { "description", "brand", "color", "productId" }, //
-			sortableAttributes = { "productId" }, //
-			rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" }, //
-			distinctAttribute = "productId", //
-			filterableAttributes = { "brand", "color", "price" }, //
-			synonyms = { //
-					@Synonym(word = "phone", synonyms = { "mobile", "cellphone" }), //
-					@Synonym(word = "laptop", synonyms = { "notebook" }) //
-			}, //
-			dictionary = { "netflix", "spotify" }, //
-			stopWords = { "a", "an", "the" }, //
-			separatorTokens = { "-", "_", "@" }, //
-			nonSeparatorTokens = { ".", "#" }, //
-			proximityPrecision = "byWord", //
-			searchCutoffMs = 50 //
-	)
-	static class EntityWithoutComplexSettings {
-		@Id private String id;
-		private String description;
-		private String brand;
-		private String color;
-		private String productId;
-		private double price;
-	}
-
-	@Document(indexUid = "products")
-	@TypoTolerance( //
-			enabled = true, minWordSizeForTypos = @MinWordSizeForTypos(oneTypo = 5, twoTypos = 9), //
-			disableOnWords = { "skype", "zoom" }, //
-			disableOnAttributes = { "serial_number" } //
-	) //
-	@Faceting(maxValuesPerFacet = 200) //
-	@Pagination(maxTotalHits = 2000) //
-	static class EntityWithComplexSettings {
-		@Id private String id;
-		private String description;
-		private String brand;
-		private String color;
-		private String productId;
-		private double price;
 	}
 	// endregion
 }

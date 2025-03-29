@@ -56,38 +56,33 @@ public interface SearchOperations {
 	<T, Q extends BaseQuery> SearchHits<T> search(Q query, Class<T> clazz);
 
 	/**
-	 * Execute non-federated multi-search query against Meilisearch and return the result.
-	 * This method allows you to perform multiple search queries in a single HTTP request,
-	 * When using {@link IndexQuery}, you can search across multiple indexes simultaneously.
+	 * Execute non-federated multi-search query against Meilisearch and return the result. This method allows you to
+	 * perform multiple search queries in a single HTTP request, When using {@link IndexQuery}, you can search across
+	 * multiple indexes simultaneously.
 	 * 
-	 * @param queries the list of queries to execute. Each query can target different indexes
-	 *          and have different search parameters
+	 * @param queries the list of queries to execute. Each query can target different indexes and have different search
+	 *          parameters
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
 	 * @param <T> the type of the entity
-	 * @param <Q> the type of query extending BaseQuery. When using {@link IndexQuery},
-	 *          multi-index search is available
+	 * @param <Q> the type of query extending BaseQuery. When using {@link IndexQuery}, multi-index search is available
 	 * @return the list of entities found by the queries
 	 */
 	<T, Q extends BaseQuery> SearchHits<T> multiSearch(List<Q> queries, Class<T> clazz);
 
 	/**
-	 * Execute federated multi-search query against Meilisearch and return the result.
-	 * Federated search allows you to combine and process results from multiple indexes
-	 * using different strategies like merging or joining the results.
+	 * Execute federated multi-search query against Meilisearch and return the result. Federated search allows you to
+	 * combine and process results from multiple indexes using different strategies like merging or joining the results.
 	 * But the pageable option in query is not supported in federated multi-search.
 	 *
-	 * @param queries the list of queries to execute. Each query can target different indexes
-	 *          and have different search parameters
-	 * @param federation the federation configuration that defines how to combine results
-	 *          from multiple indexes
+	 * @param queries the list of queries to execute. Each query can target different indexes and have different search
+	 *          parameters
+	 * @param federation the federation configuration that defines how to combine results from multiple indexes
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
 	 * @param <T> the type of the entity
-	 * @param <Q> the type of query extending BaseQuery. When using {@link IndexQuery},
-	 *          multi-index search is available
-	 * @return the list of entities found by the queries, combined according to the
-	 *         federation strategy
+	 * @param <Q> the type of query extending BaseQuery. When using {@link IndexQuery}, multi-index search is available
+	 * @return the list of entities found by the queries, combined according to the federation strategy
 	 */
 	<T, Q extends BaseQuery> SearchHits<T> multiSearch(List<Q> queries, MultiSearchFederation federation, Class<T> clazz);
 

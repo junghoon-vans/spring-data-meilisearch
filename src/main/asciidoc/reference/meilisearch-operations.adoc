@@ -205,7 +205,8 @@ SearchHits<Movie> federatedResults = meilisearchOperations.multiSearch(multiInde
 ----
 ====
 
-NOTE: The pageable option in query is not supported in federated multi-search. Instead, use the `limit` and `offset` parameters in the federation configuration.
+NOTE: The pageable option in query is not supported in federated multi-search.
+Instead, use the `limit` and `offset` parameters in the federation configuration.
 
 While both `BasicQuery` and `IndexQuery` can be used for multi-search operations, `IndexQuery` is required when you need to specify different index UIDs or configure federation options.
 Only `IndexQuery` provides methods like `withIndexUid()` that allow you to search across multiple indices.
