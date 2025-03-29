@@ -69,10 +69,12 @@ public class ResponseConverter {
 		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> SearchHits<T> mapResult(MultiSearchResult result, Class<T> clazz) {
-		List<? extends SearchHit<T>> searchHits = (List<? extends SearchHit<T>>) result.getHits().stream()
-				.map(hit -> objectMapper.convertValue(hit, clazz)).toList();
+		List<? extends SearchHit<T>> searchHits = result.getHits().stream() //
+				.map(hit -> objectMapper.convertValue(hit, clazz)) //
+				.map(hit -> new SearchHit<>(hit, result.getProcessingTimeMs(), result.getQuery(), //
+						result.getFacetStats(), result.getFacetDistribution())) //
+				.toList();
 
 		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
 		return new SearchHitsImpl<>(executionDuration, searchHits);
