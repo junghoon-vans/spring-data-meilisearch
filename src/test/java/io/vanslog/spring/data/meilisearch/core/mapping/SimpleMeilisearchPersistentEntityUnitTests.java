@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.annotations.Faceting;
+import io.vanslog.spring.data.meilisearch.annotations.LocalizedAttribute;
 import io.vanslog.spring.data.meilisearch.annotations.MinWordSizeForTypos;
 import io.vanslog.spring.data.meilisearch.annotations.Pagination;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
@@ -84,8 +85,13 @@ class SimpleMeilisearchPersistentEntityUnitTests {
 			separatorTokens = { "-", "_", "@" }, //
 			nonSeparatorTokens = { ".", "#" }, //
 			proximityPrecision = "byWord", //
-			searchCutoffMs = 50 //
-	)
+			searchCutoffMs = 50, //
+			localizedAttributes = { //
+					@LocalizedAttribute( //
+							attributePatterns = { "description", "brand", "color" }, //
+							locales = { "en", "fr" } //
+					) //
+			})
 	static class EntityWithoutComplexSettings {
 		@Id private String id;
 		private String description;
@@ -193,6 +199,12 @@ class SimpleMeilisearchPersistentEntityUnitTests {
 			// Check performance settings
 			assertThat(settings.getProximityPrecision()).isEqualTo("byWord");
 			assertThat(settings.getSearchCutoffMs()).isEqualTo(50);
+
+			// Check localized attributes
+			var localizedAttributes = settings.getLocalizedAttributes();
+			assertThat(localizedAttributes).hasSize(1);
+			assertThat(localizedAttributes[0].getAttributePatterns()).containsExactly("description", "brand", "color");
+			assertThat(localizedAttributes[0].getLocales()).containsExactly("en", "fr");
 
 			// Check complex settings
 			assertThat(typoTolerance).isNull();

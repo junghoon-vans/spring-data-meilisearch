@@ -129,4 +129,12 @@ public @interface Setting {
 	 *      tokens</a>
 	 */
 	String[] nonSeparatorTokens() default {};
+
+	/**
+	 * defines the localized attributes
+	 *
+	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#localized-attributes">Localized
+	 *      attributes</a>
+	 */
+	LocalizedAttribute[] localizedAttributes() default {};
 }
