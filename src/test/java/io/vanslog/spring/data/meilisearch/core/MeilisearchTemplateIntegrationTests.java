@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
+import io.vanslog.spring.data.meilisearch.core.federation.FederationResponse;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
 import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
@@ -330,12 +331,14 @@ class MeilisearchTemplateIntegrationTests {
 		federation.setFacetsByIndex(new HashMap<>());
 
 		SearchHits<Movie> result = meilisearchTemplate.multiSearch(queries, federation, Movie.class);
-		List<SearchHit<Movie>> searchHits = result.getSearchHits();
-		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
+		List<Movie> movies = result.get().map(SearchHit::getContent).toList();
+
+		assertThat(result.getSearchHit(0).getFederation()).isInstanceOf(FederationResponse.class);
 
 		assertThat(movies).hasSize(2);
 		assertThat(movies).extracting("id", "title").containsExactlyInAnyOrder(tuple(movie2.getId(), movie2.getTitle()),
 				tuple(comics1.getId(), comics1.getTitle()));
+
 	}
 
 	@Test
