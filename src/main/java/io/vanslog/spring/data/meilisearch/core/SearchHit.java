@@ -30,16 +30,16 @@ public class SearchHit<T> {
 	private final String query;
 	@Nullable private final Map<String, FacetRating> facetStats;
 	@Nullable private final Object facetDistribution;
-	@Nullable private final Object faderation;
+	@Nullable private final Object federation;
 
 	public SearchHit(T content, int processingTimeMs, String query, @Nullable Map<String, FacetRating> facetStats,
-			@Nullable Object facetDistribution, @Nullable Object faderation) {
+			@Nullable Object facetDistribution, @Nullable Object federation) {
 		this.content = content;
 		this.processingTimeMs = processingTimeMs;
 		this.query = query;
 		this.facetStats = facetStats;
 		this.facetDistribution = facetDistribution;
-		this.faderation = faderation;
+		this.federation = federation;
 	}
 
 	public SearchHit(T content, Searchable result) {
@@ -79,7 +79,7 @@ public class SearchHit<T> {
 	}
 
 	@Nullable
-	public Object getFaderation() {
-		return faderation;
+	public Object getFederation() {
+		return federation;
 	}
 }
