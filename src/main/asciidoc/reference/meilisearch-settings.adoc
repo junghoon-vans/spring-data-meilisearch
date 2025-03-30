@@ -210,6 +210,51 @@ class Product {
 <.> The `nonSeparatorTokens` attribute defines which characters should not be considered as word separators.
 ====
 
+[[meilisearch.settings.search.text.localization]]
+=== Localization
+
+By default, Meilisearch automatically detects the languages used in your documents.
+However, you can explicitly define which languages are present in your dataset and in which fields using localized attributes configuration.
+You can configure localized attributes using the `@LocalizedAttribute` annotation within the `@Setting` annotation.
+Note that configuring multiple languages for a single index may impact search performance.
+
+====
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
+  localizedAttributes = {
+    @LocalizedAttribute(
+      attributePatterns = { "*En" },                                                <.>
+      locales = { "eng" }                                                           <.>
+    )
+  }
+)
+class Product {
+    @Id private String id;
+    private String nameEn;
+    // fields...
+}
+----
+
+<.> The `attributePatterns` specify which fields contain content in the specified languages using patterns.
+These patterns support wildcards (*) to match multiple fields with similar naming conventions:
+* `*En` matches fields ending with "En" (e.g., "nameEn", "titleEn") These fields will be processed according to the language rules of the specified locales.
+The patterns affect `searchableAttributes`, `filterableAttributes`, and `sortableAttributes`.
+<.> The `locales` attribute defines the list of supported languages for the specified attributes.
+Each locale follows the ISO-639-3 three-letter, or alternatively use ISO-639-1 two-letter equivalents.
+For a complete list of supported languages, refer to the https://www.meilisearch.com/docs/reference/api/settings#locales[Meilisearch documentation].
+====
+
+==== Language Detection Control
+
+Meilisearch provides two mechanisms for controlling language detection:
+
+* *Query-level Language Control*: If Meilisearch is detecting incorrect languages because of the query text, you can explicitly set the search language using the `locales` parameter in your search request.
+* *Document-level Language Control*: If Meilisearch is detecting incorrect languages in your documents, use `localizedAttributes` to explicitly set the document languages at the index level.
+
+For complete control over language detection during both indexing and search time, you can use both `locales` and `localizedAttributes` together.
+
 [[meilisearch.settings.performance]]
 == Performance Settings
 
