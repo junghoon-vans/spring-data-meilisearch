@@ -17,11 +17,13 @@ package io.vanslog.spring.data.meilisearch.core.mapping;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.annotations.Faceting;
+import io.vanslog.spring.data.meilisearch.annotations.LocalizedAttribute;
 import io.vanslog.spring.data.meilisearch.annotations.Pagination;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
 import io.vanslog.spring.data.meilisearch.annotations.Synonym;
 import io.vanslog.spring.data.meilisearch.annotations.TypoTolerance;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -126,6 +128,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		@Nullable private Integer searchCutoffMs;
 		@Nullable private String[] separatorTokens;
 		@Nullable private String[] nonSeparatorTokens;
+		@Nullable private LocalizedAttribute[] localizedAttributes;
 
 		public SettingsParameter(@Nullable Setting setting, @Nullable Pagination pagination,
 				@Nullable TypoTolerance typoTolerance, @Nullable Faceting faceting) {
@@ -148,6 +151,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 				this.searchCutoffMs = setting.searchCutoffMs();
 				this.separatorTokens = setting.separatorTokens();
 				this.nonSeparatorTokens = setting.nonSeparatorTokens();
+				this.localizedAttributes = setting.localizedAttributes();
 			}
 		}
 
@@ -174,6 +178,10 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 			Optional.ofNullable(searchCutoffMs).filter(it -> it > 0).ifPresent(settings::setSearchCutoffMs);
 			Optional.ofNullable(separatorTokens).filter(it -> it.length > 0).ifPresent(settings::setSeparatorTokens);
 			Optional.ofNullable(nonSeparatorTokens).filter(it -> it.length > 0).ifPresent(settings::setNonSeparatorTokens);
+			Optional.ofNullable(localizedAttributes).filter(it -> it.length > 0)
+					.map(attrs -> Arrays.stream(attrs).map(this::createMeiliLocalizedAttribute)
+							.toArray(com.meilisearch.sdk.model.LocalizedAttribute[]::new))
+					.ifPresent(settings::setLocalizedAttributes);
 
 			return settings;
 		}
@@ -211,6 +219,14 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 			var meliFaceting = new com.meilisearch.sdk.model.Faceting();
 			meliFaceting.setMaxValuesPerFacet(faceting.maxValuesPerFacet());
 			return meliFaceting;
+		}
+
+		private com.meilisearch.sdk.model.LocalizedAttribute createMeiliLocalizedAttribute(
+				LocalizedAttribute localizedAttribute) {
+			var meiliLocalizedAttributes = new com.meilisearch.sdk.model.LocalizedAttribute();
+			meiliLocalizedAttributes.setAttributePatterns(localizedAttribute.attributePatterns());
+			meiliLocalizedAttributes.setLocales(localizedAttribute.locales());
+			return meiliLocalizedAttributes;
 		}
 	}
 }
