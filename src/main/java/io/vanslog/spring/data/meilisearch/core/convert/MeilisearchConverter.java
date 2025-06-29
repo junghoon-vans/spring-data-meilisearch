@@ -15,10 +15,9 @@
  */
 package io.vanslog.spring.data.meilisearch.core.convert;
 
+import io.vanslog.spring.data.meilisearch.core.document.Document;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
-
-import java.util.Map;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.mapping.context.MappingContext;
@@ -53,7 +52,7 @@ public interface MeilisearchConverter {
 	 * @param source must not be {@literal null}.
 	 * @return the converted object, will never be {@literal null}.
 	 */
-	<R> R read(Class<R> type, Map<String, Object> source);
+	<R> R read(Class<R> type, Document source);
 
 	/**
 	 * Writes the given object to the given sink.
@@ -61,7 +60,7 @@ public interface MeilisearchConverter {
 	 * @param source must not be {@literal null}.
 	 * @param sink must not be {@literal null}.
 	 */
-	void write(Object source, Map<String, Object> sink);
+	void write(Object source, Document sink);
 
 	default String convertId(Object idValue) {
 

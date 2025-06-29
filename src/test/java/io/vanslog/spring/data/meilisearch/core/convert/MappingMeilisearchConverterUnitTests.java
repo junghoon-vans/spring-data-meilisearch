@@ -16,6 +16,7 @@
 package io.vanslog.spring.data.meilisearch.core.convert;
 
 import static org.assertj.core.api.Assertions.*;
+import io.vanslog.spring.data.meilisearch.core.document.Document;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
 
@@ -66,7 +67,7 @@ class MappingMeilisearchConverterUnitTests {
 		entity.setTags(Arrays.asList("tag1", "tag2"));
 
 		// when
-		Map<String, Object> result = new HashMap<>();
+		Document result = Document.create();
 		converter.write(entity, result);
 
 		// then
@@ -80,7 +81,7 @@ class MappingMeilisearchConverterUnitTests {
 	@Test
 	void shouldReadMapToEntity() {
 		// given
-		Map<String, Object> source = new HashMap<>();
+		Document source = Document.create();
 		source.put("id", "test-id");
 		source.put("name", "Test Name");
 		source.put("age", 30);
@@ -107,7 +108,7 @@ class MappingMeilisearchConverterUnitTests {
 		entity.setUuid(uuid);
 
 		// when
-		Map<String, Object> result = new HashMap<>();
+		Document result = Document.create();
 		converter.write(entity, result);
 		TestEntityWithUUID readEntity = converter.read(TestEntityWithUUID.class, result);
 
@@ -124,7 +125,7 @@ class MappingMeilisearchConverterUnitTests {
 		entity.setDecimal(decimal);
 
 		// when
-		Map<String, Object> result = new HashMap<>();
+		Document result = Document.create();
 		converter.write(entity, result);
 		TestEntityWithBigDecimal readEntity = converter.read(TestEntityWithBigDecimal.class, result);
 

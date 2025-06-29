@@ -15,6 +15,7 @@
  */
 package io.vanslog.spring.data.meilisearch.core.convert;
 
+import io.vanslog.spring.data.meilisearch.core.document.Document;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 
@@ -100,21 +101,21 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 	}
 
 	@Override
-	public <R> R read(Class<R> type, Map<String, Object> source) {
+	public <R> R read(Class<R> type, Document source) {
 		Assert.notNull(source, "Source must not be null!");
 		return readInternal(type, source);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R> R readInternal(Class<R> type, Map<String, Object> source) {
+	private <R> R readInternal(Class<R> type, Document source) {
 		TypeInformation<R> typeInfo = TypeInformation.of(type);
 		Class<R> rawType = typeInfo.getType();
 
-		if (conversions.hasCustomReadTarget(Map.class, rawType)) {
+		if (conversions.hasCustomReadTarget(Document.class, rawType)) {
 			return conversionService.convert(source, rawType);
 		}
 
-		if (Map.class.isAssignableFrom(rawType)) {
+		if (Document.class.isAssignableFrom(rawType)) {
 			return (R) source;
 		}
 
@@ -127,17 +128,16 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R> R readEntity(MeilisearchPersistentEntity<?> entity, Map<String, Object> source,
-			TypeInformation<R> typeHint) {
+	private <R> R readEntity(MeilisearchPersistentEntity<?> entity, Document source, TypeInformation<R> typeHint) {
 		// Create an instance of the entity
 		EntityInstantiator instantiator = instantiators.getInstantiatorFor(entity);
-		Object instance = instantiator.createInstance(entity,
-				new PersistentEntityParameterValueProvider<>(entity, new MapPropertyValueProvider(source), null));
+		Object instance = instantiator.createInstance(entity, 
+			new PersistentEntityParameterValueProvider<>(entity, new DocumentPropertyValueProvider(source), null));
 
 		// Get a property accessor for the instance
 		PersistentPropertyAccessor<Object> accessor = entity.getPropertyAccessor(instance);
 
-		// Set properties from the source map
+		// Set properties from the source document
 		entity.doWithProperties((MeilisearchPersistentProperty property) -> {
 			if (source.containsKey(property.getName())) {
 				Object value = source.get(property.getName());
@@ -168,14 +168,15 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 		}
 
 		if (value instanceof Map) {
-			return readInternal(propertyType, (Map<String, Object>) value);
+			Document document = Document.from((Map<String, Object>) value);
+			return readInternal(propertyType, document);
 		}
 
 		return conversionService.convert(value, propertyType);
 	}
 
 	@Override
-	public void write(Object source, Map<String, Object> sink) {
+	public void write(Object source, Document sink) {
 		Assert.notNull(source, "Source must not be null!");
 		Assert.notNull(sink, "Sink must not be null!");
 
@@ -184,10 +185,15 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 	}
 
 	@SuppressWarnings("unchecked")
-	private void writeInternal(Object source, Map<String, Object> sink, Class<?> sourceType) {
-		if (conversions.hasCustomWriteTarget(sourceType, Map.class)) {
-			Map<String, Object> result = conversionService.convert(source, Map.class);
+	private void writeInternal(Object source, Document sink, Class<?> sourceType) {
+		if (conversions.hasCustomWriteTarget(sourceType, Document.class)) {
+			Document result = conversionService.convert(source, Document.class);
 			sink.putAll(result);
+			return;
+		}
+
+		if (source instanceof Document) {
+			sink.putAll((Document) source);
 			return;
 		}
 
@@ -204,7 +210,7 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 		writeEntity(entity, source, sink);
 	}
 
-	private void writeEntity(MeilisearchPersistentEntity<?> entity, Object source, Map<String, Object> sink) {
+	private void writeEntity(MeilisearchPersistentEntity<?> entity, Object source, Document sink) {
 		PersistentPropertyAccessor<?> accessor = entity.getPropertyAccessor(source);
 
 		entity.doWithProperties((MeilisearchPersistentProperty property) -> {
@@ -220,13 +226,13 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 
 	@SuppressWarnings("unchecked")
 	private Class<?> getCustomWriteTarget(Class<?> sourceType) {
-		return conversions.getCustomWriteTarget(sourceType).orElse((Class) Map.class);
+		return conversions.getCustomWriteTarget(sourceType).orElse(Document.class);
 	}
 
-	private class MapPropertyValueProvider implements PropertyValueProvider<MeilisearchPersistentProperty> {
-		private final Map<String, Object> source;
+	private class DocumentPropertyValueProvider implements PropertyValueProvider<MeilisearchPersistentProperty> {
+		private final Document source;
 
-		MapPropertyValueProvider(Map<String, Object> source) {
+		DocumentPropertyValueProvider(Document source) {
 			this.source = source;
 		}
 

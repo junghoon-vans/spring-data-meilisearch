@@ -17,6 +17,7 @@ package io.vanslog.spring.data.meilisearch.core.convert;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.vanslog.spring.data.meilisearch.core.document.Document;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,7 +55,7 @@ class Jsr310ConvertersUnitTests {
 		entity.setDateTime(dateTime);
 
 		// when
-		Map<String, Object> result = new HashMap<>();
+		Document result = Document.create();
 		converter.write(entity, result);
 		TestEntityWithLocalDateTime readEntity = converter.read(TestEntityWithLocalDateTime.class, result);
 
@@ -71,7 +72,7 @@ class Jsr310ConvertersUnitTests {
 		entity.setDate(date);
 
 		// when
-		Map<String, Object> result = new HashMap<>();
+		Document result = Document.create();
 		converter.write(entity, result);
 		TestEntityWithLocalDate readEntity = converter.read(TestEntityWithLocalDate.class, result);
 
@@ -88,7 +89,7 @@ class Jsr310ConvertersUnitTests {
 		entity.setInstant(instant);
 
 		// when
-		Map<String, Object> result = new HashMap<>();
+		Document result = Document.create();
 		converter.write(entity, result);
 		TestEntityWithInstant readEntity = converter.read(TestEntityWithInstant.class, result);
 
@@ -105,7 +106,7 @@ class Jsr310ConvertersUnitTests {
 		entity.setZonedDateTime(zonedDateTime);
 
 		// when
-		Map<String, Object> result = new HashMap<>();
+		Document result = Document.create();
 		converter.write(entity, result);
 		TestEntityWithZonedDateTime readEntity = converter.read(TestEntityWithZonedDateTime.class, result);
 
