@@ -15,29 +15,44 @@
  */
 package io.vanslog.spring.data.meilisearch.core.convert;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.CustomConversions;
+import org.springframework.data.convert.Jsr310Converters;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 
 /**
  * Meilisearch specific {@link CustomConversions}.
+ * 
+ * @author Junghoon Ban
  */
 public class MeilisearchCustomConversions extends CustomConversions {
 
 	private static final StoreConversions STORE_CONVERSIONS;
-	private static final List<Converter<?, ?>> STORE_CONVERTERS;
+	private static final List<Object> STORE_CONVERTERS;
 
 	static {
-		STORE_CONVERTERS = Collections.emptyList();
+		List<Object> converters = new ArrayList<>(35);
+
+		converters.addAll(MeilisearchConverters.getConvertersToRegister());
+		converters.addAll(Jsr310Converters.getConvertersToRegister());
+
+		STORE_CONVERTERS = Collections.unmodifiableList(converters);
 		STORE_CONVERSIONS = StoreConversions.of(SimpleTypeHolder.DEFAULT, STORE_CONVERTERS);
 	}
 
 	/**
-	 * Creates a new {@link CustomConversions} instance registering the given converters.
+	 * Creates an empty {@link MeilisearchCustomConversions} object.
+	 */
+	public MeilisearchCustomConversions() {
+		this(Collections.emptyList());
+	}
+
+	/**
+	 * Creates a new {@link MeilisearchCustomConversions} instance registering the given converters.
 	 *
 	 * @param converters must not be {@literal null}.
 	 */
