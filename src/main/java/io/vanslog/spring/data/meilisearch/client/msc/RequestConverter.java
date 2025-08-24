@@ -25,10 +25,12 @@ import com.meilisearch.sdk.FacetSearchRequest;
 import com.meilisearch.sdk.IndexSearchRequest;
 import com.meilisearch.sdk.MultiSearchRequest;
 import com.meilisearch.sdk.SearchRequest;
+import com.meilisearch.sdk.SimilarDocumentRequest;
 
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
+import io.vanslog.spring.data.meilisearch.core.query.SimilarQuery;
 
 /**
  * Class to convert Spring Data Meilisearch classes into Meilisearch requests.
@@ -118,6 +120,21 @@ public class RequestConverter {
 				.filter(query.getFilter()) //
 				.filterArray(query.getFilterArray()) //
 				.matchingStrategy(query.getMatchingStrategy()).attributesToSearchOn(query.getAttributesToSearchOn()) //
+				.build();
+	}
+
+	public SimilarDocumentRequest similarSearchRequest(SimilarQuery query) {
+		return SimilarDocumentRequest.builder() //
+				.id(query.getDocumentId()) //
+				.embedder(query.getEmbedder()) //
+				.attributesToRetrieve(query.getAttributesToRetrieve()) //
+				.offset(query.getOffset()) //
+				.limit(query.getLimit()) //
+				.filter(query.getFilter()) //
+				.showRankingScore(query.isShowRankingScore()) //
+				.showRankingScoreDetails(query.isShowRankingScoreDetails()) //
+				.rankingScoreThreshold(query.getRankingScoreThreshold()) //
+				.retrieveVectors(query.isRetrieveVectors()) //
 				.build();
 	}
 
