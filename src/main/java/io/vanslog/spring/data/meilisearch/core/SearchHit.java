@@ -24,6 +24,7 @@ import org.springframework.lang.Nullable;
 import com.meilisearch.sdk.model.FacetRating;
 import com.meilisearch.sdk.model.FacetSearchable;
 import com.meilisearch.sdk.model.Searchable;
+import com.meilisearch.sdk.model.SimilarDocumentsResults;
 
 public class SearchHit<T> {
 
@@ -56,6 +57,10 @@ public class SearchHit<T> {
 
 	public SearchHit(T content, FacetSearchable result) {
 		this(content, result.getProcessingTimeMs(), result.getFacetQuery(), null, null, null);
+	}
+
+	public SearchHit(T content, SimilarDocumentsResults result) {
+		this(content, result.getProcessingTimeMs(), "", null, null, null);
 	}
 
 	public T getContent() {
