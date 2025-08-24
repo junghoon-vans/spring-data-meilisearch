@@ -182,6 +182,19 @@
         <profile>
             <id>central</id>
             <build>
+                <pluginManagement>
+                    <plugins>
+                        <!-- Disable nexus-staging-maven-plugin from parent -->
+                        <plugin>
+                            <groupId>org.sonatype.plugins</groupId>
+                            <artifactId>nexus-staging-maven-plugin</artifactId>
+                            <version>1.6.13</version>
+                            <configuration>
+                                <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
