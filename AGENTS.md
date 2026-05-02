@@ -18,7 +18,8 @@ spring-data-meilisearch/
 │   ├── core/                       # template, operations, search result model
 │   └── repository/                 # Spring Data repository bootstrap/runtime
 ├── src/main/resources/             # Spring XML namespace registrations + XSD
-├── src/main/asciidoc/              # reference docs source; index.adoc includes chapters
+├── src/main/antora/                # Antora reference docs source and resources
+├── antora-playbook.yml             # Antora playbook
 └── src/test/java/.../meilisearch/  # unit/integration tests + reusable Meilisearch test harness
 ```
 
@@ -34,7 +35,7 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 | Mapping/settings | `core/mapping/` + `annotations/` | `@Document`, settings annotations, ID/index metadata |
 | Repository behavior | `repository/config/`, `repository/support/` | registrar/config extension/factory/base repository |
 | XML namespace | `config/`, `src/main/resources/` | parser, namespace handler, `spring.handlers`, `spring.schemas`, XSD |
-| Docs | `src/main/asciidoc/` | `index.adoc` includes all reference chapters |
+| Docs | `src/main/antora/` | Antora component, navigation, pages, and resources |
 | Integration tests | `src/test/java/.../junit/jupiter/` | custom Testcontainers-backed harness |
 
 ## CODE MAP
@@ -59,7 +60,7 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 - Checkstyle/no-http and JaCoCo run only with `-Pci`.
 - Formatting is delegated to Spring Data shared IDE formatters from `spring-data-build/etc/ide`; no local `.editorconfig`.
 - PR template asks to use Spring Data formatters, add tests, and update author/date headers on touched/new classes.
-- Reference docs are rooted at `src/main/asciidoc/index.adoc`; generated HTML is under `target/site/reference/html/`.
+- Reference docs are rooted at `src/main/antora/`; generated HTML is under `target/site/`.
 - XML namespace resources are a public contract: `spring.handlers`, `spring.schemas`, and `spring-meilisearch-1.0.xsd` must match parser/docs.
 
 ## DEVELOPMENT PROCESS
@@ -90,7 +91,7 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 - Do not use blank `@Document(indexUid = "")`; mapping rejects blank values.
 - Do not expect >1,000 search results unless `@Pagination(maxTotalHits = ...)` is configured.
 - Do not edit XML namespace docs/resources independently; parser, XSD, `spring.handlers`, `spring.schemas`, and docs must agree.
-- Do not copy XML/JSON handler examples from docs without checking code; `meilisearch-client.adoc` has known casing/name drift.
+- Do not copy XML/JSON handler examples across JavaConfig and XML without checking code; bean names and XML attributes are public contracts.
 
 ## COMMANDS
 
@@ -98,14 +99,14 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 ./mvnw test
 ./mvnw clean install
 ./mvnw verify -Pci
-./mvnw clean install -Pdistribute
+./mvnw -Pantora antora:antora
 ```
 
-Docs output: `target/site/reference/html/index.html`. CI command adds Sonar: `./mvnw verify sonar:sonar -Pci ...`.
+Docs output: `target/site/index.html`. CI command adds Sonar: `./mvnw verify sonar:sonar -Pci ...`.
 
 ## NOTES
 
-- Parent/dependency versions currently target Spring Data snapshots: `spring-data-parent` and `spring-data-commons` are `3.2.0-SNAPSHOT`.
+- Parent/dependency versions follow the active release train in `pom.xml`; release preparation removes `-SNAPSHOT` from project and Spring Data versions.
 - CD publishes on pushes to both `main` and `develop` with `mvn deploy -DskipTests -P central`.
 - `central` profile signs artifacts and uses Sonatype Central Publishing with auto-publish.
-- `src/main/asciidoc/reference/meilisearch-client.adoc` currently has JSON handler casing/name drift (`jsonhandler`/`Jsonhandler` vs `jsonHandler`/`JsonHandler`).
+- Reference documentation now uses Antora pages under `src/main/antora/modules/ROOT/pages/`; keep `nav.adoc`, pages, and docs build commands aligned.
