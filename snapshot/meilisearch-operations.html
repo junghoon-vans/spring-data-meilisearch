@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Spring Data Meilisearch :: Spring Data Meilisearch</title>
+    <title>Meilisearch Operations :: Spring Data Meilisearch</title>
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -282,7 +282,7 @@
 </div><ul class="nav-list">
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link"  href="index.html">Overview</a>
   </li>
 </ul>
@@ -297,7 +297,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link"  href="meilisearch-document.html">Meilisearch Document</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link"  href="meilisearch-operations.html">Meilisearch Operations</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -348,13 +348,13 @@
   <div class="content">
     <div
       class="toc"
-      data-title="Spring Data Meilisearch"
+      data-title="Meilisearch Operations"
       data-levels="2"
     >
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/index.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/meilisearch-operations.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -388,71 +388,418 @@
   <nav class="breadcrumbs" aria-label="breadcrumbs">
     <ul>
       <li><a href="index.html">Spring Data Meilisearch</a></li>
-      <li><a href="index.html">Overview</a></li>
+      <li>Meilisearch</li>
+      <li><a href="meilisearch-operations.html">Meilisearch Operations</a></li>
     </ul>
   </nav>
-</div><h1 id="page-title" class="page">Spring Data Meilisearch</h1>
+</div><h1 id="page-title" class="page">Meilisearch Operations</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p><em>Spring Data Meilisearch provides Meilisearch connectivity and repository support for the Meilisearch search engine.
-It eases development of applications with a consistent programming model that need to access Meilisearch indexes.</em></p>
+<p>Spring Data Meilisearch uses several interfaces to define the operations that can be called against a Meilisearch index.</p>
 </div>
-<div class="hdlist">
+<div class="ulist">
+<ul>
+<li>
+<p><code>DocumentOperations</code> defines actions to store, update and retrieve entities based on their id.</p>
+</li>
+<li>
+<p><code>SearchOperations</code> defines the actions to search for multiple entities using queries.</p>
+</li>
+<li>
+<p><code>MeilisearchOperations</code> combines the <code>DocumentOperations</code> and <code>SearchOperations</code> interfaces.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These interfaces correspond to the structuring of the <a href="https://www.meilisearch.com/docs/reference/api/overview">Meilisearch API</a>.</p>
+</div>
+<div class="paragraph">
+<p>The default implementations of the interfaces offer:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Read/Write mapping support for domain types</p>
+</li>
+<li>
+<p>A rich query API</p>
+</li>
+<li>
+<p>Resource management and exception translation</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.operations.usage"><a class="anchor" href="#meilisearch.operations.usage"></a>Usage examples</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The example shows how to use an injected <code>MeilisearchOperations</code> instance in a Spring REST controller.
+The example assumes that <code>Movie</code> is a class that is annotated with <code>@Document</code>, <code>@Id</code> etc.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 1. MeilisearchOperations usage</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RestController
+@RequestMapping("/")
+public class MovieController {
+
+  private MeilisearchOperations meilisearchOperations;
+
+  public MovieController(MeilisearchOperations meilisearchOperations) { <i class="conum" data-value="1"></i><b>(1)</b>
+    this.meilisearchOperations = meilisearchOperations;
+  }
+
+  @PostMapping("/movie")
+  public String save(@RequestBody Movie movie) {                        <i class="conum" data-value="2"></i><b>(2)</b>
+    Movie savedEntity = meilisearchOperations.save(movie);
+    return savedEntity.getId();
+  }
+
+  @GetMapping("/movie/{id}")
+  public Movie findById(@PathVariable("id") String id) {               <i class="conum" data-value="3"></i><b>(3)</b>
+    return meilisearchOperations.get(id, Movie.class);
+  }
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
 <table>
 <tr>
-<td class="hdlist1">
-<a href="meilisearch-client.html" class="xref page">Client</a> 
-</td>
-<td class="hdlist2">
-<p>Meilisearch client configuration</p>
-</td>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Let Spring inject the provided <code>MeilisearchOperations</code> bean in the constructor.</td>
 </tr>
 <tr>
-<td class="hdlist1">
-<a href="meilisearch-document.html" class="xref page">Document Mapping</a> 
-</td>
-<td class="hdlist2">
-<p>Entity metadata and document mapping</p>
-</td>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Store a movie in the Meilisearch instance.</td>
 </tr>
 <tr>
-<td class="hdlist1">
-<a href="meilisearch-operations.html" class="xref page">Operations</a> 
-</td>
-<td class="hdlist2">
-<p>Template-based index, document, and search operations</p>
-</td>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Retrieve the movie by id.</td>
 </tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.operations.searchresulttypes"><a class="anchor" href="#meilisearch.operations.searchresulttypes"></a>Search Result Types</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When searching with the methods of the <code>SearchOperations</code> interface, additional information is available for each entity.</p>
+</div>
+<div class="paragraph">
+<p>The following classes and interfaces are available:</p>
+</div>
+<div class="paragraph">
+<div class="title">SearchHit&lt;T&gt;</div>
+<p>Contains the following information:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The retrieved entity of type &lt;T&gt; (content)</p>
+</li>
+<li>
+<p>Processing time in milliseconds (processingTimeMs)</p>
+</li>
+<li>
+<p>The search query string (query)</p>
+</li>
+<li>
+<p>Facet statistics if available (facetStats)</p>
+</li>
+<li>
+<p>Facet distribution information if available (facetDistribution)</p>
+</li>
+<li>
+<p>Federation information for multi-search operations if available (federation)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<div class="title">SearchHits&lt;T&gt;</div>
+<p>Contains the following information:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>An unmodifiable list of <code>SearchHit&lt;T&gt;</code> objects</p>
+</li>
+<li>
+<p>Execution duration</p>
+</li>
+<li>
+<p>Methods to access individual search hits and check if results exist</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.operations.queries"><a class="anchor" href="#meilisearch.operations.queries"></a>Queries</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>SearchOperations</code> interface methods take different <code>Query</code> parameters that define the query to execute.
+Spring Data Meilisearch provides several implementations: <code>BasicQuery</code>, <code>IndexQuery</code>, <code>FacetQuery</code>, and <code>SimilarQuery</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.operations.basicquery"><a class="anchor" href="#meilisearch.operations.basicquery"></a>BasicQuery</h3>
+<div class="paragraph">
+<p><code>BasicQuery</code> is the standard implementation for simple search queries:</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 2. Search for movies with a given title</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">BasicQuery query = new BasicQuery("Wonder Woman");</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.operations.indexquery"><a class="anchor" href="#meilisearch.operations.indexquery"></a>IndexQuery</h3>
+<div class="paragraph">
+<p><code>IndexQuery</code> is used for multi-search operations:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;IndexQuery&gt; queries = List.of(
+    new IndexQuery("Wonder Woman"),
+    new IndexQuery("Batman")
+);</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.operations.facetquery"><a class="anchor" href="#meilisearch.operations.facetquery"></a>FacetQuery</h3>
+<div class="paragraph">
+<p><code>FacetQuery</code> is used for faceted search operations:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">FacetQuery query = FacetQuery.builder()
+    .withFacetName("genres")
+    .withFacetQuery("act")
+    .build();</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.operations.similarquery"><a class="anchor" href="#meilisearch.operations.similarquery"></a>SimilarQuery</h3>
+<div class="paragraph">
+<p><code>SimilarQuery</code> is used for similar documents search operations.
+It requires the source document id and the embedder name configured in Meilisearch:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">SimilarQuery query = SimilarQuery.builder()
+    .withDocumentId("143")
+    .withEmbedder("manual")
+    .withLimit(10)
+    .build();</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.operations.search-types"><a class="anchor" href="#meilisearch.operations.search-types"></a>Search Types</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Data Meilisearch supports different types of search operations to accommodate various use cases.</p>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.operations.standard-search"><a class="anchor" href="#meilisearch.operations.standard-search"></a>Standard Search</h3>
+<div class="paragraph">
+<p>Standard search allows you to search for documents within a single index:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// Search with BasicQuery
+BaseQuery query = new BasicQuery("Wonder Woman");
+SearchHits&lt;Movie&gt; result = meilisearchOperations.search(query, Movie.class);
+List&lt;SearchHit&lt;Movie&gt;&gt; searchHits = result.getSearchHits();
+List&lt;Movie&gt; movies = searchHits.stream().map(SearchHit::getContent).toList();
+
+// Search with filter
+BaseQuery filterQuery = BasicQuery.builder()
+    .withFilter(new String[] { "genres = Drama" })
+    .build();
+SearchHits&lt;Movie&gt; filterResult = meilisearchOperations.search(filterQuery, Movie.class);</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.operations.multi-search"><a class="anchor" href="#meilisearch.operations.multi-search"></a>Multi-Search</h3>
+<div class="paragraph">
+<p>Spring Data Meilisearch supports two types of multi-search operations: non-federated and federated multi-search.</p>
+</div>
+<div class="sect3">
+<h4 id="_non_federated_multi_search"><a class="anchor" href="#_non_federated_multi_search"></a>Non-Federated Multi-Search</h4>
+<div class="paragraph">
+<p>Non-federated multi-search allows you to execute multiple search queries in a single request.
+This can be done with homogeneous query types, mixed query types, or across multiple indices:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// Multi-search across single indices
+List&lt;BaseQuery&gt; queries = List.of(
+    new BasicQuery("Carol"),
+    new BasicQuery("Wonder Woman")
+);
+SearchHits&lt;Movie&gt; singleIndexResults = meilisearchOperations.multiSearch(queries, Movie.class);
+
+// Multi-search across multiple indices
+List&lt;BaseQuery&gt; multiIndexQueries = List.of(
+    IndexQuery.builder().withQ("Carol").withIndexUid("movies").build(),
+    IndexQuery.builder().withQ("Wonder Woman").withIndexUid("comics").build()
+);
+SearchHits&lt;Movie&gt; multiIndexResults = meilisearchOperations.multiSearch(multiIndexQueries, Movie.class);</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_federated_multi_search"><a class="anchor" href="#_federated_multi_search"></a>Federated Multi-Search</h4>
+<div class="paragraph">
+<p>Federated multi-search allows you to combine and process results from multiple indices using different strategies like merging or joining the results.
+This is particularly useful when you need to search across multiple indices and want to control how the results are combined:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// Configure federation options
+MultiSearchFederation federation = new MultiSearchFederation();
+federation.setLimit(20);  // Total number of results to return
+federation.setOffset(0);  // Starting position for results
+federation.setMergeFacets(true);  // Combine facets from all indices
+
+// Perform federated search across multiple indices
+List&lt;BaseQuery&gt; multiIndexQueries = List.of(
+    IndexQuery.builder().withQ("Wonder Woman").withIndexUid("movies").build(),
+    IndexQuery.builder().withQ("Wonder Woman").withIndexUid("comics").build()
+);
+SearchHits&lt;Movie&gt; federatedResults = meilisearchOperations.multiSearch(multiIndexQueries, federation, Movie.class);</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
 <tr>
-<td class="hdlist1">
-<a href="meilisearch-repositories.html" class="xref page">Repositories</a> 
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
 </td>
-<td class="hdlist2">
-<p>Spring Data repository support</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-settings.html" class="xref page">Settings</a> 
-</td>
-<td class="hdlist2">
-<p>Index settings, facets, pagination, localization, and AI-powered search settings</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="api/java/index.html" class="xref attachment">Javadoc</a> 
-</td>
-<td class="hdlist2">
-<p>API documentation</p>
+<td class="content">
+The pageable option in query is not supported in federated multi-search.
+Instead, use the <code>limit</code> and <code>offset</code> parameters in the federation configuration.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>&#169; 2023-2026 The original author(s).</p>
+<p>While both <code>BasicQuery</code> and <code>IndexQuery</code> can be used for multi-search operations, <code>IndexQuery</code> is required when you need to specify different index UIDs or configure federation options.
+Only <code>IndexQuery</code> provides methods like <code>withIndexUid()</code> that allow you to search across multiple indices.</p>
 </div>
 <div class="paragraph">
-<p>Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.</p>
+<p>When performing multi-index searches, all results are converted to the specified class type (<code>Movie.class</code> in the example).
+If you need to preserve the original types, you should extract and compare specific fields rather than entire objects.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.operations.facet-search"><a class="anchor" href="#meilisearch.operations.facet-search"></a>Facet Search</h3>
+<div class="paragraph">
+<p>Facet search allows you to retrieve facet information for building faceted navigation interfaces:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// First, ensure the field is set as filterable in the index settings
+meilisearchOperations.applySettings(Movie.class);
+
+// Perform facet search
+FacetQuery query = new FacetQuery("genres");
+SearchHits&lt;FacetHit&gt; result = meilisearchOperations.facetSearch(query, Movie.class);
+
+// Process facet results
+result.getSearchHits().forEach(hit -&gt; {
+    FacetHit facetHit = hit.getContent();
+    System.out.println("Value: " + facetHit.getValue());
+    System.out.println("Count: " + facetHit.getCount());
+});</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Unlike standard and multi-search operations that return entities of type <code>T</code>, facet searches return <code>FacetHit</code> objects containing facet information.
+Note that while the <code>clazz</code> parameter still specifies the document type being searched, the return type is always <code>SearchHits&lt;FacetHit&gt;</code> rather than <code>SearchHits&lt;T&gt;</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.operations.similar-search"><a class="anchor" href="#meilisearch.operations.similar-search"></a>Similar Documents Search</h3>
+<div class="paragraph">
+<p>Similar documents search uses Meilisearch&#8217;s Similar Documents API to retrieve documents that are semantically close to a source document.
+The index must already have a compatible embedder configured in Meilisearch before executing this operation.</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">SimilarQuery query = SimilarQuery.builder()
+    .withDocumentId("143")
+    .withEmbedder("manual")
+    .withAttributesToRetrieve(new String[] { "title", "description" })
+    .withFilter("genres = Action")
+    .withLimit(10)
+    .withShowRankingScore(true)
+    .build();
+
+SearchHits&lt;Movie&gt; result = meilisearchOperations.similarSearch(query, Movie.class);
+List&lt;Movie&gt; movies = result.getSearchHits().stream()
+    .map(SearchHit::getContent)
+    .toList();</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>documentId</code> and <code>embedder</code> are required. Optional parameters such as <code>limit</code>, <code>offset</code>, <code>filter</code>, ranking-score flags, and vector retrieval are only sent to Meilisearch when explicitly configured on <code>SimilarQuery</code>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section-summary">
 </div>
 </article>  </div>
 </main>

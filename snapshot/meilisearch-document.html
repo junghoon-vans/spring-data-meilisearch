@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Spring Data Meilisearch :: Spring Data Meilisearch</title>
+    <title>Meilisearch Document :: Spring Data Meilisearch</title>
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -282,7 +282,7 @@
 </div><ul class="nav-list">
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link"  href="index.html">Overview</a>
   </li>
 </ul>
@@ -294,7 +294,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link"  href="meilisearch-client.html">Meilisearch Client</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link"  href="meilisearch-document.html">Meilisearch Document</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -348,13 +348,13 @@
   <div class="content">
     <div
       class="toc"
-      data-title="Spring Data Meilisearch"
+      data-title="Meilisearch Document"
       data-levels="2"
     >
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/index.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/meilisearch-document.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -388,71 +388,98 @@
   <nav class="breadcrumbs" aria-label="breadcrumbs">
     <ul>
       <li><a href="index.html">Spring Data Meilisearch</a></li>
-      <li><a href="index.html">Overview</a></li>
+      <li>Meilisearch</li>
+      <li><a href="meilisearch-document.html">Meilisearch Document</a></li>
     </ul>
   </nav>
-</div><h1 id="page-title" class="page">Spring Data Meilisearch</h1>
+</div><h1 id="page-title" class="page">Meilisearch Document</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p><em>Spring Data Meilisearch provides Meilisearch connectivity and repository support for the Meilisearch search engine.
-It eases development of applications with a consistent programming model that need to access Meilisearch indexes.</em></p>
+<p>Spring Data Meilisearch provides a simple way to define a <a href="https://www.meilisearch.com/docs/learn/core_concepts/documents">Document</a>.</p>
 </div>
-<div class="hdlist">
-<table>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-client.html" class="xref page">Client</a> 
-</td>
-<td class="hdlist2">
-<p>Meilisearch client configuration</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-document.html" class="xref page">Document Mapping</a> 
-</td>
-<td class="hdlist2">
-<p>Entity metadata and document mapping</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-operations.html" class="xref page">Operations</a> 
-</td>
-<td class="hdlist2">
-<p>Template-based index, document, and search operations</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-repositories.html" class="xref page">Repositories</a> 
-</td>
-<td class="hdlist2">
-<p>Spring Data repository support</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-settings.html" class="xref page">Settings</a> 
-</td>
-<td class="hdlist2">
-<p>Index settings, facets, pagination, localization, and AI-powered search settings</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="api/java/index.html" class="xref attachment">Javadoc</a> 
-</td>
-<td class="hdlist2">
-<p>API documentation</p>
-</td>
-</tr>
-</table>
 </div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.document.definition"><a class="anchor" href="#meilisearch.document.definition"></a>Document definition</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>&#169; 2023-2026 The original author(s).</p>
+<p>To define the <a href="https://www.meilisearch.com/docs/learn/core_concepts/documents">Document</a>, you need to annotate a class with the <code>@Document</code> annotation.
+As an example, the following class defines a <code>Movie</code> document with <code>id</code>, <code>title</code>, <code>description</code> and <code>genres</code> fields.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 1. The sample document</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.annotations.Document;
+
+import org.springframework.data.annotation.Id;
+
+</span><span class="fold-block">@Document(indexUid = "movies")
+public class Movie {
+    @Id private int id;
+    private String title;
+    private String description;
+    private String[] genres;
+}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.document.index-uid"><a class="anchor" href="#meilisearch.document.index-uid"></a>Index UID</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="https://www.meilisearch.com/docs/learn/core_concepts/indexes#index-uid">Index UID</a> is a unique identifier for an index.
+It can be defined explicitly with the <code>indexUid</code> attribute in the <code>@Document</code> annotation.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 2. Explicit Index UID</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "movies")
+public class Movie {
+    // fields
+}</code></pre>
+</div>
+</div>
+</div>
 </div>
 <div class="paragraph">
-<p>Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.</p>
+<p>If the <code>indexUid</code> is not specified or the class is not annotated with <code>@Document</code>, the class name will be used as the index UID by default.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 3. Default Index UID (using class name)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// No @Document annotation or no indexUid specified
+public class Movie {
+    // fields
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>In this case, <code>Movie</code> is used as the index UID.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.document.id"><a class="anchor" href="#meilisearch.document.id"></a>Document id</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="https://www.meilisearch.com/docs/learn/core_concepts/primary_key#document-id">Document id</a> is a unique identifier for a document in an index.
+It can be defined with <code>@Id</code> annotation or <code>id</code> field.</p>
+</div>
+</div>
+</div>
+<div class="section-summary">
 </div>
 </article>  </div>
 </main>
