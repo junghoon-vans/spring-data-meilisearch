@@ -1,0 +1,60 @@
+{
+  "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
+  "generated": "2026-05-02T12:19:28.448Z",
+  "url": "https://docs.spring.io/spring-data-meilisearch/reference",
+  "components": {
+    "data-meilisearch": {
+      "title": "Spring Data Meilisearch",
+      "latest": "0.7.4",
+      "versions": {
+        "0.7.4": {
+          "prerelease": true,
+          "displayVersion": "0.7.4-SNAPSHOT",
+          "url": "/index.html",
+          "pages": [
+            {
+              "path": "index.adoc",
+              "url": "/index.html",
+              "title": "Spring Data Meilisearch - Reference Documentation"
+            },
+            {
+              "path": "meilisearch-client.adoc",
+              "url": "/meilisearch-client.html",
+              "title": "Meilisearch Client"
+            },
+            {
+              "path": "meilisearch-document.adoc",
+              "url": "/meilisearch-document.html",
+              "title": "Meilisearch Document"
+            },
+            {
+              "path": "meilisearch-operations.adoc",
+              "url": "/meilisearch-operations.html",
+              "title": "Meilisearch Operations"
+            },
+            {
+              "path": "meilisearch-repositories.adoc",
+              "url": "/meilisearch-repositories.html",
+              "title": "Meilisearch Repositories"
+            },
+            {
+              "path": "meilisearch-settings.adoc",
+              "url": "/meilisearch-settings.html",
+              "title": "Meilisearch Settings"
+            },
+            {
+              "path": "search.adoc",
+              "url": "/search.html",
+              "title": "Search"
+            },
+            {
+              "path": "spring-projects.adoc",
+              "url": "/spring-projects.html",
+              "title": "Spring Projects"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
