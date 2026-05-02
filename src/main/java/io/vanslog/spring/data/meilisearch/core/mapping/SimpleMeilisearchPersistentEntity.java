@@ -16,6 +16,8 @@
 package io.vanslog.spring.data.meilisearch.core.mapping;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.annotations.Embedder;
+import io.vanslog.spring.data.meilisearch.annotations.EmbedderParameter;
 import io.vanslog.spring.data.meilisearch.annotations.Faceting;
 import io.vanslog.spring.data.meilisearch.annotations.LocalizedAttribute;
 import io.vanslog.spring.data.meilisearch.annotations.Pagination;
@@ -25,6 +27,7 @@ import io.vanslog.spring.data.meilisearch.annotations.TypoTolerance;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.BeansException;
@@ -129,6 +132,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		@Nullable private String[] separatorTokens;
 		@Nullable private String[] nonSeparatorTokens;
 		@Nullable private LocalizedAttribute[] localizedAttributes;
+		@Nullable private Embedder[] embedders;
 
 		public SettingsParameter(@Nullable Setting setting, @Nullable Pagination pagination,
 				@Nullable TypoTolerance typoTolerance, @Nullable Faceting faceting) {
@@ -152,6 +156,7 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 				this.separatorTokens = setting.separatorTokens();
 				this.nonSeparatorTokens = setting.nonSeparatorTokens();
 				this.localizedAttributes = setting.localizedAttributes();
+				this.embedders = setting.embedders();
 			}
 		}
 
@@ -182,6 +187,8 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 					.map(attrs -> Arrays.stream(attrs).map(this::createMeiliLocalizedAttribute)
 							.toArray(com.meilisearch.sdk.model.LocalizedAttribute[]::new))
 					.ifPresent(settings::setLocalizedAttributes);
+			Optional.ofNullable(embedders).filter(it -> it.length > 0)
+					.ifPresent(it -> settings.setEmbedders(createEmbedderMap(it)));
 
 			return settings;
 		}
@@ -227,6 +234,69 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 			meiliLocalizedAttributes.setAttributePatterns(localizedAttribute.attributePatterns());
 			meiliLocalizedAttributes.setLocales(localizedAttribute.locales());
 			return meiliLocalizedAttributes;
+		}
+
+		private HashMap<String, com.meilisearch.sdk.model.Embedder> createEmbedderMap(Embedder[] embedders) {
+			var embedderMap = new HashMap<String, com.meilisearch.sdk.model.Embedder>();
+			for (Embedder embedder : embedders) {
+				Assert.hasText(embedder.name(), "Embedder name must not be blank");
+				Assert.isTrue(!embedderMap.containsKey(embedder.name()), "Embedder name must be unique");
+				embedderMap.put(embedder.name(), createMeiliEmbedder(embedder));
+			}
+			return embedderMap;
+		}
+
+		private com.meilisearch.sdk.model.Embedder createMeiliEmbedder(Embedder embedder) {
+			var meiliEmbedder = new com.meilisearch.sdk.model.Embedder();
+			Optional.of(embedder.source()).filter(it -> it != Embedder.Source.DEFAULT)
+					.map(it -> com.meilisearch.sdk.model.EmbedderSource.valueOf(it.name()))
+					.ifPresent(meiliEmbedder::setSource);
+			Optional.of(embedder.apiKey()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setApiKey);
+			Optional.of(embedder.model()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setModel);
+			Optional.of(embedder.documentTemplate()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setDocumentTemplate);
+			Optional.of(embedder.dimensions()).filter(it -> it > 0).ifPresent(meiliEmbedder::setDimensions);
+			boolean hasDistributionMean = !Double.isNaN(embedder.distributionMean());
+			boolean hasDistributionSigma = !Double.isNaN(embedder.distributionSigma());
+			Assert.isTrue(hasDistributionMean == hasDistributionSigma,
+					"Embedder distributionMean and distributionSigma must be configured together");
+			if (hasDistributionMean) {
+				meiliEmbedder.setDistribution(com.meilisearch.sdk.model.EmbedderDistribution
+						.custom(embedder.distributionMean(), embedder.distributionSigma()));
+			}
+			Optional.of(embedder.request()).filter(it -> it.length > 0).map(this::createParameterMap)
+					.ifPresent(meiliEmbedder::setRequest);
+			Optional.of(embedder.response()).filter(it -> it.length > 0).map(this::createParameterMap)
+					.ifPresent(meiliEmbedder::setResponse);
+			Optional.of(embedder.documentTemplateMaxBytes()).filter(it -> it > 0)
+					.ifPresent(meiliEmbedder::setDocumentTemplateMaxBytes);
+			Optional.of(embedder.revision()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setRevision);
+			Optional.of(embedder.headers()).filter(it -> it.length > 0).map(this::createHeaderMap)
+					.ifPresent(meiliEmbedder::setHeaders);
+			Optional.of(embedder.binaryQuantized()).filter(it -> it != Embedder.TriState.DEFAULT)
+					.map(it -> it == Embedder.TriState.TRUE).ifPresent(meiliEmbedder::setBinaryQuantized);
+			Optional.of(embedder.url()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setUrl);
+			Optional.of(embedder.inputField()).filter(it -> it.length > 0).ifPresent(meiliEmbedder::setInputField);
+			Optional.of(embedder.inputType()).filter(it -> it != Embedder.InputType.DEFAULT)
+					.map(it -> com.meilisearch.sdk.model.EmbedderInputType.valueOf(it.name()))
+					.ifPresent(meiliEmbedder::setInputType);
+			Optional.of(embedder.query()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setQuery);
+			return meiliEmbedder;
+		}
+
+		private Map<String, Object> createParameterMap(EmbedderParameter[] parameters) {
+			var parameterMap = new HashMap<String, Object>();
+			for (EmbedderParameter parameter : parameters) {
+				parameterMap.put(parameter.name(), parameter.value());
+			}
+			return parameterMap;
+		}
+
+		private Map<String, String> createHeaderMap(EmbedderParameter[] parameters) {
+			var headerMap = new HashMap<String, String>();
+			for (EmbedderParameter parameter : parameters) {
+				headerMap.put(parameter.name(), parameter.value());
+			}
+			return headerMap;
 		}
 	}
 }
