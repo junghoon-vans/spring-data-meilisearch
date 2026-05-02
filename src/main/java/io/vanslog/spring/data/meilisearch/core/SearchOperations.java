@@ -29,6 +29,7 @@ import io.vanslog.spring.data.meilisearch.core.query.SimilarQuery;
  * <ul>
  * <li><a href="https://www.meilisearch.com/docs/reference/api/search">Search API</a></li>
  * <li><a href="https://www.meilisearch.com/docs/reference/api/multi_search">Multi-Search API</a></li>
+ * <li><a href="https://www.meilisearch.com/docs/reference/api/similar-documents">Similar Documents API</a></li>
  * </ul>
  */
 public interface SearchOperations {

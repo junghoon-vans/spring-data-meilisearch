@@ -81,7 +81,7 @@ Contains the following information:
 == Queries
 
 The `SearchOperations` interface methods take different `Query` parameters that define the query to execute.
-Spring Data Meilisearch provides several implementations: `BasicQuery`, `IndexQuery`, and `FacetQuery`.
+Spring Data Meilisearch provides several implementations: `BasicQuery`, `IndexQuery`, `FacetQuery`, and `SimilarQuery`.
 
 [[meilisearch.operations.basicquery]]
 === BasicQuery
@@ -122,6 +122,23 @@ List<IndexQuery> queries = List.of(
 FacetQuery query = FacetQuery.builder()
     .withFacetName("genres")
     .withFacetQuery("act")
+    .build();
+----
+====
+
+[[meilisearch.operations.similarquery]]
+=== SimilarQuery
+
+`SimilarQuery` is used for similar documents search operations.
+It requires the source document id and the embedder name configured in Meilisearch:
+
+====
+[source,java]
+----
+SimilarQuery query = SimilarQuery.builder()
+    .withDocumentId("143")
+    .withEmbedder("manual")
+    .withLimit(10)
     .build();
 ----
 ====
@@ -240,3 +257,30 @@ result.getSearchHits().forEach(hit -> {
 
 Unlike standard and multi-search operations that return entities of type `T`, facet searches return `FacetHit` objects containing facet information.
 Note that while the `clazz` parameter still specifies the document type being searched, the return type is always `SearchHits<FacetHit>` rather than `SearchHits<T>`.
+
+[[meilisearch.operations.similar-search]]
+=== Similar Documents Search
+
+Similar documents search uses Meilisearch's Similar Documents API to retrieve documents that are semantically close to a source document.
+The index must already have a compatible embedder configured in Meilisearch before executing this operation.
+
+====
+[source,java]
+----
+SimilarQuery query = SimilarQuery.builder()
+    .withDocumentId("143")
+    .withEmbedder("manual")
+    .withAttributesToRetrieve(new String[] { "title", "description" })
+    .withFilter("genres = Action")
+    .withLimit(10)
+    .withShowRankingScore(true)
+    .build();
+
+SearchHits<Movie> result = meilisearchOperations.similarSearch(query, Movie.class);
+List<Movie> movies = result.getSearchHits().stream()
+    .map(SearchHit::getContent)
+    .toList();
+----
+====
+
+`documentId` and `embedder` are required. Optional parameters such as `limit`, `offset`, `filter`, ranking-score flags, and vector retrieval are only sent to Meilisearch when explicitly configured on `SimilarQuery`.
