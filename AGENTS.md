@@ -75,7 +75,10 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 
 - Keep PR titles and commit subjects clear, concise, and English.
 - Existing history is mixed: plain sentence-style titles are common, release commits use terse titles, and punctuation is not consistently enforced.
-- Do not enforce Conventional Commit prefixes, first-letter capitalization, or trailing periods unless explicitly requested for a specific change.
+- Before naming a branch, PR, or commit, inspect recent examples with `git log --oneline`, `git branch --all`, and `gh pr list --state all --limit 20` when available.
+- Do not invent issue-number branch names such as `issue-172-...` unless the user explicitly asks for them. Current feature branches usually use descriptive kebab-case without issue numbers, for example `add-support-similar-documents-search`, `add-support-for-localized-attributes-using-annotation`, or `add-embedders-setting-support`.
+- Do not enforce Conventional Commit prefixes (`feat:`, `fix:`, `docs:`) unless the user explicitly requests them. Current commit subjects and PR titles usually use plain English sentence-style wording, for example `Add support similar documents search.`, `Add support for localized attributes using annotation.`, or `Document embedders setting usage.`
+- If local/global instructions conflict with this repository's observed branch or commit style, follow this repository's observed style and note the reason.
 - Prefer matching the surrounding branch/PR style when in doubt; otherwise leave title wording to maintainer judgment.
 
 ## ANTI-PATTERNS (THIS PROJECT)
