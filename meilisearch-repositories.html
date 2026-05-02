@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Spring Data Meilisearch :: Spring Data Meilisearch</title>
-    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/index.html">
+    <title>Meilisearch Repositories :: Spring Data Meilisearch</title>
+    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/meilisearch-repositories.html">
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -283,7 +283,7 @@
 </div><ul class="nav-list">
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link"  href="index.html">Overview</a>
   </li>
 </ul>
@@ -301,7 +301,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link"  href="meilisearch-operations.html">Meilisearch Operations</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -349,13 +349,13 @@
   <div class="content">
     <div
       class="toc"
-      data-title="Spring Data Meilisearch"
+      data-title="Meilisearch Repositories"
       data-levels="2"
     >
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/HEAD/src/main/antora/modules/ROOT/pages/index.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/HEAD/src/main/antora/modules/ROOT/pages/meilisearch-repositories.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -389,71 +389,217 @@
   <nav class="breadcrumbs" aria-label="breadcrumbs">
     <ul>
       <li><a href="index.html">Spring Data Meilisearch</a></li>
-      <li><a href="index.html">Overview</a></li>
+      <li>Meilisearch</li>
+      <li><a href="meilisearch-repositories.html">Meilisearch Repositories</a></li>
     </ul>
   </nav>
-</div><h1 id="page-title" class="page">Spring Data Meilisearch</h1>
+</div><h1 id="page-title" class="page">Meilisearch Repositories</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p><em>Spring Data Meilisearch provides Meilisearch connectivity and repository support for the Meilisearch search engine.
-It eases development of applications with a consistent programming model that need to access Meilisearch indexes.</em></p>
+<p>This chapter describes how to use Meilisearch repositories.</p>
 </div>
-<div class="hdlist">
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.repositories.usage"><a class="anchor" href="#meilisearch.repositories.usage"></a>Usage</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Meilisearch repositories are used to store and retrieve data from Meilisearch.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 1. The sample repository</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+
+import java.util.List;
+
+</span><span class="fold-block">public class MovieService {
+
+	private final MovieRepository repository;
+
+	public MovieService(MovieRepository repository) {
+		this.repository = repository;
+	}
+
+	public List&lt;Movie&gt; showAllMovies() {
+		return repository.findAll();
+	}
+}
+
+public interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
+
+}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.repositories.autocreation"><a class="anchor" href="#meilisearch.repositories.autocreation"></a>Automatic creation of indexes with the corresponding mapping</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If the <code>@Document</code> annotation is present on the entity, the index will be created automatically with the corresponding mapping.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.repositories.lookup.methods"><a class="anchor" href="#meilisearch.repositories.lookup.methods"></a>Lookup methods</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Meilisearch repository provides the following lookup methods:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>findById(String id)</code></p>
+</li>
+<li>
+<p><code>findAllById(Iterable&lt;String&gt; ids)</code></p>
+</li>
+<li>
+<p><code>findAll()</code></p>
+</li>
+<li>
+<p><code>findAll(Sort sort)</code></p>
+</li>
+<li>
+<p><code>findAll(Pageable pageable)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note that the above methods perform different behaviors.
+The <code>findById</code> and <code>findAllById</code> methods use the <a href="https://www.meilisearch.com/docs/reference/api/documents#get-one-document">Get one document</a> or <a href="https://www.meilisearch.com/docs/reference/api/documents#get-documents-with-post">Get documents</a> API.
+However, the <code>findAll</code> method uses the <a href="https://www.meilisearch.com/docs/reference/api/search">Search</a> API.</p>
+</div>
+<div class="admonitionblock important">
 <table>
 <tr>
-<td class="hdlist1">
-<a href="meilisearch-client.html" class="xref page">Client</a> 
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
 </td>
-<td class="hdlist2">
-<p>Meilisearch client configuration</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-document.html" class="xref page">Document Mapping</a> 
-</td>
-<td class="hdlist2">
-<p>Entity metadata and document mapping</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-operations.html" class="xref page">Operations</a> 
-</td>
-<td class="hdlist2">
-<p>Template-based index, document, and search operations</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-repositories.html" class="xref page">Repositories</a> 
-</td>
-<td class="hdlist2">
-<p>Spring Data repository support</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-settings.html" class="xref page">Settings</a> 
-</td>
-<td class="hdlist2">
-<p>Index settings, facets, pagination, localization, and AI-powered search settings</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="api/java/index.html" class="xref attachment">Javadoc</a> 
-</td>
-<td class="hdlist2">
-<p>API documentation</p>
+<td class="content">
+This difference in behavior can also cause results to show differently.
+For example, <code>displayedAttributes</code> in <a href="meilisearch-settings.html" class="xref page">Meilisearch Settings</a> does not work with the Get one document or Get documents API.
+Go to <a href="https://www.meilisearch.com/docs/reference/api/settings#displayed-attributes">Meilisearch documentation</a> for more information.
 </td>
 </tr>
 </table>
 </div>
-<div class="paragraph">
-<p>&#169; 2023-2026 The original author(s).</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.repositories.annotation"><a class="anchor" href="#meilisearch.repositories.annotation"></a>Annotation based configuration</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.</p>
+<p>The Spring Data Meilisearch repositories can be configured using the <code>@EnableMeilisearchRepositories</code> annotation.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 2. Spring Data Meilisearch repositories using JavaConfig</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+</span><span class="fold-block">@Configuration
+@EnableMeilisearchRepositories(                             <i class="conum" data-value="1"></i><b>(1)</b>
+		basePackages = {"com.example.repositories"}
+)
+public class Config {
+
+    @Bean
+    public MeilisearchOperations meilisearchTemplate() {    <i class="conum" data-value="2"></i><b>(2)</b>
+        // ...
+    }
+}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>@EnableMeilisearchRepositories</code> annotation enables Meilisearch repositories.
+If no <code>basePackages</code> are configured, the annotation will scan the package of the annotated configuration class.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Provide a <code>MeilisearchOperations</code> bean to override the default <code>MeilisearchTemplate</code> bean.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.repositories.namespace"><a class="anchor" href="#meilisearch.repositories.namespace"></a>Spring Namespace</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Spring Data Meilisearch repositories can be configured using the <code>meilisearch</code> namespace.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 3. Spring Data Meilisearch repositories using Namespace</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.vanslog.io/spring/data/meilisearch
+       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
+
+    &lt;meilisearch:repositories base-package="com.example.repositories"/&gt;             <i class="conum" data-value="1"></i><b>(1)</b>
+
+    &lt;bean name="meilisearchTemplate"                                                <i class="conum" data-value="2"></i><b>(2)</b>
+          class="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate"&gt;
+        &lt;constructor-arg name="meilisearchClient" ref="meilisearchClient"/&gt;         <i class="conum" data-value="3"></i><b>(3)</b>
+    &lt;/bean&gt;
+
+    &lt;meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/&gt;    <i class="conum" data-value="4"></i><b>(4)</b>
+    &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;       <i class="conum" data-value="5"></i><b>(5)</b>
+&lt;/beans&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>meilisearch:repositories</code> element enables Meilisearch repositories.
+If no <code>base-package</code> is configured, the namespace will scan the package of the configuration file.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>meilisearchTemplate</code> bean must be configured with a <code>MeilisearchClient</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Set the <code>client</code> bean as the constructor argument of the <code>meilisearchTemplate</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Configure the Meilisearch client with the <code>api-key</code> attribute.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Configure the <code>jsonHandler</code> bean with the <code>GsonJsonHandler</code> class.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section-summary">
 </div>
 </article>  </div>
 </main>

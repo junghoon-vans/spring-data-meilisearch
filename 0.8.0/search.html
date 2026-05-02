@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Spring Data Meilisearch :: Spring Data Meilisearch</title>
-    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/index.html">
+    <title>Search :: Spring Data Meilisearch</title>
+    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/search.html">
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -283,7 +283,7 @@
 </div><ul class="nav-list">
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link"  href="index.html">Overview</a>
   </li>
 </ul>
@@ -345,117 +345,39 @@
 </div>
 </div>
   <div class="content">
-<aside class="sidebar">
-  <div class="content">
-    <div
-      class="toc"
-      data-title="Spring Data Meilisearch"
-      data-levels="2"
-    >
-      <div class="toc-menu"></div>
+<div class="page-search">
+  <div class="search-wrap">
+
+    <h1 id="page-title" class="page">Search</h1>
+    <div class="page-box-sticky">
+      <div id="page-searchbox"></div>
+      <div class="page-info">
+        <div id="page-counter"></div>
+        <div class="page-search-by">
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://www.algolia.com/"
+            aria-label="Search by Algolia"
+          >
+            <img
+              class="light"
+              width="140"
+              src="https://docs.spring.io/spring-framework/reference/_/img/algolia-light.svg"
+            />
+            <img
+              class="dark"
+              width="140"
+              src="https://docs.spring.io/spring-framework/reference/_/img/algolia-dark.svg"
+            />
+          </a>
+        </div>
+      </div>
     </div>
-    <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/HEAD/src/main/antora/modules/ROOT/pages/index.adoc">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24"
-            viewBox="0 0 24 24"
-            width="24"
-          ><path
-              d="m16 2.012 3 3L16.713 7.3l-3-3zM4 14v3h3l8.299-8.287-3-3zm0 6h16v2H4z"
-            ></path></svg>
-          Edit this Page
-        </a>
-              <a href="https://github.com/junghoon-vans/spring-data-meilisearch" title="GitHub">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="512px"
-            id="Layer_1"
-            version="1.1"
-            viewBox="0 0 512 512"
-            width="512px"
-          ><style type="text/css"><![CDATA[
-              .st0{fill-rule:evenodd;clip-rule:evenodd;} ]]></style><g><path
-                class="st0"
-                d="M256,32C132.3,32,32,134.8,32,261.7c0,101.5,64.2,187.5,153.2,217.9c11.2,2.1,15.3-5,15.3-11.1   c0-5.5-0.2-19.9-0.3-39.1c-62.3,13.9-75.5-30.8-75.5-30.8c-10.2-26.5-24.9-33.6-24.9-33.6c-20.3-14.3,1.5-14,1.5-14   c22.5,1.6,34.3,23.7,34.3,23.7c20,35.1,52.4,25,65.2,19.1c2-14.8,7.8-25,14.2-30.7c-49.7-5.8-102-25.5-102-113.5   c0-25.1,8.7-45.6,23-61.6c-2.3-5.8-10-29.2,2.2-60.8c0,0,18.8-6.2,61.6,23.5c17.9-5.1,37-7.6,56.1-7.7c19,0.1,38.2,2.6,56.1,7.7   c42.8-29.7,61.5-23.5,61.5-23.5c12.2,31.6,4.5,55,2.2,60.8c14.3,16.1,23,36.6,23,61.6c0,88.2-52.4,107.6-102.3,113.3   c8,7.1,15.2,21.1,15.2,42.5c0,30.7-0.3,55.5-0.3,63c0,6.1,4,13.3,15.4,11C415.9,449.1,480,363.1,480,261.7   C480,134.8,379.7,32,256,32z"
-              ></path></g></svg>
-          GitHub Project
-        </a>
-    </div>
+    <div id="page-hits"></div>
+
   </div>
-</aside>
-<article class="doc">
-<div class="breadcrumbs-container">
-  <nav class="breadcrumbs" aria-label="breadcrumbs">
-    <ul>
-      <li><a href="index.html">Spring Data Meilisearch</a></li>
-      <li><a href="index.html">Overview</a></li>
-    </ul>
-  </nav>
-</div><h1 id="page-title" class="page">Spring Data Meilisearch</h1>
-<div class="paragraph">
-<p><em>Spring Data Meilisearch provides Meilisearch connectivity and repository support for the Meilisearch search engine.
-It eases development of applications with a consistent programming model that need to access Meilisearch indexes.</em></p>
-</div>
-<div class="hdlist">
-<table>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-client.html" class="xref page">Client</a> 
-</td>
-<td class="hdlist2">
-<p>Meilisearch client configuration</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-document.html" class="xref page">Document Mapping</a> 
-</td>
-<td class="hdlist2">
-<p>Entity metadata and document mapping</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-operations.html" class="xref page">Operations</a> 
-</td>
-<td class="hdlist2">
-<p>Template-based index, document, and search operations</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-repositories.html" class="xref page">Repositories</a> 
-</td>
-<td class="hdlist2">
-<p>Spring Data repository support</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="meilisearch-settings.html" class="xref page">Settings</a> 
-</td>
-<td class="hdlist2">
-<p>Index settings, facets, pagination, localization, and AI-powered search settings</p>
-</td>
-</tr>
-<tr>
-<td class="hdlist1">
-<a href="api/java/index.html" class="xref attachment">Javadoc</a> 
-</td>
-<td class="hdlist2">
-<p>API documentation</p>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>&#169; 2023-2026 The original author(s).</p>
-</div>
-<div class="paragraph">
-<p>Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.</p>
-</div>
-</article>  </div>
+</div>  </div>
 </main>
 <div class="modal micromodal-slide" id="modal-versions" aria-hidden="true">
     <div class="modal__overlay" tabindex="-1" data-micromodal-close>
@@ -784,5 +706,6 @@ It eases development of applications with a consistent programming model that ne
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
 <script async id="search-script" src="./_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="./_/css/vendor/search.css" data-page-version="0.8.0" data-page-component="data-meilisearch"></script>
+<script id="page-search-script" async src="./_/js/vendor/page-search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="./_/css/vendor/search.css" data-page-version="0.8.0" data-page-component="data-meilisearch"></script>
   </body>
 </html>
