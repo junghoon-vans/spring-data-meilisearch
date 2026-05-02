@@ -19,7 +19,7 @@ on:
         required: false
         default: ''
       path:
-        description: 'Destination path, such as v1.0.0 or snapshot (leave empty for root)'
+        description: 'Destination path, such as 1.0.0 or snapshot (leave empty for root)'
         required: false
         default: ''
       update-root:
@@ -144,7 +144,7 @@ jobs:
               remove_target="true"
             fi
           elif [ "$EVENT_NAME" = "push" ] && [ "$REF_TYPE" = "tag" ]; then
-            target_path="$REF_NAME"
+            target_path="${REF_NAME#v}"
             update_root="true"
           elif [ "$EVENT_NAME" = "push" ] && [ "$REF_NAME" = "main" ]; then
             target_path="snapshot"
@@ -154,7 +154,7 @@ jobs:
           fi
 
           if [ "$remove_target" = "true" ]; then
-            rm -rf "$SITE_DIR/$target_path"
+            rm -rf "${SITE_DIR:?}/${target_path:?}"
             exit 0
           fi
 
@@ -165,10 +165,11 @@ jobs:
               ! -name "snapshot" \
               ! -name "pr-*" \
               ! -name "v*.*.*" \
+              ! -name "[0-9]*.[0-9]*.[0-9]*" \
               -exec rm -rf {} +
             cp -a "$DOCS_DIR/." "$SITE_DIR/"
           else
-            rm -rf "$SITE_DIR/$target_path"
+            rm -rf "${SITE_DIR:?}/${target_path:?}"
             mkdir -p "$SITE_DIR/$target_path"
             cp -a "$DOCS_DIR/." "$SITE_DIR/$target_path/"
           fi
@@ -180,6 +181,7 @@ jobs:
               ! -name "snapshot" \
               ! -name "pr-*" \
               ! -name "v*.*.*" \
+              ! -name "[0-9]*.[0-9]*.[0-9]*" \
               -exec rm -rf {} +
             cp -a "$DOCS_DIR/." "$SITE_DIR/"
           fi
