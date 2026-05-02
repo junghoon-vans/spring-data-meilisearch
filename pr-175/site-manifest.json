@@ -1,7 +1,7 @@
 {
   "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
-  "generated": "2026-05-02T14:20:06.889Z",
-  "url": "https://docs.spring.io/spring-data-meilisearch/reference",
+  "generated": "2026-05-02T14:24:05.752Z",
+  "url": "https://junghoon-vans.github.io/spring-data-meilisearch",
   "components": {
     "data-meilisearch": {
       "title": "Spring Data Meilisearch",
