@@ -404,7 +404,7 @@
 <p><code>DocumentOperations</code> defines actions to store, update and retrieve entities based on their id.</p>
 </li>
 <li>
-<p><code>SearchOperations</code> define the actions to search for multiple entities using queries</p>
+<p><code>SearchOperations</code> defines the actions to search for multiple entities using queries.</p>
 </li>
 <li>
 <p><code>MeilisearchOperations</code> combines the <code>DocumentOperations</code> and <code>SearchOperations</code> interfaces.</p>
@@ -426,7 +426,7 @@
 <p>A rich query API</p>
 </li>
 <li>
-<p>Resource management and Exception translation</p>
+<p>Resource management and exception translation</p>
 </li>
 </ul>
 </div>
@@ -471,15 +471,15 @@ public class MovieController {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Let Spring inject the provided <code>MeilisearchOperations</code> bean in the constructor</td>
+<td>Let Spring inject the provided <code>MeilisearchOperations</code> bean in the constructor.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Store a movie in the Meilisearch instance</td>
+<td>Store a movie in the Meilisearch instance.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Retrieve the movie with a get by id</td>
+<td>Retrieve the movie by id.</td>
 </tr>
 </table>
 </div>
@@ -558,7 +558,7 @@ Spring Data Meilisearch provides several implementations: <code>BasicQuery</code
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">BasicQuery query = BasicQuery("Wonder Woman");</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">BasicQuery query = new BasicQuery("Wonder Woman");</code></pre>
 </div>
 </div>
 </div>
@@ -798,6 +798,8 @@ List&lt;Movie&gt; movies = result.getSearchHits().stream()
 </div>
 </div>
 </div>
+</div>
+<div class="section-summary">
 </div>
 </article>  </div>
 </main>

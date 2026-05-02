@@ -436,7 +436,7 @@ public class MyClientConfig extends MeilisearchConfiguration {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>for a detailed description of the builder methods see <a href="#meilisearch.client.configuration">Client Configuration</a></td>
+<td>For a detailed description of the builder methods see <a href="#meilisearch.client.configuration">Client Configuration</a>.</td>
 </tr>
 </table>
 </div>
@@ -478,7 +478,7 @@ public class MyClientConfig extends MeilisearchConfiguration {
 </td>
 <td class="content">
 When setting up a client using the Spring namespace, a JSON handler must be set up.
-Use the following section, <a href="#meilisearch.json-handler.namespace">Spring Namespace</a> of JSON handler.
+Use the <a href="#meilisearch.json-handler.namespace">JSON handler namespace configuration</a>.
 </td>
 </tr>
 </table>
@@ -553,13 +553,13 @@ ClientConfiguration clientConfiguration = ClientConfiguration.builder()
 <div class="ulist">
 <ul>
 <li>
-<p><code>com.meilisearch.sdk.json.GsonJsonhandler</code></p>
+<p><code>com.meilisearch.sdk.json.GsonJsonHandler</code></p>
 </li>
 <li>
-<p><code>com.meilisearch.sdk.json.JacksonJsonhandler</code></p>
+<p><code>com.meilisearch.sdk.json.JacksonJsonHandler</code></p>
 </li>
 <li>
-<p>Custom JSON handler that implements <code>com.meilisearch.sdk.json.Jsonhandler</code></p>
+<p>Custom JSON handler that implements <code>com.meilisearch.sdk.json.JsonHandler</code></p>
 </li>
 </ul>
 </div>
@@ -567,8 +567,8 @@ ClientConfiguration clientConfiguration = ClientConfiguration.builder()
 <div class="sect2">
 <h3 id="meilisearch.json-handler.annotation"><a class="anchor" href="#meilisearch.json-handler.annotation"></a>Annotation based configuration</h3>
 <div class="paragraph">
-<p>You don&#8217;t need to provide a JSON handler if you are using the default JSON handler, <code>GsonJsonhandler</code>.
-But you can override the <code>jsonhandler()</code> method to provide a custom JSON handler.</p>
+<p>You don&#8217;t need to provide a JSON handler if you are using the default JSON handler, <code>GsonJsonHandler</code>.
+But you can override the <code>jsonHandler()</code> method to provide a custom JSON handler.</p>
 </div>
 <div class="exampleblock">
 <div class="title">Example 4. Setting JSON handler using JavaConfig</div>
@@ -577,14 +577,17 @@ But you can override the <code>jsonhandler()</code> method to provide a custom J
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
 
+import com.meilisearch.sdk.json.JacksonJsonHandler;
+import com.meilisearch.sdk.json.JsonHandler;
+
 import org.springframework.context.annotation.Configuration;
 
 </span><span class="fold-block">@Configuration
-public class JsonhandlerConfig extends MeilisearchConfiguration {
+public class JsonHandlerConfig extends MeilisearchConfiguration {
 
     @Override
-    public Jsonhandler jsonhandler() {
-        return new JacksonJsonhandler();    <i class="conum" data-value="1"></i><b>(1)</b>
+    public JsonHandler jsonHandler() {
+        return new JacksonJsonHandler();    <i class="conum" data-value="1"></i><b>(1)</b>
     }
 }</span></code></pre>
 </div>
@@ -603,8 +606,8 @@ public class JsonhandlerConfig extends MeilisearchConfiguration {
 <div class="sect2">
 <h3 id="meilisearch.json-handler.namespace"><a class="anchor" href="#meilisearch.json-handler.namespace"></a>Spring Namespace</h3>
 <div class="paragraph">
-<p>The JSON handler must be registered as a bean with the <code>id=jsonhandler</code>.
-And pass the class name of the JSON handler to the <code>class</code> attribute.</p>
+<p>The JSON handler must be registered as a bean with the <code>id=jsonHandler</code>.
+Pass the class name of the JSON handler to the <code>class</code> attribute.</p>
 </div>
 <div class="exampleblock">
 <div class="title">Example 5. Setting JSON handler using XML Namespace</div>
@@ -619,7 +622,7 @@ And pass the class name of the JSON handler to the <code>class</code> attribute.
        http://www.vanslog.io/spring/data/meilisearch
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
 
-    &lt;bean id="jsonhandler" class="com.meilisearch.sdk.json.GsonJsonhandler"/&gt;
+    &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;
 
 &lt;/beans&gt;</code></pre>
 </div>
@@ -628,6 +631,8 @@ And pass the class name of the JSON handler to the <code>class</code> attribute.
 </div>
 </div>
 </div>
+</div>
+<div class="section-summary">
 </div>
 </article>  </div>
 </main>

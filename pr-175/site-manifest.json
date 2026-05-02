@@ -1,6 +1,6 @@
 {
   "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
-  "generated": "2026-05-02T12:19:28.448Z",
+  "generated": "2026-05-02T12:52:53.322Z",
   "url": "https://docs.spring.io/spring-data-meilisearch/reference",
   "components": {
     "data-meilisearch": {
@@ -15,7 +15,7 @@
             {
               "path": "index.adoc",
               "url": "/index.html",
-              "title": "Spring Data Meilisearch - Reference Documentation"
+              "title": "Spring Data Meilisearch"
             },
             {
               "path": "meilisearch-client.adoc",

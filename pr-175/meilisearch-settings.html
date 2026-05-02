@@ -405,7 +405,7 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p>Meilisearch settings are used to define the behavior of the search engine.
-Using <code>@Setting</code> annotation, you can define the basic settings for the index, while complex settings are defined using separate annotations like <code>@TypoTolerance</code>, <code>@Faceting</code>, and <code>@Pagination</code>.</p>
+Using the <code>@Setting</code> annotation, you can define the basic settings for the index, while complex settings are defined using separate annotations like <code>@TypoTolerance</code>, <code>@Faceting</code>, and <code>@Pagination</code>.</p>
 </div>
 <div class="exampleblock">
 <div class="content">
@@ -613,7 +613,7 @@ class Product {
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>The <code>stopWords</code> attribute is used to define the stop words that must be used for searching the results.</td>
+<td>The <code>stopWords</code> attribute defines stop words to ignore while searching.</td>
 </tr>
 </table>
 </div>
@@ -722,7 +722,8 @@ These patterns support wildcards (*) to match multiple fields with similar namin
 <div class="ulist">
 <ul>
 <li>
-<p><code>*En</code> matches fields ending with "En" (e.g., "nameEn", "titleEn") These fields will be processed according to the language rules of the specified locales.
+<p><code>*En</code> matches fields ending with <code>En</code>, such as <code>nameEn</code> and <code>titleEn</code>.
+These fields are processed according to the language rules of the specified locales.
 The patterns affect <code>searchableAttributes</code>, <code>filterableAttributes</code>, and <code>sortableAttributes</code>.</p>
 </li>
 </ul>
@@ -826,7 +827,7 @@ class Product {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>proximityPrecision</code> attribute defines how word proximity is calculated ("byWord", "byAttribute")</td>
+<td>The <code>proximityPrecision</code> attribute defines how word proximity is calculated (<code>byWord</code>, <code>byAttribute</code>).</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
@@ -871,6 +872,8 @@ class Product {
 </div>
 </div>
 </div>
+</div>
+<div class="section-summary">
 </div>
 </article>  </div>
 </main>
