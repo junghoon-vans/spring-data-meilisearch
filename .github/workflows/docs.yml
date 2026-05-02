@@ -50,12 +50,12 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Build reference documentation
-        run: ./mvnw clean install -Pdistribute
+        run: ./mvnw -Pantora antora:antora
       - name: Upload reference documentation
         uses: actions/upload-artifact@v4
         with:
           name: reference-documentation
-          path: ./target/site/reference/html
+          path: ./target/site
           if-no-files-found: error
 
   deploy:
