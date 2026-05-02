@@ -12,7 +12,7 @@ change-template: '* $TITLE #$NUMBER'
 template: |
   ## 📗 Links
   * [Spring Data Meilisearch $RESOLVED_VERSION Reference documentation](https://junghoon-vans.github.io/spring-data-meilisearch/$RESOLVED_VERSION/)
-  * [Spring Data Meilisearch $RESOLVED_VERSION Javadoc](https://javadoc.io/doc/io.vanslog/spring-data-meilisearch/$RESOLVED_VERSION/index.html)
+  * [Spring Data Meilisearch $RESOLVED_VERSION Javadoc](https://junghoon-vans.github.io/spring-data-meilisearch/$RESOLVED_VERSION/api/java/index.html)
 
   $CHANGES
   
