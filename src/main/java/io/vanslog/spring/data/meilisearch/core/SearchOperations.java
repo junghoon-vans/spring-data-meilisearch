@@ -22,12 +22,14 @@ import com.meilisearch.sdk.MultiSearchFederation;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
+import io.vanslog.spring.data.meilisearch.core.query.SimilarQuery;
 
 /**
  * The operations for the below Meilisearch APIs.
  * <ul>
  * <li><a href="https://www.meilisearch.com/docs/reference/api/search">Search API</a></li>
  * <li><a href="https://www.meilisearch.com/docs/reference/api/multi_search">Multi-Search API</a></li>
+ * <li><a href="https://www.meilisearch.com/docs/reference/api/similar-documents">Similar Documents API</a></li>
  * </ul>
  */
 public interface SearchOperations {
@@ -95,4 +97,16 @@ public interface SearchOperations {
 	 * @return the list of entities found by the query
 	 */
 	SearchHits<FacetHit> facetSearch(FacetQuery query, Class<?> clazz);
+
+	/**
+	 * Execute the similar documents search query against meilisearch and return the result.
+	 * This method performs AI-powered semantic search to find documents similar to the given document.
+	 *
+	 * @param query the similar query to execute, containing the document ID and embedder
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @param <T> the type of the entity
+	 * @return the list of similar entities found by the query
+	 */
+	<T> SearchHits<T> similarSearch(SimilarQuery query, Class<T> clazz);
 }

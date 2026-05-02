@@ -29,6 +29,7 @@ import com.meilisearch.sdk.model.FacetSearchable;
 import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.Searchable;
+import com.meilisearch.sdk.model.SimilarDocumentsResults;
 
 /**
  * Class to convert Meilisearch classes into Spring Data Meilisearch responses.
@@ -76,6 +77,16 @@ public class ResponseConverter {
 					hit.remove("_federation");
 					return new SearchHit<>(objectMapper.convertValue(hit, clazz), result, federation);
 				}).toList();
+
+		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
+		return new SearchHitsImpl<>(executionDuration, searchHits);
+	}
+
+	public <T> SearchHits<T> mapResult(SimilarDocumentsResults result, Class<T> clazz) {
+		List<SearchHit<T>> searchHits = result.getHits().stream() //
+				.map(hit -> objectMapper.convertValue(hit, clazz)) //
+				.map(content -> new SearchHit<>(content, result)) //
+				.toList();
 
 		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
 		return new SearchHitsImpl<>(executionDuration, searchHits);
