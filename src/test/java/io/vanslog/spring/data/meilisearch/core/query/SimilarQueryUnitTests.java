@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Test;
  */
 class SimilarQueryUnitTests {
 
+	private static final String DOCUMENT_ID = "143";
+	private static final String EMBEDDER = "manual";
+
 	@Test
 	void shouldRequireDocumentId() {
 		assertThatThrownBy(() -> SimilarQuery.builder().withEmbedder("manual").build()) //
@@ -40,10 +43,10 @@ class SimilarQueryUnitTests {
 
 	@Test
 	void shouldLeaveOptionalValuesUnsetByDefault() {
-		SimilarQuery query = new SimilarQuery("143", "manual");
+		SimilarQuery query = new SimilarQuery(DOCUMENT_ID, EMBEDDER);
 
-		assertThat(query.getDocumentId()).isEqualTo("143");
-		assertThat(query.getEmbedder()).isEqualTo("manual");
+		assertThat(query.getDocumentId()).isEqualTo(DOCUMENT_ID);
+		assertThat(query.getEmbedder()).isEqualTo(EMBEDDER);
 		assertThat(query.getAttributesToRetrieve()).isNull();
 		assertThat(query.getOffset()).isNull();
 		assertThat(query.getLimit()).isNull();
@@ -55,10 +58,41 @@ class SimilarQueryUnitTests {
 	}
 
 	@Test
+	void shouldRejectNullDocumentIdSetter() {
+		SimilarQuery query = new SimilarQuery(DOCUMENT_ID, EMBEDDER);
+
+		assertThatThrownBy(() -> query.setDocumentId(null)) //
+				.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	void shouldRejectNullEmbedderSetter() {
+		SimilarQuery query = new SimilarQuery(DOCUMENT_ID, EMBEDDER);
+
+		assertThatThrownBy(() -> query.setEmbedder(null)) //
+				.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
 	void shouldBuildQueryWithAllSupportedOptions() {
-		SimilarQuery query = SimilarQuery.builder() //
-				.withDocumentId("143") //
-				.withEmbedder("manual") //
+		SimilarQuery query = queryWithAllSupportedOptions();
+
+		assertThat(query.getDocumentId()).isEqualTo(DOCUMENT_ID);
+		assertThat(query.getEmbedder()).isEqualTo(EMBEDDER);
+		assertThat(query.getAttributesToRetrieve()).containsExactly("title", "description");
+		assertThat(query.getOffset()).isEqualTo(10);
+		assertThat(query.getLimit()).isEqualTo(20);
+		assertThat(query.getFilter()).isEqualTo("genres = Action");
+		assertThat(query.getShowRankingScore()).isTrue();
+		assertThat(query.getShowRankingScoreDetails()).isTrue();
+		assertThat(query.getRankingScoreThreshold()).isEqualTo(0.5);
+		assertThat(query.getRetrieveVectors()).isTrue();
+	}
+
+	private SimilarQuery queryWithAllSupportedOptions() {
+		return SimilarQuery.builder() //
+				.withDocumentId(DOCUMENT_ID) //
+				.withEmbedder(EMBEDDER) //
 				.withAttributesToRetrieve(new String[] { "title", "description" }) //
 				.withOffset(10) //
 				.withLimit(20) //
@@ -68,16 +102,5 @@ class SimilarQueryUnitTests {
 				.withRankingScoreThreshold(0.5) //
 				.withRetrieveVectors(true) //
 				.build();
-
-		assertThat(query.getDocumentId()).isEqualTo("143");
-		assertThat(query.getEmbedder()).isEqualTo("manual");
-		assertThat(query.getAttributesToRetrieve()).containsExactly("title", "description");
-		assertThat(query.getOffset()).isEqualTo(10);
-		assertThat(query.getLimit()).isEqualTo(20);
-		assertThat(query.getFilter()).isEqualTo("genres = Action");
-		assertThat(query.getShowRankingScore()).isTrue();
-		assertThat(query.getShowRankingScoreDetails()).isTrue();
-		assertThat(query.getRankingScoreThreshold()).isEqualTo(0.5);
-		assertThat(query.getRetrieveVectors()).isTrue();
 	}
 }

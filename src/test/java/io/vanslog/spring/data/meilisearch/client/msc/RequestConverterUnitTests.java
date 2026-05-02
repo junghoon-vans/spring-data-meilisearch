@@ -30,6 +30,8 @@ import io.vanslog.spring.data.meilisearch.core.query.SimilarQuery;
  */
 class RequestConverterUnitTests {
 
+	private static final String[] RETRIEVED_ATTRIBUTES = { "title", "description" };
+
 	private final RequestConverter converter = new RequestConverter();
 
 	@Test
@@ -52,30 +54,28 @@ class RequestConverterUnitTests {
 
 	@Test
 	void shouldConvertAllSimilarQueryOptions() {
-		SimilarQuery query = SimilarQuery.builder() //
-				.withDocumentId("143") //
-				.withEmbedder("manual") //
-				.withAttributesToRetrieve(new String[] { "title", "description" }) //
-				.withOffset(10) //
-				.withLimit(20) //
-				.withFilter("genres = Action") //
-				.withShowRankingScore(true) //
-				.withShowRankingScoreDetails(true) //
-				.withRankingScoreThreshold(0.5) //
-				.withRetrieveVectors(true) //
-				.build();
+		SimilarQuery query = new SimilarQuery("143", "manual");
+		query.setAttributesToRetrieve(RETRIEVED_ATTRIBUTES);
+		query.setOffset(10);
+		query.setLimit(20);
+		query.setFilter("genres = Action");
+		query.setShowRankingScore(true);
+		query.setShowRankingScoreDetails(true);
+		query.setRankingScoreThreshold(0.5);
+		query.setRetrieveVectors(true);
 
 		SimilarDocumentRequest request = converter.similarSearchRequest(query);
 
-		assertThat(request.getId()).isEqualTo("143");
-		assertThat(request.getEmbedder()).isEqualTo("manual");
-		assertThat(request.getAttributesToRetrieve()).containsExactly("title", "description");
-		assertThat(request.getOffset()).isEqualTo(10);
-		assertThat(request.getLimit()).isEqualTo(20);
-		assertThat(request.getFilter()).isEqualTo("genres = Action");
-		assertThat(request.getShowRankingScore()).isTrue();
-		assertThat(request.getShowRankingScoreDetails()).isTrue();
-		assertThat(request.getRankingScoreThreshold()).isEqualTo(0.5);
-		assertThat(request.getRetrieveVectors()).isTrue();
+		assertThat(request) //
+				.returns("143", SimilarDocumentRequest::getId) //
+				.returns("manual", SimilarDocumentRequest::getEmbedder) //
+				.returns(10, SimilarDocumentRequest::getOffset) //
+				.returns(20, SimilarDocumentRequest::getLimit) //
+				.returns("genres = Action", SimilarDocumentRequest::getFilter) //
+				.returns(true, SimilarDocumentRequest::getShowRankingScore) //
+				.returns(true, SimilarDocumentRequest::getShowRankingScoreDetails) //
+				.returns(0.5, SimilarDocumentRequest::getRankingScoreThreshold) //
+				.returns(true, SimilarDocumentRequest::getRetrieveVectors);
+		assertThat(request.getAttributesToRetrieve()).containsExactly(RETRIEVED_ATTRIBUTES);
 	}
 }

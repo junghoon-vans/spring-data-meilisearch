@@ -36,12 +36,12 @@ public class SimilarQueryBuilder {
 		return new SimilarQuery(this);
 	}
 
-	public SimilarQueryBuilder withDocumentId(@Nullable String documentId) {
+	public SimilarQueryBuilder withDocumentId(String documentId) {
 		this.documentId = documentId;
 		return this;
 	}
 
-	public SimilarQueryBuilder withEmbedder(@Nullable String embedder) {
+	public SimilarQueryBuilder withEmbedder(String embedder) {
 		this.embedder = embedder;
 		return this;
 	}

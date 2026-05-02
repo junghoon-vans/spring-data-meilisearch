@@ -20,8 +20,8 @@ import org.springframework.util.Assert;
 
 public class SimilarQuery {
 
-	@Nullable private String documentId;
-	@Nullable private String embedder;
+	private String documentId;
+	private String embedder;
 	@Nullable private String[] attributesToRetrieve;
 	@Nullable private Integer offset;
 	@Nullable private Integer limit;
@@ -36,11 +36,13 @@ public class SimilarQuery {
 	}
 
 	public SimilarQuery(SimilarQueryBuilder builder) {
-		Assert.notNull(builder.getDocumentId(), "documentId must not be null");
-		Assert.notNull(builder.getEmbedder(), "embedder must not be null");
+		String documentId = builder.getDocumentId();
+		String embedder = builder.getEmbedder();
+		Assert.notNull(documentId, "documentId must not be null");
+		Assert.notNull(embedder, "embedder must not be null");
 
-		this.documentId = builder.getDocumentId();
-		this.embedder = builder.getEmbedder();
+		this.documentId = documentId;
+		this.embedder = embedder;
 		this.attributesToRetrieve = builder.getAttributesToRetrieve();
 		this.offset = builder.getOffset();
 		this.limit = builder.getLimit();
@@ -55,21 +57,21 @@ public class SimilarQuery {
 		return new SimilarQueryBuilder();
 	}
 
-	@Nullable
 	public String getDocumentId() {
 		return documentId;
 	}
 
-	public void setDocumentId(@Nullable String documentId) {
+	public void setDocumentId(String documentId) {
+		Assert.notNull(documentId, "documentId must not be null");
 		this.documentId = documentId;
 	}
 
-	@Nullable
 	public String getEmbedder() {
 		return embedder;
 	}
 
-	public void setEmbedder(@Nullable String embedder) {
+	public void setEmbedder(String embedder) {
+		Assert.notNull(embedder, "embedder must not be null");
 		this.embedder = embedder;
 	}
 
