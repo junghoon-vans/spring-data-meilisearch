@@ -1,5 +1,6 @@
 [[meilisearch.settings]]
 = Meilisearch Settings
+:page-section-summary-toc: 1
 
 This chapter covers how to modify search https://www.meilisearch.com/docs/reference/api/settings[settings] in Meilisearch.
 
@@ -7,7 +8,7 @@ This chapter covers how to modify search https://www.meilisearch.com/docs/refere
 == Overview
 
 Meilisearch settings are used to define the behavior of the search engine.
-Using `@Setting` annotation, you can define the basic settings for the index, while complex settings are defined using separate annotations like `@TypoTolerance`, `@Faceting`, and `@Pagination`.
+Using the `@Setting` annotation, you can define the basic settings for the index, while complex settings are defined using separate annotations like `@TypoTolerance`, `@Faceting`, and `@Pagination`.
 
 ====
 [source,java]
@@ -161,7 +162,7 @@ class Product {
 
 <.> The `synonyms` attribute defines groups of words that should be considered equivalent in search.
 <.> The `dictionary` attribute adds custom words to the internal dictionary.
-<.> The `stopWords` attribute is used to define the stop words that must be used for searching the results.
+<.> The `stopWords` attribute defines stop words to ignore while searching.
 ====
 
 [[meilisearch.settings.search.text.typo]]
@@ -239,7 +240,8 @@ class Product {
 
 <.> The `attributePatterns` specify which fields contain content in the specified languages using patterns.
 These patterns support wildcards (*) to match multiple fields with similar naming conventions:
-* `*En` matches fields ending with "En" (e.g., "nameEn", "titleEn") These fields will be processed according to the language rules of the specified locales.
+* `*En` matches fields ending with `En`, such as `nameEn` and `titleEn`.
+These fields are processed according to the language rules of the specified locales.
 The patterns affect `searchableAttributes`, `filterableAttributes`, and `sortableAttributes`.
 <.> The `locales` attribute defines the list of supported languages for the specified attributes.
 Each locale follows the ISO-639-3 three-letter, or alternatively use ISO-639-1 two-letter equivalents.
@@ -309,7 +311,7 @@ class Product {
 }
 ----
 
-<.> The `proximityPrecision` attribute defines how word proximity is calculated ("byWord", "byAttribute")
+<.> The `proximityPrecision` attribute defines how word proximity is calculated (`byWord`, `byAttribute`).
 <.> The `searchCutoffMs` attribute sets the maximum processing time for a search query in milliseconds.
 ====
 

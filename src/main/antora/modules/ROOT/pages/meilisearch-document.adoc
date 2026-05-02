@@ -1,12 +1,13 @@
 [[meilisearch.document]]
 = Meilisearch Document
+:page-section-summary-toc: 1
 
 Spring Data Meilisearch provides a simple way to define a https://www.meilisearch.com/docs/learn/core_concepts/documents[Document].
 
 [[meilisearch.document.definition]]
 == Document definition
 
-To define the https://www.meilisearch.com/docs/learn/core_concepts/documents[Document], you need to annotate a class with `@Document` annotation.
+To define the https://www.meilisearch.com/docs/learn/core_concepts/documents[Document], you need to annotate a class with the `@Document` annotation.
 As an example, the following class defines a `Movie` document with `id`, `title`, `description` and `genres` fields.
 
 .The sample document
@@ -57,7 +58,7 @@ public class Movie {
 ----
 ====
 
-In this case, "Movie" will be used as the index UID
+In this case, `Movie` is used as the index UID.
 
 [[meilisearch.document.id]]
 == Document id

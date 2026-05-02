@@ -1,0 +1,21 @@
+[[spring-data-meilisearch-reference-documentation]]
+= Spring Data Meilisearch
+Junghoon Ban
+:revnumber: {version}
+:revdate: {localdate}
+:feature-scroll: true
+
+_Spring Data Meilisearch provides Meilisearch connectivity and repository support for the Meilisearch search engine.
+It eases development of applications with a consistent programming model that need to access Meilisearch indexes._
+
+[horizontal]
+xref:meilisearch-client.adoc[Client] :: Meilisearch client configuration
+xref:meilisearch-document.adoc[Document Mapping] :: Entity metadata and document mapping
+xref:meilisearch-operations.adoc[Operations] :: Template-based index, document, and search operations
+xref:meilisearch-repositories.adoc[Repositories] :: Spring Data repository support
+xref:meilisearch-settings.adoc[Settings] :: Index settings, facets, pagination, localization, and AI-powered search settings
+xref:attachment$api/java/index.html[Javadoc] :: API documentation
+
+(C) 2023-{copyright-year} The original author(s).
+
+Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.

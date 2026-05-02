@@ -17,3 +17,8 @@ target/
 *.iml
 *.ipr
 *.iws
+
+build/
+node_modules
+node
+package-lock.json

@@ -1,0 +1,10 @@
+* xref:index.adoc[Overview]
+
+.Meilisearch
+* xref:meilisearch-client.adoc[Meilisearch Client]
+* xref:meilisearch-document.adoc[Meilisearch Document]
+* xref:meilisearch-operations.adoc[Meilisearch Operations]
+* xref:meilisearch-repositories.adoc[Meilisearch Repositories]
+* xref:meilisearch-settings.adoc[Meilisearch Settings]
+
+* xref:attachment$api/java/index.html[Javadoc,role=link-external,window=_blank]
