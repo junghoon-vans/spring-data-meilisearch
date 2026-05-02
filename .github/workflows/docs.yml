@@ -2,37 +2,47 @@ name: Reference Documentation
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*.*.*'
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Git tag to checkout (leave empty for current branch)'
+      ref:
+        description: 'Git ref to checkout (leave empty for current branch)'
         required: false
         default: ''
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+      path:
+        description: 'Destination path, such as v1.0.0 or snapshot (leave empty for root)'
+        required: false
+        default: ''
+      update-root:
+        description: 'Also update / with this documentation build'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+          ref: ${{ inputs.ref || github.ref }}
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -41,10 +51,195 @@ jobs:
           cache: 'maven'
       - name: Build reference documentation
         run: ./mvnw clean install -Pdistribute
-      - name: Upload artifact
+      - name: Upload reference documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: reference-documentation
+          path: ./target/site/reference/html
+          if-no-files-found: error
+
+  deploy:
+    needs: build
+    if: |
+      always() &&
+      (
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        )
+      ) &&
+      (
+        needs.build.result == 'success' ||
+        (
+          github.event_name == 'pull_request' &&
+          github.event.action == 'closed'
+        )
+      )
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      pull-requests: write
+    env:
+      DOCS_DIR: reference-documentation
+      SITE_BRANCH: pages-content
+      SITE_DIR: site
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Checkout Pages content
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: pages-content
+          path: site
+
+      - name: Initialize Pages content
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -d "$SITE_DIR/.git" ]; then
+            rm -rf "$SITE_DIR"
+            mkdir -p "$SITE_DIR"
+            git init "$SITE_DIR"
+            git -C "$SITE_DIR" checkout --orphan "$SITE_BRANCH"
+            git -C "$SITE_DIR" remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          fi
+
+          git -C "$SITE_DIR" config user.name "github-actions[bot]"
+          git -C "$SITE_DIR" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          touch "$SITE_DIR/.nojekyll"
+
+      - name: Download reference documentation
+        if: github.event_name != 'pull_request' || github.event.action != 'closed'
+        uses: actions/download-artifact@v4
+        with:
+          name: reference-documentation
+          path: reference-documentation
+
+      - name: Stage Pages content
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DISPATCH_PATH: ${{ inputs.path }}
+          DISPATCH_UPDATE_ROOT: ${{ inputs.update-root }}
+        run: |
+          target_path=""
+          update_root="false"
+          remove_target="false"
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            target_path="pr-${PR_NUMBER}"
+            if [ "$EVENT_ACTION" = "closed" ]; then
+              remove_target="true"
+            fi
+          elif [ "$EVENT_NAME" = "push" ] && [ "$REF_TYPE" = "tag" ]; then
+            target_path="$REF_NAME"
+            update_root="true"
+          elif [ "$EVENT_NAME" = "push" ] && [ "$REF_NAME" = "main" ]; then
+            target_path="snapshot"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            target_path="$DISPATCH_PATH"
+            update_root="$DISPATCH_UPDATE_ROOT"
+          fi
+
+          if [ "$remove_target" = "true" ]; then
+            rm -rf "$SITE_DIR/$target_path"
+            exit 0
+          fi
+
+          if [ -z "$target_path" ]; then
+            find "$SITE_DIR" -mindepth 1 -maxdepth 1 \
+              ! -name ".git" \
+              ! -name ".nojekyll" \
+              ! -name "snapshot" \
+              ! -name "pr-*" \
+              ! -name "v*.*.*" \
+              -exec rm -rf {} +
+            cp -a "$DOCS_DIR/." "$SITE_DIR/"
+          else
+            rm -rf "$SITE_DIR/$target_path"
+            mkdir -p "$SITE_DIR/$target_path"
+            cp -a "$DOCS_DIR/." "$SITE_DIR/$target_path/"
+          fi
+
+          if [ "$update_root" = "true" ]; then
+            find "$SITE_DIR" -mindepth 1 -maxdepth 1 \
+              ! -name ".git" \
+              ! -name ".nojekyll" \
+              ! -name "snapshot" \
+              ! -name "pr-*" \
+              ! -name "v*.*.*" \
+              -exec rm -rf {} +
+            cp -a "$DOCS_DIR/." "$SITE_DIR/"
+          fi
+
+          touch "$SITE_DIR/.nojekyll"
+
+      - name: Commit Pages content
+        id: commit
+        run: |
+          git -C "$SITE_DIR" add -A
+
+          if git -C "$SITE_DIR" diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git -C "$SITE_DIR" commit -m "Update reference documentation"
+          git -C "$SITE_DIR" push origin HEAD:"$SITE_BRANCH"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Pages artifact
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          rm -rf pages-artifact
+          mkdir -p pages-artifact
+          cp -a "$SITE_DIR/." pages-artifact/
+          rm -rf pages-artifact/.git
+
+      - name: Upload Pages artifact
+        if: steps.commit.outputs.changed == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './target/site/reference/html'
+          path: pages-artifact
+
       - name: Deploy to GitHub Pages
+        if: steps.commit.outputs.changed == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Comment PR preview URL
+        if: |
+          steps.commit.outputs.changed == 'true' &&
+          github.event_name == 'pull_request' &&
+          github.event.action != 'closed'
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.deployment.outputs.page_url }}pr-${{ github.event.pull_request.number }}/
+        with:
+          script: |
+            const marker = '<!-- reference-documentation-preview -->';
+            const body = `${marker}\nReference documentation preview: ${process.env.PREVIEW_URL}`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.rest.issues.listComments({ owner, repo, issue_number });
+            const previous = comments.data.find((comment) =>
+              comment.user.type === 'Bot' && comment.body.includes(marker)
+            );
+
+            if (previous) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
