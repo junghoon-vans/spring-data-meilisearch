@@ -606,8 +606,8 @@ public class JsonHandlerConfig extends MeilisearchConfiguration {
 <div class="sect2">
 <h3 id="meilisearch.json-handler.namespace"><a class="anchor" href="#meilisearch.json-handler.namespace"></a>Spring Namespace</h3>
 <div class="paragraph">
-<p>The JSON handler must be registered as a bean with the <code>id=jsonHandler</code>.
-Pass the class name of the JSON handler to the <code>class</code> attribute.</p>
+<p>Register a JSON handler bean and reference it from <code>&lt;meilisearch:meilisearch-client&gt;</code> using <code>json-handler-ref</code>.
+If <code>json-handler-ref</code> is omitted, the default bean name is <code>jsonHandler</code>.</p>
 </div>
 <div class="exampleblock">
 <div class="title">Example 5. Setting JSON handler using XML Namespace</div>
@@ -623,6 +623,11 @@ Pass the class name of the JSON handler to the <code>class</code> attribute.</p>
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
 
     &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;
+
+    &lt;meilisearch:meilisearch-client
+        id="meilisearchClient"
+        api-key="masterKey"
+        json-handler-ref="jsonHandler"/&gt;
 
 &lt;/beans&gt;</code></pre>
 </div>
