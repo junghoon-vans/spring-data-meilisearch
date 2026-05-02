@@ -131,10 +131,10 @@ public class RequestConverter {
 				.offset(query.getOffset()) //
 				.limit(query.getLimit()) //
 				.filter(query.getFilter()) //
-				.showRankingScore(query.isShowRankingScore()) //
-				.showRankingScoreDetails(query.isShowRankingScoreDetails()) //
+				.showRankingScore(query.getShowRankingScore()) //
+				.showRankingScoreDetails(query.getShowRankingScoreDetails()) //
 				.rankingScoreThreshold(query.getRankingScoreThreshold()) //
-				.retrieveVectors(query.isRetrieveVectors()) //
+				.retrieveVectors(query.getRetrieveVectors()) //
 				.build();
 	}
 

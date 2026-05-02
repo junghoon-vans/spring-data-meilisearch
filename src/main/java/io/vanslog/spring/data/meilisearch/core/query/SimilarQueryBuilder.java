@@ -1,3 +1,18 @@
+/*
+ * Copyright 2025 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.vanslog.spring.data.meilisearch.core.query;
 
 import org.springframework.lang.Nullable;
@@ -7,13 +22,13 @@ public class SimilarQueryBuilder {
 	@Nullable private String documentId;
 	@Nullable private String embedder;
 	@Nullable private String[] attributesToRetrieve;
-	private int offset;
-	private int limit;
+	@Nullable private Integer offset;
+	@Nullable private Integer limit;
 	@Nullable private String filter;
-	private boolean showRankingScore = false;
-	private boolean showRankingScoreDetails = false;
+	@Nullable private Boolean showRankingScore;
+	@Nullable private Boolean showRankingScoreDetails;
 	@Nullable private Double rankingScoreThreshold;
-	private boolean retrieveVectors = false;
+	@Nullable private Boolean retrieveVectors;
 
 	public SimilarQueryBuilder() {}
 
@@ -36,12 +51,12 @@ public class SimilarQueryBuilder {
 		return this;
 	}
 
-	public SimilarQueryBuilder withOffset(int offset) {
+	public SimilarQueryBuilder withOffset(@Nullable Integer offset) {
 		this.offset = offset;
 		return this;
 	}
 
-	public SimilarQueryBuilder withLimit(int limit) {
+	public SimilarQueryBuilder withLimit(@Nullable Integer limit) {
 		this.limit = limit;
 		return this;
 	}
@@ -51,12 +66,12 @@ public class SimilarQueryBuilder {
 		return this;
 	}
 
-	public SimilarQueryBuilder withShowRankingScore(boolean showRankingScore) {
+	public SimilarQueryBuilder withShowRankingScore(@Nullable Boolean showRankingScore) {
 		this.showRankingScore = showRankingScore;
 		return this;
 	}
 
-	public SimilarQueryBuilder withShowRankingScoreDetails(boolean showRankingScoreDetails) {
+	public SimilarQueryBuilder withShowRankingScoreDetails(@Nullable Boolean showRankingScoreDetails) {
 		this.showRankingScoreDetails = showRankingScoreDetails;
 		return this;
 	}
@@ -66,7 +81,7 @@ public class SimilarQueryBuilder {
 		return this;
 	}
 
-	public SimilarQueryBuilder withRetrieveVectors(boolean retrieveVectors) {
+	public SimilarQueryBuilder withRetrieveVectors(@Nullable Boolean retrieveVectors) {
 		this.retrieveVectors = retrieveVectors;
 		return this;
 	}
@@ -86,11 +101,13 @@ public class SimilarQueryBuilder {
 		return attributesToRetrieve;
 	}
 
-	public int getOffset() {
+	@Nullable
+	public Integer getOffset() {
 		return offset;
 	}
 
-	public int getLimit() {
+	@Nullable
+	public Integer getLimit() {
 		return limit;
 	}
 
@@ -99,11 +116,13 @@ public class SimilarQueryBuilder {
 		return filter;
 	}
 
-	public boolean isShowRankingScore() {
+	@Nullable
+	public Boolean getShowRankingScore() {
 		return showRankingScore;
 	}
 
-	public boolean isShowRankingScoreDetails() {
+	@Nullable
+	public Boolean getShowRankingScoreDetails() {
 		return showRankingScoreDetails;
 	}
 
@@ -112,7 +131,8 @@ public class SimilarQueryBuilder {
 		return rankingScoreThreshold;
 	}
 
-	public boolean isRetrieveVectors() {
+	@Nullable
+	public Boolean getRetrieveVectors() {
 		return retrieveVectors;
 	}
 }
