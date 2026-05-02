@@ -1,20 +1,21 @@
-= Spring Data Meilisearch - Reference Documentation
+[[spring-data-meilisearch-reference-documentation]]
+= Spring Data Meilisearch
 Junghoon Ban
 :revnumber: {version}
 :revdate: {localdate}
+:feature-scroll: true
 
-(C) 2023-2026 The original author(s).
+_Spring Data Meilisearch provides Meilisearch connectivity and repository support for the Meilisearch search engine.
+It eases development of applications with a consistent programming model that need to access Meilisearch indexes._
 
-NOTE: Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.
+[horizontal]
+xref:meilisearch-client.adoc[Client] :: Meilisearch client configuration
+xref:meilisearch-document.adoc[Document Mapping] :: Entity metadata and document mapping
+xref:meilisearch-operations.adoc[Operations] :: Template-based index, document, and search operations
+xref:meilisearch-repositories.adoc[Repositories] :: Spring Data repository support
+xref:meilisearch-settings.adoc[Settings] :: Index settings, facets, pagination, localization, and AI-powered search settings
+xref:attachment$api/java/index.html[Javadoc] :: API documentation
 
-This document is the reference guide for Spring Data Meilisearch support. It explains concepts and semantics and syntax for using Spring Data with Meilisearch search engine.
+(C) 2023-{copyright-year} The original author(s).
 
-[[reference]]
-== Reference Documentation
-
-:leveloffset: 1
-include::meilisearch-client.adoc[]
-include::meilisearch-document.adoc[]
-include::meilisearch-operations.adoc[]
-include::meilisearch-repositories.adoc[]
-include::meilisearch-settings.adoc[]
+Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.
