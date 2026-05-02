@@ -1,10 +1,11 @@
 [[meilisearch.operations]]
 = Meilisearch Operations
+:page-section-summary-toc: 1
 
 Spring Data Meilisearch uses several interfaces to define the operations that can be called against a Meilisearch index.
 
 * `DocumentOperations` defines actions to store, update and retrieve entities based on their id.
-* `SearchOperations` define the actions to search for multiple entities using queries
+* `SearchOperations` defines the actions to search for multiple entities using queries.
 * `MeilisearchOperations` combines the `DocumentOperations` and `SearchOperations` interfaces.
 
 These interfaces correspond to the structuring of the https://www.meilisearch.com/docs/reference/api/overview[Meilisearch API].
@@ -13,7 +14,7 @@ The default implementations of the interfaces offer:
 
 * Read/Write mapping support for domain types
 * A rich query API
-* Resource management and Exception translation
+* Resource management and exception translation
 
 [[meilisearch.operations.usage]]
 == Usage examples
@@ -48,9 +49,9 @@ public class MovieController {
 }
 ----
 
-<.> Let Spring inject the provided `MeilisearchOperations` bean in the constructor
-<.> Store a movie in the Meilisearch instance
-<.> Retrieve the movie with a get by id
+<.> Let Spring inject the provided `MeilisearchOperations` bean in the constructor.
+<.> Store a movie in the Meilisearch instance.
+<.> Retrieve the movie by id.
 ====
 
 [[meilisearch.operations.searchresulttypes]]
@@ -92,7 +93,7 @@ Spring Data Meilisearch provides several implementations: `BasicQuery`, `IndexQu
 ====
 [source,java]
 ----
-BasicQuery query = BasicQuery("Wonder Woman");
+BasicQuery query = new BasicQuery("Wonder Woman");
 ----
 ====
 

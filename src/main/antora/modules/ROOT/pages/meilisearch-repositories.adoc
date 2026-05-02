@@ -1,5 +1,6 @@
 [[meilisearch.repositories]]
 = Meilisearch Repositories
+:page-section-summary-toc: 1
 
 This chapter describes how to use Meilisearch repositories.
 
@@ -56,7 +57,7 @@ The `findById` and `findAllById` methods use the https://www.meilisearch.com/doc
 However, the `findAll` method uses the https://www.meilisearch.com/docs/reference/api/search[Search] API.
 
 IMPORTANT: This difference in behavior can also cause results to show differently.
-For example, `displayedAttributes` in <<meilisearch.settings>> does not work with the Get one document or Get documents API.
+For example, `displayedAttributes` in xref:meilisearch-settings.adoc[Meilisearch Settings] does not work with the Get one document or Get documents API.
 Go to https://www.meilisearch.com/docs/reference/api/settings#displayed-attributes[Meilisearch documentation] for more information.
 
 [[meilisearch.repositories.custom.query]]
