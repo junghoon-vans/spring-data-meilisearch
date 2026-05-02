@@ -7,14 +7,14 @@ Junghoon Ban
 
 NOTE: Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.
 
-include::preface.adoc[]
+This document is the reference guide for Spring Data Meilisearch support. It explains concepts and semantics and syntax for using Spring Data with Meilisearch search engine.
 
 [[reference]]
-= Reference Documentation
+== Reference Documentation
 
 :leveloffset: 1
-include::reference/meilisearch-client.adoc[]
-include::reference/meilisearch-document.adoc[]
-include::reference/meilisearch-operations.adoc[]
-include::reference/meilisearch-repositories.adoc[]
-include::reference/meilisearch-settings.adoc[]
+include::meilisearch-client.adoc[]
+include::meilisearch-document.adoc[]
+include::meilisearch-operations.adoc[]
+include::meilisearch-repositories.adoc[]
+include::meilisearch-settings.adoc[]
