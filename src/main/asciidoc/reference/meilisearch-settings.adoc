@@ -255,6 +255,41 @@ Meilisearch provides two mechanisms for controlling language detection:
 
 For complete control over language detection during both indexing and search time, you can use both `locales` and `localizedAttributes` together.
 
+[[meilisearch.settings.ai]]
+== AI-powered Search Settings
+
+Meilisearch uses embedders to generate vector embeddings for AI-powered search features such as semantic search and similar document search.
+You can configure embedders with the `@Embedder` annotation inside `@Setting`.
+
+====
+[source,java]
+----
+@Document(indexUid = "movies")
+@Setting(
+  searchableAttributes = { "title", "description" },
+  embedders = {
+    @Embedder(
+      name = "default",
+      source = Embedder.Source.OPEN_AI,
+      apiKey = "sk-...",
+      model = "text-embedding-3-small",
+      documentTemplate = "A movie titled {{doc.title}} whose description starts with {{doc.description|truncatewords: 20}}"
+    )
+  }
+)
+class Movie {
+    @Id private String id;
+    private String title;
+    private String description;
+}
+----
+====
+
+Each `@Embedder` requires a unique `name`, which becomes the key in Meilisearch's `embedders` setting.
+Optional attributes map to the SDK embedder settings, including `source`, `apiKey`, `model`, `documentTemplate`, `dimensions`, `distributionMean`, `distributionSigma`, `documentTemplateMaxBytes`, `revision`, `binaryQuantized`, REST `request` and `response` parameters, `headers`, `url`, `inputField`, `inputType`, and `query`.
+`distributionMean` and `distributionSigma` must be configured together.
+`request`, `response`, and `headers` use `@EmbedderParameter` and currently support flat string key-value parameters.
+
 [[meilisearch.settings.performance]]
 == Performance Settings
 

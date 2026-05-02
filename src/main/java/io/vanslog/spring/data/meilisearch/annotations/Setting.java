@@ -137,4 +137,11 @@ public @interface Setting {
 	 *      attributes</a>
 	 */
 	LocalizedAttribute[] localizedAttributes() default {};
+
+	/**
+	 * defines the embedders configuration for AI-powered search
+	 *
+	 * @see <a href="https://www.meilisearch.com/docs/reference/api/settings#embedders">Embedders</a>
+	 */
+	Embedder[] embedders() default {};
 }
