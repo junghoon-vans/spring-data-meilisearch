@@ -7,7 +7,7 @@ antora:
       root_component_name: 'data-meilisearch'
 site:
   title: Spring Data Meilisearch
-  url: https://docs.spring.io/spring-data-meilisearch/reference/
+  url: https://junghoon-vans.github.io/spring-data-meilisearch/
 content:
   sources:
     - url: ./../../..
