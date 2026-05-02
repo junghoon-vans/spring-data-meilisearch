@@ -251,9 +251,9 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 			Optional.of(embedder.source()).filter(it -> it != Embedder.Source.DEFAULT)
 					.map(it -> com.meilisearch.sdk.model.EmbedderSource.valueOf(it.name()))
 					.ifPresent(meiliEmbedder::setSource);
-			Optional.of(embedder.apiKey()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setApiKey);
-			Optional.of(embedder.model()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setModel);
-			Optional.of(embedder.documentTemplate()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setDocumentTemplate);
+			Optional.of(embedder.apiKey()).filter(it -> !it.isBlank()).ifPresent(meiliEmbedder::setApiKey);
+			Optional.of(embedder.model()).filter(it -> !it.isBlank()).ifPresent(meiliEmbedder::setModel);
+			Optional.of(embedder.documentTemplate()).filter(it -> !it.isBlank()).ifPresent(meiliEmbedder::setDocumentTemplate);
 			Optional.of(embedder.dimensions()).filter(it -> it > 0).ifPresent(meiliEmbedder::setDimensions);
 			boolean hasDistributionMean = !Double.isNaN(embedder.distributionMean());
 			boolean hasDistributionSigma = !Double.isNaN(embedder.distributionSigma());
@@ -263,37 +263,41 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 				meiliEmbedder.setDistribution(com.meilisearch.sdk.model.EmbedderDistribution
 						.custom(embedder.distributionMean(), embedder.distributionSigma()));
 			}
-			Optional.of(embedder.request()).filter(it -> it.length > 0).map(this::createParameterMap)
+			Optional.of(embedder.request()).filter(it -> it.length > 0).map(SettingsParameter::createParameterMap)
 					.ifPresent(meiliEmbedder::setRequest);
-			Optional.of(embedder.response()).filter(it -> it.length > 0).map(this::createParameterMap)
+			Optional.of(embedder.response()).filter(it -> it.length > 0).map(SettingsParameter::createParameterMap)
 					.ifPresent(meiliEmbedder::setResponse);
 			Optional.of(embedder.documentTemplateMaxBytes()).filter(it -> it > 0)
 					.ifPresent(meiliEmbedder::setDocumentTemplateMaxBytes);
-			Optional.of(embedder.revision()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setRevision);
-			Optional.of(embedder.headers()).filter(it -> it.length > 0).map(this::createHeaderMap)
+			Optional.of(embedder.revision()).filter(it -> !it.isBlank()).ifPresent(meiliEmbedder::setRevision);
+			Optional.of(embedder.headers()).filter(it -> it.length > 0).map(SettingsParameter::createHeaderMap)
 					.ifPresent(meiliEmbedder::setHeaders);
 			Optional.of(embedder.binaryQuantized()).filter(it -> it != Embedder.TriState.DEFAULT)
 					.map(it -> it == Embedder.TriState.TRUE).ifPresent(meiliEmbedder::setBinaryQuantized);
-			Optional.of(embedder.url()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setUrl);
+			Optional.of(embedder.url()).filter(it -> !it.isBlank()).ifPresent(meiliEmbedder::setUrl);
 			Optional.of(embedder.inputField()).filter(it -> it.length > 0).ifPresent(meiliEmbedder::setInputField);
 			Optional.of(embedder.inputType()).filter(it -> it != Embedder.InputType.DEFAULT)
 					.map(it -> com.meilisearch.sdk.model.EmbedderInputType.valueOf(it.name()))
 					.ifPresent(meiliEmbedder::setInputType);
-			Optional.of(embedder.query()).filter(it -> !it.isEmpty()).ifPresent(meiliEmbedder::setQuery);
+			Optional.of(embedder.query()).filter(it -> !it.isBlank()).ifPresent(meiliEmbedder::setQuery);
 			return meiliEmbedder;
 		}
 
-		private Map<String, Object> createParameterMap(EmbedderParameter[] parameters) {
+		private static Map<String, Object> createParameterMap(EmbedderParameter[] parameters) {
 			var parameterMap = new HashMap<String, Object>();
 			for (EmbedderParameter parameter : parameters) {
+				Assert.hasText(parameter.name(), "Embedder parameter name must not be blank");
+				Assert.isTrue(!parameterMap.containsKey(parameter.name()), "Embedder parameter name must be unique");
 				parameterMap.put(parameter.name(), parameter.value());
 			}
 			return parameterMap;
 		}
 
-		private Map<String, String> createHeaderMap(EmbedderParameter[] parameters) {
+		private static Map<String, String> createHeaderMap(EmbedderParameter[] parameters) {
 			var headerMap = new HashMap<String, String>();
 			for (EmbedderParameter parameter : parameters) {
+				Assert.hasText(parameter.name(), "Embedder parameter name must not be blank");
+				Assert.isTrue(!headerMap.containsKey(parameter.name()), "Embedder parameter name must be unique");
 				headerMap.put(parameter.name(), parameter.value());
 			}
 			return headerMap;

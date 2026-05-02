@@ -180,6 +180,35 @@ class SimpleMeilisearchPersistentEntityUnitTests {
 		@Id private String id;
 	}
 
+	@Document(indexUid = "movies")
+	@Setting(embedders = @Embedder( //
+			name = "default", //
+			apiKey = " ", //
+			model = " ", //
+			documentTemplate = " ", //
+			revision = " ", //
+			url = " ", //
+			query = " " //
+	))
+	static class EntityWithBlankEmbedderValues {
+		@Id private String id;
+	}
+
+	@Document(indexUid = "movies")
+	@Setting(embedders = @Embedder(name = "default", request = @EmbedderParameter(name = "", value = "{{text}}")))
+	static class EntityWithBlankEmbedderParameterName {
+		@Id private String id;
+	}
+
+	@Document(indexUid = "movies")
+	@Setting(embedders = @Embedder(name = "default", headers = { //
+			@EmbedderParameter(name = "Authorization", value = "Bearer token"), //
+			@EmbedderParameter(name = "Authorization", value = "Bearer other") //
+	}))
+	static class EntityWithDuplicateEmbedderHeaderNames {
+		@Id private String id;
+	}
+
 	@Nested
 	@DisplayName("index uid")
 	class IndexUidTests {
@@ -342,9 +371,39 @@ class SimpleMeilisearchPersistentEntityUnitTests {
 			assertThat(rest.getQuery()).isEqualTo("{{q}}");
 
 			assertThat(minimal.getSource()).isNull();
+			assertThat(minimal.getApiKey()).isNull();
 			assertThat(minimal.getModel()).isNull();
+			assertThat(minimal.getDocumentTemplate()).isNull();
+			assertThat(minimal.getDimensions()).isNull();
 			assertThat(minimal.getDistribution()).isNull();
+			assertThat(minimal.getRequest()).isNull();
+			assertThat(minimal.getResponse()).isNull();
+			assertThat(minimal.getDocumentTemplateMaxBytes()).isNull();
+			assertThat(minimal.getRevision()).isNull();
+			assertThat(minimal.getHeaders()).isNull();
 			assertThat(minimal.getBinaryQuantized()).isFalse();
+			assertThat(minimal.getUrl()).isNull();
+			assertThat(minimal.getInputField()).isNull();
+			assertThat(minimal.getInputType()).isNull();
+			assertThat(minimal.getQuery()).isNull();
+		}
+
+		@Test
+		void shouldIgnoreBlankEmbedderValues() {
+			// given
+			SimpleMeilisearchPersistentEntity<EntityWithBlankEmbedderValues> entity = new SimpleMeilisearchPersistentEntity<>(
+					TypeInformation.of(EntityWithBlankEmbedderValues.class));
+
+			// when
+			var embedder = entity.getDefaultSettings().getEmbedders().get("default");
+
+			// then
+			assertThat(embedder.getApiKey()).isNull();
+			assertThat(embedder.getModel()).isNull();
+			assertThat(embedder.getDocumentTemplate()).isNull();
+			assertThat(embedder.getRevision()).isNull();
+			assertThat(embedder.getUrl()).isNull();
+			assertThat(embedder.getQuery()).isNull();
 		}
 
 		@Test
@@ -378,6 +437,28 @@ class SimpleMeilisearchPersistentEntityUnitTests {
 			// when / then
 			assertThatThrownBy(entity::getDefaultSettings).isInstanceOf(IllegalArgumentException.class)
 					.hasMessageContaining("distributionMean and distributionSigma must be configured together");
+		}
+
+		@Test
+		void shouldRejectBlankEmbedderParameterName() {
+			// given
+			SimpleMeilisearchPersistentEntity<EntityWithBlankEmbedderParameterName> entity = new SimpleMeilisearchPersistentEntity<>(
+					TypeInformation.of(EntityWithBlankEmbedderParameterName.class));
+
+			// when / then
+			assertThatThrownBy(entity::getDefaultSettings).isInstanceOf(IllegalArgumentException.class)
+					.hasMessageContaining("Embedder parameter name must not be blank");
+		}
+
+		@Test
+		void shouldRejectDuplicateEmbedderParameterNames() {
+			// given
+			SimpleMeilisearchPersistentEntity<EntityWithDuplicateEmbedderHeaderNames> entity = new SimpleMeilisearchPersistentEntity<>(
+					TypeInformation.of(EntityWithDuplicateEmbedderHeaderNames.class));
+
+			// when / then
+			assertThatThrownBy(entity::getDefaultSettings).isInstanceOf(IllegalArgumentException.class)
+					.hasMessageContaining("Embedder parameter name must be unique");
 		}
 	}
 	// endregion
