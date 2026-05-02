@@ -26,7 +26,8 @@
 
     <properties>
         <springdata.commons>3.3.13-SNAPSHOT</springdata.commons>
-        <meilisearch-java>0.15.0</meilisearch-java>
+        <meilisearch-java>0.20.1</meilisearch-java>
+        <okhttp>5.3.2</okhttp>
         <testcontainers-meilisearch>1.0.5</testcontainers-meilisearch>
 
         <java-module-name>spring.data.meilisearch</java-module-name>
@@ -64,6 +65,11 @@
             <groupId>com.meilisearch.sdk</groupId>
             <artifactId>meilisearch-java</artifactId>
             <version>${meilisearch-java}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp-jvm</artifactId>
+            <version>${okhttp}</version>
         </dependency>
 
         <!-- Jackson JSON Mapper -->
