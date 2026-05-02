@@ -1,6 +1,6 @@
 {
   "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
-  "generated": "2026-05-02T12:52:53.322Z",
+  "generated": "2026-05-02T13:25:33.557Z",
   "url": "https://docs.spring.io/spring-data-meilisearch/reference",
   "components": {
     "data-meilisearch": {
