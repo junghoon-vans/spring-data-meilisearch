@@ -18,7 +18,8 @@ spring-data-meilisearch/
 │   ├── core/                       # template, operations, search result model
 │   └── repository/                 # Spring Data repository bootstrap/runtime
 ├── src/main/resources/             # Spring XML namespace registrations + XSD
-├── src/main/antora/                # Antora reference docs source, playbook, and resources
+├── src/main/antora/                # Antora reference docs source and resources
+├── antora-playbook.yml             # Antora playbook
 └── src/test/java/.../meilisearch/  # unit/integration tests + reusable Meilisearch test harness
 ```
 
