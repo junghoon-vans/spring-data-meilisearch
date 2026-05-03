@@ -50,6 +50,7 @@ class MeilisearchRepositoryIntegrationTests {
 	@BeforeEach
 	void setUp() {
 		movieRepository.deleteAll();
+		totalHitsLimitedRepository.deleteAll();
 	}
 
 	@Test
@@ -317,6 +318,8 @@ class MeilisearchRepositoryIntegrationTests {
 
 		// then
 		assertThat(page).hasSizeLessThan(elementCount);
+		assertThat(page.getTotalElements()).isEqualTo(10);
+		assertThat(page.getTotalPages()).isEqualTo(1);
 	}
 
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
