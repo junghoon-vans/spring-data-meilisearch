@@ -57,7 +57,7 @@ The `findById` and `findAllById` methods use the https://www.meilisearch.com/doc
 However, the `findAll` method uses the https://www.meilisearch.com/docs/reference/api/search[Search] API.
 
 For `findAll(Pageable pageable)`, the returned `Page` total elements are based on the total reported by the Meilisearch Search API response when available.
-They are not derived from a separate repository `count()` call.
+If the search response does not expose total-hit metadata, the repository falls back to `count()`.
 The number of elements in the page content remains the number of hits returned for the requested page.
 
 IMPORTANT: This difference in behavior can also cause results to show differently.

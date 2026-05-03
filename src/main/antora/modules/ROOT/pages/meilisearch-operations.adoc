@@ -76,6 +76,9 @@ Contains the following information:
 
 * An unmodifiable list of `SearchHit<T>` objects
 * Total hit metadata through `getTotalHits()` and `getTotalHitsRelation()`
+** `EQUAL_TO`: `getTotalHits()` is equal to the total matching result set reported by the search engine.
+** `GREATER_THAN_OR_EQUAL_TO`: `getTotalHits()` is a lower bound; the actual matching result set may be higher.
+** `OFF`: total hit metadata is unavailable, so `getTotalHits()` falls back to the loaded hit count.
 * Execution duration
 * Methods to access individual search hits and check if results exist
 
