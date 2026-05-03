@@ -317,7 +317,7 @@ class MeilisearchRepositoryIntegrationTests {
 		Page<TotalHitsLimited> page = totalHitsLimitedRepository.findAll(PageRequest.of(0, elementCount));
 
 		// then
-		assertThat(page).hasSizeLessThan(elementCount);
+		assertThat(page).hasSize(10);
 		assertThat(page.getTotalElements()).isEqualTo(10);
 		assertThat(page.getTotalPages()).isEqualTo(1);
 	}
