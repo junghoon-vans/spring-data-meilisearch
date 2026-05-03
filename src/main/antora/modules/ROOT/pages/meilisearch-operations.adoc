@@ -75,8 +75,12 @@ Contains the following information:
 Contains the following information:
 
 * An unmodifiable list of `SearchHit<T>` objects
+* Total hit metadata through `getTotalHits()` and `getTotalHitsRelation()`
 * Execution duration
 * Methods to access individual search hits and check if results exist
+
+The number of returned hits is separate from the reported total hits.
+Use `getSearchHits().size()` for the current result content and `getTotalHits()` together with `getTotalHitsRelation()` for the search total metadata.
 
 [[meilisearch.operations.queries]]
 == Queries
