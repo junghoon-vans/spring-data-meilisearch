@@ -477,7 +477,7 @@ However, the <code>findAll</code> method uses the <a href="https://www.meilisear
 </div>
 <div class="paragraph">
 <p>For <code>findAll(Pageable pageable)</code>, the returned <code>Page</code> total elements are based on the total reported by the Meilisearch Search API response when available.
-They are not derived from a separate repository <code>count()</code> call.
+If the search response does not expose total-hit metadata, the repository falls back to <code>count()</code>.
 The number of elements in the page content remains the number of hits returned for the requested page.</p>
 </div>
 <div class="admonitionblock important">

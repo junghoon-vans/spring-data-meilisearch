@@ -533,6 +533,19 @@ public class MovieController {
 </li>
 <li>
 <p>Total hit metadata through <code>getTotalHits()</code> and <code>getTotalHitsRelation()</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>EQUAL_TO</code>: <code>getTotalHits()</code> is equal to the total matching result set reported by the search engine.</p>
+</li>
+<li>
+<p><code>GREATER_THAN_OR_EQUAL_TO</code>: <code>getTotalHits()</code> is a lower bound; the actual matching result set may be higher.</p>
+</li>
+<li>
+<p><code>OFF</code>: total hit metadata is unavailable, so <code>getTotalHits()</code> falls back to the loaded hit count.</p>
+</li>
+</ul>
+</div>
 </li>
 <li>
 <p>Execution duration</p>
