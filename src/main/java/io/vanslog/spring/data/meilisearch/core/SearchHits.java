@@ -47,6 +47,20 @@ public interface SearchHits<T> extends Streamable<SearchHit<T>> {
 	 */
 	List<SearchHit<T>> getSearchHits();
 
+	/**
+	 * @return the total hits returned by the search response, or the loaded hit count if unavailable.
+	 */
+	default long getTotalHits() {
+		return getSearchHits().size();
+	}
+
+	/**
+	 * @return how {@link #getTotalHits()} relates to the total matching result set.
+	 */
+	default TotalHitsRelation getTotalHitsRelation() {
+		return TotalHitsRelation.OFF;
+	}
+
 	@Override
 	default Iterator<SearchHit<T>> iterator() {
 		return getSearchHits().iterator();

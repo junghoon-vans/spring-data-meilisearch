@@ -10,11 +10,20 @@ public class SearchHitsImpl<T> implements SearchHits<T> {
 
 	private final Duration executionDuration;
 	private final List<? extends SearchHit<T>> searchHits;
+	private final long totalHits;
+	private final TotalHitsRelation totalHitsRelation;
 	private final Lazy<List<SearchHit<T>>> unmodifiableSearchHits;
 
 	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits) {
+		this(executionDuration, searchHits, searchHits.size(), TotalHitsRelation.OFF);
+	}
+
+	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits, long totalHits,
+			TotalHitsRelation totalHitsRelation) {
 		this.executionDuration = executionDuration;
 		this.searchHits = searchHits;
+		this.totalHits = totalHits;
+		this.totalHitsRelation = totalHitsRelation;
 		this.unmodifiableSearchHits = Lazy.of(() -> Collections.unmodifiableList(searchHits));
 	}
 
@@ -34,10 +43,22 @@ public class SearchHitsImpl<T> implements SearchHits<T> {
 	}
 
 	@Override
+	public long getTotalHits() {
+		return totalHits;
+	}
+
+	@Override
+	public TotalHitsRelation getTotalHitsRelation() {
+		return totalHitsRelation;
+	}
+
+	@Override
 	public String toString() {
 		return "SearchHits{" + //
 				"executionDuration=" + executionDuration + //
 				", searchHits={" + searchHits.size() + " elements}" + //
+				", totalHits=" + totalHits + //
+				", totalHitsRelation=" + totalHitsRelation + //
 				'}';
 	}
 }
