@@ -15,10 +15,23 @@
  */
 package io.vanslog.spring.data.meilisearch.core;
 
+/**
+ * Relation that describes how {@link SearchHits#getTotalHits()} relates to the total matching result set.
+ */
 public enum TotalHitsRelation {
 
+	/**
+	 * The total hit count is equal to the total matching result set reported by the search engine.
+	 */
 	EQUAL_TO,
+
+	/**
+	 * The total hit count is a lower bound for the total matching result set.
+	 */
 	GREATER_THAN_OR_EQUAL_TO,
-	ESTIMATED,
+
+	/**
+	 * Total hit metadata is unavailable.
+	 */
 	OFF
 }

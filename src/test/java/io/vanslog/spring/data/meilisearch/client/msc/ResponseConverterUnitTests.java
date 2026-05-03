@@ -58,11 +58,11 @@ class ResponseConverterUnitTests {
 
 		assertThat(searchHits.getSearchHits()).hasSize(2);
 		assertThat(searchHits.getTotalHits()).isEqualTo(10);
-		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.GREATER_THAN_OR_EQUAL_TO);
+		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.EQUAL_TO);
 	}
 
 	@Test
-	void shouldConvertEstimatedTotalHitsMetadataToSearchHits() {
+	void shouldKeepTotalHitsOffForEstimatedSearchResults() {
 		SearchResult result = new SearchResult();
 		ArrayList<HashMap<String, Object>> hits = new ArrayList<>();
 		hits.add(hit("143", "Escape Room"));
@@ -74,8 +74,8 @@ class ResponseConverterUnitTests {
 		SearchHits<SimilarMovie> searchHits = converter.mapHits(result, SimilarMovie.class);
 
 		assertThat(searchHits.getSearchHits()).hasSize(1);
-		assertThat(searchHits.getTotalHits()).isEqualTo(15);
-		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.ESTIMATED);
+		assertThat(searchHits.getTotalHits()).isEqualTo(1);
+		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
 	}
 
 	@Test
@@ -92,8 +92,8 @@ class ResponseConverterUnitTests {
 
 		assertThat(searchHits.getExecutionDuration().toMillis()).isEqualTo(25);
 		assertThat(searchHits.getSearchHits()).hasSize(1);
-		assertThat(searchHits.getTotalHits()).isEqualTo(15);
-		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.ESTIMATED);
+		assertThat(searchHits.getTotalHits()).isEqualTo(1);
+		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
 		SearchHit<SimilarMovie> searchHit = searchHits.getSearchHit(0);
 		assertThat(searchHit.getProcessingTimeMs()).isEqualTo(25);
 		assertThat(searchHit.getQuery()).isEmpty();

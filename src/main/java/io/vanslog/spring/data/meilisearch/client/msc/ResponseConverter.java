@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.model.FacetSearchable;
 import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
-import com.meilisearch.sdk.model.SearchResult;
 import com.meilisearch.sdk.model.SearchResultPaginated;
 import com.meilisearch.sdk.model.Searchable;
 import com.meilisearch.sdk.model.SimilarDocumentsResults;
@@ -67,12 +66,7 @@ public class ResponseConverter {
 		if (searchable instanceof SearchResultPaginated) {
 			SearchResultPaginated result = (SearchResultPaginated) searchable;
 			return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(),
-					TotalHitsRelation.GREATER_THAN_OR_EQUAL_TO);
-		}
-		if (searchable instanceof SearchResult) {
-			SearchResult result = (SearchResult) searchable;
-			return new SearchHitsImpl<>(executionDuration, searchHits, result.getEstimatedTotalHits(),
-					TotalHitsRelation.ESTIMATED);
+					TotalHitsRelation.EQUAL_TO);
 		}
 		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
@@ -92,8 +86,7 @@ public class ResponseConverter {
 				}).toList();
 
 		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
-		return new SearchHitsImpl<>(executionDuration, searchHits, result.getEstimatedTotalHits(),
-				TotalHitsRelation.ESTIMATED);
+		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 
 	public <T> SearchHits<T> mapResult(SimilarDocumentsResults result, Class<T> clazz) {
@@ -103,8 +96,7 @@ public class ResponseConverter {
 				.toList();
 
 		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
-		return new SearchHitsImpl<>(executionDuration, searchHits, result.getEstimatedTotalHits(),
-				TotalHitsRelation.ESTIMATED);
+		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 
 	public <T> SearchHits<T> mapResults(Results<MultiSearchResult> results, Class<T> clazz) {
