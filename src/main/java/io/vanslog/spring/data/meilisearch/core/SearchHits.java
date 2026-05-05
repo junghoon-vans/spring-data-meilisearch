@@ -48,7 +48,7 @@ public interface SearchHits<T> extends Streamable<SearchHit<T>> {
 	List<SearchHit<T>> getSearchHits();
 
 	/**
-	 * @return the exact total matching result set only when {@link #getTotalHitsRelation()} is
+	 * @return the reported total-hit metadata only when {@link #getTotalHitsRelation()} is
 	 *         {@link TotalHitsRelation#EQUAL_TO}; otherwise the loaded hit count, which is not usable as a page total.
 	 */
 	default long getTotalHits() {
@@ -56,8 +56,8 @@ public interface SearchHits<T> extends Streamable<SearchHit<T>> {
 	}
 
 	/**
-	 * @return how {@link #getTotalHits()} relates to the total matching result set. Only
-	 *         {@link TotalHitsRelation#EQUAL_TO} represents exact total-hit metadata.
+	 * @return how {@link #getTotalHits()} relates to the reported total-hit metadata. Only
+	 *         {@link TotalHitsRelation#EQUAL_TO} marks total-hit metadata reported by the search response.
 	 */
 	default TotalHitsRelation getTotalHitsRelation() {
 		return TotalHitsRelation.OFF;
