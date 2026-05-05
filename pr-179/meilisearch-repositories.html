@@ -476,9 +476,10 @@ The <code>findById</code> and <code>findAllById</code> methods use the <a href="
 However, the <code>findAll</code> method uses the <a href="https://www.meilisearch.com/docs/reference/api/search">Search</a> API.</p>
 </div>
 <div class="paragraph">
-<p>For <code>findAll(Pageable pageable)</code>, the returned <code>Page</code> total elements are based on the total reported by the Meilisearch Search API response when available.
-If the search response does not expose total-hit metadata, the repository falls back to <code>count()</code>.
-The number of elements in the page content remains the number of hits returned for the requested page.</p>
+<p>For <code>findAll(Pageable pageable)</code>, the returned <code>Page</code> total elements come from Meilisearch paginated search <code>totalHits</code>.
+The repository does not use estimated totals or a separate <code>count()</code> query for page totals.
+The number of elements in the page content remains the number of hits returned for the requested page.
+If the entity configures <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, Meilisearch can cap the reported <code>totalHits</code>, and the repository <code>Page</code> total reflects that capped value.</p>
 </div>
 <div class="admonitionblock important">
 <table>

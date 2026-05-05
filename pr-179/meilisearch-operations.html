@@ -539,10 +539,7 @@ public class MovieController {
 <p><code>EQUAL_TO</code>: <code>getTotalHits()</code> is equal to the total matching result set reported by the search engine.</p>
 </li>
 <li>
-<p><code>GREATER_THAN_OR_EQUAL_TO</code>: <code>getTotalHits()</code> is a lower bound; the actual matching result set may be higher.</p>
-</li>
-<li>
-<p><code>OFF</code>: total hit metadata is unavailable, so <code>getTotalHits()</code> falls back to the loaded hit count.</p>
+<p><code>OFF</code>: exact total-hit metadata is unavailable, so <code>getTotalHits()</code> is the loaded hit count and is not usable as a page total.</p>
 </li>
 </ul>
 </div>
@@ -557,7 +554,8 @@ public class MovieController {
 </div>
 <div class="paragraph">
 <p>The number of returned hits is separate from the reported total hits.
-Use <code>getSearchHits().size()</code> for the current result content and <code>getTotalHits()</code> together with <code>getTotalHitsRelation()</code> for the search total metadata.</p>
+Use <code>getSearchHits().size()</code> for the current result content and use <code>getTotalHits()</code> as exact search total metadata only when <code>getTotalHitsRelation()</code> is <code>EQUAL_TO</code>.
+Meilisearch exposes this exact total through paginated search responses; estimated totals and flattened or aggregate responses are reported with <code>OFF</code>.</p>
 </div>
 </div>
 </div>

@@ -871,8 +871,8 @@ class Product {
 </div>
 <div class="paragraph">
 <p>See the <a href="https://www.meilisearch.com/docs/capabilities/full_text_search/how_to/paginate_search_results">Meilisearch pagination documentation</a> for details on <code>maxTotalHits</code>, <code>estimatedTotalHits</code>, and <code>totalHits</code>.
-This setting can also cap the total hits reported by Meilisearch search responses.
-As a result, total hit metadata such as <code>SearchHits#getTotalHits()</code> and repository <code>Page</code> totals can reflect the capped search total, while the page content size still reflects only the hits returned for the current request.</p>
+This setting can cap the <code>totalHits</code> reported by Meilisearch paginated search responses.
+As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</code> with relation <code>EQUAL_TO</code> and repository <code>Page</code> totals can reflect the capped search total, while the page content size still reflects only the hits returned for the current request.</p>
 </div>
 </div>
 </div>
