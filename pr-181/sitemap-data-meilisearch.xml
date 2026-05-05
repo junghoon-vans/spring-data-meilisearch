@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>https://junghoon-vans.github.io/spring-data-meilisearch/index.html</loc>
+<lastmod>2026-05-05T05:26:08.810Z</lastmod>
+</url>
+<url>
+<loc>https://junghoon-vans.github.io/spring-data-meilisearch/meilisearch-client.html</loc>
+<lastmod>2026-05-05T05:26:08.810Z</lastmod>
+</url>
+<url>
+<loc>https://junghoon-vans.github.io/spring-data-meilisearch/meilisearch-document.html</loc>
+<lastmod>2026-05-05T05:26:08.810Z</lastmod>
+</url>
+<url>
+<loc>https://junghoon-vans.github.io/spring-data-meilisearch/meilisearch-operations.html</loc>
+<lastmod>2026-05-05T05:26:08.810Z</lastmod>
+</url>
+<url>
+<loc>https://junghoon-vans.github.io/spring-data-meilisearch/meilisearch-repositories.html</loc>
+<lastmod>2026-05-05T05:26:08.810Z</lastmod>
+</url>
+<url>
+<loc>https://junghoon-vans.github.io/spring-data-meilisearch/meilisearch-settings.html</loc>
+<lastmod>2026-05-05T05:26:08.810Z</lastmod>
+</url>
+<url>
+<loc>https://junghoon-vans.github.io/spring-data-meilisearch/search.html</loc>
+<lastmod>2026-05-05T05:26:08.810Z</lastmod>
+</url>
+<url>
+<loc>https://junghoon-vans.github.io/spring-data-meilisearch/spring-projects.html</loc>
+<lastmod>2026-05-05T05:26:08.810Z</lastmod>
+</url>
+</urlset>
