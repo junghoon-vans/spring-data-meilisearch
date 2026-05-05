@@ -20,7 +20,6 @@ import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHitSupport;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.SearchPage;
-import io.vanslog.spring.data.meilisearch.core.TotalHitsRelation;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
@@ -169,9 +168,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 		Assert.notNull(pageable, "pageable must not be null");
 		BaseQuery query = BasicQuery.builder().withPageable(pageable).build();
 		SearchHits<T> searchHits = meilisearchOperations.search(query, entityType);
-		long total = searchHits.getTotalHitsRelation() != TotalHitsRelation.OFF ? searchHits.getTotalHits()
-				: this.count();
-		SearchPage<T> page = SearchHitSupport.searchPageFor(searchHits, query.getPageable(), total);
+		SearchPage<T> page = SearchHitSupport.searchPageFor(searchHits, query.getPageable(), searchHits.getTotalHits());
 		// noinspection ConstantConditions
 		return (Page<T>) SearchHitSupport.unwrapSearchHits(page);
 	}

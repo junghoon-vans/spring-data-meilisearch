@@ -258,7 +258,7 @@ class MeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
-	void shouldFindDocumentsWithPaging() {
+	void shouldFindDocumentsWithPagingAndUseSearchTotalHitsAsPageTotal() {
 		// given
 		int pagingSize = 2;
 
@@ -292,6 +292,7 @@ class MeilisearchRepositoryIntegrationTests {
 
 		// then
 		assertThat(page1.getTotalElements()).isEqualTo(movies.size());
+		assertThat(page2.getTotalElements()).isEqualTo(movies.size());
 
 		assertThat(page1.getContent()).hasSize(2);
 		assertThat(page1.getContent().get(0)).isEqualTo(movie1);
@@ -302,7 +303,7 @@ class MeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
-	void shouldNotSearchAllElementsWhenMaxTotalHitsAre10() {
+	void shouldUseMaxTotalHitsCapAsRepositoryPageTotal() {
 		// given
 		int elementCount = 11;
 
@@ -317,6 +318,7 @@ class MeilisearchRepositoryIntegrationTests {
 		Page<TotalHitsLimited> page = totalHitsLimitedRepository.findAll(PageRequest.of(0, elementCount));
 
 		// then
+		assertThat(totalHitsLimitedRepository.count()).isEqualTo(elementCount);
 		assertThat(page).hasSize(10);
 		assertThat(page.getTotalElements()).isEqualTo(10);
 		assertThat(page.getTotalPages()).isEqualTo(1);
