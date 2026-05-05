@@ -107,7 +107,7 @@ _Also see link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] if you wish to submit pull r
 
 === Building reference documentation
 
-Building the documentation builds also the project without running tests.
+Build the authoring/PR preview documentation from the checked-out HEAD with Maven:
 
 [source,bash]
 ----
@@ -115,6 +115,17 @@ Building the documentation builds also the project without running tests.
 ----
 
 The generated documentation is available from `target/site/index.html`.
+
+To build the published aggregate site locally, fetch `main` and release tags first, then run the root playbook after Maven has prepared the Antora CLI dependencies:
+
+[source,bash]
+----
+ $ git fetch --tags origin main
+ $ ./mvnw -Pantora antora:antora
+ $ rm -rf target/site
+ $ npx --offline antora --to-dir target/site antora-playbook.yml
+ $ node src/main/antora/generate-latest-version-redirects.mjs target/site
+----
 
 == License
 
