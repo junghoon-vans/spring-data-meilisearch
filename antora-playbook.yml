@@ -30,6 +30,11 @@ content:
         - '!v0.7.*'
       start_path: src/main/antora
       worktrees: true
+    - url: https://github.com/spring-projects/spring-data-commons
+      # Refname matching:
+      # https://docs.antora.org/antora/latest/playbook/content-refname-matching/
+      branches: [ main ]
+      start_path: src/main/antora
 asciidoc:
   attributes:
     hide-uri-scheme: '@'
