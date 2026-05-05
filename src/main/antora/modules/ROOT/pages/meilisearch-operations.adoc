@@ -77,13 +77,13 @@ Contains the following information:
 * An unmodifiable list of `SearchHit<T>` objects
 * Total hit metadata through `getTotalHits()` and `getTotalHitsRelation()`
 ** `EQUAL_TO`: `getTotalHits()` is equal to the total matching result set reported by the search engine.
-** `GREATER_THAN_OR_EQUAL_TO`: `getTotalHits()` is a lower bound; the actual matching result set may be higher.
-** `OFF`: total hit metadata is unavailable, so `getTotalHits()` falls back to the loaded hit count.
+** `OFF`: exact total-hit metadata is unavailable, so `getTotalHits()` is the loaded hit count and is not usable as a page total.
 * Execution duration
 * Methods to access individual search hits and check if results exist
 
 The number of returned hits is separate from the reported total hits.
-Use `getSearchHits().size()` for the current result content and `getTotalHits()` together with `getTotalHitsRelation()` for the search total metadata.
+Use `getSearchHits().size()` for the current result content and use `getTotalHits()` as exact search total metadata only when `getTotalHitsRelation()` is `EQUAL_TO`.
+Meilisearch exposes this exact total through paginated search responses; estimated totals and flattened or aggregate responses are reported with `OFF`.
 
 [[meilisearch.operations.queries]]
 == Queries

@@ -337,6 +337,6 @@ class Product {
 <.> The `maxTotalHits` is used to define the maximum number of results that can be reached through search.
 
 See the https://www.meilisearch.com/docs/capabilities/full_text_search/how_to/paginate_search_results[Meilisearch pagination documentation] for details on `maxTotalHits`, `estimatedTotalHits`, and `totalHits`.
-This setting can also cap the total hits reported by Meilisearch search responses.
-As a result, total hit metadata such as `SearchHits#getTotalHits()` and repository `Page` totals can reflect the capped search total, while the page content size still reflects only the hits returned for the current request.
+This setting can cap the `totalHits` reported by Meilisearch paginated search responses.
+As a result, exact total hit metadata such as `SearchHits#getTotalHits()` with relation `EQUAL_TO` and repository `Page` totals can reflect the capped search total, while the page content size still reflects only the hits returned for the current request.
 ====
