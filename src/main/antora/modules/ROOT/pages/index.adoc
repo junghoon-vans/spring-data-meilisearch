@@ -14,8 +14,6 @@ xref:meilisearch-document.adoc[Document Mapping] :: Entity metadata and document
 xref:meilisearch-operations.adoc[Operations] :: Template-based index, document, and search operations
 xref:meilisearch-repositories.adoc[Repositories] :: Spring Data repository support
 xref:meilisearch-settings.adoc[Settings] :: Index settings, facets, pagination, localization, and AI-powered search settings
-{spring-data-commons-docs-url}[Spring Data Commons] :: Shared Spring Data reference documentation
-{spring-data-commons-javadoc-base}index.html[Spring Data Commons Javadoc] :: API documentation for Spring Data Commons
 xref:attachment$api/java/index.html[Javadoc] :: API documentation
 
 (C) 2023-{copyright-year} The original author(s).

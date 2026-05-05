@@ -10,8 +10,8 @@ asciidoc:
     attribute-missing: 'warn'
     commons: ${springdata.commons.docs}
     include-xml-namespaces: false
-    spring-data-commons-docs-url: https://docs.spring.io/spring-data/commons/reference
-    spring-data-commons-javadoc-base: https://docs.spring.io/spring-data/commons/docs/${springdata.commons}/api/
+    spring-data-commons-docs-url: https://docs.spring.io/spring-data/commons/reference/${springdata.commons.short}
+    spring-data-commons-javadoc-base: '{spring-data-commons-docs-url}/api/java'
     springdocsurl: https://docs.spring.io/spring-framework/reference/{springversionshort}
     springjavadocurl: https://docs.spring.io/spring-framework/docs/${spring}/javadoc-api
     spring-framework-docs: '{springdocsurl}'
