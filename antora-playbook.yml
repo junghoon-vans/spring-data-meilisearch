@@ -1,17 +1,33 @@
 # PACKAGES antora@3.2.0-alpha.6 @antora/atlas-extension@1.0.0-alpha.2 @antora/collector-extension@1.0.0-alpha.7 @springio/antora-extensions@1.13.0 @asciidoctor/tabs@1.0.0-beta.6 @springio/asciidoctor-extensions@1.0.0-alpha.11
 #
-# The purpose of this Antora playbook is to build the docs in the current branch.
+# Publish playbook: aggregate main and release tags so the Spring UI can build a version selector.
 antora:
   extensions:
-    - require: '@springio/antora-extensions'
+    - '@antora/atlas-extension'
+    - '@springio/antora-extensions/latest-version-extension'
+    - '@antora/collector-extension'
+    - require: '@springio/antora-extensions/root-component-extension'
       root_component_name: 'data-meilisearch'
+    - '@springio/antora-extensions/root-attachments-extension'
+    - '@springio/antora-extensions/static-page-extension'
 site:
   title: Spring Data Meilisearch
   url: https://junghoon-vans.github.io/spring-data-meilisearch/
 content:
   sources:
     - url: .
-      branches: HEAD
+      branches:
+        - main
+      # v0.1.x-v0.7.x tags predate the Antora start path and cannot be aggregated safely.
+      tags:
+        - v*.*.*
+        - '!v0.1.*'
+        - '!v0.2.*'
+        - '!v0.3.*'
+        - '!v0.4.*'
+        - '!v0.5.*'
+        - '!v0.6.*'
+        - '!v0.7.*'
       start_path: src/main/antora
       worktrees: true
 asciidoc:
