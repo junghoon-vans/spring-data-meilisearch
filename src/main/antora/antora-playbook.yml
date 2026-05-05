@@ -26,6 +26,7 @@ asciidoc:
 urls:
   latest_version_segment: ''
 runtime:
+  fetch: true
   log:
     failure_level: warn
     format: pretty
