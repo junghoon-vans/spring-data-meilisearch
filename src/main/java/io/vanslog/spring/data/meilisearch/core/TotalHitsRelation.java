@@ -26,11 +26,6 @@ public enum TotalHitsRelation {
 	EQUAL_TO,
 
 	/**
-	 * The total hit count is a lower bound for the total matching result set.
-	 */
-	GREATER_THAN_OR_EQUAL_TO,
-
-	/**
 	 * Total hit metadata is unavailable.
 	 */
 	OFF

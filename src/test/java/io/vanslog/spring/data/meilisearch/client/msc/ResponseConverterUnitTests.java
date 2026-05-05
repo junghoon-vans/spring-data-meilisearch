@@ -24,6 +24,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.meilisearch.sdk.model.FacetSearchable;
 import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.SearchResult;
@@ -118,6 +119,32 @@ class ResponseConverterUnitTests {
 
 		assertThat(searchHits.getSearchHits()).hasSize(2);
 		assertThat(searchHits.getTotalHits()).isEqualTo(2);
+		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
+	}
+
+	@Test
+	void shouldKeepTotalHitsOffForFacetSearchResults() {
+		FacetSearchable result = new FacetSearchable() {
+			@Override
+			public ArrayList<HashMap<String, Object>> getFacetHits() {
+				return new ArrayList<>(List.of(hit("143", "Escape Room")));
+			}
+
+			@Override
+			public int getProcessingTimeMs() {
+				return 25;
+			}
+
+			@Override
+			public String getFacetQuery() {
+				return "Escape";
+			}
+		};
+
+		SearchHits<SimilarMovie> searchHits = converter.mapHits(result, SimilarMovie.class);
+
+		assertThat(searchHits.getSearchHits()).hasSize(1);
+		assertThat(searchHits.getTotalHits()).isEqualTo(1);
 		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
 	}
 
