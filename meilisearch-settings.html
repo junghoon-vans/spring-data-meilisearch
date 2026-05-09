@@ -16,12 +16,15 @@
     <link rel="stylesheet" href="./_/css/site.css">
     <link rel="stylesheet" href="./_/css/vendor/search.css">
     <link rel="stylesheet" href="./_/css/vendor/page-search.css">
+    <link rel="stylesheet" href="./_/css/vendor/onetrust.css">
     <link rel="stylesheet" href="./_/css/vendor/asciidoctor-tabs.css">
 
-    <meta name="antora-ui-version" content="v0.4.16"> 
+    <meta name="antora-ui-version" content="v0.4.25"> 
     <meta name="version" content="0.8.0">
+    <meta name="generation" content="0.8">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.8/meilisearch-settings.html">
     <meta name="component" content="data-meilisearch">
-    <meta name="latest-version" content="false">
+    <meta name="latest-version" content="true">
     <link rel="icon" href="./_/img/favicon.ico" type="image/vnd.microsoft.icon">
   </head>
   <body class="article">
@@ -271,16 +274,7 @@
           d="M384,224c-17.7,0-32,14.3-32,32s14.3,32,32,32s32-14.3,32-32S401.7,224,384,224L384,224z"
         ></path></g></svg>
   </button>
-  <div class="search">
-  <button class="DocSearch-Button search-button">
-    <svg enable-background="new 0 0 32 32" id="Glyph" version="1.1" viewBox="0 0 32 32" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-      <path d="M27.414,24.586l-5.077-5.077C23.386,17.928,24,16.035,24,14c0-5.514-4.486-10-10-10S4,8.486,4,14  s4.486,10,10,10c2.035,0,3.928-0.614,5.509-1.663l5.077,5.077c0.78,0.781,2.048,0.781,2.828,0  C28.195,26.633,28.195,25.367,27.414,24.586z M7,14c0-3.86,3.14-7,7-7s7,3.14,7,7s-3.14,7-7,7S7,17.86,7,14z" id="XMLID_223_"/>
-    </svg>
-    <span>Search</span>
-    <span class="search-key"></span>
-  </button>
-</div>
-</div><ul class="nav-list">
+  </div><ul class="nav-list">
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
@@ -308,7 +302,7 @@
     <a class="nav-link"  href="meilisearch-settings.html">Meilisearch Settings</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link attachment link-external"  target="_blank" href="api/java/index.html">Javadoc</a>
+    <span class="nav-text"><a href="/api/java/index.html" class="xref attachment link-external" target="_blank" rel="noopener">Javadoc</a></span>
   </li>
 </ul>
   </li>
@@ -334,15 +328,6 @@
 </script><main class="article">
 <div class="toolbar" role="navigation">
   <button id="nav-toggle-1" class="nav-toggle"></button>
-<div class="search">
-  <button class="DocSearch-Button search-button">
-    <svg enable-background="new 0 0 32 32" id="Glyph" version="1.1" viewBox="0 0 32 32" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-      <path d="M27.414,24.586l-5.077-5.077C23.386,17.928,24,16.035,24,14c0-5.514-4.486-10-10-10S4,8.486,4,14  s4.486,10,10,10c2.035,0,3.928-0.614,5.509-1.663l5.077,5.077c0.78,0.781,2.048,0.781,2.828,0  C28.195,26.633,28.195,25.367,27.414,24.586z M7,14c0-3.86,3.14-7,7-7s7,3.14,7,7s-3.14,7-7,7S7,17.86,7,14z" id="XMLID_223_"/>
-    </svg>
-    <span>Search</span>
-    <span class="search-key"></span>
-  </button>
-</div>
 </div>
   <div class="content">
 <aside class="sidebar">
@@ -355,7 +340,7 @@
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/HEAD/src/main/antora/modules/ROOT/pages/meilisearch-settings.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/blob/v0.8.0/src/main/antora/modules/ROOT/pages/meilisearch-settings.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -388,6 +373,7 @@
 <div class="breadcrumbs-container">
   <nav class="breadcrumbs" aria-label="breadcrumbs">
     <ul>
+      <li id="copy-url" title="Copy versioned URL"></li>
       <li><a href="index.html">Spring Data Meilisearch</a></li>
       <li>Meilisearch</li>
       <li><a href="meilisearch-settings.html">Meilisearch Settings</a></li>
@@ -887,17 +873,60 @@ class Product {
               </button>
               <div class="colset">
                 <div class="col-left">
+
                   <ul class="nav-versions">
-                    <li class="component is-current">
-                      <a class="title" href="index.html">Spring Data Meilisearch</a>
-                      <ul class="versions">
-                        <li class="version is-current is-latest">
-                          <a href="index.html">
-                            0.8.0<span class="current">current</span>
-                          </a>
-                        </li>
-                      </ul>
-                    </li>
+                      <li class="component">
+                        <div>
+                          <a class="title" href="data-commons/index.html">Spring Data Commons</a>
+                        </div>                        <div class="version-item">
+                          <div>
+                            <button class="version-toggle" type="button">
+                              <span></span>
+                              Snapshot
+                            </button>
+                          </div>
+                          <ul class="versions">
+  <li class="version">
+    <a href="data-commons/index.html">
+      4.1.0-SNAPSHOT
+    </a>
+  </li>
+</ul>                        </div>
+                        
+                      </li>
+                      <li class="component">
+                        <div>
+                          <a class="title" href="index.html">Spring Data Meilisearch</a>
+                        </div>                        <div class="version-item is-active">
+                          <div>
+                            <button class="version-toggle" type="button">
+                              <span></span>
+                              Stable
+                            </button>
+                          </div>
+                          <ul class="versions">
+  <li class="version">
+    <a href="meilisearch-settings.html">
+      0.8.0
+    </a>
+  </li>
+</ul>                        </div>
+                        <div class="version-item">
+                          <div>
+                            <button class="version-toggle" type="button">
+                              <span></span>
+                              Snapshot
+                            </button>
+                          </div>
+                          <ul class="versions">
+  <li class="version">
+    <a href="0.8-SNAPSHOT/meilisearch-settings.html">
+      0.8.1-SNAPSHOT
+    </a>
+  </li>
+</ul>                        </div>
+                        
+                      </li>
                   </ul>
                 </div>
                 <div class="col-right">
@@ -1179,31 +1208,5 @@ class Product {
 <script src="./_/js/site.js"></script>
 <script async src="./_/js/vendor/highlight.js"></script>
 <script async src="./_/js/vendor/asciidoctor-tabs.js" data-sync-storage-key="docs:preferred-tab"></script>
-
-<div class="modal micromodal-slide" id="modal-1" aria-hidden="true">
-    <div class="modal__overlay" tabindex="-1" data-micromodal-close>
-        <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
-            <main class="modal__content" id="modal-1-content">
-                <div id="searchbox"></div>
-                <div id="counter"></div>
-                <div class="search-link-box">
-                    <a class="search-link" href="search.html">Search in all Spring Docs</a>
-                </div>
-                <div class="search-by">
-                    <a target="_blank" rel="noopener noreferrer" href="https://www.algolia.com/" aria-label="Search by Algolia">
-                        <img class="light" width="140" src="./_/img/algolia-light.svg" />
-                        <img class="dark" width="140" src="./_/img/algolia-dark.svg" />
-                    </a>
-                </div>
-                <div id="hits"></div>
-            </main>
-        </div>
-    </div>
-</div>
-
-<script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="./_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="./_/css/vendor/search.css" data-page-version="0.8.0" data-page-component="data-meilisearch"></script>
   </body>
 </html>
