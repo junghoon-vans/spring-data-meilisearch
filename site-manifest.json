@@ -1,6 +1,6 @@
 {
   "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
-  "generated": "2026-05-09T14:57:57.904Z",
+  "generated": "2026-05-09T15:14:01.437Z",
   "url": "https://junghoon-vans.github.io/spring-data-meilisearch",
   "components": {
     "data-commons": {
@@ -232,56 +232,9 @@
     },
     "data-meilisearch": {
       "title": "Spring Data Meilisearch",
-      "latest": "0.8.0",
+      "latest": "0.8.1",
       "versions": {
         "0.8.1": {
-          "prerelease": true,
-          "displayVersion": "0.8.1-SNAPSHOT",
-          "url": "/0.8-SNAPSHOT/index.html",
-          "pages": [
-            {
-              "path": "index.adoc",
-              "url": "/0.8-SNAPSHOT/index.html",
-              "title": "Spring Data Meilisearch"
-            },
-            {
-              "path": "meilisearch-client.adoc",
-              "url": "/0.8-SNAPSHOT/meilisearch-client.html",
-              "title": "Meilisearch Client"
-            },
-            {
-              "path": "meilisearch-document.adoc",
-              "url": "/0.8-SNAPSHOT/meilisearch-document.html",
-              "title": "Meilisearch Document"
-            },
-            {
-              "path": "meilisearch-operations.adoc",
-              "url": "/0.8-SNAPSHOT/meilisearch-operations.html",
-              "title": "Meilisearch Operations"
-            },
-            {
-              "path": "meilisearch-repositories.adoc",
-              "url": "/0.8-SNAPSHOT/meilisearch-repositories.html",
-              "title": "Meilisearch Repositories"
-            },
-            {
-              "path": "meilisearch-settings.adoc",
-              "url": "/0.8-SNAPSHOT/meilisearch-settings.html",
-              "title": "Meilisearch Settings"
-            },
-            {
-              "path": "search.adoc",
-              "url": "/0.8-SNAPSHOT/search.html",
-              "title": "Search"
-            },
-            {
-              "path": "spring-projects.adoc",
-              "url": "/0.8-SNAPSHOT/spring-projects.html",
-              "title": "Spring Projects"
-            }
-          ]
-        },
-        "0.8.0": {
           "url": "/index.html",
           "pages": [
             {
@@ -322,6 +275,51 @@
             {
               "path": "spring-projects.adoc",
               "url": "/spring-projects.html",
+              "title": "Spring Projects"
+            }
+          ]
+        },
+        "0.8.0": {
+          "url": "/0.8/index.html",
+          "pages": [
+            {
+              "path": "index.adoc",
+              "url": "/0.8/index.html",
+              "title": "Spring Data Meilisearch"
+            },
+            {
+              "path": "meilisearch-client.adoc",
+              "url": "/0.8/meilisearch-client.html",
+              "title": "Meilisearch Client"
+            },
+            {
+              "path": "meilisearch-document.adoc",
+              "url": "/0.8/meilisearch-document.html",
+              "title": "Meilisearch Document"
+            },
+            {
+              "path": "meilisearch-operations.adoc",
+              "url": "/0.8/meilisearch-operations.html",
+              "title": "Meilisearch Operations"
+            },
+            {
+              "path": "meilisearch-repositories.adoc",
+              "url": "/0.8/meilisearch-repositories.html",
+              "title": "Meilisearch Repositories"
+            },
+            {
+              "path": "meilisearch-settings.adoc",
+              "url": "/0.8/meilisearch-settings.html",
+              "title": "Meilisearch Settings"
+            },
+            {
+              "path": "search.adoc",
+              "url": "/0.8/search.html",
+              "title": "Search"
+            },
+            {
+              "path": "spring-projects.adoc",
+              "url": "/0.8/spring-projects.html",
               "title": "Spring Projects"
             }
           ]

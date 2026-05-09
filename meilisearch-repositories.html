@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="./_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.8.0">
+    <meta name="version" content="0.8.1">
     <meta name="generation" content="0.8">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.8/meilisearch-repositories.html">
     <meta name="component" content="data-meilisearch">
@@ -249,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.8.0">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.8.1">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.8.0</span>
+  <span class="version">0.8.1</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -340,7 +340,7 @@
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/blob/v0.8.0/src/main/antora/modules/ROOT/pages/meilisearch-repositories.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/meilisearch-repositories.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -461,6 +461,12 @@ public interface MovieRepository extends MeilisearchRepository&lt;Movie, String&
 <p>Note that the above methods perform different behaviors.
 The <code>findById</code> and <code>findAllById</code> methods use the <a href="https://www.meilisearch.com/docs/reference/api/documents#get-one-document">Get one document</a> or <a href="https://www.meilisearch.com/docs/reference/api/documents#get-documents-with-post">Get documents</a> API.
 However, the <code>findAll</code> method uses the <a href="https://www.meilisearch.com/docs/reference/api/search">Search</a> API.</p>
+</div>
+<div class="paragraph">
+<p>For <code>findAll(Pageable pageable)</code>, the returned <code>Page</code> total elements come from Meilisearch paginated search <code>totalHits</code>.
+The repository does not use estimated totals or a separate <code>count()</code> query for page totals.
+The number of elements in the page content remains the number of hits returned for the requested page.
+If the entity configures <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, Meilisearch can cap the reported <code>totalHits</code>, and the repository <code>Page</code> total reflects that capped value.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -632,21 +638,12 @@ If no <code>base-package</code> is configured, the namespace will scan the packa
                           <ul class="versions">
   <li class="version">
     <a href="meilisearch-repositories.html">
-      0.8.0
+      0.8.1
     </a>
   </li>
-</ul>                        </div>
-                        <div class="version-item">
-                          <div>
-                            <button class="version-toggle" type="button">
-                              <span></span>
-                              Snapshot
-                            </button>
-                          </div>
-                          <ul class="versions">
   <li class="version">
-    <a href="0.8-SNAPSHOT/meilisearch-repositories.html">
-      0.8.1-SNAPSHOT
+    <a href="0.8/meilisearch-repositories.html">
+      0.8.0
     </a>
   </li>
 </ul>                        </div>
