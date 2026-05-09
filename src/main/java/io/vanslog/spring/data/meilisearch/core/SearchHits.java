@@ -47,6 +47,22 @@ public interface SearchHits<T> extends Streamable<SearchHit<T>> {
 	 */
 	List<SearchHit<T>> getSearchHits();
 
+	/**
+	 * @return the reported total-hit metadata only when {@link #getTotalHitsRelation()} is
+	 *         {@link TotalHitsRelation#EQUAL_TO}; otherwise the loaded hit count, which is not usable as a page total.
+	 */
+	default long getTotalHits() {
+		return getSearchHits().size();
+	}
+
+	/**
+	 * @return how {@link #getTotalHits()} relates to the reported total-hit metadata. Only
+	 *         {@link TotalHitsRelation#EQUAL_TO} marks total-hit metadata reported by the search response.
+	 */
+	default TotalHitsRelation getTotalHitsRelation() {
+		return TotalHitsRelation.OFF;
+	}
+
 	@Override
 	default Iterator<SearchHit<T>> iterator() {
 		return getSearchHits().iterator();

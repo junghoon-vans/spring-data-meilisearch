@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.client.msc;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
+import io.vanslog.spring.data.meilisearch.core.TotalHitsRelation;
 import io.vanslog.spring.data.meilisearch.core.federation.FederationResponse;
 
 import java.time.Duration;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.model.FacetSearchable;
 import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
+import com.meilisearch.sdk.model.SearchResultPaginated;
 import com.meilisearch.sdk.model.Searchable;
 import com.meilisearch.sdk.model.SimilarDocumentsResults;
 
@@ -61,6 +63,11 @@ public class ResponseConverter {
 	public <T> SearchHits<T> mapHits(Searchable searchable, Class<T> clazz) {
 		List<SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
+		if (searchable instanceof SearchResultPaginated) {
+			SearchResultPaginated result = (SearchResultPaginated) searchable;
+			return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(),
+					TotalHitsRelation.EQUAL_TO);
+		}
 		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
 
