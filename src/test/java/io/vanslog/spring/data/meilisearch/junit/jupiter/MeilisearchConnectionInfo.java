@@ -25,13 +25,15 @@ import io.vanslog.testcontainers.meilisearch.MeilisearchContainer;
  */
 public class MeilisearchConnectionInfo {
 
+	private final String endpoint;
 	private final String host;
 	private final int port;
 	private final String masterKey;
 	private final MeilisearchContainer meilisearchContainer;
 
-	private MeilisearchConnectionInfo(String host, int port, String masterKey,
+	private MeilisearchConnectionInfo(String endpoint, String host, int port, String masterKey,
 			MeilisearchContainer meilisearchContainer) {
+		this.endpoint = endpoint;
 		this.host = host;
 		this.port = port;
 		this.masterKey = masterKey;
@@ -44,8 +46,12 @@ public class MeilisearchConnectionInfo {
 
 	@Override
 	public String toString() {
-		return "MeilisearchConnectionInfo{" + "host='" + host + '\'' + ", port=" + port + ", masterKey='" + masterKey + '\''
-				+ ", meilisearchContainer=" + meilisearchContainer + '}';
+		return "MeilisearchConnectionInfo{" + "endpoint='" + endpoint + '\'' + ", host='" + host + '\'' + ", port="
+				+ port + ", masterKey='" + masterKey + '\'' + ", meilisearchContainer=" + meilisearchContainer + '}';
+	}
+
+	public String getEndpoint() {
+		return endpoint;
 	}
 
 	public String getHost() {
@@ -66,10 +72,16 @@ public class MeilisearchConnectionInfo {
 
 	public static class Builder {
 
+		private String endpoint;
 		private String host;
 		private int port;
 		private String masterKey;
 		private MeilisearchContainer meilisearchContainer;
+
+		public Builder endpoint(String endpoint) {
+			this.endpoint = endpoint;
+			return this;
+		}
 
 		public Builder host(String host) {
 			this.host = host;
@@ -92,7 +104,7 @@ public class MeilisearchConnectionInfo {
 		}
 
 		public MeilisearchConnectionInfo build() {
-			return new MeilisearchConnectionInfo(host, port, masterKey, meilisearchContainer);
+			return new MeilisearchConnectionInfo(endpoint, host, port, masterKey, meilisearchContainer);
 		}
 	}
 }

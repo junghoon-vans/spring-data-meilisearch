@@ -18,15 +18,6 @@ on:
         description: 'Git ref to checkout (leave empty for current branch)'
         required: false
         default: ''
-      path:
-        description: 'Destination path, such as 1.0.0 or snapshot (leave empty for root)'
-        required: false
-        default: ''
-      update-root:
-        description: 'Also update / with this documentation build'
-        required: false
-        type: boolean
-        default: false
 
 concurrency:
   group: pages
@@ -43,14 +34,27 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: ${{ github.event_name == 'pull_request' && 1 || 0 }}
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
           cache: 'maven'
-      - name: Build reference documentation
+      - name: Build PR preview documentation
+        if: github.event_name == 'pull_request'
         run: ./mvnw -Pantora antora:antora
+
+      - name: Prepare Antora CLI for publish documentation
+        if: github.event_name != 'pull_request'
+        run: ./mvnw -Pantora antora:antora
+
+      - name: Build publish documentation
+        if: github.event_name != 'pull_request'
+        run: |
+          rm -rf target/site
+          npx --offline antora --to-dir target/site antora-playbook.yml
+          node src/main/antora/generate-latest-version-redirects.mjs target/site
       - name: Upload reference documentation
         uses: actions/upload-artifact@v4
         with:
@@ -128,60 +132,25 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           EVENT_ACTION: ${{ github.event.action }}
-          REF_NAME: ${{ github.ref_name }}
-          REF_TYPE: ${{ github.ref_type }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          DISPATCH_PATH: ${{ inputs.path }}
-          DISPATCH_UPDATE_ROOT: ${{ inputs.update-root }}
         run: |
-          target_path=""
-          update_root="false"
-          remove_target="false"
-
           if [ "$EVENT_NAME" = "pull_request" ]; then
             target_path="pr-${PR_NUMBER}"
+
             if [ "$EVENT_ACTION" = "closed" ]; then
-              remove_target="true"
+              rm -rf "${SITE_DIR:?}/${target_path:?}"
+              touch "$SITE_DIR/.nojekyll"
+              exit 0
             fi
-          elif [ "$EVENT_NAME" = "push" ] && [ "$REF_TYPE" = "tag" ]; then
-            target_path="${REF_NAME#v}"
-            update_root="true"
-          elif [ "$EVENT_NAME" = "push" ] && [ "$REF_NAME" = "main" ]; then
-            target_path="snapshot"
-          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            target_path="$DISPATCH_PATH"
-            update_root="$DISPATCH_UPDATE_ROOT"
-          fi
 
-          if [ "$remove_target" = "true" ]; then
-            rm -rf "${SITE_DIR:?}/${target_path:?}"
-            exit 0
-          fi
-
-          if [ -z "$target_path" ]; then
-            find "$SITE_DIR" -mindepth 1 -maxdepth 1 \
-              ! -name ".git" \
-              ! -name ".nojekyll" \
-              ! -name "snapshot" \
-              ! -name "pr-*" \
-              ! -name "v*.*.*" \
-              ! -name "[0-9]*.[0-9]*.[0-9]*" \
-              -exec rm -rf {} +
-            cp -a "$DOCS_DIR/." "$SITE_DIR/"
-          else
             rm -rf "${SITE_DIR:?}/${target_path:?}"
             mkdir -p "$SITE_DIR/$target_path"
             cp -a "$DOCS_DIR/." "$SITE_DIR/$target_path/"
-          fi
-
-          if [ "$update_root" = "true" ]; then
+          else
             find "$SITE_DIR" -mindepth 1 -maxdepth 1 \
               ! -name ".git" \
               ! -name ".nojekyll" \
-              ! -name "snapshot" \
               ! -name "pr-*" \
-              ! -name "v*.*.*" \
-              ! -name "[0-9]*.[0-9]*.[0-9]*" \
               -exec rm -rf {} +
             cp -a "$DOCS_DIR/." "$SITE_DIR/"
           fi

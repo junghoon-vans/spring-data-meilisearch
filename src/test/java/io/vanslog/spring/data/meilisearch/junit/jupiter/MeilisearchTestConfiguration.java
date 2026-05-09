@@ -28,14 +28,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MeilisearchTestConfiguration extends MeilisearchConfiguration {
 
-	private static final String HTTP = "http://";
-
 	private final MeilisearchConnectionInfo meilisearchConnectionInfo = MeilisearchConnection.meilisearchConnectionInfo();
 
 	@Override
 	public ClientConfiguration clientConfiguration() {
-		return ClientConfiguration.builder()
-				.connectedTo(HTTP + meilisearchConnectionInfo.getHost() + ":" + meilisearchConnectionInfo.getPort())
+		return ClientConfiguration.builder().connectedTo(meilisearchConnectionInfo.getEndpoint())
 				.withApiKey(meilisearchConnectionInfo.getMasterKey()).build();
 	}
 }
