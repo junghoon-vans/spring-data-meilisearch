@@ -116,14 +116,15 @@ Build the authoring/PR preview documentation from the checked-out HEAD with Mave
 
 The generated documentation is available from `target/site/index.html`.
 
-To build the published aggregate site locally, fetch `main` and release tags first, then run the root playbook after Maven has prepared the Antora CLI dependencies:
+To build the published aggregate site locally, fetch `main` and release tags first, then generate the temporary publish playbook after Maven has prepared the Antora CLI dependencies:
 
 [source,bash]
 ----
  $ git fetch --tags origin main
  $ ./mvnw -Pantora antora:antora
  $ rm -rf target/site
- $ npx --offline antora --to-dir target/site antora-playbook.yml
+ $ node src/main/antora/generate-publish-playbook.mjs
+ $ npx --offline antora --to-dir target/site target/antora-publish-playbook.yml
  $ node src/main/antora/generate-latest-version-redirects.mjs target/site
 ----
 
