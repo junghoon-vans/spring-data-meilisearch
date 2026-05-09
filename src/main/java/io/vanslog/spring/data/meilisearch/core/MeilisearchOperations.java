@@ -27,6 +27,30 @@ import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 public interface MeilisearchOperations extends DocumentOperations, SearchOperations {
 
 	/**
+	 * Return operations for instance-level APIs.
+	 *
+	 * @return instance operations
+	 */
+	MeilisearchInstanceOperations instanceOps();
+
+	/**
+	 * Return operations bound to the index resolved for the given entity class.
+	 *
+	 * @param entityClass the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @return index operations
+	 */
+	MeilisearchIndexOperations indexOps(Class<?> entityClass);
+
+	/**
+	 * Return operations bound to the given index uid.
+	 *
+	 * @param indexUid the index uid, must not be empty
+	 * @return index operations
+	 */
+	MeilisearchIndexOperations indexOps(String indexUid);
+
+	/**
 	 * Apply the default settings for the given entity class.
 	 * 
 	 * @param clazz the entity class, must be annotated with

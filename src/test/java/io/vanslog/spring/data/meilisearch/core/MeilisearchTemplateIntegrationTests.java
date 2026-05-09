@@ -203,6 +203,50 @@ class MeilisearchTemplateIntegrationTests {
 	}
 
 	@Test
+	void shouldGetInstanceHealth() {
+
+		MeilisearchHealth health = meilisearchTemplate.instanceOps().health();
+
+		assertThat(health.getStatus()).isEqualTo("available");
+		assertThat(meilisearchTemplate.instanceOps().isHealthy()).isTrue();
+	}
+
+	@Test
+	void shouldGetInstanceVersion() {
+
+		MeilisearchVersion version = meilisearchTemplate.instanceOps().version();
+
+		assertThat(version.getCommitSha()).isNotBlank();
+		assertThat(version.getCommitDate()).isNotBlank();
+		assertThat(version.getPkgVersion()).isNotBlank();
+	}
+
+	@Test
+	void shouldGetStatsFromInstanceAndIndexOperations() {
+
+		meilisearchTemplate.save(List.of(movie1, movie2));
+
+		MeilisearchStats instanceStats = meilisearchTemplate.instanceOps().stats();
+		MeilisearchIndexStats indexStatsByClass = meilisearchTemplate.indexOps(Movie.class).stats();
+		MeilisearchIndexStats indexStatsByIndexUid = meilisearchTemplate.indexOps("movies").stats();
+
+		assertThat(instanceStats.getDatabaseSize()).isGreaterThanOrEqualTo(instanceStats.getUsedDatabaseSize());
+		assertThat(instanceStats.getLastUpdate()).isNotNull();
+		assertThat(instanceStats.getIndexes()).containsKey("movies");
+		assertThat(instanceStats.getIndexes().get("movies").getNumberOfDocuments()).isEqualTo(2);
+		assertThat(indexStatsByClass.getNumberOfDocuments()).isEqualTo(2);
+		assertThat(indexStatsByClass.isIndexing()).isFalse();
+		assertThat(indexStatsByClass.getFieldDistribution()).containsEntry("title", 2L);
+		assertThat(indexStatsByIndexUid.getNumberOfDocuments()).isEqualTo(2);
+	}
+
+	@Test
+	void shouldRejectBlankIndexUid() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> meilisearchTemplate.indexOps(""));
+	}
+
+	@Test
 	void shouldSearchWithBasicQuery() {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
 

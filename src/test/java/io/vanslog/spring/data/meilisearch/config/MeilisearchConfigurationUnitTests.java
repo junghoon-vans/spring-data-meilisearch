@@ -72,6 +72,13 @@ class MeilisearchConfigurationUnitTests {
 	}
 
 	@Test
+	void shouldExposeInstanceAndIndexOperationsFromMeilisearchTemplate() {
+		assertThat(meilisearchTemplate.instanceOps()).isNotNull();
+		assertThat(meilisearchTemplate.indexOps(ApplySettingsFalseEntity.class)).isNotNull();
+		assertThat(meilisearchTemplate.indexOps("test-index-config-namespace")).isNotNull();
+	}
+
+	@Test
 	void shouldCreateMeilisearchRepository() {
 		assertThat(applySettingsFalseRepository).isNotNull();
 	}

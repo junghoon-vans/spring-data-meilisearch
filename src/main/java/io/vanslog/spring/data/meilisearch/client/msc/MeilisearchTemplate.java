@@ -16,15 +16,22 @@
 package io.vanslog.spring.data.meilisearch.client.msc;
 
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.FacetSearchRequest;
 import com.meilisearch.sdk.MultiSearchFederation;
 import com.meilisearch.sdk.MultiSearchRequest;
@@ -34,11 +41,13 @@ import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.model.DocumentsQuery;
 import com.meilisearch.sdk.model.FacetSearchable;
+import com.meilisearch.sdk.model.IndexStats;
 import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.Searchable;
 import com.meilisearch.sdk.model.SimilarDocumentsResults;
 import com.meilisearch.sdk.model.Settings;
+import com.meilisearch.sdk.model.Stats;
 import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
 
@@ -73,6 +82,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	private final MeilisearchConverter meilisearchConverter;
 	private final RequestConverter requestConverter;
 	private final ResponseConverter responseConverter;
+	private final ObjectMapper objectMapper;
+	private final MeilisearchInstanceOperations instanceOperations;
 
 	public MeilisearchTemplate(MeilisearchClient meilisearchClient) {
 		this(meilisearchClient, null);
@@ -85,6 +96,27 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 		this.requestConverter = new RequestConverter();
 		this.responseConverter = new ResponseConverter();
+		this.objectMapper = new ObjectMapper();
+		this.instanceOperations = new TemplateInstanceOperations();
+	}
+
+	@Override
+	public MeilisearchInstanceOperations instanceOps() {
+		return instanceOperations;
+	}
+
+	@Override
+	public MeilisearchIndexOperations indexOps(Class<?> entityClass) {
+
+		Assert.notNull(entityClass, "Entity class must not be null");
+		return indexOps(getIndexUidFor(entityClass));
+	}
+
+	@Override
+	public MeilisearchIndexOperations indexOps(String indexUid) {
+
+		Assert.hasText(indexUid, "Index uid must not be empty");
+		return new TemplateIndexOperations(indexUid);
 	}
 
 	@Override
@@ -336,8 +368,98 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		return meilisearchConverter.getMappingContext().getRequiredPersistentEntity(clazz);
 	}
 
+	private MeilisearchHealth mapHealth(String payload) {
+
+		try {
+			JsonNode root = objectMapper.readTree(payload);
+			return new MeilisearchHealth(root.path("status").asText());
+		} catch (JsonProcessingException e) {
+			throw new UncategorizedMeilisearchException("Failed to read health response.", e);
+		}
+	}
+
+	private MeilisearchVersion mapVersion(String payload) {
+
+		try {
+			JsonNode root = objectMapper.readTree(payload);
+			return new MeilisearchVersion(nullableText(root, "commitSha"), nullableText(root, "commitDate"),
+					nullableText(root, "pkgVersion"));
+		} catch (JsonProcessingException e) {
+			throw new UncategorizedMeilisearchException("Failed to read version response.", e);
+		}
+	}
+
+	@Nullable
+	private String nullableText(JsonNode root, String fieldName) {
+		JsonNode field = root.get(fieldName);
+		return field != null && !field.isNull() ? field.asText() : null;
+	}
+
+	private MeilisearchStats mapStats(Stats stats) {
+
+		Map<String, MeilisearchIndexStats> indexes = new LinkedHashMap<>();
+		if (stats.getIndexes() != null) {
+			stats.getIndexes().forEach((indexUid, indexStats) -> indexes.put(indexUid, mapIndexStats(indexStats)));
+		}
+
+		Date lastUpdate = stats.getLastUpdate();
+		Instant lastUpdateInstant = lastUpdate != null ? lastUpdate.toInstant() : null;
+
+		return new MeilisearchStats(stats.getDatabaseSize(), stats.getUsedDatabaseSize(), lastUpdateInstant, indexes);
+	}
+
+	private MeilisearchIndexStats mapIndexStats(IndexStats stats) {
+
+		Map<String, Long> fieldDistribution = new LinkedHashMap<>();
+		if (stats.getFieldDistribution() != null) {
+			stats.getFieldDistribution()
+					.forEach((fieldName, count) -> fieldDistribution.put(fieldName, count.longValue()));
+		}
+
+		return new MeilisearchIndexStats(stats.getNumberOfDocuments(), stats.isIndexing(), fieldDistribution,
+				stats.getRawDocumentDbSize(), stats.getAvgDocumentSize(), stats.getNumberOfEmbeddedDocuments(),
+				stats.getNumberOfEmbeddings());
+	}
+
 	@Override
 	public MeilisearchConverter getMeilisearchConverter() {
 		return meilisearchConverter;
+	}
+
+	private class TemplateInstanceOperations implements MeilisearchInstanceOperations {
+
+		@Override
+		public MeilisearchHealth health() {
+			return mapHealth(execute(client -> client.health()));
+		}
+
+		@Override
+		public boolean isHealthy() {
+			return Boolean.TRUE.equals(execute(client -> client.isHealthy()));
+		}
+
+		@Override
+		public MeilisearchVersion version() {
+			return mapVersion(execute(client -> client.getVersion()));
+		}
+
+		@Override
+		public MeilisearchStats stats() {
+			return mapStats(execute(client -> client.getStats()));
+		}
+	}
+
+	private class TemplateIndexOperations implements MeilisearchIndexOperations {
+
+		private final String indexUid;
+
+		TemplateIndexOperations(String indexUid) {
+			this.indexUid = indexUid;
+		}
+
+		@Override
+		public MeilisearchIndexStats stats() {
+			return mapIndexStats(execute(client -> client.index(indexUid).getStats()));
+		}
 	}
 }
