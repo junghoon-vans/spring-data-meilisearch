@@ -15,10 +15,13 @@
     <link rel="stylesheet" href="./_/css/site.css">
     <link rel="stylesheet" href="./_/css/vendor/search.css">
     <link rel="stylesheet" href="./_/css/vendor/page-search.css">
+    <link rel="stylesheet" href="./_/css/vendor/onetrust.css">
     <link rel="stylesheet" href="./_/css/vendor/asciidoctor-tabs.css">
 
-    <meta name="antora-ui-version" content="v0.4.16"> 
+    <meta name="antora-ui-version" content="v0.4.25"> 
     <meta name="version" content="0.8.1">
+    <meta name="generation" content="0.8-SNAPSHOT">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.8-SNAPSHOT/meilisearch-settings.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="./_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -387,6 +390,7 @@
 <div class="breadcrumbs-container">
   <nav class="breadcrumbs" aria-label="breadcrumbs">
     <ul>
+      <li id="copy-url" title="Copy versioned URL"></li>
       <li><a href="index.html">Spring Data Meilisearch</a></li>
       <li>Meilisearch</li>
       <li><a href="meilisearch-settings.html">Meilisearch Settings</a></li>
@@ -891,17 +895,46 @@ As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</c
               </button>
               <div class="colset">
                 <div class="col-left">
+
                   <ul class="nav-versions">
-                    <li class="component is-current">
-                      <a class="title" href="index.html">Spring Data Meilisearch</a>
-                      <ul class="versions">
-                        <li class="version is-current is-latest">
-                          <a href="index.html">
-                            0.8.1-SNAPSHOT<span class="current">current</span>
-                          </a>
-                        </li>
-                      </ul>
-                    </li>
+                      <li class="component">
+                        <div>
+                          <a class="title" href="data-commons/index.html">Spring Data Commons</a>
+                        </div>                        <div class="version-item">
+                          <div>
+                            <button class="version-toggle" type="button">
+                              <span></span>
+                              Snapshot
+                            </button>
+                          </div>
+                          <ul class="versions">
+  <li class="version">
+    <a href="data-commons/index.html">
+      4.1.0-SNAPSHOT
+    </a>
+  </li>
+</ul>                        </div>
+                        
+                      </li>
+                      <li class="component">
+                        <div>
+                          <a class="title" href="index.html">Spring Data Meilisearch</a>
+                        </div>                        <div class="version-item">
+                          <div>
+                            <button class="version-toggle" type="button">
+                              <span></span>
+                              Snapshot
+                            </button>
+                          </div>
+                          <ul class="versions">
+  <li class="version">
+    <a href="index.html">
+      0.8.1-SNAPSHOT
+    </a>
+  </li>
+</ul>                        </div>
+                        
+                      </li>
                   </ul>
                 </div>
                 <div class="col-right">
@@ -1205,9 +1238,9 @@ As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</c
     </div>
 </div>
 
-<script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
+<script src="./_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="./_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="./_/css/vendor/search.css" data-page-version="0.8.1" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="./_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="./_/css/vendor/search.css" data-page-version="0.8.1" data-page-generation="0.8-SNAPSHOT" data-page-component="data-meilisearch"></script>
   </body>
 </html>
