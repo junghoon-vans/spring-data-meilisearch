@@ -502,7 +502,8 @@ public class MovieController {
 <div class="sectionbody">
 <div class="paragraph">
 <p><code>MeilisearchOperations</code> exposes concern-specific operations for APIs that are not document or search operations.
-Use <code>instanceOps()</code> for Meilisearch instance-level information and <code>indexOps(&#8230;&#8203;)</code> for statistics bound to one index.</p>
+Use <code>instanceOps()</code> for Meilisearch instance-level information and <code>indexOps(&#8230;&#8203;)</code> for statistics bound to one index.
+Version and stats operations use the configured Meilisearch API key, so server-side key permissions and index restrictions still apply.</p>
 </div>
 <div class="exampleblock">
 <div class="title">Example 2. Instance and index operation usage</div>
