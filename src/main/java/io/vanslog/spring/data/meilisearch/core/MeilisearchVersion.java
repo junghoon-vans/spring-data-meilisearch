@@ -26,12 +26,12 @@ public class MeilisearchVersion {
 
 	@Nullable private final String commitSha;
 	@Nullable private final String commitDate;
-	@Nullable private final String pkgVersion;
+	@Nullable private final String packageVersion;
 
-	public MeilisearchVersion(@Nullable String commitSha, @Nullable String commitDate, @Nullable String pkgVersion) {
+	public MeilisearchVersion(@Nullable String commitSha, @Nullable String commitDate, @Nullable String packageVersion) {
 		this.commitSha = commitSha;
 		this.commitDate = commitDate;
-		this.pkgVersion = pkgVersion;
+		this.packageVersion = packageVersion;
 	}
 
 	@Nullable
@@ -45,7 +45,7 @@ public class MeilisearchVersion {
 	}
 
 	@Nullable
-	public String getPkgVersion() {
-		return pkgVersion;
+	public String getPackageVersion() {
+		return packageVersion;
 	}
 }

@@ -61,6 +61,7 @@ public class MovieController {
 
 `MeilisearchOperations` exposes concern-specific operations for APIs that are not document or search operations.
 Use `instanceOps()` for Meilisearch instance-level information and `indexOps(...)` for statistics bound to one index.
+Version and stats operations use the configured Meilisearch API key, so server-side key permissions and index restrictions still apply.
 
 .Instance and index operation usage
 ====

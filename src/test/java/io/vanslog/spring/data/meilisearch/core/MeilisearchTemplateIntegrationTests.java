@@ -218,7 +218,7 @@ class MeilisearchTemplateIntegrationTests {
 
 		assertThat(version.getCommitSha()).isNotBlank();
 		assertThat(version.getCommitDate()).isNotBlank();
-		assertThat(version.getPkgVersion()).isNotBlank();
+		assertThat(version.getPackageVersion()).isNotBlank();
 	}
 
 	@Test
