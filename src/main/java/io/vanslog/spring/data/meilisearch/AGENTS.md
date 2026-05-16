@@ -2,16 +2,16 @@
 
 ## OVERVIEW
 
-Architectural root for the Spring Data Meilisearch module: public annotations/client/config/template/repository APIs plus internal adapters.
+Architectural root for the Spring Data Meilisearch module: public annotations/client/config/operations/repository APIs plus internal adapters.
 
 ## STRUCTURE
 
 ```text
 meilisearch/
 ├── annotations/      # @Document and settings annotations consumed by core.mapping
-├── client/           # client config, SDK wrapper, SDK request/response converters
+├── client/           # client config, SDK wrapper, client-backed template/adapters
 ├── config/           # JavaConfig and XML namespace bootstrap
-├── core/             # operations/template/search hits/query/mapping/convert
+├── core/             # operations contracts/search hits/query/mapping/convert
 └── repository/       # Spring Data repository API/config/support
 ```
 
@@ -31,10 +31,10 @@ meilisearch/
 - Public integration starts with subclassing `MeilisearchConfiguration` and using `@EnableMeilisearchRepositories`.
 - `MeilisearchConfiguration` bean names matter: `meilisearchClientConfiguration`, `meilisearchClient`, `meilisearchOperations`, `meilisearchTemplate`, `jsonHandler`.
 - `@Document` is both a domain marker and repository-identifying annotation.
-- `MeilisearchTemplate` owns runtime SDK calls; lower packages prepare metadata/query/request objects for it.
+- `client/msc/MeilisearchTemplate` owns runtime SDK calls; core packages define contracts and prepare metadata/query objects for it.
 - `package-info.java` commonly marks packages with `@NonNullApi` / `@NonNullFields`; keep nullable points explicit with `@Nullable`.
 - JavaConfig bean names are public contract; XML parser/resource/docs depend on `meilisearchTemplate`, `jsonHandler`, and `api-key` semantics.
-- `client/msc` is the SDK adapter boundary: request conversion maps query/page/sort/federation options; response conversion maps SDK hits/federation metadata to `SearchHits`.
+- `client/msc` is the SDK adapter boundary: the concrete template executes SDK calls, request conversion maps query/page/sort/federation options, and response conversion maps SDK hits/federation metadata to `SearchHits`.
 - Query changes usually span `core/query`, `client/msc/RequestConverter`, docs, and integration tests; do not add builder-only state.
 - Mapping changes usually span `annotations`, `core/mapping`, mapping unit tests, and settings docs; `id` is the only implicit ID fallback and associations are unsupported.
 - Repository config uses `meilisearchTemplateRef` / `meilisearch-template-ref`; runtime repositories delegate to `MeilisearchOperations` and may apply settings on construction.

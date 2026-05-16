@@ -8,7 +8,7 @@
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
 
     <bean name="meilisearchTemplate"
-          class="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate">
+          class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate">
         <constructor-arg name="meilisearchClient" ref="meilisearchClient"/>
     </bean>
 

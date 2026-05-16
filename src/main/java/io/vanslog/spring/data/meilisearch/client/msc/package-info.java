@@ -15,8 +15,8 @@
  */
 
 /**
- * This package contains classes that use the Meilisearch client library (com.meilisearch.sdk:meilisearch-java) to
- * access Meilisearch.
+ * Meilisearch Java client-specific runtime implementation and adapters. This package contains the concrete template
+ * implementation and request/response conversion code backed by {@code com.meilisearch.sdk:meilisearch-java}.
  */
 @org.springframework.lang.NonNullApi
 @org.springframework.lang.NonNullFields
