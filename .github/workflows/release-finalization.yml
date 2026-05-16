@@ -1,0 +1,171 @@
+name: Release Finalization
+
+on:
+  workflow_run:
+    workflows:
+      - CD
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to inspect for a dry run
+        required: false
+        default: main
+      dry_run:
+        description: Run checks without mutating tags, releases, or branches
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  finalize:
+    name: Finalize release
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CHECKOUT_REF: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.ref || 'main' }}
+      RELEASE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || '' }}
+      RELEASE_AUTOMATION_TOKEN: ${{ secrets.RELEASE_AUTOMATION_TOKEN }}
+    steps:
+      - name: Require workflow_dispatch dry run
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run != true }}
+        run: |
+          echo "::error::workflow_dispatch is supported for dry runs only."
+          exit 1
+
+      - name: Checkout release candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify workflow_run checkout SHA
+        if: ${{ github.event_name == 'workflow_run' }}
+        run: |
+          checked_out_sha="$(git rev-parse HEAD)"
+
+          if [ "$checked_out_sha" != "$RELEASE_SHA" ]; then
+            echo "::error::Expected checkout at $RELEASE_SHA but got $checked_out_sha."
+            exit 1
+          fi
+
+      - name: Read release commit subject
+        id: commit
+        run: |
+          subject="$(git log -1 --format=%s HEAD)"
+          sha="$(git rev-parse HEAD)"
+          {
+            echo "subject<<SUBJECT"
+            echo "$subject"
+            echo "SUBJECT"
+            echo "sha=$sha"
+          } >> "$GITHUB_OUTPUT"
+          echo "Inspecting $sha: $subject"
+
+      - name: Inspect pom.xml release state
+        id: inspect
+        env:
+          COMMIT_SUBJECT: ${{ steps.commit.outputs.subject }}
+        run: |
+          node .github/scripts/release-finalization.mjs inspect pom.xml "$COMMIT_SUBJECT" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Report no-op
+        if: ${{ steps.inspect.outputs.release != 'true' }}
+        run: |
+          echo "No release finalization needed: ${{ steps.inspect.outputs.reason }}"
+
+      - name: Report dry run
+        if: ${{ github.event_name == 'workflow_dispatch' && steps.inspect.outputs.release == 'true' }}
+        run: |
+          echo "Dry run passed for ${{ steps.inspect.outputs.tag }} at ${{ steps.commit.outputs.sha }}."
+          echo "No tag, GitHub release, or next snapshot commit was created."
+
+      - name: Require release automation token
+        if: ${{ github.event_name == 'workflow_run' && steps.inspect.outputs.release == 'true' }}
+        run: |
+          if [ -z "$RELEASE_AUTOMATION_TOKEN" ]; then
+            echo "::error::RELEASE_AUTOMATION_TOKEN is required for live release finalization."
+            exit 1
+          fi
+
+          git remote set-url origin "https://x-access-token:${RELEASE_AUTOMATION_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+      - name: Verify release SHA is still origin/main
+        if: ${{ github.event_name == 'workflow_run' && steps.inspect.outputs.release == 'true' }}
+        run: |
+          git fetch --no-tags origin main
+          main_sha="$(git rev-parse refs/remotes/origin/main)"
+
+          if [ "$main_sha" != "$RELEASE_SHA" ]; then
+            echo "::error::origin/main moved from $RELEASE_SHA to $main_sha before release finalization."
+            exit 1
+          fi
+
+      - name: Verify release tag does not exist
+        if: ${{ github.event_name == 'workflow_run' && steps.inspect.outputs.release == 'true' }}
+        run: |
+          tag="${{ steps.inspect.outputs.tag }}"
+
+          set +e
+          git ls-remote --exit-code --tags origin "refs/tags/${tag}" > /dev/null 2>&1
+          status="$?"
+          set -e
+
+          if [ "$status" = "0" ]; then
+            echo "::error::Tag ${tag} already exists."
+            exit 1
+          fi
+
+          if [ "$status" != "2" ]; then
+            echo "::error::Could not verify whether tag ${tag} exists."
+            exit "$status"
+          fi
+
+      - name: Create release tag
+        if: ${{ github.event_name == 'workflow_run' && steps.inspect.outputs.release == 'true' }}
+        run: |
+          tag="${{ steps.inspect.outputs.tag }}"
+          git tag "$tag" "$RELEASE_SHA"
+          git push origin "refs/tags/${tag}"
+
+      - name: Publish GitHub release
+        if: ${{ github.event_name == 'workflow_run' && steps.inspect.outputs.release == 'true' }}
+        uses: release-drafter/release-drafter@v6
+        with:
+          publish: true
+          tag: ${{ steps.inspect.outputs.tag }}
+          version: ${{ steps.inspect.outputs.version }}
+          name: Spring Data Meilisearch ${{ steps.inspect.outputs.version }}
+          commitish: ${{ env.RELEASE_SHA }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_AUTOMATION_TOKEN }}
+
+      - name: Prepare next development iteration
+        id: next-snapshot
+        if: ${{ github.event_name == 'workflow_run' && steps.inspect.outputs.release == 'true' }}
+        run: |
+          node .github/scripts/release-finalization.mjs rewrite pom.xml | tee -a "$GITHUB_OUTPUT"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pom.xml
+
+          if git diff --cached --quiet; then
+            echo "::error::Expected pom.xml to change for the next development iteration."
+            exit 1
+          fi
+
+          git commit -m "Prepare next development iteration."
+          git push origin HEAD:main
