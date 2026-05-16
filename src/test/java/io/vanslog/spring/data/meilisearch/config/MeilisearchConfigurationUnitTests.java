@@ -46,6 +46,7 @@ class MeilisearchConfigurationUnitTests {
 
 	@Autowired private MeilisearchClient meilisearchClient;
 	@Autowired private MeilisearchOperations meilisearchTemplate;
+	@Autowired private io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate clientMeilisearchTemplate;
 	@Autowired private ApplySettingsFalseRepository applySettingsFalseRepository;
 
 	@Test
@@ -63,6 +64,11 @@ class MeilisearchConfigurationUnitTests {
 	@Test
 	void shouldCreateMeilisearchTemplate() {
 		assertThat(meilisearchTemplate).isNotNull();
+	}
+
+	@Test
+	void shouldExposeClientSpecificTemplateAsMeilisearchOperations() {
+		assertThat(meilisearchTemplate).isSameAs(clientMeilisearchTemplate);
 	}
 
 	@Test

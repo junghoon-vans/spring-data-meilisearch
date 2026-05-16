@@ -43,7 +43,7 @@ import com.meilisearch.sdk.MultiSearchFederation;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 
 /**
- * Integration tests for {@link MeilisearchTemplate}.
+ * Integration tests for {@link MeilisearchOperations}.
  *
  * @author Junghoon Ban
  */

@@ -28,7 +28,7 @@
         <xsd:annotation>
             <xsd:appinfo>
                 <tool:annotation kind="ref">
-                    <tool:assignable-to type="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate"/>
+                    <tool:assignable-to type="io.vanslog.spring.data.meilisearch.core.MeilisearchOperations"/>
                 </tool:annotation>
             </xsd:appinfo>
         </xsd:annotation>

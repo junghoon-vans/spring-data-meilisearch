@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.vanslog.spring.data.meilisearch.core;
+package io.vanslog.spring.data.meilisearch.client.msc;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -47,8 +47,10 @@ import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
-import io.vanslog.spring.data.meilisearch.client.msc.RequestConverter;
-import io.vanslog.spring.data.meilisearch.client.msc.ResponseConverter;
+import io.vanslog.spring.data.meilisearch.core.FacetHit;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchCallback;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
@@ -59,7 +61,7 @@ import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.SimilarQuery;
 
 /**
- * Implementation of {@link io.vanslog.spring.data.meilisearch.core.MeilisearchOperations}.
+ * Meilisearch Java client-backed implementation of {@link MeilisearchOperations}.
  *
  * @author Junghoon Ban
  * @see com.meilisearch.sdk.Client

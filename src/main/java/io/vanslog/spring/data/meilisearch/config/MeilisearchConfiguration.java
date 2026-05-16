@@ -17,8 +17,8 @@ package io.vanslog.spring.data.meilisearch.config;
 
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
+import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
-import io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 
 import org.springframework.context.annotation.Bean;

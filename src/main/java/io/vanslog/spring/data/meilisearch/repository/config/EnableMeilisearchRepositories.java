@@ -117,7 +117,7 @@ public @interface EnableMeilisearchRepositories {
 	Class<?> repositoryFactoryBeanClass() default MeilisearchRepositoryFactoryBean.class;
 
 	/**
-	 * Returns the {@link io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate} bean name. This name will be used
+	 * Returns the {@link io.vanslog.spring.data.meilisearch.core.MeilisearchOperations} bean name. This name will be used
 	 * to create Meilisearch repositories discovered through this annotation. Defaults to {@code  meilisearchTemplate}.
 	 *
 	 * @return String

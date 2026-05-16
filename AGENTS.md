@@ -13,9 +13,9 @@ spring-data-meilisearch/
 ├── TESTING.adoc                    # test command + integration-test pattern
 ├── src/main/java/io/vanslog/spring/data/meilisearch/
 │   ├── annotations/                # entity/settings annotation schema
-│   ├── client/                     # SDK client wrapper + config builder
+│   ├── client/                     # SDK client wrapper, config builder, client-backed template/adapters
 │   ├── config/                     # JavaConfig + XML namespace parser
-│   ├── core/                       # template, operations, search result model
+│   ├── core/                       # operations contracts, search result model, query/mapping support
 │   └── repository/                 # Spring Data repository bootstrap/runtime
 ├── src/main/resources/             # Spring XML namespace registrations + XSD
 ├── src/main/antora/                # Antora reference docs source and resources
@@ -30,7 +30,7 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 | Task | Location | Notes |
 |------|----------|-------|
 | Client setup | `client/`, `config/MeilisearchConfiguration.java` | `ClientConfiguration.builder()`, `MeilisearchClient`, default `JsonHandler` |
-| Template operations | `core/MeilisearchTemplate.java` | CRUD/search/multi-search/facet/settings/task handling |
+| Template operations | `client/msc/MeilisearchTemplate.java` | CRUD/search/multi-search/facet/settings/task handling |
 | Query options | `core/query/` + `client/msc/RequestConverter.java` | model, builder, SDK request mapping must move together |
 | Mapping/settings | `core/mapping/` + `annotations/` | `@Document`, settings annotations, ID/index metadata |
 | Repository behavior | `repository/config/`, `repository/support/` | registrar/config extension/factory/base repository |
@@ -48,7 +48,7 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 | `MeilisearchRepositoryFactoryBean` | factory bean | `repository/support/` | creates repository factory |
 | `SimpleMeilisearchRepository` | base repository | `repository/support/` | delegates CRUD/page/sort to `MeilisearchOperations` |
 | `MeilisearchOperations` | API | `core/` | public template-style operations contract |
-| `MeilisearchTemplate` | implementation | `core/` | central runtime orchestrator |
+| `MeilisearchTemplate` | implementation | `client/msc/` | Meilisearch Java client-backed runtime orchestrator |
 | `SimpleMeilisearchPersistentEntity` | metadata | `core/mapping/` | resolves index UID, applySettings, default settings |
 | `RequestConverter` / `ResponseConverter` | SDK adapters | `client/msc/` | query/result translation boundary |
 
