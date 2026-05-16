@@ -24,11 +24,16 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.meilisearch.sdk.Index;
+import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.model.IndexStats;
+import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.Stats;
 
 import io.vanslog.spring.data.meilisearch.core.MeilisearchHealth;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchIndex;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexList;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexStats;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchStats;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchVersion;
@@ -80,6 +85,53 @@ class InstanceResponseConverterUnitTests {
 		assertThat(stats.getLastUpdate()).isEqualTo(lastUpdate);
 		assertThat(stats.getIndexes()).containsOnlyKeys("movies");
 		assertThat(stats.getIndexes().get("movies").getNumberOfDocuments()).isEqualTo(10);
+	}
+
+	@Test
+	void shouldConvertIndex() throws MeilisearchException {
+
+		Index sdkIndex = new GsonJsonHandler().decode("""
+				{
+				  "uid": "movies",
+				  "primaryKey": "id",
+				  "createdAt": "2026-05-16T01:00:00.000000Z",
+				  "updatedAt": "2026-05-16T01:01:00.000000Z"
+				}
+				""", Index.class);
+
+		MeilisearchIndex index = converter.mapIndex(sdkIndex);
+
+		assertThat(index.getUid()).isEqualTo("movies");
+		assertThat(index.getPrimaryKey()).isEqualTo("id");
+		assertThat(index.getCreatedAt()).isEqualTo("2026-05-16T01:00:00.000000Z");
+		assertThat(index.getUpdatedAt()).isEqualTo("2026-05-16T01:01:00.000000Z");
+	}
+
+	@Test
+	void shouldConvertIndexList() throws MeilisearchException {
+
+		Results<Index> sdkResults = new GsonJsonHandler().decode("""
+				{
+				  "results": [
+				    {
+				      "uid": "movies",
+				      "primaryKey": "id",
+				      "createdAt": "2026-05-16T01:00:00.000000Z",
+				      "updatedAt": "2026-05-16T01:01:00.000000Z"
+				    }
+				  ],
+				  "offset": 0,
+				  "limit": 20,
+				  "total": 1
+				}
+				""", Results.class, Index.class);
+
+		MeilisearchIndexList indexes = converter.mapIndexes(sdkResults);
+
+		assertThat(indexes.getIndexes()).extracting(MeilisearchIndex::getUid).containsExactly("movies");
+		assertThat(indexes.getOffset()).isZero();
+		assertThat(indexes.getLimit()).isEqualTo(20);
+		assertThat(indexes.getTotal()).isEqualTo(1);
 	}
 
 	@Test
