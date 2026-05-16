@@ -408,7 +408,13 @@
 <p><code>SearchOperations</code> defines the actions to search for multiple entities using queries.</p>
 </li>
 <li>
-<p><code>MeilisearchOperations</code> combines the <code>DocumentOperations</code> and <code>SearchOperations</code> interfaces.</p>
+<p><code>MeilisearchInstanceOperations</code> defines instance-level actions such as health, version, and stats.</p>
+</li>
+<li>
+<p><code>MeilisearchIndexOperations</code> defines actions scoped to a single index.</p>
+</li>
+<li>
+<p><code>MeilisearchOperations</code> combines the <code>DocumentOperations</code> and <code>SearchOperations</code> interfaces and exposes accessors for instance and index operations.</p>
 </li>
 </ul>
 </div>
@@ -481,6 +487,44 @@ public class MovieController {
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
 <td>Retrieve the movie by id.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.operations.instance-index"><a class="anchor" href="#meilisearch.operations.instance-index"></a>Instance and Index Operations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>MeilisearchOperations</code> exposes concern-specific operations for APIs that are not document or search operations.
+Use <code>instanceOps()</code> for Meilisearch instance-level information and <code>indexOps(&#8230;&#8203;)</code> for statistics bound to one index.
+Version and stats operations use the configured Meilisearch API key, so server-side key permissions and index restrictions still apply.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 2. Instance and index operation usage</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MeilisearchHealth health = meilisearchOperations.instanceOps().health();
+boolean healthy = meilisearchOperations.instanceOps().isHealthy();
+MeilisearchVersion version = meilisearchOperations.instanceOps().version();
+MeilisearchStats stats = meilisearchOperations.instanceOps().stats();
+
+MeilisearchIndexStats movieStats = meilisearchOperations.indexOps(Movie.class).stats(); <i class="conum" data-value="1"></i><b>(1)</b>
+MeilisearchIndexStats namedStats = meilisearchOperations.indexOps("movies").stats(); <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Resolve the index uid from the mapping metadata of the <code>@Document</code> entity class.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Bind operations directly to a non-empty index uid.</td>
 </tr>
 </table>
 </div>
@@ -573,7 +617,7 @@ Spring Data Meilisearch provides several implementations: <code>BasicQuery</code
 <p><code>BasicQuery</code> is the standard implementation for simple search queries:</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 2. Search for movies with a given title</div>
+<div class="title">Example 3. Search for movies with a given title</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
