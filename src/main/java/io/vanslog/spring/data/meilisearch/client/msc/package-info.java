@@ -15,8 +15,8 @@
  */
 
 /**
- * Meilisearch Java client-specific runtime implementation and adapters. This package contains the concrete template
- * implementation and request/response conversion code backed by {@code com.meilisearch.sdk:meilisearch-java}.
+ * Meilisearch Java client-specific runtime implementation and adapters. This package contains concrete operation
+ * templates and request/response conversion code backed by {@code com.meilisearch.sdk:meilisearch-java}.
  */
 @org.springframework.lang.NonNullApi
 @org.springframework.lang.NonNullFields
