@@ -21,6 +21,7 @@ import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClientFactoryBean;
 import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
 import java.lang.reflect.Field;
@@ -52,6 +53,7 @@ class MeilisearchNamespaceHandlerUnitTests {
 	@Test
 	void shouldCreateMeilisearchTemplate() {
 		assertThat(context.getBean(MeilisearchTemplate.class)).isInstanceOf(MeilisearchTemplate.class);
+		assertThat(context.getBean("meilisearchTemplate", MeilisearchOperations.class)).isNotNull();
 	}
 
 	@Test
