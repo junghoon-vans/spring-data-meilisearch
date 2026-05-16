@@ -355,8 +355,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	}
 
 	private MeilisearchPersistentEntity<?> getPersistentEntityFor(Class<?> clazz) {
-		Assert.hasText(clazz.getAnnotation(Document.class).indexUid(),
-				"Given class must be annotated with @Document(indexUid = \"foo\")!");
+		Document document = clazz.getAnnotation(Document.class);
+		Assert.notNull(document, "Given class must be annotated with @Document(indexUid = \"foo\")!");
+		Assert.hasText(document.indexUid(), "Given class must be annotated with @Document(indexUid = \"foo\")!");
 
 		return meilisearchConverter.getMappingContext().getRequiredPersistentEntity(clazz);
 	}
