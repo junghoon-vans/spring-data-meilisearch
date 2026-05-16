@@ -570,7 +570,7 @@ If no <code>basePackages</code> are configured, the annotation will scan the pac
     &lt;meilisearch:repositories base-package="com.example.repositories"/&gt;             <i class="conum" data-value="1"></i><b>(1)</b>
 
     &lt;bean name="meilisearchTemplate"                                                <i class="conum" data-value="2"></i><b>(2)</b>
-          class="io.vanslog.spring.data.meilisearch.core.MeilisearchTemplate"&gt;
+          class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate"&gt;
         &lt;constructor-arg name="meilisearchClient" ref="meilisearchClient"/&gt;         <i class="conum" data-value="3"></i><b>(3)</b>
     &lt;/bean&gt;
 
