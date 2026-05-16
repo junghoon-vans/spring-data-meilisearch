@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * Meilisearch Java client-specific runtime implementation and adapters. This package contains concrete operation
- * templates and request/response conversion code backed by {@code com.meilisearch.sdk:meilisearch-java}.
- */
-@org.springframework.lang.NonNullApi
-@org.springframework.lang.NonNullFields
 package io.vanslog.spring.data.meilisearch.client.msc;
+
+import io.vanslog.spring.data.meilisearch.core.MeilisearchCallback;
+
+@FunctionalInterface
+interface MeilisearchClientExecutor {
+
+	<T> T execute(MeilisearchCallback<T> callback);
+}

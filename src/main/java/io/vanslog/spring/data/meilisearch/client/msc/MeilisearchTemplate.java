@@ -49,6 +49,8 @@ import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.core.FacetHit;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchCallback;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexOperations;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchInstanceOperations;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
@@ -73,6 +75,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	private final MeilisearchConverter meilisearchConverter;
 	private final RequestConverter requestConverter;
 	private final ResponseConverter responseConverter;
+	private final InstanceResponseConverter instanceResponseConverter;
+	private final MeilisearchInstanceOperations instanceOperations;
 
 	public MeilisearchTemplate(MeilisearchClient meilisearchClient) {
 		this(meilisearchClient, null);
@@ -85,6 +89,27 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 		this.requestConverter = new RequestConverter();
 		this.responseConverter = new ResponseConverter();
+		this.instanceResponseConverter = new InstanceResponseConverter(meilisearchClient.getJsonHandler());
+		this.instanceOperations = new MeilisearchInstanceTemplate(this::execute, instanceResponseConverter);
+	}
+
+	@Override
+	public MeilisearchInstanceOperations instanceOps() {
+		return instanceOperations;
+	}
+
+	@Override
+	public MeilisearchIndexOperations indexOps(Class<?> entityClass) {
+
+		Assert.notNull(entityClass, "Entity class must not be null");
+		return indexOps(getIndexUidFor(entityClass));
+	}
+
+	@Override
+	public MeilisearchIndexOperations indexOps(String indexUid) {
+
+		Assert.hasText(indexUid, "Index uid must not be empty");
+		return new MeilisearchIndexTemplate(indexUid, this::execute, instanceResponseConverter);
 	}
 
 	@Override
@@ -330,8 +355,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	}
 
 	private MeilisearchPersistentEntity<?> getPersistentEntityFor(Class<?> clazz) {
-		Assert.hasText(clazz.getAnnotation(Document.class).indexUid(),
-				"Given class must be annotated with @Document(indexUid = \"foo\")!");
+		Document document = clazz.getAnnotation(Document.class);
+		Assert.notNull(document, "Given class must be annotated with @Document(indexUid = \"foo\")!");
+		Assert.hasText(document.indexUid(), "Given class must be annotated with @Document(indexUid = \"foo\")!");
 
 		return meilisearchConverter.getMappingContext().getRequiredPersistentEntity(clazz);
 	}
@@ -340,4 +366,5 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	public MeilisearchConverter getMeilisearchConverter() {
 		return meilisearchConverter;
 	}
+
 }

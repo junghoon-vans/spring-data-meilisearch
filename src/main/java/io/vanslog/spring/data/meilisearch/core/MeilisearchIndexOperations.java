@@ -13,11 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.vanslog.spring.data.meilisearch.core;
 
 /**
- * Meilisearch Java client-specific runtime implementation and adapters. This package contains concrete operation
- * templates and request/response conversion code backed by {@code com.meilisearch.sdk:meilisearch-java}.
+ * Operations for APIs scoped to a single Meilisearch index.
+ *
+ * @author Junghoon Ban
+ * @see com.meilisearch.sdk.Index
  */
-@org.springframework.lang.NonNullApi
-@org.springframework.lang.NonNullFields
-package io.vanslog.spring.data.meilisearch.client.msc;
+public interface MeilisearchIndexOperations {
+
+	/**
+	 * Return statistics for the bound index.
+	 *
+	 * @return index statistics
+	 */
+	MeilisearchIndexStats stats();
+}

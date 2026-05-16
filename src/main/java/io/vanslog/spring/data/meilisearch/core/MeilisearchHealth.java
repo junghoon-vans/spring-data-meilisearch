@@ -13,11 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.vanslog.spring.data.meilisearch.core;
+
+import org.springframework.util.Assert;
 
 /**
- * Meilisearch Java client-specific runtime implementation and adapters. This package contains concrete operation
- * templates and request/response conversion code backed by {@code com.meilisearch.sdk:meilisearch-java}.
+ * Health information for a Meilisearch instance.
+ *
+ * @author Junghoon Ban
  */
-@org.springframework.lang.NonNullApi
-@org.springframework.lang.NonNullFields
-package io.vanslog.spring.data.meilisearch.client.msc;
+public class MeilisearchHealth {
+
+	private final String status;
+
+	public MeilisearchHealth(String status) {
+
+		Assert.hasText(status, "Status must not be empty");
+		this.status = status;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+}

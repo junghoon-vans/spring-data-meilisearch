@@ -6,7 +6,9 @@ Spring Data Meilisearch uses several interfaces to define the operations that ca
 
 * `DocumentOperations` defines actions to store, update and retrieve entities based on their id.
 * `SearchOperations` defines the actions to search for multiple entities using queries.
-* `MeilisearchOperations` combines the `DocumentOperations` and `SearchOperations` interfaces.
+* `MeilisearchInstanceOperations` defines instance-level actions such as health, version, and stats.
+* `MeilisearchIndexOperations` defines actions scoped to a single index.
+* `MeilisearchOperations` combines the `DocumentOperations` and `SearchOperations` interfaces and exposes accessors for instance and index operations.
 
 These interfaces correspond to the structuring of the https://www.meilisearch.com/docs/reference/api/overview[Meilisearch API].
 
@@ -52,6 +54,30 @@ public class MovieController {
 <.> Let Spring inject the provided `MeilisearchOperations` bean in the constructor.
 <.> Store a movie in the Meilisearch instance.
 <.> Retrieve the movie by id.
+====
+
+[[meilisearch.operations.instance-index]]
+== Instance and Index Operations
+
+`MeilisearchOperations` exposes concern-specific operations for APIs that are not document or search operations.
+Use `instanceOps()` for Meilisearch instance-level information and `indexOps(...)` for statistics bound to one index.
+Version and stats operations use the configured Meilisearch API key, so server-side key permissions and index restrictions still apply.
+
+.Instance and index operation usage
+====
+[source,java]
+----
+MeilisearchHealth health = meilisearchOperations.instanceOps().health();
+boolean healthy = meilisearchOperations.instanceOps().isHealthy();
+MeilisearchVersion version = meilisearchOperations.instanceOps().version();
+MeilisearchStats stats = meilisearchOperations.instanceOps().stats();
+
+MeilisearchIndexStats movieStats = meilisearchOperations.indexOps(Movie.class).stats(); <.>
+MeilisearchIndexStats namedStats = meilisearchOperations.indexOps("movies").stats(); <.>
+----
+
+<.> Resolve the index uid from the mapping metadata of the `@Document` entity class.
+<.> Bind operations directly to a non-empty index uid.
 ====
 
 [[meilisearch.operations.searchresulttypes]]
