@@ -24,6 +24,58 @@ package io.vanslog.spring.data.meilisearch.core;
 public interface MeilisearchIndexOperations {
 
 	/**
+	 * Create the bound index without declaring a primary key.
+	 *
+	 * @return the created index
+	 */
+	MeilisearchIndex create();
+
+	/**
+	 * Create the bound index using the given request.
+	 *
+	 * @param request index creation options
+	 * @return the created index
+	 */
+	MeilisearchIndex create(MeilisearchIndexCreateRequest request);
+
+	/**
+	 * Return the bound index metadata.
+	 *
+	 * @return index metadata
+	 */
+	MeilisearchIndex get();
+
+	/**
+	 * Return a page of indexes using Meilisearch defaults.
+	 *
+	 * @return indexes page
+	 */
+	MeilisearchIndexList list();
+
+	/**
+	 * Return a page of indexes using the given query.
+	 *
+	 * @param query index listing options
+	 * @return indexes page
+	 */
+	MeilisearchIndexList list(MeilisearchIndexQuery query);
+
+	/**
+	 * Update the bound index using the given request.
+	 *
+	 * @param request index update options
+	 * @return the updated index
+	 */
+	MeilisearchIndex update(MeilisearchIndexUpdateRequest request);
+
+	/**
+	 * Delete the bound index.
+	 *
+	 * @return {@literal true} if the delete task succeeded
+	 */
+	boolean delete();
+
+	/**
 	 * Return statistics for the bound index.
 	 *
 	 * @return index statistics
