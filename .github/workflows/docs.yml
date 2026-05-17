@@ -18,6 +18,15 @@ on:
         description: 'Git ref to checkout (leave empty for current branch)'
         required: false
         default: ''
+      path:
+        description: 'Destination path, such as 1.0.0 (leave empty for root or inferred tag path)'
+        required: false
+        default: ''
+      update-root:
+        description: 'Also update / with this documentation build'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: pages
@@ -29,7 +38,62 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      target_path: ${{ steps.publish-target.outputs.target_path }}
+      update_root: ${{ steps.publish-target.outputs.update_root }}
+      versioned: ${{ steps.publish-target.outputs.versioned }}
     steps:
+      - name: Resolve documentation target
+        id: publish-target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DISPATCH_REF: ${{ inputs.ref }}
+          DISPATCH_PATH: ${{ inputs.path }}
+          DISPATCH_UPDATE_ROOT: ${{ inputs.update-root }}
+        run: |
+          target_path=""
+          update_root="false"
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            target_path="pr-${PR_NUMBER}"
+          elif [ "$EVENT_NAME" = "push" ] && [ "$REF_TYPE" = "tag" ]; then
+            target_path="${REF_NAME#v}"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            target_path="$DISPATCH_PATH"
+            update_root="$DISPATCH_UPDATE_ROOT"
+
+            if [ -z "$target_path" ]; then
+              dispatch_ref="${DISPATCH_REF#refs/tags/}"
+              if [[ "$dispatch_ref" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                target_path="${dispatch_ref#v}"
+              fi
+            fi
+          fi
+
+          versioned="false"
+          if [ -n "$target_path" ]; then
+            if [ "$EVENT_NAME" = "pull_request" ]; then
+              if [[ ! "$target_path" =~ ^pr-[0-9]+$ ]]; then
+                echo "::error::Pull request documentation path must be a PR preview path."
+                exit 1
+              fi
+            elif [[ ! "$target_path" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Documentation path must be a release version such as 1.0.0."
+              exit 1
+            fi
+
+            versioned="true"
+          fi
+
+          {
+            echo "target_path=$target_path"
+            echo "update_root=$update_root"
+            echo "versioned=$versioned"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -41,16 +105,16 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: 'maven'
-      - name: Build PR preview documentation
-        if: github.event_name == 'pull_request'
+      - name: Build versioned documentation
+        if: steps.publish-target.outputs.versioned == 'true'
         run: ./mvnw -Pantora antora:antora
 
       - name: Prepare Antora CLI for publish documentation
-        if: github.event_name != 'pull_request'
+        if: steps.publish-target.outputs.versioned != 'true'
         run: ./mvnw -Pantora antora:antora
 
       - name: Build publish documentation
-        if: github.event_name != 'pull_request'
+        if: steps.publish-target.outputs.versioned != 'true'
         run: |
           rm -rf target/site
           node src/main/antora/generate-publish-playbook.mjs
@@ -134,6 +198,8 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           EVENT_ACTION: ${{ github.event.action }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          TARGET_PATH: ${{ needs.build.outputs.target_path }}
+          UPDATE_ROOT: ${{ needs.build.outputs.update_root }}
         run: |
           if [ "$EVENT_NAME" = "pull_request" ]; then
             target_path="pr-${PR_NUMBER}"
@@ -148,12 +214,27 @@ jobs:
             mkdir -p "$SITE_DIR/$target_path"
             cp -a "$DOCS_DIR/." "$SITE_DIR/$target_path/"
           else
-            find "$SITE_DIR" -mindepth 1 -maxdepth 1 \
-              ! -name ".git" \
-              ! -name ".nojekyll" \
-              ! -name "pr-*" \
-              -exec rm -rf {} +
-            cp -a "$DOCS_DIR/." "$SITE_DIR/"
+            refresh_root() {
+              find "$SITE_DIR" -mindepth 1 -maxdepth 1 \
+                ! -name ".git" \
+                ! -name ".nojekyll" \
+                ! -name "pr-*" \
+                ! -name "[0-9]*.[0-9]*.[0-9]*" \
+                -exec rm -rf {} +
+              cp -a "$DOCS_DIR/." "$SITE_DIR/"
+            }
+
+            if [ -n "$TARGET_PATH" ]; then
+              rm -rf "${SITE_DIR:?}/${TARGET_PATH:?}"
+              mkdir -p "$SITE_DIR/$TARGET_PATH"
+              cp -a "$DOCS_DIR/." "$SITE_DIR/$TARGET_PATH/"
+            else
+              refresh_root
+            fi
+
+            if [ "$UPDATE_ROOT" = "true" ]; then
+              refresh_root
+            fi
           fi
 
           touch "$SITE_DIR/.nojekyll"
