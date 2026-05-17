@@ -299,6 +299,7 @@ public class MeilisearchIndexSettings {
 
 		public Builder withSearchCutoffMs(@Nullable Integer searchCutoffMs) {
 
+			Assert.isTrue(searchCutoffMs == null || searchCutoffMs >= 0, "Search cutoff ms must not be negative");
 			this.searchCutoffMs = searchCutoffMs;
 			return this;
 		}
@@ -342,6 +343,8 @@ public class MeilisearchIndexSettings {
 		private final int maxTotalHits;
 
 		public PaginationSettings(int maxTotalHits) {
+
+			Assert.isTrue(maxTotalHits >= 0, "Max total hits must not be negative");
 			this.maxTotalHits = maxTotalHits;
 		}
 
@@ -356,6 +359,8 @@ public class MeilisearchIndexSettings {
 		private final int maxValuesPerFacet;
 
 		public FacetingSettings(int maxValuesPerFacet) {
+
+			Assert.isTrue(maxValuesPerFacet >= 0, "Max values per facet must not be negative");
 			this.maxValuesPerFacet = maxValuesPerFacet;
 		}
 
