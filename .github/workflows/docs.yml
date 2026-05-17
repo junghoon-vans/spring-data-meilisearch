@@ -107,64 +107,15 @@ jobs:
           cache: 'maven'
       - name: Build versioned documentation
         if: steps.publish-target.outputs.versioned == 'true'
-        env:
-          RELEASE_VERSION: ${{ steps.publish-target.outputs.target_path }}
         run: |
-          run_maven() {
-            if [ -x ./mvnw ]; then
-              ./mvnw "$@"
-            else
-              mvn "$@"
-            fi
-          }
-
-          prepare_versioned_site() {
+          if grep -q '<id>antora</id>' pom.xml; then
+            ./mvnw -Pantora antora:antora
+          else
+            ./mvnw clean install -Pdistribute -DskipTests
             rm -rf target/versioned-site
             mkdir -p target/versioned-site/api/java
-          }
-
-          copy_javadoc() {
-            if [ -d target/site/apidocs ]; then
-              cp -a target/site/apidocs/. target/versioned-site/api/java/
-            elif [ -d target/reports/apidocs ]; then
-              cp -a target/reports/apidocs/. target/versioned-site/api/java/
-            else
-              echo "::error::Javadoc output was not found."
-              exit 1
-            fi
-          }
-
-          write_legacy_landing_page() {
-            cat > target/versioned-site/index.html <<HTML
-          <!doctype html>
-          <html lang="en">
-          <head>
-            <meta charset="utf-8">
-            <title>Spring Data Meilisearch ${RELEASE_VERSION} Documentation</title>
-          </head>
-          <body>
-            <h1>Spring Data Meilisearch ${RELEASE_VERSION}</h1>
-            <p>This release predates the generated reference documentation site.</p>
-            <p>Use the <a href="api/java/index.html">Javadoc API reference</a> for this version.</p>
-          </body>
-          </html>
-          HTML
-          }
-
-          if grep -q '<id>antora</id>' pom.xml; then
-            run_maven -Pantora antora:antora
-          elif [ -d src/main/asciidoc ]; then
-            run_maven clean install -Pdistribute -DskipTests
-            prepare_versioned_site
             cp -a target/site/reference/html/. target/versioned-site/
-            copy_javadoc
-            rm -rf target/site
-            mv target/versioned-site target/site
-          else
-            run_maven -DskipTests javadoc:javadoc
-            prepare_versioned_site
-            write_legacy_landing_page
-            copy_javadoc
+            cp -a target/site/apidocs/. target/versioned-site/api/java/
             rm -rf target/site
             mv target/versioned-site target/site
           fi
