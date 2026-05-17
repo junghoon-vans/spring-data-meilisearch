@@ -31,8 +31,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.annotation.Id;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 
 /**
  * Namespace based configuration test.
@@ -54,6 +59,15 @@ class MeilisearchNamespaceHandlerUnitTests {
 	void shouldCreateMeilisearchTemplate() {
 		assertThat(context.getBean(MeilisearchTemplate.class)).isInstanceOf(MeilisearchTemplate.class);
 		assertThat(context.getBean("meilisearchTemplate", MeilisearchOperations.class)).isNotNull();
+	}
+
+	@Test
+	void shouldWireConfiguredConverterAndObjectMapperIntoMeilisearchTemplate() {
+		MeilisearchTemplate template = context.getBean(MeilisearchTemplate.class);
+
+		assertThat(ReflectionTestUtils.getField(template, "meilisearchConverter"))
+				.isSameAs(context.getBean(MeilisearchConverter.class));
+		assertThat(ReflectionTestUtils.getField(template, "objectMapper")).isSameAs(context.getBean(ObjectMapper.class));
 	}
 
 	@Test
