@@ -49,6 +49,8 @@ These timeout and interval settings affect operations that submit asynchronous M
 == JSON Handler
 
 `MeilisearchConfiguration` registers `GsonJsonHandler` by default.
+The `JsonHandler` configures the underlying Meilisearch Java SDK transport.
+Entity document mapping and document JSON payloads are handled by Spring Data Meilisearch through `MeilisearchConverter` and the `meilisearchObjectMapper` bean.
 Override `jsonHandler()` when you need a different implementation.
 
 [source,java]
