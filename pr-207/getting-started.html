@@ -510,22 +510,25 @@
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
+import org.springframework.context.annotation.Configuration;
 
-</span><span class="fold-block">@EnableMeilisearchRepositories(basePackages = "com.example.movies")
+</span><span class="fold-block">@Configuration
+@EnableMeilisearchRepositories(basePackages = "com.example.movies")
 class MeilisearchConfig extends MeilisearchConfiguration {
 
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
                 .connectedTo("http://localhost:7700")
-                .withApiKey("masterKey")
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
                 .build();
     }
 }</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>MeilisearchConfiguration</code> registers the standard Spring Data Meilisearch beans, including the client, mapping context, converter, and the <code>meilisearchTemplate</code> / <code>meilisearchOperations</code> bean.</p>
+<p><code>MeilisearchConfiguration</code> registers the standard Spring Data Meilisearch beans, including the client, mapping context, converter, and the <code>meilisearchTemplate</code> / <code>meilisearchOperations</code> bean.
+For local development, prefer a scoped API key exposed through <code>MEILISEARCH_API_KEY</code> instead of using the Meilisearch master key in application code.</p>
 </div>
 </div>
 </div>
