@@ -4,12 +4,13 @@
 antora:
   extensions:
     - '@antora/atlas-extension'
-    - '@springio/antora-extensions/latest-version-extension'
     - '@antora/collector-extension'
     - require: '@springio/antora-extensions/root-component-extension'
       root_component_name: 'data-meilisearch'
     - '@springio/antora-extensions/root-attachments-extension'
     - '@springio/antora-extensions/static-page-extension'
+    - require: './src/main/antora/version-segment-metadata-extension.js'
+      root_component_name: 'data-meilisearch'
 site:
   title: Spring Data Meilisearch
   url: https://junghoon-vans.github.io/spring-data-meilisearch/
@@ -46,6 +47,8 @@ asciidoc:
   sourcemap: true
 urls:
   latest_version_segment: ''
+  latest_version_segment_strategy: redirect:to
+  latest_prerelease_version_segment: snapshot
 runtime:
   fetch: true
   log:

@@ -125,7 +125,7 @@ To build the published aggregate site locally, fetch `main` and release tags fir
  $ rm -rf target/site
  $ node src/main/antora/generate-publish-playbook.mjs
  $ npx --offline antora --to-dir target/site target/antora-publish-playbook.yml
- $ node src/main/antora/generate-latest-version-redirects.mjs target/site
+ $ node src/main/antora/copy-latest-stable-version.mjs
 ----
 
 == License

@@ -7,6 +7,7 @@ const sourcePlaybookPath = path.resolve(process.argv[2] ?? 'antora-playbook.yml'
 const outputPlaybookPath = path.resolve(process.argv[3] ?? 'target/antora-publish-playbook.yml');
 const targetAntoraDescriptorPath = path.resolve('target/classes/antora.yml');
 const localUrlMarker = '    - url: .';
+const localExtensionRequire = "require: './src/main/antora/version-segment-metadata-extension.js'";
 const localTagsMarker = 'tags:\n        - v*.*.*';
 
 function readHeadReleaseTags() {
@@ -41,6 +42,13 @@ function rewriteLocalSourceUrl(playbookContents) {
   return playbookContents.replace(localUrlMarker, `    - url: ${sourceDirectory}`);
 }
 
+function rewriteLocalExtensionRequire(playbookContents) {
+  const sourceDirectory = path.dirname(sourcePlaybookPath);
+  const extensionPath = path.join(sourceDirectory, 'src/main/antora/version-segment-metadata-extension.js');
+
+  return playbookContents.replace(localExtensionRequire, `require: '${extensionPath}'`);
+}
+
 function injectExclusions(playbookContents, exclusions) {
   if (exclusions.length === 0) {
     return playbookContents;
@@ -63,7 +71,7 @@ async function main() {
     ...(currentComponentVersionTag ? [currentComponentVersionTag] : [])
   ])];
 
-  const rewrittenPlaybook = injectExclusions(rewriteLocalSourceUrl(playbookContents), exclusions);
+  const rewrittenPlaybook = injectExclusions(rewriteLocalExtensionRequire(rewriteLocalSourceUrl(playbookContents)), exclusions);
 
   await mkdir(path.dirname(outputPlaybookPath), { recursive: true });
   await writeFile(outputPlaybookPath, rewrittenPlaybook, 'utf8');
