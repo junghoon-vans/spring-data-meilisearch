@@ -207,7 +207,7 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 	}
 
 	@Nullable
-	private Object readValue(@Nullable Object value, Class<?> targetType, Class<?> componentType) {
+	private Object readValue(@Nullable Object value, Class<?> targetType, @Nullable Class<?> componentType) {
 
 		if (value == null) {
 			return null;
