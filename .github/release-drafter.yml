@@ -7,6 +7,11 @@ categories:
     label: 'type: documentation'
   - title: '🔨 Dependency Upgrades'
     label: 'type: dependency-upgrade'
+  - title: '🧰 Maintenance'
+    label: 'type: task'
+
+exclude-contributors:
+  - 'junghoon-vans'
 
 change-template: '* $TITLE #$NUMBER'
 template: |
