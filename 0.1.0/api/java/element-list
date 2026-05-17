@@ -1,0 +1,8 @@
+io.vanslog.spring.data.meilisearch
+io.vanslog.spring.data.meilisearch.annotations
+io.vanslog.spring.data.meilisearch.client
+io.vanslog.spring.data.meilisearch.config
+io.vanslog.spring.data.meilisearch.core
+io.vanslog.spring.data.meilisearch.core.convert
+io.vanslog.spring.data.meilisearch.core.mapping
+io.vanslog.spring.data.meilisearch.core.support
