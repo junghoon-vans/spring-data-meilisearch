@@ -201,6 +201,49 @@ jobs:
           TARGET_PATH: ${{ needs.build.outputs.target_path }}
           UPDATE_ROOT: ${{ needs.build.outputs.update_root }}
         run: |
+          normalize_javadoc_links() {
+            local docs_root="$1"
+
+            DOCS_ROOT="$docs_root" node <<'NODE'
+          import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+          import { dirname, join, relative, resolve, sep } from 'node:path';
+
+          const root = resolve(process.env.DOCS_ROOT);
+          const javadocRoot = join(root, 'api', 'java');
+          let replacements = 0;
+
+          function walk(directory) {
+            for (const entry of readdirSync(directory)) {
+              const path = join(directory, entry);
+              const stat = statSync(path);
+
+              if (stat.isDirectory()) {
+                walk(path);
+                continue;
+              }
+
+              if (!path.endsWith('.html')) {
+                continue;
+              }
+
+              const content = readFileSync(path, 'utf8');
+              const relativeJavadocRoot = relative(dirname(path), javadocRoot).split(sep).join('/') || '.';
+              const normalized = content.replace(/href=(['"])\/api\/java\//g, (_match, quote) => {
+                replacements += 1;
+                return `href=${quote}${relativeJavadocRoot}/`;
+              });
+
+              if (normalized !== content) {
+                writeFileSync(path, normalized);
+              }
+            }
+          }
+
+          walk(root);
+          console.log(`Normalized ${replacements} root-relative Javadoc link(s) in ${root}.`);
+          NODE
+          }
+
           if [ "$EVENT_NAME" = "pull_request" ]; then
             target_path="pr-${PR_NUMBER}"
 
@@ -213,6 +256,7 @@ jobs:
             rm -rf "${SITE_DIR:?}/${target_path:?}"
             mkdir -p "$SITE_DIR/$target_path"
             cp -a "$DOCS_DIR/." "$SITE_DIR/$target_path/"
+            normalize_javadoc_links "$SITE_DIR/$target_path"
           else
             refresh_root() {
               find "$SITE_DIR" -mindepth 1 -maxdepth 1 \
@@ -222,12 +266,14 @@ jobs:
                 ! -name "[0-9]*.[0-9]*.[0-9]*" \
                 -exec rm -rf {} +
               cp -a "$DOCS_DIR/." "$SITE_DIR/"
+              normalize_javadoc_links "$SITE_DIR"
             }
 
             if [ -n "$TARGET_PATH" ]; then
               rm -rf "${SITE_DIR:?}/${TARGET_PATH:?}"
               mkdir -p "$SITE_DIR/$TARGET_PATH"
               cp -a "$DOCS_DIR/." "$SITE_DIR/$TARGET_PATH/"
+              normalize_javadoc_links "$SITE_DIR/$TARGET_PATH"
             else
               refresh_root
             fi
