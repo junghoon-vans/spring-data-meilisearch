@@ -1,0 +1,285 @@
+{
+  "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
+  "generated": "2026-05-17T05:27:48.794Z",
+  "url": "https://junghoon-vans.github.io/spring-data-meilisearch",
+  "components": {
+    "data-commons": {
+      "title": "Spring Data Commons",
+      "latest": "4.1.0",
+      "versions": {
+        "4.1.0": {
+          "prerelease": true,
+          "displayVersion": "4.1.0-SNAPSHOT",
+          "url": "/data-commons/index.html",
+          "pages": [
+            {
+              "path": "index.adoc",
+              "url": "/data-commons/index.html",
+              "title": "Spring Data Commons"
+            },
+            {
+              "path": "aot.adoc",
+              "url": "/data-commons/aot.html",
+              "title": "Ahead of Time Optimizations"
+            },
+            {
+              "path": "auditing.adoc",
+              "url": "/data-commons/auditing.html",
+              "title": "Auditing"
+            },
+            {
+              "path": "custom-conversions.adoc",
+              "url": "/data-commons/custom-conversions.html",
+              "title": "Custom Conversions"
+            },
+            {
+              "path": "dependencies.adoc",
+              "url": "/data-commons/dependencies.html",
+              "title": "Dependencies"
+            },
+            {
+              "path": "entity-callbacks.adoc",
+              "url": "/data-commons/entity-callbacks.html",
+              "title": "Entity Callbacks"
+            },
+            {
+              "path": "is-new-state-detection.adoc",
+              "url": "/data-commons/is-new-state-detection.html",
+              "title": "Entity State Detection Strategies"
+            },
+            {
+              "path": "kotlin.adoc",
+              "url": "/data-commons/kotlin.html",
+              "title": "Kotlin Support"
+            },
+            {
+              "path": "kotlin/coroutines.adoc",
+              "url": "/data-commons/kotlin/coroutines.html",
+              "title": "Coroutines"
+            },
+            {
+              "path": "kotlin/extensions.adoc",
+              "url": "/data-commons/kotlin/extensions.html",
+              "title": "Extensions"
+            },
+            {
+              "path": "kotlin/null-safety.adoc",
+              "url": "/data-commons/kotlin/null-safety.html",
+              "title": "Null Safety"
+            },
+            {
+              "path": "kotlin/object-mapping.adoc",
+              "url": "/data-commons/kotlin/object-mapping.html",
+              "title": "Object Mapping"
+            },
+            {
+              "path": "kotlin/requirements.adoc",
+              "url": "/data-commons/kotlin/requirements.html",
+              "title": "Requirements"
+            },
+            {
+              "path": "object-mapping.adoc",
+              "url": "/data-commons/object-mapping.html",
+              "title": "Object Mapping Fundamentals"
+            },
+            {
+              "path": "property-paths.adoc",
+              "url": "/data-commons/property-paths.html",
+              "title": "Property Paths"
+            },
+            {
+              "path": "query-by-example.adoc",
+              "url": "/data-commons/query-by-example.html",
+              "title": "Query by Example"
+            },
+            {
+              "path": "repositories.adoc",
+              "url": "/data-commons/repositories.html",
+              "title": "Working with Spring Data Repositories"
+            },
+            {
+              "path": "repositories/core-concepts.adoc",
+              "url": "/data-commons/repositories/core-concepts.html",
+              "title": "Core concepts"
+            },
+            {
+              "path": "repositories/core-domain-events.adoc",
+              "url": "/data-commons/repositories/core-domain-events.html",
+              "title": "Publishing Events from Aggregate Roots"
+            },
+            {
+              "path": "repositories/core-extensions-populators.adoc",
+              "url": "/data-commons/repositories/core-extensions-populators.html",
+              "title": "Repository Populators"
+            },
+            {
+              "path": "repositories/core-extensions-querydsl.adoc",
+              "url": "/data-commons/repositories/core-extensions-querydsl.html",
+              "title": "Querydsl Extension"
+            },
+            {
+              "path": "repositories/core-extensions-web.adoc",
+              "url": "/data-commons/repositories/core-extensions-web.html",
+              "title": "Web support"
+            },
+            {
+              "path": "repositories/core-extensions.adoc",
+              "url": "/data-commons/repositories/core-extensions.html",
+              "title": "Spring Data Extensions"
+            },
+            {
+              "path": "repositories/create-instances.adoc",
+              "url": "/data-commons/repositories/create-instances.html",
+              "title": "Creating Repository Instances"
+            },
+            {
+              "path": "repositories/custom-implementations.adoc",
+              "url": "/data-commons/repositories/custom-implementations.html",
+              "title": "Custom Repository Implementations"
+            },
+            {
+              "path": "repositories/definition.adoc",
+              "url": "/data-commons/repositories/definition.html",
+              "title": "Defining Repository Interfaces"
+            },
+            {
+              "path": "repositories/namespace-reference.adoc",
+              "url": "/data-commons/repositories/namespace-reference.html",
+              "title": "Namespace reference"
+            },
+            {
+              "path": "repositories/null-handling.adoc",
+              "url": "/data-commons/repositories/null-handling.html",
+              "title": "Null Handling of Repository Methods"
+            },
+            {
+              "path": "repositories/populator-namespace-reference.adoc",
+              "url": "/data-commons/repositories/populator-namespace-reference.html",
+              "title": "Populators namespace reference"
+            },
+            {
+              "path": "repositories/projections-class.adoc",
+              "url": "/data-commons/repositories/projections-class.html",
+              "title": "Class-based Projections (DTOs)"
+            },
+            {
+              "path": "repositories/projections-interface.adoc",
+              "url": "/data-commons/repositories/projections-interface.html",
+              "title": "Interface-based Projections"
+            },
+            {
+              "path": "repositories/projections-intro.adoc",
+              "url": "/data-commons/repositories/projections-intro.html"
+            },
+            {
+              "path": "repositories/projections.adoc",
+              "url": "/data-commons/repositories/projections.html",
+              "title": "Projections"
+            },
+            {
+              "path": "repositories/query-keywords-reference.adoc",
+              "url": "/data-commons/repositories/query-keywords-reference.html",
+              "title": "Repository query keywords"
+            },
+            {
+              "path": "repositories/query-methods-details.adoc",
+              "url": "/data-commons/repositories/query-methods-details.html",
+              "title": "Defining Query Methods"
+            },
+            {
+              "path": "repositories/query-methods.adoc",
+              "url": "/data-commons/repositories/query-methods.html",
+              "title": "Query Methods"
+            },
+            {
+              "path": "repositories/query-return-types-reference.adoc",
+              "url": "/data-commons/repositories/query-return-types-reference.html",
+              "title": "Repository query return types"
+            },
+            {
+              "path": "repositories/scrolling.adoc",
+              "url": "/data-commons/repositories/scrolling.html",
+              "title": "Scrolling"
+            },
+            {
+              "path": "repositories/vector-search.adoc",
+              "url": "/data-commons/repositories/vector-search.html",
+              "title": "Vector Search"
+            },
+            {
+              "path": "search.adoc",
+              "url": "/data-commons/search.html",
+              "title": "Search"
+            },
+            {
+              "path": "spring-projects.adoc",
+              "url": "/data-commons/spring-projects.html",
+              "title": "Spring Projects"
+            },
+            {
+              "path": "upgrade.adoc",
+              "url": "/data-commons/upgrade.html",
+              "title": "Upgrading Spring Data"
+            },
+            {
+              "path": "value-expressions.adoc",
+              "url": "/data-commons/value-expressions.html",
+              "title": "Value Expressions Fundamentals"
+            }
+          ]
+        }
+      }
+    },
+    "data-meilisearch": {
+      "title": "Spring Data Meilisearch",
+      "latest": "0.8.1",
+      "versions": {
+        "0.8.1": {
+          "url": "/index.html",
+          "pages": [
+            {
+              "path": "index.adoc",
+              "url": "/index.html",
+              "title": "Spring Data Meilisearch"
+            },
+            {
+              "path": "meilisearch-client.adoc",
+              "url": "/meilisearch-client.html",
+              "title": "Meilisearch Client"
+            },
+            {
+              "path": "meilisearch-document.adoc",
+              "url": "/meilisearch-document.html",
+              "title": "Meilisearch Document"
+            },
+            {
+              "path": "meilisearch-operations.adoc",
+              "url": "/meilisearch-operations.html",
+              "title": "Meilisearch Operations"
+            },
+            {
+              "path": "meilisearch-repositories.adoc",
+              "url": "/meilisearch-repositories.html",
+              "title": "Meilisearch Repositories"
+            },
+            {
+              "path": "meilisearch-settings.adoc",
+              "url": "/meilisearch-settings.html",
+              "title": "Meilisearch Settings"
+            },
+            {
+              "path": "search.adoc",
+              "url": "/search.html",
+              "title": "Search"
+            },
+            {
+              "path": "spring-projects.adoc",
+              "url": "/spring-projects.html",
+              "title": "Spring Projects"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
