@@ -12,12 +12,6 @@ on:
       - synchronize
       - reopened
       - closed
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: 'Git ref to checkout (leave empty for current branch)'
-        required: false
-        default: ''
 
 concurrency:
   group: pages
@@ -29,11 +23,50 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      target_path: ${{ steps.publish-target.outputs.target_path }}
+      versioned: ${{ steps.publish-target.outputs.versioned }}
     steps:
+      - name: Resolve documentation target
+        id: publish-target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          target_path=""
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            target_path="pr-${PR_NUMBER}"
+          elif [ "$EVENT_NAME" = "push" ] && [ "$REF_TYPE" = "tag" ]; then
+            target_path="${REF_NAME#v}"
+          fi
+
+          versioned="false"
+          if [ -n "$target_path" ]; then
+            if [ "$EVENT_NAME" = "pull_request" ]; then
+              if [[ ! "$target_path" =~ ^pr-[0-9]+$ ]]; then
+                echo "::error::Pull request documentation path must be a PR preview path."
+                exit 1
+              fi
+            elif [[ ! "$target_path" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Documentation path must be a release version such as 1.0.0."
+              exit 1
+            fi
+
+            versioned="true"
+          fi
+
+          {
+            echo "target_path=$target_path"
+            echo "versioned=$versioned"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref || github.ref }}
+          ref: ${{ github.ref }}
           fetch-depth: ${{ github.event_name == 'pull_request' && 1 || 0 }}
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -41,21 +74,21 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: 'maven'
-      - name: Build PR preview documentation
-        if: github.event_name == 'pull_request'
+      - name: Build versioned documentation
+        if: steps.publish-target.outputs.versioned == 'true'
         run: ./mvnw -Pantora antora:antora
 
       - name: Prepare Antora CLI for publish documentation
-        if: github.event_name != 'pull_request'
+        if: steps.publish-target.outputs.versioned != 'true'
         run: ./mvnw -Pantora antora:antora
 
       - name: Build publish documentation
-        if: github.event_name != 'pull_request'
+        if: steps.publish-target.outputs.versioned != 'true'
         run: |
           rm -rf target/site
           node src/main/antora/generate-publish-playbook.mjs
           npx --offline antora --to-dir target/site target/antora-publish-playbook.yml
-          node src/main/antora/generate-latest-version-redirects.mjs target/site
+          node src/main/antora/copy-latest-stable-version.mjs
       - name: Upload reference documentation
         uses: actions/upload-artifact@v4
         with:
@@ -69,7 +102,6 @@ jobs:
       always() &&
       (
         github.event_name == 'push' ||
-        github.event_name == 'workflow_dispatch' ||
         (
           github.event_name == 'pull_request' &&
           github.event.pull_request.head.repo.full_name == github.repository
@@ -85,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment-url.outputs.url }}
     permissions:
       contents: write
       pages: write
@@ -134,7 +166,51 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           EVENT_ACTION: ${{ github.event.action }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          TARGET_PATH: ${{ needs.build.outputs.target_path }}
         run: |
+          normalize_javadoc_links() {
+            local docs_root="$1"
+
+            DOCS_ROOT="$docs_root" node <<'NODE'
+          import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+          import { dirname, join, relative, resolve, sep } from 'node:path';
+
+          const root = resolve(process.env.DOCS_ROOT);
+          const javadocRoot = join(root, 'api', 'java');
+          let replacements = 0;
+
+          function walk(directory) {
+            for (const entry of readdirSync(directory)) {
+              const path = join(directory, entry);
+              const stat = statSync(path);
+
+              if (stat.isDirectory()) {
+                walk(path);
+                continue;
+              }
+
+              if (!path.endsWith('.html')) {
+                continue;
+              }
+
+              const content = readFileSync(path, 'utf8');
+              const relativeJavadocRoot = relative(dirname(path), javadocRoot).split(sep).join('/') || '.';
+              const normalized = content.replace(/href=(['"])\/api\/java\//g, (_match, quote) => {
+                replacements += 1;
+                return `href=${quote}${relativeJavadocRoot}/`;
+              });
+
+              if (normalized !== content) {
+                writeFileSync(path, normalized);
+              }
+            }
+          }
+
+          walk(root);
+          console.log(`Normalized ${replacements} root-relative Javadoc link(s) in ${root}.`);
+          NODE
+          }
+
           if [ "$EVENT_NAME" = "pull_request" ]; then
             target_path="pr-${PR_NUMBER}"
 
@@ -147,13 +223,27 @@ jobs:
             rm -rf "${SITE_DIR:?}/${target_path:?}"
             mkdir -p "$SITE_DIR/$target_path"
             cp -a "$DOCS_DIR/." "$SITE_DIR/$target_path/"
+            normalize_javadoc_links "$SITE_DIR/$target_path"
           else
-            find "$SITE_DIR" -mindepth 1 -maxdepth 1 \
-              ! -name ".git" \
-              ! -name ".nojekyll" \
-              ! -name "pr-*" \
-              -exec rm -rf {} +
-            cp -a "$DOCS_DIR/." "$SITE_DIR/"
+            refresh_root() {
+              find "$SITE_DIR" -mindepth 1 -maxdepth 1 \
+                ! -name ".git" \
+                ! -name ".nojekyll" \
+                ! -name "pr-*" \
+                ! -name "[0-9]*.[0-9]*.[0-9]*" \
+                -exec rm -rf {} +
+              cp -a "$DOCS_DIR/." "$SITE_DIR/"
+              normalize_javadoc_links "$SITE_DIR"
+            }
+
+            if [ -n "$TARGET_PATH" ]; then
+              rm -rf "${SITE_DIR:?}/${TARGET_PATH:?}"
+              mkdir -p "$SITE_DIR/$TARGET_PATH"
+              cp -a "$DOCS_DIR/." "$SITE_DIR/$TARGET_PATH/"
+              normalize_javadoc_links "$SITE_DIR/$TARGET_PATH"
+            else
+              refresh_root
+            fi
           fi
 
           touch "$SITE_DIR/.nojekyll"
@@ -190,6 +280,23 @@ jobs:
         if: steps.commit.outputs.changed == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Resolve deployment URL
+        if: steps.commit.outputs.changed == 'true'
+        id: deployment-url
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TARGET_PATH: ${{ needs.build.outputs.target_path }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            echo "url=${PAGE_URL}pr-${PR_NUMBER}/" >> "$GITHUB_OUTPUT"
+          elif [ -n "$TARGET_PATH" ]; then
+            echo "url=${PAGE_URL}${TARGET_PATH}/" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=${PAGE_URL}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Comment PR preview URL
         if: |
