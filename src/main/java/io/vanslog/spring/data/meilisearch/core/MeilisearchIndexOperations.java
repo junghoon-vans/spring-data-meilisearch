@@ -81,4 +81,26 @@ public interface MeilisearchIndexOperations {
 	 * @return index statistics
 	 */
 	MeilisearchIndexStats stats();
+
+	/**
+	 * Return runtime settings for the bound index.
+	 *
+	 * @return index settings
+	 */
+	MeilisearchIndexSettings getSettings();
+
+	/**
+	 * Update runtime settings for the bound index.
+	 *
+	 * @param settings index settings to update
+	 * @return index settings after the update task succeeds
+	 */
+	MeilisearchIndexSettings updateSettings(MeilisearchIndexSettings settings);
+
+	/**
+	 * Reset all runtime settings for the bound index to Meilisearch defaults.
+	 *
+	 * @return index settings after the reset task succeeds
+	 */
+	MeilisearchIndexSettings resetSettings();
 }
