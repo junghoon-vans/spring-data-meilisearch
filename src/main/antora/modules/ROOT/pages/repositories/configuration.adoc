@@ -10,6 +10,9 @@ Spring Data Meilisearch repositories are enabled through `@EnableMeilisearchRepo
 ----
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
 
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 @EnableMeilisearchRepositories(
         basePackages = "com.example.movies",
         meilisearchTemplateRef = "meilisearchTemplate")
@@ -31,6 +34,9 @@ class RepositoryConfig {
 
 If no base packages are configured, Spring Data scans the package of the annotated configuration class.
 
+The presence of `queryLookupStrategy` and `namedQueriesLocation` on the annotation reflects the standard Spring Data configuration contract.
+However, Spring Data Meilisearch's documented repository model currently centers on the built-in repository methods rather than on derived or declared query methods.
+
 [[meilisearch.repositories.configuration.namespace]]
 == XML Namespace
 
@@ -46,7 +52,7 @@ If no base packages are configured, Spring Data scans the package of the annotat
 
     <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
 
-    <meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/>
+    <meilisearch:meilisearch-client id="meilisearchClient" api-key="${MEILISEARCH_API_KEY}"/>
 
     <bean id="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate">
