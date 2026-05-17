@@ -21,8 +21,10 @@ import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
@@ -59,12 +61,13 @@ public abstract class MeilisearchConfiguration extends MeilisearchConfigurationS
 	 *
 	 * @param meilisearchClient the Meilisearch client
 	 * @param meilisearchConverter the Meilisearch converter
+	 * @param objectMapper the object mapper for JSON document payloads
 	 * @return the created {@link io.vanslog.spring.data.meilisearch.core.MeilisearchOperations} bean.
 	 */
 	@Bean(name = { "meilisearchOperations", "meilisearchTemplate" })
 	public MeilisearchOperations meilisearchOperations(MeilisearchClient meilisearchClient,
-			MeilisearchConverter meilisearchConverter) {
-		return new MeilisearchTemplate(meilisearchClient, meilisearchConverter);
+			MeilisearchConverter meilisearchConverter, @Qualifier("meilisearchObjectMapper") ObjectMapper objectMapper) {
+		return new MeilisearchTemplate(meilisearchClient, meilisearchConverter, objectMapper);
 	}
 
 	/**

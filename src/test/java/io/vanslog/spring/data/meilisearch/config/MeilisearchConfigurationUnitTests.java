@@ -27,11 +27,14 @@ import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRep
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.annotation.Id;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
@@ -47,6 +50,7 @@ class MeilisearchConfigurationUnitTests {
 	@Autowired private MeilisearchClient meilisearchClient;
 	@Autowired private MeilisearchOperations meilisearchTemplate;
 	@Autowired private io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate clientMeilisearchTemplate;
+	@Autowired @Qualifier("meilisearchObjectMapper") private ObjectMapper objectMapper;
 	@Autowired private ApplySettingsFalseRepository applySettingsFalseRepository;
 
 	@Test
@@ -64,6 +68,12 @@ class MeilisearchConfigurationUnitTests {
 	@Test
 	void shouldCreateMeilisearchTemplate() {
 		assertThat(meilisearchTemplate).isNotNull();
+	}
+
+	@Test
+	void shouldWireSpringManagedObjectMapperIntoMeilisearchTemplate() {
+		assertThat(objectMapper).isNotNull();
+		assertThat(ReflectionTestUtils.getField(clientMeilisearchTemplate, "objectMapper")).isSameAs(objectMapper);
 	}
 
 	@Test
