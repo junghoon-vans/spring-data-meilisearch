@@ -4,6 +4,8 @@
 
 This chapter describes the store-specific integration provided by Spring Data Meilisearch: client bootstrap, object mapping, operations, index lifecycle management, and index settings.
 
+Where the repositories chapter focuses on the Spring Data repository abstraction, this chapter focuses on the native integration surface exposed through configuration support, mapping metadata, and `MeilisearchOperations`.
+
 The main integration layers are:
 
 * xref:meilisearch/client-configuration.adoc[Client configuration] for JavaConfig and XML namespace bootstrap.

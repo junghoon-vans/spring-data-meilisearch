@@ -6,6 +6,8 @@
 
 _Spring Data Meilisearch provides Meilisearch connectivity, object mapping, template-style operations, and repository support for the Meilisearch search engine._
 
+This reference documentation is organized in the same chapter-oriented style used by Spring Data reference manuals. Start with the overview and getting-started material, then move into the store-specific Meilisearch chapter and the repository chapter as needed.
+
 [horizontal]
 xref:getting-started.adoc[Getting Started] :: Dependency setup, Java configuration, and first repository usage.
 xref:meilisearch.adoc[Meilisearch] :: Client configuration, object mapping, operations, index management, and settings.

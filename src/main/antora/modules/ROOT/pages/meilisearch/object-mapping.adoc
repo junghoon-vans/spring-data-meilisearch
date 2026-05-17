@@ -3,6 +3,8 @@
 
 Spring Data Meilisearch maps domain objects to Meilisearch documents through annotation metadata, a mapping context, and a converter.
 
+Object mapping is the basis for both repository support and template-style operations because the mapping metadata provides the index uid, document id, and optional settings metadata for each managed entity type.
+
 [[meilisearch.mapping.document]]
 == @Document
 
@@ -63,7 +65,7 @@ class Product {
 }
 ----
 
-Use annotation-driven settings for stable, entity-owned index defaults.
+Use annotation-driven settings for stable, entity-owned index defaults that should travel with the mapped type.
 Use xref:meilisearch/settings.adoc[runtime settings operations] when settings must be inspected or adjusted dynamically.
 
 [[meilisearch.mapping.converter]]

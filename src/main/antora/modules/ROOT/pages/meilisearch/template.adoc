@@ -8,7 +8,7 @@ That interface combines document operations, search operations, access to instan
 == Entry Point
 
 `MeilisearchConfiguration` registers a bean named `meilisearchOperations` and `meilisearchTemplate`.
-Inject that bean when you want direct access to Meilisearch-specific operations instead of the repository abstraction.
+Inject that bean when you want direct access to Meilisearch-specific operations instead of the repository abstraction. This is also the primary entry point for store-specific capabilities that are intentionally not surfaced through repositories.
 
 [source,java]
 ----
@@ -98,6 +98,8 @@ Each hit is a `SearchHit<T>` that contains:
 * `OFF` means exact total-hit metadata is unavailable.
 
 Use the hit list size for the current page content and total-hit metadata only when the relation is `EQUAL_TO`.
+
+When you need access to raw search metadata such as facets or federation details, prefer `MeilisearchOperations` directly instead of adapting repository return types.
 
 [[meilisearch.operations.notes]]
 == Notes on Search Semantics

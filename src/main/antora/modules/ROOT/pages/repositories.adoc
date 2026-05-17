@@ -15,3 +15,5 @@ In particular, Spring Data Meilisearch currently documents:
 * store-specific behavior such as automatic settings application and the difference between document-backed and search-backed methods.
 
 It does not currently claim support for the richer repository-query model that some other Spring Data modules provide, such as derived finder methods, named queries, or store-specific `@Query` execution.
+
+Read the common repository fundamentals first, then continue with the store-specific pages in this chapter to understand the exact repository surface exposed by Spring Data Meilisearch.

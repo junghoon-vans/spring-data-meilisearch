@@ -4,6 +4,8 @@
 `MeilisearchRepository<T, ID>` extends Spring Data `CrudRepository` and `PagingAndSortingRepository`.
 The default implementation delegates to `MeilisearchOperations`.
 
+This keeps repository usage aligned with familiar Spring Data patterns while still letting the module preserve Meilisearch-specific behavior underneath the repository facade.
+
 [source,java]
 ----
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;

@@ -6,6 +6,8 @@
 * `instanceOps()` for Meilisearch instance-level information.
 * `indexOps(...)` for APIs bound to one index.
 
+These APIs are useful when an application needs to manage index lifecycle or inspect runtime state without dropping down to the raw Meilisearch Java SDK.
+
 [[meilisearch.index-operations.instance]]
 == Instance Operations
 

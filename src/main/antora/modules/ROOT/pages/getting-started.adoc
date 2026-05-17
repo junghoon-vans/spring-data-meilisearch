@@ -3,6 +3,8 @@
 
 Spring Data Meilisearch is a single-module Spring Data integration for applications that want to access Meilisearch through familiar Spring configuration, mapping, operations, and repository abstractions.
 
+The quickest way to get started is to declare the dependency, extend `MeilisearchConfiguration`, annotate your domain type with `@Document`, and create a `MeilisearchRepository` for the aggregate root.
+
 [[meilisearch.getting-started.requirements]]
 == Requirements
 
@@ -66,6 +68,7 @@ class MeilisearchConfig extends MeilisearchConfiguration {
 ----
 
 `MeilisearchConfiguration` registers the standard Spring Data Meilisearch beans, including the client, mapping context, converter, and the `meilisearchTemplate` / `meilisearchOperations` bean.
+`MeilisearchRepository` is the recommended repository base interface for this module's current repository feature set.
 For local development, prefer a scoped API key exposed through `MEILISEARCH_API_KEY` instead of using the Meilisearch master key in application code.
 
 [[meilisearch.getting-started.domain]]
@@ -121,5 +124,5 @@ class MovieService {
 == Next Steps
 
 * Continue with xref:meilisearch/client-configuration.adoc[client configuration] to customize JSON handling, timeouts, and XML namespace usage.
-* Read xref:meilisearch/object-mapping.adoc[object mapping] to understand `@Document`, `@Setting`, and conversion support.
-* Read xref:meilisearch/template.adoc[operations] and xref:repositories.adoc[repositories] to choose between template-style access and repository abstractions.
+* Continue with xref:meilisearch/object-mapping.adoc[object mapping] to understand `@Document`, `@Setting`, and conversion support.
+* Continue with xref:meilisearch/template.adoc[operations] and xref:repositories.adoc[repositories] to choose between template-style access and repository abstractions.

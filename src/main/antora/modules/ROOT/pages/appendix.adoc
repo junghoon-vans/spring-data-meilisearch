@@ -11,4 +11,4 @@ xref:appendix/xml-namespace-reference.adoc[Spring Data Meilisearch Schema (meili
 [[meilisearch.appendix.javadoc]]
 == Javadoc
 
-https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html[Spring Data Meilisearch Javadoc]
+https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html[Spring Data Meilisearch Javadoc,role=link-external,window=_blank]

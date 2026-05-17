@@ -6,6 +6,8 @@ Spring Data Meilisearch supports two complementary ways to work with Meilisearch
 * annotation-driven settings that live with the mapped entity type,
 * runtime settings operations exposed through `MeilisearchIndexOperations`.
 
+This split keeps stable index defaults close to the domain model while still allowing explicit runtime adjustments when operational concerns require them.
+
 [[meilisearch.settings.annotation-driven]]
 == Annotation-driven Settings
 

@@ -3,6 +3,8 @@
 
 Spring Data Meilisearch operates on top of the Meilisearch Java client and exposes a Spring-friendly configuration model for creating and wiring the client.
 
+In most applications, the entry point is a Java configuration class that extends `MeilisearchConfiguration`. XML namespace support is available for applications that still use XML-based container configuration.
+
 [[meilisearch.clients.javaconfig]]
 == JavaConfig
 
@@ -13,13 +15,16 @@ Extend `MeilisearchConfiguration` to provide the `ClientConfiguration` bean. The
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
 
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 class MyClientConfig extends MeilisearchConfiguration {
 
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
                 .connectedTo("http://localhost:7700")
-                .withApiKey("masterKey")
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
                 .withRequestTimeout(2_000)
                 .withRequestInterval(20)
                 .build();
@@ -51,6 +56,9 @@ Override `jsonHandler()` when you need a different implementation.
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 class JsonHandlerConfig extends MeilisearchConfiguration {
 
     @Override
@@ -71,6 +79,7 @@ The supported integration styles are:
 
 Spring Data Meilisearch also provides an XML namespace.
 Register a JSON handler bean and reference it from `<meilisearch:meilisearch-client>` when you do not want to use the default bean name.
+For production deployments, prefer a scoped API key rather than the Meilisearch master key.
 
 [source,xml]
 ----
@@ -87,7 +96,7 @@ Register a JSON handler bean and reference it from `<meilisearch:meilisearch-cli
     <meilisearch:meilisearch-client
             id="meilisearchClient"
             host-url="http://localhost:7700"
-            api-key="masterKey"
+            api-key="${MEILISEARCH_API_KEY}"
             request-timeout="2000"
             request-interval="20"
             json-handler-ref="jsonHandler"/>

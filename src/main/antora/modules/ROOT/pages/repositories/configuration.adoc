@@ -3,6 +3,8 @@
 
 Spring Data Meilisearch repositories are enabled through `@EnableMeilisearchRepositories` or the XML namespace.
 
+As with other Spring Data modules, repository bootstrap is intentionally lightweight. The main store-specific choice is which `MeilisearchOperations` bean should back discovered repositories.
+
 [[meilisearch.repositories.configuration.annotation]]
 == JavaConfig
 

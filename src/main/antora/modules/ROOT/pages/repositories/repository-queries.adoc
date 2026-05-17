@@ -5,6 +5,8 @@ Spring Data Meilisearch currently focuses on the repository base interfaces and 
 
 This page intentionally documents the boundary of the current repository support so that the manual stays aligned with the implemented code rather than with the broader feature set available in some other Spring Data modules.
 
+That boundary is deliberate: the repository API covers the common persistence flow, while the operations API remains the explicit place for richer Meilisearch search capabilities.
+
 [[meilisearch.repositories.queries.scope]]
 == Recommended Scope
 
