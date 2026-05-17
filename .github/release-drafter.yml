@@ -2,11 +2,16 @@ categories:
   - title: '⭐ New Features'
     label: 'type: enhancement'
   - title: '🐞 Bug Fixes'
-    label: 'type: bug'
+    labels:
+      - 'type: bug'
+      - 'type: regression'
   - title: '📔 Documentation'
     label: 'type: documentation'
   - title: '🔨 Dependency Upgrades'
     label: 'type: dependency-upgrade'
+
+exclude-contributors:
+  - 'junghoon-vans'
 
 change-template: '* $TITLE #$NUMBER'
 template: |
