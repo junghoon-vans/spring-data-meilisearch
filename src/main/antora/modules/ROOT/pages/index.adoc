@@ -1,20 +1,21 @@
 [[spring-data-meilisearch-reference-documentation]]
 = Spring Data Meilisearch
-Junghoon Ban
 :revnumber: {version}
 :revdate: {localdate}
 :feature-scroll: true
 
-_Spring Data Meilisearch provides Meilisearch connectivity and repository support for the Meilisearch search engine.
-It eases development of applications with a consistent programming model that need to access Meilisearch indexes._
+_Spring Data Meilisearch provides Meilisearch connectivity, object mapping, template-style operations, and repository support for the Meilisearch search engine._
+
+This reference documentation is organized in the same chapter-oriented style used by Spring Data reference manuals. Start with the overview and getting-started material, then move into the store-specific Meilisearch chapter and the repository chapter as needed.
 
 [horizontal]
-xref:meilisearch-client.adoc[Client] :: Meilisearch client configuration
-xref:meilisearch-document.adoc[Document Mapping] :: Entity metadata and document mapping
-xref:meilisearch-operations.adoc[Operations] :: Template-based index, document, and search operations
-xref:meilisearch-repositories.adoc[Repositories] :: Spring Data repository support
-xref:meilisearch-settings.adoc[Settings] :: Index settings, facets, pagination, localization, and AI-powered search settings
-xref:attachment$api/java/index.html[Javadoc] :: API documentation
+xref:getting-started.adoc[Getting Started] :: Dependency setup, Java configuration, and first repository usage.
+xref:meilisearch.adoc[Meilisearch] :: Client configuration, object mapping, operations, index management, and settings.
+xref:repositories.adoc[Repositories] :: Spring Data repository fundamentals and Meilisearch-specific repository behavior.
+xref:appendix.adoc[Appendix] :: XML namespace reference and supporting reference material.
+https://github.com/spring-projects/spring-data-commons/wiki[Wiki] :: What's new, supported versions, and additional Spring Data cross-project information.
+
+Junghoon Ban
 
 (C) 2023-{copyright-year} The original author(s).
 

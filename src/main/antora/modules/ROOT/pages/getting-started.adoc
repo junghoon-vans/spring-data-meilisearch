@@ -1,0 +1,128 @@
+[[meilisearch.getting-started]]
+= Getting Started
+
+Spring Data Meilisearch is a single-module Spring Data integration for applications that want to access Meilisearch through familiar Spring configuration, mapping, operations, and repository abstractions.
+
+The quickest way to get started is to declare the dependency, extend `MeilisearchConfiguration`, annotate your domain type with `@Document`, and create a `MeilisearchRepository` for the aggregate root.
+
+[[meilisearch.getting-started.requirements]]
+== Requirements
+
+* JDK 17 or newer.
+* A reachable Meilisearch instance.
+* A Meilisearch API key with the permissions required for your application.
+
+[[meilisearch.getting-started.maven]]
+== Maven Coordinates
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.vanslog</groupId>
+  <artifactId>spring-data-meilisearch</artifactId>
+  <version>{version}</version>
+</dependency>
+----
+
+If you want to try the next snapshot build, add the Sonatype snapshot repository and use a `-SNAPSHOT` version.
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.vanslog</groupId>
+  <artifactId>spring-data-meilisearch</artifactId>
+  <version>{version}-SNAPSHOT</version>
+</dependency>
+
+<repository>
+  <id>sonatype-snapshots</id>
+  <name>Sonatype Snapshot Repository</name>
+  <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+</repository>
+----
+
+[[meilisearch.getting-started.java-config]]
+== Java Configuration
+
+The usual starting point is a configuration class that extends `MeilisearchConfiguration` and enables repository scanning.
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
+import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@EnableMeilisearchRepositories(basePackages = "com.example.movies")
+class MeilisearchConfig extends MeilisearchConfiguration {
+
+    @Override
+    public ClientConfiguration clientConfiguration() {
+        return ClientConfiguration.builder()
+                .connectedTo("http://localhost:7700")
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
+                .build();
+    }
+}
+----
+
+`MeilisearchConfiguration` registers the standard Spring Data Meilisearch beans, including the client, mapping context, converter, and the `meilisearchTemplate` / `meilisearchOperations` bean.
+`MeilisearchRepository` is the recommended repository base interface for this module's current repository feature set.
+For local development, prefer a scoped API key exposed through `MEILISEARCH_API_KEY` instead of using the Meilisearch master key in application code.
+
+[[meilisearch.getting-started.domain]]
+== Domain Type
+
+Annotate persistent types with `@Document` and choose the target index uid explicitly.
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.annotations.Document;
+
+import org.springframework.data.annotation.Id;
+
+@Document(indexUid = "movies")
+class Movie {
+
+    @Id
+    private String id;
+    private String title;
+    private String description;
+}
+----
+
+[[meilisearch.getting-started.repository]]
+== Repository Usage
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+
+public interface MovieRepository extends MeilisearchRepository<Movie, String> {
+}
+----
+
+[source,java]
+----
+@Service
+class MovieService {
+
+    private final MovieRepository repository;
+
+    MovieService(MovieRepository repository) {
+        this.repository = repository;
+    }
+
+    public Movie save(Movie movie) {
+        return repository.save(movie);
+    }
+}
+----
+
+[[meilisearch.getting-started.next-steps]]
+== Next Steps
+
+* Continue with xref:meilisearch/client-configuration.adoc[client configuration] to customize JSON handling, timeouts, and XML namespace usage.
+* Continue with xref:meilisearch/object-mapping.adoc[object mapping] to understand `@Document`, `@Setting`, and conversion support.
+* Continue with xref:meilisearch/template.adoc[operations] and xref:repositories.adoc[repositories] to choose between template-style access and repository abstractions.

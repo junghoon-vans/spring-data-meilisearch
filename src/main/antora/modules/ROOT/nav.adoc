@@ -1,10 +1,23 @@
 * xref:index.adoc[Overview]
+** xref:getting-started.adoc[]
 
-.Meilisearch
-* xref:meilisearch-client.adoc[Meilisearch Client]
-* xref:meilisearch-document.adoc[Meilisearch Document]
-* xref:meilisearch-operations.adoc[Meilisearch Operations]
-* xref:meilisearch-repositories.adoc[Meilisearch Repositories]
-* xref:meilisearch-settings.adoc[Meilisearch Settings]
+* xref:meilisearch.adoc[]
+** xref:meilisearch/client-configuration.adoc[]
+** xref:meilisearch/object-mapping.adoc[]
+** xref:meilisearch/template.adoc[]
+** xref:meilisearch/index-operations.adoc[]
+** xref:meilisearch/settings.adoc[]
 
-* xref:attachment$api/java/index.html[Javadoc,role=link-external,window=_blank]
+* xref:repositories.adoc[]
+** xref:repositories/core-concepts.adoc[]
+** xref:repositories/definition.adoc[]
+** xref:repositories/create-instances.adoc[]
+** xref:repositories/configuration.adoc[]
+** xref:repositories/meilisearch-repositories.adoc[]
+** xref:repositories/repository-queries.adoc[]
+
+* xref:appendix.adoc[]
+** xref:appendix/xml-namespace-reference.adoc[]
+
+* https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html[Javadoc,role=link-external,window=_blank]
+* https://github.com/spring-projects/spring-data-commons/wiki[Wiki,role=link-external,window=_blank]

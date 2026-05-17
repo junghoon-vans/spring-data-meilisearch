@@ -1,0 +1,14 @@
+[[meilisearch.appendix]]
+= Appendix
+
+This appendix contains reference material for Spring Data Meilisearch.
+
+[[meilisearch.appendix.schema]]
+== Schema
+
+xref:appendix/xml-namespace-reference.adoc[Spring Data Meilisearch Schema (meilisearch-namespace)]
+
+[[meilisearch.appendix.javadoc]]
+== Javadoc
+
+https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html[Spring Data Meilisearch Javadoc,role=link-external,window=_blank]

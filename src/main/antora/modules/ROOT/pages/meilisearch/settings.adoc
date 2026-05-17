@@ -1,0 +1,130 @@
+[[meilisearch.settings]]
+= Settings
+
+Spring Data Meilisearch supports two complementary ways to work with Meilisearch index settings:
+
+* annotation-driven settings that live with the mapped entity type,
+* runtime settings operations exposed through `MeilisearchIndexOperations`.
+
+This split keeps stable index defaults close to the domain model while still allowing explicit runtime adjustments when operational concerns require them.
+
+[[meilisearch.settings.annotation-driven]]
+== Annotation-driven Settings
+
+Use `@Setting` for the main index settings and companion annotations for the specialized settings groups.
+
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(
+        searchableAttributes = { "description", "brand", "color" },
+        displayedAttributes = { "description", "brand", "color", "productId" },
+        sortableAttributes = { "productId" },
+        rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" },
+        distinctAttribute = "productId",
+        filterableAttributes = { "brand", "color", "price" },
+        synonyms = {
+                @Synonym(word = "phone", synonyms = { "mobile", "cellphone" })
+        },
+        dictionary = { "netflix", "spotify" },
+        stopWords = { "a", "an", "the" },
+        separatorTokens = { "-", "_", "@" },
+        nonSeparatorTokens = { ".", "#" },
+        proximityPrecision = "byWord",
+        searchCutoffMs = 50)
+@TypoTolerance(enabled = true,
+        minWordSizeForTypos = @MinWordSizeForTypos(oneTypo = 5, twoTypos = 9),
+        disableOnWords = { "skype", "zoom" },
+        disableOnAttributes = { "serial_number" })
+@Faceting(maxValuesPerFacet = 100)
+@Pagination(maxTotalHits = 2000)
+class Product {
+}
+----
+
+These annotations are mapping metadata.
+They are applied automatically when repository bootstrap encounters an entity with `@Document(applySettings = true)` and can also be applied explicitly through `MeilisearchOperations.applySettings(Entity.class)`.
+
+[[meilisearch.settings.categories]]
+== Settings Categories
+
+The supported annotation model covers the main settings groups exposed by Meilisearch:
+
+* search and display behavior through `searchableAttributes`, `displayedAttributes`, `filterableAttributes`, `sortableAttributes`, `rankingRules`, and `distinctAttribute`,
+* text processing through synonyms, dictionary, stop words, tokenization, and typo tolerance,
+* result-shaping and performance controls through pagination, faceting, proximity precision, and `searchCutoffMs`,
+* localized attributes for explicit language handling,
+* embedder definitions for AI-powered and similar-document search scenarios.
+
+[[meilisearch.settings.localization]]
+== Localized Attributes
+
+`localizedAttributes` allow you to declare the locale rules for matching groups of fields.
+Use them when automatic language detection is not enough for your index.
+
+[source,java]
+----
+@Document(indexUid = "products")
+@Setting(localizedAttributes = {
+        @LocalizedAttribute(attributePatterns = { "*En" }, locales = { "eng" })
+})
+class Product {
+
+    private String nameEn;
+}
+----
+
+[[meilisearch.settings.embedders]]
+== Embedders
+
+Embedders are configured through `@Embedder` inside `@Setting`.
+That configuration is relevant for Meilisearch AI-powered features such as semantic and similar-document search.
+
+[source,java]
+----
+@Document(indexUid = "movies")
+@Setting(embedders = {
+        @Embedder(
+                name = "default",
+                source = Embedder.Source.OPEN_AI,
+                apiKey = "${OPENAI_API_KEY}",
+                model = "text-embedding-3-small")
+})
+class Movie {
+}
+----
+
+Each embedder definition needs a unique `name` because that value is later referenced from `SimilarQuery` through `withEmbedder(...)`.
+
+[[meilisearch.settings.runtime]]
+== Runtime Settings Updates
+
+Use `MeilisearchIndexOperations` for runtime inspection and updates.
+
+[source,java]
+----
+MeilisearchIndexOperations index = meilisearchOperations.indexOps(Product.class);
+
+MeilisearchIndexSettings current = index.getSettings();
+
+MeilisearchIndexSettings updated = index.updateSettings(
+        MeilisearchIndexSettings.builder()
+                .withSearchableAttributes(List.of("description", "brand", "color"))
+                .withDisplayedAttributes(List.of("description", "brand", "color", "productId"))
+                .withFilterableAttributes(List.of("brand", "color", "price"))
+                .withPagination(new MeilisearchIndexSettings.PaginationSettings(2000))
+                .build());
+
+MeilisearchIndexSettings defaults = index.resetSettings();
+----
+
+Runtime settings updates send the non-null fields from `MeilisearchIndexSettings`.
+Use empty collections when you want to clear supported list or map settings, and use `resetSettings()` when you want to restore all settings to Meilisearch defaults.
+
+[[meilisearch.settings.pagination]]
+== Pagination Limits
+
+Meilisearch paginated search responses can be capped by the configured `maxTotalHits` value.
+That affects both `SearchHits#getTotalHits()` and repository `Page` totals because repository paging is implemented on top of search APIs rather than separate count queries.
+
+If you expect more than the default limit, configure `@Pagination(maxTotalHits = ...)` or the equivalent runtime settings value before relying on page totals.

@@ -1,0 +1,94 @@
+[[meilisearch.appendix.xml-namespace]]
+= XML Namespace Reference
+
+The Spring Data Meilisearch XML namespace lives under `http://www.vanslog.io/spring/data/meilisearch` and is backed by `spring-meilisearch-1.0.xsd`.
+
+[[meilisearch.appendix.xml-namespace.client]]
+== `<meilisearch:meilisearch-client>`
+
+Creates a `MeilisearchClient` bean.
+
+[cols="1,1,3"]
+|===
+|Attribute | Default | Description
+
+|`id`
+|
+|Bean id for the client instance.
+
+|`host-url`
+|`http://localhost:7700`
+|The Meilisearch server URL.
+
+|`api-key`
+|
+|The API key used for authentication.
+
+|`client-agents`
+|
+|Comma-delimited client agent values sent with requests.
+
+|`request-timeout`
+|
+|How long to wait, in milliseconds, for task-based operations to complete.
+
+|`request-interval`
+|
+|Polling interval, in milliseconds, used while waiting for task completion.
+
+|`json-handler-ref`
+|`jsonHandler`
+|Reference to a bean implementing `com.meilisearch.sdk.json.JsonHandler`.
+|===
+
+[[meilisearch.appendix.xml-namespace.repositories]]
+== `<meilisearch:repositories>`
+
+Enables Meilisearch repository scanning.
+It extends the generic Spring Data repository namespace and therefore also supports the standard repository namespace attributes.
+
+[cols="1,1,3"]
+|===
+|Attribute | Default | Description
+
+|`base-package`
+|
+|Package to scan for repository interfaces.
+
+|`meilisearch-template-ref`
+|`meilisearchTemplate`
+|Reference to the `MeilisearchOperations` bean used to back discovered repositories.
+|===
+
+[[meilisearch.appendix.xml-namespace.example]]
+== Example
+
+[source,xml]
+----
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.vanslog.io/spring/data/meilisearch
+       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
+
+    <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
+
+    <meilisearch:meilisearch-client
+            id="meilisearchClient"
+            host-url="http://localhost:7700"
+            api-key="masterKey"
+            json-handler-ref="jsonHandler"/>
+
+    <bean id="meilisearchTemplate"
+          class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate">
+        <constructor-arg name="meilisearchClient" ref="meilisearchClient"/>
+        <constructor-arg name="meilisearchConverter" ref="meilisearchConverter"/>
+    </bean>
+
+    <meilisearch:repositories
+            base-package="com.example.movies"
+            meilisearch-template-ref="meilisearchTemplate"/>
+</beans>
+----

@@ -1,0 +1,72 @@
+[[meilisearch.repositories.configuration]]
+= Repository Configuration
+
+Spring Data Meilisearch repositories are enabled through `@EnableMeilisearchRepositories` or the XML namespace.
+
+As with other Spring Data modules, repository bootstrap is intentionally lightweight. The main store-specific choice is which `MeilisearchOperations` bean should back discovered repositories.
+
+[[meilisearch.repositories.configuration.annotation]]
+== JavaConfig
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
+
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@EnableMeilisearchRepositories(
+        basePackages = "com.example.movies",
+        meilisearchTemplateRef = "meilisearchTemplate")
+class RepositoryConfig {
+}
+----
+
+`@EnableMeilisearchRepositories` supports the standard Spring Data repository scanning options, including:
+
+* `value` and `basePackages`
+* `basePackageClasses`
+* `includeFilters` and `excludeFilters`
+* `repositoryImplementationPostfix`
+* `namedQueriesLocation`
+* `queryLookupStrategy`
+* `repositoryFactoryBeanClass`
+* `meilisearchTemplateRef`
+* `considerNestedRepositories`
+
+If no base packages are configured, Spring Data scans the package of the annotated configuration class.
+
+The presence of `queryLookupStrategy` and `namedQueriesLocation` on the annotation reflects the standard Spring Data configuration contract.
+However, Spring Data Meilisearch's documented repository model currently centers on the built-in repository methods rather than on derived or declared query methods.
+
+[[meilisearch.repositories.configuration.namespace]]
+== XML Namespace
+
+[source,xml]
+----
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.vanslog.io/spring/data/meilisearch
+       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
+
+    <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
+
+    <meilisearch:meilisearch-client id="meilisearchClient" api-key="${MEILISEARCH_API_KEY}"/>
+
+    <bean id="meilisearchTemplate"
+          class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate">
+        <constructor-arg name="meilisearchClient" ref="meilisearchClient"/>
+        <constructor-arg name="meilisearchConverter" ref="meilisearchConverter"/>
+    </bean>
+
+    <meilisearch:repositories
+            base-package="com.example.movies"
+            meilisearch-template-ref="meilisearchTemplate"/>
+</beans>
+----
+
+The XML namespace extends the Spring Data repository namespace and adds the `meilisearch-template-ref` attribute.
+See xref:appendix/xml-namespace-reference.adoc[XML namespace reference] for the full attribute list.

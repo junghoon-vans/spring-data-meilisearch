@@ -1,0 +1,57 @@
+[[repositories.core-concepts]]
+= Core Concepts
+
+Spring Data Meilisearch supports the core Spring Data repository programming model, but its repository surface is intentionally narrower than stores such as JPA, MongoDB, Elasticsearch, or Redis.
+
+The important distinction is that this module currently provides:
+
+* repository bootstrap through `@EnableMeilisearchRepositories` and the XML namespace,
+* a store-specific `MeilisearchRepository<T, ID>` base interface,
+* CRUD and paging/sorting methods implemented by `SimpleMeilisearchRepository`,
+* direct access to advanced search features through `MeilisearchOperations`.
+
+It does *not* currently document or promise full Spring Data query derivation support, custom `@Query` methods, or named-query execution.
+
+[[repositories.core-concepts.repository-interface]]
+== Repository Interface
+
+`MeilisearchRepository<T, ID>` extends Spring Data `CrudRepository` and `PagingAndSortingRepository`.
+That means the stable repository contract is the built-in CRUD plus sorting/paging methods defined by those interfaces.
+
+[source,java]
+----
+public interface MeilisearchRepository<T, ID>
+        extends CrudRepository<T, ID>, PagingAndSortingRepository<T, ID> {
+}
+----
+
+[[repositories.core-concepts.execution-model]]
+== Execution Model
+
+The default repository implementation delegates to `MeilisearchOperations`, but not every repository method uses the same underlying Meilisearch API:
+
+* `findById(...)` and `findAllById(...)` use document APIs.
+* `findAll()`, `findAll(Sort)`, and `findAll(Pageable)` use search APIs.
+* `count()` is derived from the search-oriented operations layer.
+
+That difference matters because Meilisearch search settings can affect search-backed repository methods without affecting document lookups.
+
+[[repositories.core-concepts-when-to-use]]
+== When to Use Repositories vs. Operations
+
+Use repositories when you want Spring Data's familiar persistence model for:
+
+* saving and deleting entities,
+* id-based reads,
+* simple collection reads,
+* sorting and pageable access.
+
+Use `MeilisearchOperations` when you need store-specific behavior such as:
+
+* `BasicQuery`, `IndexQuery`, `FacetQuery`, or `SimilarQuery`,
+* federated multi-search,
+* facet metadata,
+* index lifecycle management,
+* runtime settings updates.
+
+For the concrete store-specific rules and current limitations, see xref:repositories/meilisearch-repositories.adoc[Meilisearch Repositories] and xref:repositories/repository-queries.adoc[Repository Methods and Limitations].
