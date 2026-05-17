@@ -1,8 +1,14 @@
 [[meilisearch.appendix]]
 = Appendix
-:page-section-summary-toc: 1
 
 This appendix contains reference material for Spring Data Meilisearch.
 
-* xref:appendix/xml-namespace-reference.adoc[XML namespace reference]
-* https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html[Javadoc]
+[[meilisearch.appendix.schema]]
+== Schema
+
+xref:appendix/xml-namespace-reference.adoc[Spring Data Meilisearch Schema (meilisearch-namespace)]
+
+[[meilisearch.appendix.javadoc]]
+== Javadoc
+
+https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html[Spring Data Meilisearch Javadoc]

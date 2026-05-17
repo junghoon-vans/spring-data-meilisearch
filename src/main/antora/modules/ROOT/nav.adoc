@@ -1,6 +1,5 @@
 * xref:index.adoc[Overview]
 ** xref:getting-started.adoc[]
-** xref:commons/upgrade.adoc[]
 
 * xref:meilisearch.adoc[]
 ** xref:meilisearch/client-configuration.adoc[]
