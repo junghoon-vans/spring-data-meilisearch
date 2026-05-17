@@ -7,4 +7,4 @@
 * xref:meilisearch-repositories.adoc[Meilisearch Repositories]
 * xref:meilisearch-settings.adoc[Meilisearch Settings]
 
-* xref:attachment$api/java/index.html[Javadoc]
+* xref:attachment$api/java/index.html[Javadoc,role=link-external,window=_blank]
