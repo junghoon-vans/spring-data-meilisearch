@@ -42,6 +42,7 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 	private final String indexUid;
 	private final MeilisearchClientExecutor executor;
 	private final IndexRequestConverter requestConverter;
+	private final IndexSettingsResponseConverter settingsResponseConverter;
 	private final InstanceResponseConverter responseConverter;
 	private final int requestTimeout;
 	private final int requestInterval;
@@ -55,6 +56,7 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 		this.indexUid = indexUid;
 		this.executor = executor;
 		this.requestConverter = new IndexRequestConverter();
+		this.settingsResponseConverter = new IndexSettingsResponseConverter();
 		this.responseConverter = responseConverter;
 		this.requestTimeout = requestTimeout;
 		this.requestInterval = requestInterval;
@@ -126,7 +128,7 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 
 	@Override
 	public MeilisearchIndexSettings getSettings() {
-		return requestConverter.fromSettings(executor.execute(client -> client.index(indexUid).getSettings()));
+		return settingsResponseConverter.fromSettings(executor.execute(client -> client.index(indexUid).getSettings()));
 	}
 
 	@Override

@@ -17,7 +17,6 @@ package io.vanslog.spring.data.meilisearch.client.msc;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -119,49 +118,4 @@ class IndexRequestConverterUnitTests {
 		assertThat(sdkSettings.getEmbedders().get("default").getBinaryQuantized()).isTrue();
 	}
 
-	@Test
-	void shouldConvertSdkSettingsToIndexSettings() {
-
-		Settings sdkSettings = new Settings();
-		sdkSettings.setSearchableAttributes(new String[] { "title", "description" });
-		sdkSettings.setDisplayedAttributes(new String[] { "id", "title" });
-		sdkSettings.setFilterableAttributes(new String[] { "genres" });
-		HashMap<String, String[]> synonyms = new HashMap<>();
-		synonyms.put("hero", new String[] { "superhero" });
-		sdkSettings.setSynonyms(synonyms);
-		sdkSettings.setPagination(new com.meilisearch.sdk.model.Pagination(1500));
-		com.meilisearch.sdk.model.Faceting faceting = new com.meilisearch.sdk.model.Faceting();
-		faceting.setMaxValuesPerFacet(75);
-		sdkSettings.setFaceting(faceting);
-		com.meilisearch.sdk.model.TypoTolerance typoTolerance = new com.meilisearch.sdk.model.TypoTolerance();
-		typoTolerance.setEnabled(true);
-		HashMap<String, Integer> minWordSizeForTypos = new HashMap<>();
-		minWordSizeForTypos.put("oneTypo", 5);
-		minWordSizeForTypos.put("twoTypos", 9);
-		typoTolerance.setMinWordSizeForTypos(minWordSizeForTypos);
-		sdkSettings.setTypoTolerance(typoTolerance);
-		sdkSettings.setLocalizedAttributes(new com.meilisearch.sdk.model.LocalizedAttribute[] {
-				new com.meilisearch.sdk.model.LocalizedAttribute(new String[] { "title_*" }, new String[] { "eng" }) });
-		HashMap<String, com.meilisearch.sdk.model.Embedder> embedders = new HashMap<>();
-		embedders.put("default", new com.meilisearch.sdk.model.Embedder()
-				.setSource(com.meilisearch.sdk.model.EmbedderSource.REST).setUrl("https://example.com/embed")
-				.setInputType(com.meilisearch.sdk.model.EmbedderInputType.TEXT_ARRAY));
-		sdkSettings.setEmbedders(embedders);
-
-		MeilisearchIndexSettings settings = converter.fromSettings(sdkSettings);
-
-		assertThat(settings.getSearchableAttributes()).containsExactly("title", "description");
-		assertThat(settings.getDisplayedAttributes()).containsExactly("id", "title");
-		assertThat(settings.getFilterableAttributes()).containsExactly("genres");
-		assertThat(settings.getSynonyms()).containsEntry("hero", List.of("superhero"));
-		assertThat(settings.getPagination().getMaxTotalHits()).isEqualTo(1500);
-		assertThat(settings.getFaceting().getMaxValuesPerFacet()).isEqualTo(75);
-		assertThat(settings.getTypoTolerance().getOneTypo()).isEqualTo(5);
-		assertThat(settings.getTypoTolerance().getTwoTypos()).isEqualTo(9);
-		assertThat(settings.getLocalizedAttributes().get(0).getAttributePatterns()).containsExactly("title_*");
-		assertThat(settings.getLocalizedAttributes().get(0).getLocales()).containsExactly("eng");
-		assertThat(settings.getEmbedders().get("default").getSource()).isEqualTo(EmbedderSource.REST);
-		assertThat(settings.getEmbedders().get("default").getUrl()).isEqualTo("https://example.com/embed");
-		assertThat(settings.getEmbedders().get("default").getInputType()).isEqualTo(EmbedderInputType.TEXT_ARRAY);
-	}
 }
