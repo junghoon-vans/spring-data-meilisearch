@@ -107,7 +107,18 @@ jobs:
           cache: 'maven'
       - name: Build versioned documentation
         if: steps.publish-target.outputs.versioned == 'true'
-        run: ./mvnw -Pantora antora:antora
+        run: |
+          if grep -q '<id>antora</id>' pom.xml; then
+            ./mvnw -Pantora antora:antora
+          else
+            ./mvnw clean install -Pdistribute -DskipTests
+            rm -rf target/versioned-site
+            mkdir -p target/versioned-site/api/java
+            cp -a target/site/reference/html/. target/versioned-site/
+            cp -a target/site/apidocs/. target/versioned-site/api/java/
+            rm -rf target/site
+            mv target/versioned-site target/site
+          fi
 
       - name: Prepare Antora CLI for publish documentation
         if: steps.publish-target.outputs.versioned != 'true'
