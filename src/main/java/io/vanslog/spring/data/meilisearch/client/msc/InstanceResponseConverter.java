@@ -16,20 +16,26 @@
 package io.vanslog.spring.data.meilisearch.client.msc;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.json.JsonHandler;
 import com.meilisearch.sdk.model.IndexStats;
+import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.Stats;
 
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchHealth;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchIndex;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexList;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexStats;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchStats;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchVersion;
@@ -80,6 +86,19 @@ class InstanceResponseConverter {
 		Instant lastUpdateInstant = lastUpdate != null ? lastUpdate.toInstant() : null;
 
 		return new MeilisearchStats(stats.getDatabaseSize(), stats.getUsedDatabaseSize(), lastUpdateInstant, indexes);
+	}
+
+	MeilisearchIndex mapIndex(Index index) {
+		return new MeilisearchIndex(index.getUid(), index.getPrimaryKey(), index.getCreatedAt(), index.getUpdatedAt());
+	}
+
+	MeilisearchIndexList mapIndexes(Results<Index> results) {
+
+		Index[] indexes = results.getResults();
+		List<MeilisearchIndex> mappedIndexes = indexes != null ? Arrays.stream(indexes).map(this::mapIndex).toList()
+				: List.of();
+
+		return new MeilisearchIndexList(mappedIndexes, results.getOffset(), results.getLimit(), results.getTotal());
 	}
 
 	MeilisearchIndexStats mapIndexStats(IndexStats stats) {

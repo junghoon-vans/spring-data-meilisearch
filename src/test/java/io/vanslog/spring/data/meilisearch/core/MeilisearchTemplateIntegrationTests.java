@@ -32,6 +32,7 @@ import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfigura
 import java.util.HashMap;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,9 @@ import org.springframework.test.context.ContextConfiguration;
 
 import com.meilisearch.sdk.MergeFacets;
 import com.meilisearch.sdk.MultiSearchFederation;
+import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
+import com.meilisearch.sdk.model.TaskInfo;
 
 /**
  * Integration tests for {@link MeilisearchOperations}.
@@ -61,9 +64,18 @@ class MeilisearchTemplateIntegrationTests {
 	ComicsMovie comics1 = new ComicsMovie(1, "Wonder Woman", "A superhero comic", new String[] { "Comics", "Action" });
 	ComicsMovie comics2 = new ComicsMovie(2, "Batman", "A superhero comic", new String[] { "Comics", "Action" });
 
+	private static final List<String> LIFECYCLE_INDEX_UIDS = List.of("lifecycle-create-index",
+			"lifecycle-get-list-index", "lifecycle-update-index", "lifecycle-delete-index");
+
 	@BeforeEach
 	void setUp() throws MeilisearchException {
 		meilisearchClient.index("movies").deleteAllDocuments();
+		deleteLifecycleIndexes();
+	}
+
+	@AfterEach
+	void tearDown() throws MeilisearchException {
+		deleteLifecycleIndexes();
 	}
 
 	@Test
@@ -241,6 +253,61 @@ class MeilisearchTemplateIntegrationTests {
 	}
 
 	@Test
+	void shouldCreateIndex() {
+
+		MeilisearchIndex index = meilisearchTemplate.indexOps("lifecycle-create-index")
+				.create(new MeilisearchIndexCreateRequest("id"));
+
+		assertThat(index.getUid()).isEqualTo("lifecycle-create-index");
+		assertThat(index.getPrimaryKey()).isEqualTo("id");
+		assertThat(index.getCreatedAt()).isNotBlank();
+	}
+
+	@Test
+	void shouldGetAndListIndexes() {
+
+		meilisearchTemplate.indexOps("lifecycle-get-list-index").create(new MeilisearchIndexCreateRequest("id"));
+
+		MeilisearchIndex index = meilisearchTemplate.indexOps("lifecycle-get-list-index").get();
+		MeilisearchIndexList indexes = meilisearchTemplate.indexOps("lifecycle-get-list-index")
+				.list(new MeilisearchIndexQuery(0, 100));
+
+		assertThat(index.getUid()).isEqualTo("lifecycle-get-list-index");
+		assertThat(indexes.getIndexes()).extracting(MeilisearchIndex::getUid).contains("lifecycle-get-list-index");
+		assertThat(indexes.getTotal()).isGreaterThanOrEqualTo(indexes.getIndexes().size());
+	}
+
+	@Test
+	void shouldUpdateIndex() {
+
+		MeilisearchIndex created = meilisearchTemplate.indexOps("lifecycle-update-index").create();
+
+		MeilisearchIndex updated = meilisearchTemplate.indexOps("lifecycle-update-index")
+				.update(new MeilisearchIndexUpdateRequest("id"));
+
+		assertThat(created.getPrimaryKey()).isNull();
+		assertThat(updated.getUid()).isEqualTo("lifecycle-update-index");
+		assertThat(updated.getPrimaryKey()).isEqualTo("id");
+	}
+
+	@Test
+	void shouldDeleteIndex() {
+
+		meilisearchTemplate.indexOps("lifecycle-delete-index").create(new MeilisearchIndexCreateRequest("id"));
+		meilisearchTemplate.indexOps("lifecycle-get-list-index").create(new MeilisearchIndexCreateRequest("id"));
+
+		boolean deleted = meilisearchTemplate.indexOps("lifecycle-delete-index").delete();
+		MeilisearchIndexList indexes = meilisearchTemplate.indexOps("lifecycle-delete-index")
+				.list(new MeilisearchIndexQuery(0, 100));
+		List<String> indexUids = indexes.getIndexes().stream().map(MeilisearchIndex::getUid).toList();
+
+		assertThat(deleted).isTrue();
+		assertThat(indexUids).isNotEmpty()
+				.contains("lifecycle-get-list-index")
+				.doesNotContain("lifecycle-delete-index");
+	}
+
+	@Test
 	void shouldRejectBlankIndexUid() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> meilisearchTemplate.indexOps(""));
@@ -408,6 +475,26 @@ class MeilisearchTemplateIntegrationTests {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+	}
+
+	private void deleteLifecycleIndexes() throws MeilisearchException {
+
+		for (String indexUid : LIFECYCLE_INDEX_UIDS) {
+			deleteIndexIfExists(indexUid);
+		}
+	}
+
+	private void deleteIndexIfExists(String indexUid) throws MeilisearchException {
+
+		try {
+			TaskInfo taskInfo = meilisearchClient.deleteIndex(indexUid);
+			meilisearchClient.index(indexUid).waitForTask(taskInfo.getTaskUid(), meilisearchClient.getRequestTimeout(),
+					meilisearchClient.getRequestInterval());
+		} catch (MeilisearchApiException e) {
+			if (!"index_not_found".equals(e.getCode())) {
+				throw e;
+			}
 		}
 	}
 }

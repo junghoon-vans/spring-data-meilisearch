@@ -109,7 +109,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	public MeilisearchIndexOperations indexOps(String indexUid) {
 
 		Assert.hasText(indexUid, "Index uid must not be empty");
-		return new MeilisearchIndexTemplate(indexUid, this::execute, instanceResponseConverter);
+		return new MeilisearchIndexTemplate(indexUid, this::execute, instanceResponseConverter,
+				meilisearchClient.getRequestTimeout(), meilisearchClient.getRequestInterval());
 	}
 
 	@Override
