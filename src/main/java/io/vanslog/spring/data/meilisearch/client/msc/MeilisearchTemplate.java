@@ -15,8 +15,8 @@
  */
 package io.vanslog.spring.data.meilisearch.client.msc;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +25,9 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.FacetSearchRequest;
 import com.meilisearch.sdk.MultiSearchFederation;
 import com.meilisearch.sdk.MultiSearchRequest;
@@ -55,6 +58,7 @@ import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
+import io.vanslog.spring.data.meilisearch.core.document.MeilisearchDocument;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
@@ -73,22 +77,36 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	private final MeilisearchClient meilisearchClient;
 	private final MeilisearchConverter meilisearchConverter;
+	private final ObjectMapper objectMapper;
 	private final RequestConverter requestConverter;
 	private final ResponseConverter responseConverter;
 	private final InstanceResponseConverter instanceResponseConverter;
 	private final MeilisearchInstanceOperations instanceOperations;
 
 	public MeilisearchTemplate(MeilisearchClient meilisearchClient) {
-		this(meilisearchClient, null);
+		this(meilisearchClient, null, new ObjectMapper());
 	}
 
 	public MeilisearchTemplate(MeilisearchClient meilisearchClient, @Nullable MeilisearchConverter meilisearchConverter) {
+		this(meilisearchClient, meilisearchConverter, new ObjectMapper());
+	}
+
+	public MeilisearchTemplate(MeilisearchClient meilisearchClient, ObjectMapper objectMapper) {
+		this(meilisearchClient, null, objectMapper);
+	}
+
+	public MeilisearchTemplate(MeilisearchClient meilisearchClient, @Nullable MeilisearchConverter meilisearchConverter,
+			ObjectMapper objectMapper) {
+
+		Assert.notNull(meilisearchClient, "MeilisearchClient must not be null");
+		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
 		this.meilisearchClient = meilisearchClient;
 		this.meilisearchConverter = meilisearchConverter != null ? meilisearchConverter
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
+		this.objectMapper = objectMapper;
 		this.requestConverter = new RequestConverter();
-		this.responseConverter = new ResponseConverter();
+		this.responseConverter = new ResponseConverter(this.meilisearchConverter, objectMapper);
 		this.instanceResponseConverter = new InstanceResponseConverter(meilisearchClient.getJsonHandler());
 		this.instanceOperations = new MeilisearchInstanceTemplate(this::execute, instanceResponseConverter);
 	}
@@ -128,7 +146,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		String primaryKey = Objects.requireNonNull(idProperty.getField()).getName();
 
 		TaskInfo taskInfo = execute(client -> {
-			String document = meilisearchClient.getJsonHandler().encode(entities);
+			List<MeilisearchDocument> documents = entities.stream().map(this::toDocument).toList();
+			String document = writeJson(documents);
 			return client.index(indexUid).addDocuments(document, primaryKey);
 		});
 
@@ -143,7 +162,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	public <T> T get(String documentId, Class<T> clazz) {
 		String indexUid = getIndexUidFor(clazz);
 		try {
-			return execute(client -> client.index(indexUid).getDocument(documentId, clazz));
+			String document = execute(client -> client.index(indexUid).getRawDocument(documentId));
+			return readDocument(document, clazz);
 		} catch (DocumentAccessException e) {
 			return null;
 		}
@@ -161,8 +181,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		query.setOffset(offset);
 		query.setLimit(limit);
 
-		T[] results = execute(client -> client.index(indexUid).getDocuments(query, clazz).getResults());
-		return Arrays.asList(results);
+		String results = execute(client -> client.index(indexUid).getRawDocuments(query));
+		return readDocuments(results, clazz);
 	}
 
 	@Override
@@ -189,8 +209,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		query.setOffset(0);
 		query.setLimit(0);
 
-		return execute(client -> client.index(indexUid) //
-				.getDocuments(query, clazz).getTotal()).longValue();
+		return readTotal(execute(client -> client.index(indexUid).getRawDocuments(query)));
 	}
 
 	@Override
@@ -232,7 +251,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	public <T, Q extends BaseQuery> SearchHits<T> search(Q query, Class<T> clazz) {
 		String indexUid = getIndexUidFor(clazz);
 		SearchRequest request = requestConverter.searchRequest(query);
-		Searchable result = execute(client -> client.index(indexUid).search(request));
+		Searchable result = readSearchResult(execute(client -> client.index(indexUid).rawSearch(request)));
 		return responseConverter.mapHits(result, clazz);
 	}
 
@@ -257,7 +276,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	public SearchHits<FacetHit> facetSearch(FacetQuery query, Class<?> clazz) {
 		String indexUid = getIndexUidFor(clazz);
 		FacetSearchRequest request = requestConverter.searchRequest(query);
-		FacetSearchable result = execute(client -> client.index(indexUid).facetSearch(request));
+		FacetSearchable result = readFacetSearchResult(execute(client -> client.index(indexUid).rawFacetSearch(request)));
 		return responseConverter.mapHits(result, FacetHit.class);
 	}
 
@@ -296,7 +315,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			return callback.doWithClient(meilisearchClient);
 		} catch (MeilisearchException e) {
-			if (e instanceof MeilisearchApiException ex) {
+			if (e instanceof MeilisearchApiException) {
+				MeilisearchApiException ex = (MeilisearchApiException) e;
 				handleApiException(ex);
 			}
 			throw new UncategorizedMeilisearchException(e.getMessage(), e.getCause());
@@ -347,6 +367,78 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 			return getMeilisearchConverter().convertId(id);
 		} catch (Exception e) {
 			throw new UncategorizedMeilisearchException("Failed to get id.", e);
+		}
+	}
+
+	private MeilisearchDocument toDocument(Object entity) {
+
+		MeilisearchDocument document = MeilisearchDocument.create();
+		meilisearchConverter.write(entity, document);
+		return document;
+	}
+
+	private String writeJson(List<MeilisearchDocument> documents) {
+
+		try {
+			return objectMapper.writeValueAsString(documents);
+		} catch (JsonProcessingException e) {
+			throw new UncategorizedMeilisearchException("Failed to write Meilisearch documents.", e);
+		}
+	}
+
+	private <T> T readDocument(String source, Class<T> clazz) {
+
+		try {
+			MeilisearchDocument document = objectMapper.readValue(source, MeilisearchDocument.class);
+			return meilisearchConverter.read(clazz, document);
+		} catch (IOException e) {
+			throw new UncategorizedMeilisearchException("Failed to read Meilisearch document.", e);
+		}
+	}
+
+	private <T> List<T> readDocuments(String source, Class<T> clazz) {
+
+		try {
+			JsonNode results = objectMapper.readTree(source).get("results");
+			if (results == null || !results.isArray()) {
+				throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents results.");
+			}
+			List<MeilisearchDocument> documents = objectMapper.readerForListOf(MeilisearchDocument.class)
+					.readValue(results);
+			return documents.stream().map(document -> meilisearchConverter.read(clazz, document)).toList();
+		} catch (IOException e) {
+			throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents.", e);
+		}
+	}
+
+	private long readTotal(String source) {
+
+		try {
+			JsonNode total = objectMapper.readTree(source).get("total");
+			if (total == null || !total.canConvertToLong()) {
+				throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents total.");
+			}
+			return total.asLong();
+		} catch (IOException e) {
+			throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents total.", e);
+		}
+	}
+
+	private Searchable readSearchResult(String source) {
+
+		try {
+			return MeilisearchSearchResult.from(objectMapper.readTree(source), objectMapper);
+		} catch (IOException e) {
+			throw new UncategorizedMeilisearchException("Failed to read Meilisearch search result.", e);
+		}
+	}
+
+	private FacetSearchable readFacetSearchResult(String source) {
+
+		try {
+			return MeilisearchFacetSearchResult.from(objectMapper.readTree(source), objectMapper);
+		} catch (IOException e) {
+			throw new UncategorizedMeilisearchException("Failed to read Meilisearch facet search result.", e);
 		}
 	}
 

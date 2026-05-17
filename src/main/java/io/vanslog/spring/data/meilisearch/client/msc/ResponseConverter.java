@@ -15,15 +15,24 @@
  */
 package io.vanslog.spring.data.meilisearch.client.msc;
 
+import io.vanslog.spring.data.meilisearch.core.FacetHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
 import io.vanslog.spring.data.meilisearch.core.TotalHitsRelation;
+import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
+import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
+import io.vanslog.spring.data.meilisearch.core.document.MeilisearchDocument;
 import io.vanslog.spring.data.meilisearch.core.federation.FederationResponse;
+import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.model.FacetSearchable;
@@ -38,31 +47,49 @@ import com.meilisearch.sdk.model.SimilarDocumentsResults;
  */
 public class ResponseConverter {
 
+	private final MeilisearchConverter meilisearchConverter;
 	private final ObjectMapper objectMapper;
 
 	public ResponseConverter() {
-		this.objectMapper = new ObjectMapper();
+		this(new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext()), new ObjectMapper());
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> List<T> mapHitList(Searchable searchable, Class<?> clazz) {
-		return (List<T>) searchable.getHits().stream() //
-				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.map(content -> new SearchHit<>(content, searchable)) //
+	public ResponseConverter(MeilisearchConverter meilisearchConverter) {
+		this(meilisearchConverter, new ObjectMapper());
+	}
+
+	public ResponseConverter(MeilisearchConverter meilisearchConverter, ObjectMapper objectMapper) {
+
+		Assert.notNull(meilisearchConverter, "MeilisearchConverter must not be null");
+		Assert.notNull(objectMapper, "ObjectMapper must not be null");
+
+		this.meilisearchConverter = meilisearchConverter;
+		this.objectMapper = objectMapper;
+	}
+
+	public <T> List<SearchHit<T>> mapHitList(Searchable searchable, Class<T> clazz) {
+		return searchable.getHits().stream() //
+				.map(hit -> new SearchHit<>(readHit(hit, clazz), searchable)) //
 				.toList();
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> List<T> mapHitList(FacetSearchable searchable, Class<?> clazz) {
-		return (List<T>) searchable.getFacetHits().stream() //
-				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.map(content -> new SearchHit<>(content, searchable)) //
+	public <T> List<SearchHit<T>> mapHitList(FacetSearchable searchable, Class<T> clazz) {
+		return searchable.getFacetHits().stream() //
+				.map(hit -> new SearchHit<>(readHit(hit, clazz), searchable)) //
 				.toList();
 	}
 
 	public <T> SearchHits<T> mapHits(Searchable searchable, Class<T> clazz) {
 		List<SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
+		if (searchable instanceof MeilisearchSearchResult) {
+			MeilisearchSearchResult result = (MeilisearchSearchResult) searchable;
+			if (result.hasTotalHits()) {
+				return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(),
+						TotalHitsRelation.EQUAL_TO);
+			}
+		}
+
 		if (searchable instanceof SearchResultPaginated) {
 			SearchResultPaginated result = (SearchResultPaginated) searchable;
 			return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(),
@@ -80,9 +107,9 @@ public class ResponseConverter {
 	public <T> SearchHits<T> mapResult(MultiSearchResult result, Class<T> clazz) {
 		List<? extends SearchHit<T>> searchHits = result.getHits().stream() //
 				.map(hit -> {
-					FederationResponse federation = objectMapper.convertValue(hit.get("_federation"), FederationResponse.class);
-					hit.remove("_federation");
-					return new SearchHit<>(objectMapper.convertValue(hit, clazz), result, federation);
+					Map<String, Object> source = new LinkedHashMap<>(hit);
+					FederationResponse federation = objectMapper.convertValue(source.remove("_federation"), FederationResponse.class);
+					return new SearchHit<>(readHit(source, clazz), result, federation);
 				}).toList();
 
 		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
@@ -91,8 +118,7 @@ public class ResponseConverter {
 
 	public <T> SearchHits<T> mapResult(SimilarDocumentsResults result, Class<T> clazz) {
 		List<SearchHit<T>> searchHits = result.getHits().stream() //
-				.map(hit -> objectMapper.convertValue(hit, clazz)) //
-				.map(content -> new SearchHit<>(content, result)) //
+				.map(hit -> new SearchHit<>(readHit(hit, clazz), result)) //
 				.toList();
 
 		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
@@ -103,8 +129,7 @@ public class ResponseConverter {
 		MultiSearchResult[] multiSearchResults = results.getResults();
 		List<SearchHit<T>> searchHits = Arrays.stream(multiSearchResults) //
 				.flatMap(result -> result.getHits().stream() //
-						.map(hit -> objectMapper.convertValue(hit, clazz)) //
-						.map(content -> new SearchHit<>(content, result)))
+						.map(hit -> new SearchHit<>(readHit(hit, clazz), result)))
 				.toList();
 
 		int maxProcessingTime = Arrays.stream(multiSearchResults) //
@@ -112,5 +137,21 @@ public class ResponseConverter {
 		Duration executionDuration = Duration.ofMillis(maxProcessingTime);
 
 		return new SearchHitsImpl<>(executionDuration, searchHits);
+	}
+
+	private <T> T readHit(Map<String, Object> hit, Class<T> clazz) {
+
+		if (FacetHit.class.equals(clazz)) {
+			return objectMapper.convertValue(hit, clazz);
+		}
+
+		return meilisearchConverter.read(clazz, toDocument(hit));
+	}
+
+	private static MeilisearchDocument toDocument(Map<String, Object> hit) {
+
+		MeilisearchDocument document = MeilisearchDocument.create();
+		document.putAll(hit);
+		return document;
 	}
 }

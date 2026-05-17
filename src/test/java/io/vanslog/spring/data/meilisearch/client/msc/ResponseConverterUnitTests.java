@@ -20,10 +20,15 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.convert.ReadingConverter;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.model.FacetSearchable;
 import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
@@ -34,6 +39,12 @@ import com.meilisearch.sdk.model.SimilarDocumentsResults;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.TotalHitsRelation;
+import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.core.FacetHit;
+import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
+import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions;
+import io.vanslog.spring.data.meilisearch.core.document.MeilisearchDocument;
+import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
 /**
  * Unit tests for {@link ResponseConverter}.
@@ -60,6 +71,39 @@ class ResponseConverterUnitTests {
 		assertThat(searchHits.getSearchHits()).hasSize(2);
 		assertThat(searchHits.getTotalHits()).isEqualTo(10);
 		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.EQUAL_TO);
+	}
+
+	@Test
+	void shouldConvertRawPaginatedTotalHitsMetadataToSearchHits() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		MeilisearchSearchResult result = MeilisearchSearchResult.from(objectMapper.readTree("{"
+				+ "\"hits\": [{\"id\": \"143\", \"title\": \"Escape Room\"}],"
+				+ "\"processingTimeMs\": 25,"
+				+ "\"query\": \"escape\","
+				+ "\"totalHits\": 10"
+				+ "}"), objectMapper);
+
+		SearchHits<SimilarMovie> searchHits = converter.mapHits(result, SimilarMovie.class);
+
+		assertThat(searchHits.getSearchHits()).hasSize(1);
+		assertThat(searchHits.getTotalHits()).isEqualTo(10);
+		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.EQUAL_TO);
+	}
+
+	@Test
+	void shouldConvertRawFacetStatsToFacetRating() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		MeilisearchSearchResult result = MeilisearchSearchResult.from(objectMapper.readTree("{"
+				+ "\"hits\": [{\"id\": \"143\", \"title\": \"Escape Room\"}],"
+				+ "\"processingTimeMs\": 25,"
+				+ "\"query\": \"escape\","
+				+ "\"facetStats\": {\"rating\": {\"min\": 1, \"max\": 5}}"
+				+ "}"), objectMapper);
+
+		SearchHits<SimilarMovie> searchHits = converter.mapHits(result, SimilarMovie.class);
+
+		assertThat(searchHits.getSearchHit(0).getFacetStats().get("rating").getMin()).isEqualTo(1);
+		assertThat(searchHits.getSearchHit(0).getFacetStats().get("rating").getMax()).isEqualTo(5);
 	}
 
 	@Test
@@ -148,10 +192,61 @@ class ResponseConverterUnitTests {
 		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
 	}
 
+	@Test
+	void shouldMapFacetHitsAsResponseDtos() {
+		FacetSearchable result = new FacetSearchable() {
+			@Override
+			public ArrayList<HashMap<String, Object>> getFacetHits() {
+				return new ArrayList<>(List.of(facetHit("Drama", 2)));
+			}
+
+			@Override
+			public int getProcessingTimeMs() {
+				return 25;
+			}
+
+			@Override
+			public String getFacetQuery() {
+				return "Dra";
+			}
+		};
+
+		SearchHits<FacetHit> searchHits = converter.mapHits(result, FacetHit.class);
+
+		assertThat(searchHits.getSearchHit(0).getContent().value()).isEqualTo("Drama");
+		assertThat(searchHits.getSearchHit(0).getContent().count()).isEqualTo(2);
+	}
+
+	@Test
+	void shouldMaterializeSearchHitsThroughMeilisearchConverter() {
+		MappingMeilisearchConverter mappingConverter = new MappingMeilisearchConverter(
+				new SimpleMeilisearchMappingContext());
+		mappingConverter.setConversions(new MeilisearchCustomConversions(List.of(new DocumentToCodeConverter())));
+		mappingConverter.afterPropertiesSet();
+		ResponseConverter converter = new ResponseConverter(mappingConverter, new ObjectMapper());
+		SearchResult result = new SearchResult();
+		HashMap<String, Object> hit = hit("143", "Escape Room");
+		hit.put("code", Map.of("raw", "custom-code"));
+
+		ReflectionTestUtils.setField(result, "hits", new ArrayList<>(List.of(hit)));
+		ReflectionTestUtils.setField(result, "processingTimeMs", 25);
+
+		SearchHits<MovieWithConvertedProperty> searchHits = converter.mapHits(result, MovieWithConvertedProperty.class);
+
+		assertThat(searchHits.getSearchHit(0).getContent().getCode().getValue()).isEqualTo("custom-code");
+	}
+
 	private static HashMap<String, Object> hit(String id, String title) {
 		HashMap<String, Object> hit = new HashMap<>();
 		hit.put("id", id);
 		hit.put("title", title);
+		return hit;
+	}
+
+	private static HashMap<String, Object> facetHit(String value, int count) {
+		HashMap<String, Object> hit = new HashMap<>();
+		hit.put("value", value);
+		hit.put("count", count);
 		return hit;
 	}
 
@@ -174,6 +269,43 @@ class ResponseConverterUnitTests {
 
 		public void setTitle(String title) {
 			this.title = title;
+		}
+	}
+
+	@Document(indexUid = "converted-movies")
+	static class MovieWithConvertedProperty {
+
+		@Id private String id;
+		private Code code;
+
+		public String getId() {
+			return id;
+		}
+
+		public Code getCode() {
+			return code;
+		}
+	}
+
+	static class Code {
+
+		private final String value;
+
+		Code(String value) {
+			this.value = value;
+		}
+
+		String getValue() {
+			return value;
+		}
+	}
+
+	@ReadingConverter
+	static class DocumentToCodeConverter implements Converter<MeilisearchDocument, Code> {
+
+		@Override
+		public Code convert(MeilisearchDocument source) {
+			return new Code((String) source.get("raw"));
 		}
 	}
 }
