@@ -499,8 +499,8 @@ public class MovieController {
 <div class="sectionbody">
 <div class="paragraph">
 <p><code>MeilisearchOperations</code> exposes concern-specific operations for APIs that are not document or search operations.
-Use <code>instanceOps()</code> for Meilisearch instance-level information and <code>indexOps(&#8230;&#8203;)</code> for statistics bound to one index.
-Version and stats operations use the configured Meilisearch API key, so server-side key permissions and index restrictions still apply.</p>
+Use <code>instanceOps()</code> for Meilisearch instance-level information and <code>indexOps(&#8230;&#8203;)</code> for lifecycle and statistics operations bound to one index.
+Version, stats, and index lifecycle operations use the configured Meilisearch API key, so server-side key permissions and index restrictions still apply.</p>
 </div>
 <div class="exampleblock">
 <div class="title">Example 2. Instance and index operation usage</div>
@@ -513,7 +513,14 @@ MeilisearchVersion version = meilisearchOperations.instanceOps().version();
 MeilisearchStats stats = meilisearchOperations.instanceOps().stats();
 
 MeilisearchIndexStats movieStats = meilisearchOperations.indexOps(Movie.class).stats(); <i class="conum" data-value="1"></i><b>(1)</b>
-MeilisearchIndexStats namedStats = meilisearchOperations.indexOps("movies").stats(); <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+MeilisearchIndexStats namedStats = meilisearchOperations.indexOps("movies").stats(); <i class="conum" data-value="2"></i><b>(2)</b>
+
+MeilisearchIndexOperations catalogIndex = meilisearchOperations.indexOps("catalog");
+MeilisearchIndex created = catalogIndex.create();
+MeilisearchIndex updated = catalogIndex.update(new MeilisearchIndexUpdateRequest("id"));
+MeilisearchIndex loaded = catalogIndex.get();
+MeilisearchIndexList indexes = catalogIndex.list(new MeilisearchIndexQuery(0, 100));
+boolean deleted = catalogIndex.delete();</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -529,6 +536,28 @@ MeilisearchIndexStats namedStats = meilisearchOperations.indexOps("movies").stat
 </table>
 </div>
 </div>
+</div>
+<div class="paragraph">
+<p><code>indexOps(Class&lt;?&gt;)</code> resolves the index uid from the entity mapping, so <code>indexOps(Movie.class)</code> targets the same <code>@Document(indexUid = "movies")</code> index used by template and repository operations.
+<code>indexOps(String)</code> is available when the index uid is not represented by a mapped entity class.</p>
+</div>
+<div class="paragraph">
+<p>The index lifecycle API returns Spring Data Meilisearch-owned request and response types such as <code>MeilisearchIndex</code>, <code>MeilisearchIndexCreateRequest</code>, <code>MeilisearchIndexUpdateRequest</code>, <code>MeilisearchIndexQuery</code>, and <code>MeilisearchIndexList</code>.
+It does not expose Meilisearch Java SDK model types from public operation signatures.</p>
+</div>
+<div class="paragraph">
+<p>Meilisearch performs create, update, and delete operations asynchronously.
+The default template waits for the submitted task to complete using the configured request timeout and retry interval before returning from these lifecycle methods.</p>
+</div>
+<div class="paragraph">
+<p><code>list(&#8230;&#8203;)</code> returns a page of indexes for the configured key; it is exposed from <code>indexOps(&#8230;&#8203;)</code> to keep index management under the index operations API rather than introducing a separate admin wrapper.
+Updating an index currently covers the practical Meilisearch lifecycle update exposed for a bound index: assigning the primary key, typically before documents are added.
+Runtime settings management is separate from index lifecycle operations and remains handled by mapping/settings APIs such as <code>applySettings(&#8230;&#8203;)</code>.</p>
+</div>
+<div class="paragraph">
+<p>The API key must be allowed to perform the requested index actions.
+For restricted keys, create, retrieve/list, update, and delete operations require the corresponding Meilisearch index permissions (for example <code>indexes.create</code>, <code>indexes.get</code>, <code>indexes.update</code>, and <code>indexes.delete</code>) and must also match the key&#8217;s index restrictions.
+Deleting or renaming an index outside the mapping does not change <code>@Document(indexUid = &#8230;&#8203;)</code>; repositories continue to target the index uid declared on the entity.</p>
 </div>
 </div>
 </div>
