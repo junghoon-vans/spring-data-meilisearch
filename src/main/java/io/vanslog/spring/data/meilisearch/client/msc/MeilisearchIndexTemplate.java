@@ -18,6 +18,7 @@ package io.vanslog.spring.data.meilisearch.client.msc;
 import org.springframework.util.Assert;
 
 import com.meilisearch.sdk.model.IndexesQuery;
+import com.meilisearch.sdk.model.Settings;
 import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
 
@@ -27,6 +28,7 @@ import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexCreateRequest;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexList;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexOperations;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexQuery;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexSettings;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexStats;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexUpdateRequest;
 
@@ -40,6 +42,7 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 	private final String indexUid;
 	private final MeilisearchClientExecutor executor;
 	private final IndexRequestConverter requestConverter;
+	private final IndexSettingsResponseConverter settingsResponseConverter;
 	private final InstanceResponseConverter responseConverter;
 	private final int requestTimeout;
 	private final int requestInterval;
@@ -53,6 +56,7 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 		this.indexUid = indexUid;
 		this.executor = executor;
 		this.requestConverter = new IndexRequestConverter();
+		this.settingsResponseConverter = new IndexSettingsResponseConverter();
 		this.responseConverter = responseConverter;
 		this.requestTimeout = requestTimeout;
 		this.requestInterval = requestInterval;
@@ -120,6 +124,38 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 	@Override
 	public MeilisearchIndexStats stats() {
 		return responseConverter.mapIndexStats(executor.execute(client -> client.index(indexUid).getStats()));
+	}
+
+	@Override
+	public MeilisearchIndexSettings getSettings() {
+		return settingsResponseConverter.fromSettings(executor.execute(client -> client.index(indexUid).getSettings()));
+	}
+
+	@Override
+	public MeilisearchIndexSettings updateSettings(MeilisearchIndexSettings settings) {
+
+		Assert.notNull(settings, "MeilisearchIndexSettings must not be null");
+
+		Settings sdkSettings = requestConverter.toSettings(settings);
+		TaskInfo taskInfo = executor.execute(client -> client.index(indexUid).updateSettings(sdkSettings));
+		TaskStatus taskStatus = waitForTask(taskInfo);
+		if (taskStatus != TaskStatus.SUCCEEDED) {
+			throw new TaskStatusException(taskStatus, "Failed to update index settings.");
+		}
+
+		return getSettings();
+	}
+
+	@Override
+	public MeilisearchIndexSettings resetSettings() {
+
+		TaskInfo taskInfo = executor.execute(client -> client.index(indexUid).resetSettings());
+		TaskStatus taskStatus = waitForTask(taskInfo);
+		if (taskStatus != TaskStatus.SUCCEEDED) {
+			throw new TaskStatusException(taskStatus, "Failed to reset index settings.");
+		}
+
+		return getSettings();
 	}
 
 	private TaskStatus waitForTask(TaskInfo taskInfo) {

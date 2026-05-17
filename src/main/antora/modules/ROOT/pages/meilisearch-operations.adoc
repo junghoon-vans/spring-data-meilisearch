@@ -80,6 +80,14 @@ MeilisearchIndex created = catalogIndex.create();
 MeilisearchIndex updated = catalogIndex.update(new MeilisearchIndexUpdateRequest("id"));
 MeilisearchIndex loaded = catalogIndex.get();
 MeilisearchIndexList indexes = catalogIndex.list(new MeilisearchIndexQuery(0, 100));
+MeilisearchIndexSettings settings = catalogIndex.getSettings();
+MeilisearchIndexSettings updatedSettings = catalogIndex.updateSettings(
+    MeilisearchIndexSettings.builder()
+        .withSearchableAttributes(List.of("title", "description"))
+        .withFilterableAttributes(List.of("genres"))
+        .withPagination(new MeilisearchIndexSettings.PaginationSettings(1500))
+        .build());
+MeilisearchIndexSettings resetSettings = catalogIndex.resetSettings();
 boolean deleted = catalogIndex.delete();
 ----
 
@@ -92,13 +100,17 @@ boolean deleted = catalogIndex.delete();
 
 The index lifecycle API returns Spring Data Meilisearch-owned request and response types such as `MeilisearchIndex`, `MeilisearchIndexCreateRequest`, `MeilisearchIndexUpdateRequest`, `MeilisearchIndexQuery`, and `MeilisearchIndexList`.
 It does not expose Meilisearch Java SDK model types from public operation signatures.
+Runtime settings APIs follow the same rule: `MeilisearchIndexSettings` and its nested value types are Spring Data Meilisearch-owned and no `com.meilisearch.sdk.model.Settings` types are exposed.
 
 Meilisearch performs create, update, and delete operations asynchronously.
-The default template waits for the submitted task to complete using the configured request timeout and retry interval before returning from these lifecycle methods.
+The default template waits for the submitted task to complete using the configured request timeout and retry interval before returning from lifecycle methods and from settings update/reset methods.
 
 `list(...)` returns a page of indexes for the configured key; it is exposed from `indexOps(...)` to keep index management under the index operations API rather than introducing a separate admin wrapper.
 Updating an index currently covers the practical Meilisearch lifecycle update exposed for a bound index: assigning the primary key, typically before documents are added.
-Runtime settings management is separate from index lifecycle operations and remains handled by mapping/settings APIs such as `applySettings(...)`.
+Runtime settings management is exposed on the same index-scoped operations object through `getSettings()`, `updateSettings(...)`, and `resetSettings()`.
+`updateSettings(...)` sends the settings fields present in the provided `MeilisearchIndexSettings` value to Meilisearch; use empty lists or maps to clear supported list/map settings and use `resetSettings()` to restore all settings to Meilisearch defaults.
+Do not rely on `null` values to reset individual settings.
+Annotation-driven `applySettings(...)` remains available for applying settings declared on mapped entity classes and is separate from ad-hoc runtime settings updates.
 
 The API key must be allowed to perform the requested index actions.
 For restricted keys, create, retrieve/list, update, and delete operations require the corresponding Meilisearch index permissions (for example `indexes.create`, `indexes.get`, `indexes.update`, and `indexes.delete`) and must also match the key's index restrictions.

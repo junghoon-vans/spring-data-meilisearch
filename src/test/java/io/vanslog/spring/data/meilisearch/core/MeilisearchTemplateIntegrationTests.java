@@ -31,6 +31,7 @@ import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfigura
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +66,8 @@ class MeilisearchTemplateIntegrationTests {
 	ComicsMovie comics2 = new ComicsMovie(2, "Batman", "A superhero comic", new String[] { "Comics", "Action" });
 
 	private static final List<String> LIFECYCLE_INDEX_UIDS = List.of("lifecycle-create-index",
-			"lifecycle-get-list-index", "lifecycle-update-index", "lifecycle-delete-index");
+			"lifecycle-get-list-index", "lifecycle-update-index", "lifecycle-delete-index", "runtime-settings-index",
+			"runtime-settings-reset-index");
 
 	@BeforeEach
 	void setUp() throws MeilisearchException {
@@ -311,6 +313,67 @@ class MeilisearchTemplateIntegrationTests {
 	void shouldRejectBlankIndexUid() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> meilisearchTemplate.indexOps(""));
+	}
+
+	@Test
+	void shouldReadCurrentIndexSettings() {
+
+		meilisearchTemplate.applySettings(Movie.class);
+
+		MeilisearchIndexSettings settings = meilisearchTemplate.indexOps(Movie.class).getSettings();
+
+		assertThat(settings.getFilterableAttributes()).contains("genres");
+	}
+
+	@Test
+	void shouldUpdateIndexSettings() {
+
+		meilisearchTemplate.indexOps("runtime-settings-index").create(new MeilisearchIndexCreateRequest("id"));
+		MeilisearchIndexSettings settings = MeilisearchIndexSettings.builder() //
+				.withSearchableAttributes(List.of("title", "description")) //
+				.withDisplayedAttributes(List.of("id", "title", "description")) //
+				.withFilterableAttributes(List.of("genres")) //
+				.withSortableAttributes(List.of("title")) //
+				.withSynonyms(Map.of("hero", List.of("superhero"))) //
+				.withPagination(new MeilisearchIndexSettings.PaginationSettings(1500)) //
+				.withFaceting(new MeilisearchIndexSettings.FacetingSettings(75)) //
+				.withTypoTolerance(new MeilisearchIndexSettings.TypoToleranceSettings(true, 5, 9,
+						List.of("skype"), List.of("serial_number"))) //
+				.withProximityPrecision("byWord") //
+				.withSearchCutoffMs(50) //
+				.build();
+
+		MeilisearchIndexSettings updated = meilisearchTemplate.indexOps("runtime-settings-index")
+				.updateSettings(settings);
+
+		assertThat(updated.getSearchableAttributes()).containsExactly("title", "description");
+		assertThat(updated.getDisplayedAttributes()).containsExactly("id", "title", "description");
+		assertThat(updated.getFilterableAttributes()).contains("genres");
+		assertThat(updated.getSortableAttributes()).contains("title");
+		assertThat(updated.getSynonyms()).containsEntry("hero", List.of("superhero"));
+		assertThat(updated.getPagination().getMaxTotalHits()).isEqualTo(1500);
+		assertThat(updated.getFaceting().getMaxValuesPerFacet()).isEqualTo(75);
+		assertThat(updated.getTypoTolerance().getOneTypo()).isEqualTo(5);
+		assertThat(updated.getTypoTolerance().getTwoTypos()).isEqualTo(9);
+		assertThat(updated.getTypoTolerance().getDisableOnWords()).containsExactly("skype");
+		assertThat(updated.getTypoTolerance().getDisableOnAttributes()).containsExactly("serial_number");
+		assertThat(updated.getProximityPrecision()).isEqualTo("byWord");
+		assertThat(updated.getSearchCutoffMs()).isEqualTo(50);
+	}
+
+	@Test
+	void shouldResetIndexSettings() {
+
+		meilisearchTemplate.indexOps("runtime-settings-reset-index").create(new MeilisearchIndexCreateRequest("id"));
+		MeilisearchIndexSettings settings = MeilisearchIndexSettings.builder() //
+				.withFilterableAttributes(List.of("genres")) //
+				.build();
+		MeilisearchIndexOperations indexOperations = meilisearchTemplate.indexOps("runtime-settings-reset-index");
+		assertThat(indexOperations.updateSettings(settings).getFilterableAttributes()).contains("genres");
+
+		MeilisearchIndexSettings reset = indexOperations.resetSettings();
+
+		assertThat(reset.getFilterableAttributes()).isEmpty();
 	}
 
 	@Test
