@@ -1,5 +1,5 @@
 [[meilisearch.repositories.queries]]
-= Query Methods and Limitations
+= Repository Methods and Limitations
 
 Spring Data Meilisearch currently focuses on the repository base interfaces and on direct use of `MeilisearchOperations` for advanced search features.
 
