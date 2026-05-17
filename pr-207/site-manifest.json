@@ -1,0 +1,144 @@
+{
+  "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
+  "generated": "2026-05-17T11:22:36.593Z",
+  "url": "https://junghoon-vans.github.io/spring-data-meilisearch",
+  "components": {
+    "data-meilisearch": {
+      "title": "Spring Data Meilisearch",
+      "latest": "0.9.1",
+      "versions": {
+        "0.9.1": {
+          "prerelease": true,
+          "displayVersion": "0.9.1-SNAPSHOT",
+          "url": "/index.html",
+          "pages": [
+            {
+              "path": "index.adoc",
+              "url": "/index.html",
+              "title": "Spring Data Meilisearch"
+            },
+            {
+              "path": "appendix.adoc",
+              "url": "/appendix.html",
+              "title": "Appendix"
+            },
+            {
+              "path": "appendix/xml-namespace-reference.adoc",
+              "url": "/appendix/xml-namespace-reference.html",
+              "title": "XML Namespace Reference"
+            },
+            {
+              "path": "commons/upgrade.adoc",
+              "url": "/commons/upgrade.html"
+            },
+            {
+              "path": "getting-started.adoc",
+              "url": "/getting-started.html",
+              "title": "Getting Started"
+            },
+            {
+              "path": "meilisearch-client.adoc",
+              "url": "/meilisearch-client.html",
+              "title": "Meilisearch Client"
+            },
+            {
+              "path": "meilisearch-document.adoc",
+              "url": "/meilisearch-document.html",
+              "title": "Meilisearch Document"
+            },
+            {
+              "path": "meilisearch-operations.adoc",
+              "url": "/meilisearch-operations.html",
+              "title": "Meilisearch Operations"
+            },
+            {
+              "path": "meilisearch-repositories.adoc",
+              "url": "/meilisearch-repositories.html",
+              "title": "Meilisearch Repositories"
+            },
+            {
+              "path": "meilisearch-settings.adoc",
+              "url": "/meilisearch-settings.html",
+              "title": "Meilisearch Settings"
+            },
+            {
+              "path": "meilisearch.adoc",
+              "url": "/meilisearch.html",
+              "title": "Meilisearch"
+            },
+            {
+              "path": "meilisearch/client-configuration.adoc",
+              "url": "/meilisearch/client-configuration.html",
+              "title": "Client Configuration"
+            },
+            {
+              "path": "meilisearch/index-operations.adoc",
+              "url": "/meilisearch/index-operations.html",
+              "title": "Index and Instance Operations"
+            },
+            {
+              "path": "meilisearch/object-mapping.adoc",
+              "url": "/meilisearch/object-mapping.html",
+              "title": "Object Mapping"
+            },
+            {
+              "path": "meilisearch/settings.adoc",
+              "url": "/meilisearch/settings.html",
+              "title": "Settings"
+            },
+            {
+              "path": "meilisearch/template.adoc",
+              "url": "/meilisearch/template.html",
+              "title": "Operations"
+            },
+            {
+              "path": "repositories.adoc",
+              "url": "/repositories.html",
+              "title": "Repositories"
+            },
+            {
+              "path": "repositories/configuration.adoc",
+              "url": "/repositories/configuration.html",
+              "title": "Repository Configuration"
+            },
+            {
+              "path": "repositories/core-concepts.adoc",
+              "url": "/repositories/core-concepts.html",
+              "title": "Core concepts"
+            },
+            {
+              "path": "repositories/create-instances.adoc",
+              "url": "/repositories/create-instances.html",
+              "title": "Creating Repository Instances"
+            },
+            {
+              "path": "repositories/definition.adoc",
+              "url": "/repositories/definition.html",
+              "title": "Defining Repository Interfaces"
+            },
+            {
+              "path": "repositories/meilisearch-repositories.adoc",
+              "url": "/repositories/meilisearch-repositories.html",
+              "title": "Meilisearch Repositories"
+            },
+            {
+              "path": "repositories/repository-queries.adoc",
+              "url": "/repositories/repository-queries.html",
+              "title": "Query Methods and Limitations"
+            },
+            {
+              "path": "search.adoc",
+              "url": "/search.html",
+              "title": "Search"
+            },
+            {
+              "path": "spring-projects.adoc",
+              "url": "/spring-projects.html",
+              "title": "Spring Projects"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
