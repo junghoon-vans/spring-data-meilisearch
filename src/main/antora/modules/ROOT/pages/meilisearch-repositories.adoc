@@ -1,5 +1,0 @@
-[[meilisearch.repositories.legacy]]
-= Meilisearch Repositories
-
-This page is kept for compatibility with earlier links.
-See xref:repositories/meilisearch-repositories.adoc[Meilisearch Repositories] and xref:repositories/configuration.adoc[Repository Configuration].

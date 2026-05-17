@@ -1,5 +1,0 @@
-[[meilisearch.operations.legacy]]
-= Meilisearch Operations
-
-This page is kept for compatibility with earlier links.
-See xref:meilisearch/template.adoc[Operations], xref:meilisearch/index-operations.adoc[Index and Instance Operations], and xref:meilisearch/settings.adoc[Settings].

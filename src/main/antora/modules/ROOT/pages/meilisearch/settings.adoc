@@ -85,7 +85,7 @@ That configuration is relevant for Meilisearch AI-powered features such as seman
         @Embedder(
                 name = "default",
                 source = Embedder.Source.OPEN_AI,
-                apiKey = "sk-...",
+                apiKey = "${OPENAI_API_KEY}",
                 model = "text-embedding-3-small")
 })
 class Movie {

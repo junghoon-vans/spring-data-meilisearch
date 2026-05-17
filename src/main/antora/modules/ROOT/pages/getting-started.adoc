@@ -49,7 +49,9 @@ The usual starting point is a configuration class that extends `MeilisearchConfi
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
 @EnableMeilisearchRepositories(basePackages = "com.example.movies")
 class MeilisearchConfig extends MeilisearchConfiguration {
 
@@ -57,13 +59,14 @@ class MeilisearchConfig extends MeilisearchConfiguration {
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
                 .connectedTo("http://localhost:7700")
-                .withApiKey("masterKey")
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
                 .build();
     }
 }
 ----
 
 `MeilisearchConfiguration` registers the standard Spring Data Meilisearch beans, including the client, mapping context, converter, and the `meilisearchTemplate` / `meilisearchOperations` bean.
+For local development, prefer a scoped API key exposed through `MEILISEARCH_API_KEY` instead of using the Meilisearch master key in application code.
 
 [[meilisearch.getting-started.domain]]
 == Domain Type

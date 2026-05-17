@@ -1,5 +1,0 @@
-[[meilisearch.document.legacy]]
-= Meilisearch Document
-
-This page is kept for compatibility with earlier links.
-See xref:meilisearch/object-mapping.adoc[Object Mapping].

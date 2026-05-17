@@ -1,5 +1,0 @@
-[[meilisearch.settings.legacy]]
-= Meilisearch Settings
-
-This page is kept for compatibility with earlier links.
-See xref:meilisearch/settings.adoc[Settings].

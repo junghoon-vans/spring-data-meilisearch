@@ -1,5 +1,0 @@
-[[meilisearch.client.legacy]]
-= Meilisearch Client
-
-This page is kept for compatibility with earlier links.
-See xref:meilisearch/client-configuration.adoc[Client Configuration].
