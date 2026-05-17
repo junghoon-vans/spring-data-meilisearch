@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment-url.outputs.url }}
     permissions:
       contents: write
       pages: write
@@ -280,6 +280,23 @@ jobs:
         if: steps.commit.outputs.changed == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Resolve deployment URL
+        if: steps.commit.outputs.changed == 'true'
+        id: deployment-url
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TARGET_PATH: ${{ needs.build.outputs.target_path }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            echo "url=${PAGE_URL}pr-${PR_NUMBER}/" >> "$GITHUB_OUTPUT"
+          elif [ -n "$TARGET_PATH" ]; then
+            echo "url=${PAGE_URL}${TARGET_PATH}/" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=${PAGE_URL}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Comment PR preview URL
         if: |
