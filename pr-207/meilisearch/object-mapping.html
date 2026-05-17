@@ -444,6 +444,9 @@
 <div class="paragraph">
 <p>Spring Data Meilisearch maps domain objects to Meilisearch documents through annotation metadata, a mapping context, and a converter.</p>
 </div>
+<div class="paragraph">
+<p>Object mapping is the basis for both repository support and template-style operations because the mapping metadata provides the index uid, document id, and optional settings metadata for each managed entity type.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -516,7 +519,7 @@ class Product {
 </div>
 </div>
 <div class="paragraph">
-<p>Use annotation-driven settings for stable, entity-owned index defaults.
+<p>Use annotation-driven settings for stable, entity-owned index defaults that should travel with the mapped type.
 Use <a href="settings.html" class="xref page">runtime settings operations</a> when settings must be inspected or adjusted dynamically.</p>
 </div>
 </div>

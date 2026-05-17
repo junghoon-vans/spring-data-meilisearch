@@ -444,6 +444,9 @@
 <div class="paragraph">
 <p>Spring Data Meilisearch operates on top of the Meilisearch Java client and exposes a Spring-friendly configuration model for creating and wiring the client.</p>
 </div>
+<div class="paragraph">
+<p>In most applications, the entry point is a Java configuration class that extends <code>MeilisearchConfiguration</code>. XML namespace support is available for applications that still use XML-based container configuration.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -457,13 +460,16 @@
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
 
-</span><span class="fold-block">class MyClientConfig extends MeilisearchConfiguration {
+import org.springframework.context.annotation.Configuration;
+
+</span><span class="fold-block">@Configuration
+class MyClientConfig extends MeilisearchConfiguration {
 
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
                 .connectedTo("http://localhost:7700")
-                .withApiKey("masterKey")
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
                 .withRequestTimeout(2_000)
                 .withRequestInterval(20)
                 .build();
@@ -515,7 +521,10 @@ Override <code>jsonHandler()</code> when you need a different implementation.</p
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
-</span><span class="fold-block">class JsonHandlerConfig extends MeilisearchConfiguration {
+import org.springframework.context.annotation.Configuration;
+
+</span><span class="fold-block">@Configuration
+class JsonHandlerConfig extends MeilisearchConfiguration {
 
     @Override
     public JsonHandler jsonHandler() {
@@ -547,7 +556,8 @@ import com.meilisearch.sdk.json.JsonHandler;
 <div class="sectionbody">
 <div class="paragraph">
 <p>Spring Data Meilisearch also provides an XML namespace.
-Register a JSON handler bean and reference it from <code>&lt;meilisearch:meilisearch-client&gt;</code> when you do not want to use the default bean name.</p>
+Register a JSON handler bean and reference it from <code>&lt;meilisearch:meilisearch-client&gt;</code> when you do not want to use the default bean name.
+For production deployments, prefer a scoped API key rather than the Meilisearch master key.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -564,7 +574,7 @@ Register a JSON handler bean and reference it from <code>&lt;meilisearch:meilise
     &lt;meilisearch:meilisearch-client
             id="meilisearchClient"
             host-url="http://localhost:7700"
-            api-key="masterKey"
+            api-key="${MEILISEARCH_API_KEY}"
             request-timeout="2000"
             request-interval="20"
             json-handler-ref="jsonHandler"/&gt;

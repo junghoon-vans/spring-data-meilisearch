@@ -444,6 +444,9 @@
 <div class="paragraph">
 <p>Spring Data Meilisearch is a single-module Spring Data integration for applications that want to access Meilisearch through familiar Spring configuration, mapping, operations, and repository abstractions.</p>
 </div>
+<div class="paragraph">
+<p>The quickest way to get started is to declare the dependency, extend <code>MeilisearchConfiguration</code>, annotate your domain type with <code>@Document</code>, and create a <code>MeilisearchRepository</code> for the aggregate root.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -525,6 +528,7 @@ class MeilisearchConfig extends MeilisearchConfiguration {
 </div>
 <div class="paragraph">
 <p><code>MeilisearchConfiguration</code> registers the standard Spring Data Meilisearch beans, including the client, mapping context, converter, and the <code>meilisearchTemplate</code> / <code>meilisearchOperations</code> bean.
+<code>MeilisearchRepository</code> is the recommended repository base interface for this module&#8217;s current repository feature set.
 For local development, prefer a scoped API key exposed through <code>MEILISEARCH_API_KEY</code> instead of using the Meilisearch master key in application code.</p>
 </div>
 </div>
@@ -592,10 +596,10 @@ class MovieService {
 <p>Continue with <a href="meilisearch/client-configuration.html" class="xref page">client configuration</a> to customize JSON handling, timeouts, and XML namespace usage.</p>
 </li>
 <li>
-<p>Read <a href="meilisearch/object-mapping.html" class="xref page">object mapping</a> to understand <code>@Document</code>, <code>@Setting</code>, and conversion support.</p>
+<p>Continue with <a href="meilisearch/object-mapping.html" class="xref page">object mapping</a> to understand <code>@Document</code>, <code>@Setting</code>, and conversion support.</p>
 </li>
 <li>
-<p>Read <a href="meilisearch/template.html" class="xref page">operations</a> and <a href="repositories.html" class="xref page">repositories</a> to choose between template-style access and repository abstractions.</p>
+<p>Continue with <a href="meilisearch/template.html" class="xref page">operations</a> and <a href="repositories.html" class="xref page">repositories</a> to choose between template-style access and repository abstractions.</p>
 </li>
 </ul>
 </div>

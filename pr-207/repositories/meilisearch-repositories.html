@@ -445,6 +445,9 @@
 <p><code>MeilisearchRepository&lt;T, ID&gt;</code> extends Spring Data <code>CrudRepository</code> and <code>PagingAndSortingRepository</code>.
 The default implementation delegates to <code>MeilisearchOperations</code>.</p>
 </div>
+<div class="paragraph">
+<p>This keeps repository usage aligned with familiar Spring Data patterns while still letting the module preserve Meilisearch-specific behavior underneath the repository facade.</p>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;

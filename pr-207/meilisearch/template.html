@@ -452,7 +452,7 @@ That interface combines document operations, search operations, access to instan
 <div class="sectionbody">
 <div class="paragraph">
 <p><code>MeilisearchConfiguration</code> registers a bean named <code>meilisearchOperations</code> and <code>meilisearchTemplate</code>.
-Inject that bean when you want direct access to Meilisearch-specific operations instead of the repository abstraction.</p>
+Inject that bean when you want direct access to Meilisearch-specific operations instead of the repository abstraction. This is also the primary entry point for store-specific capabilities that are intentionally not surfaced through repositories.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -619,6 +619,9 @@ Each hit is a <code>SearchHit&lt;T&gt;</code> that contains:</p>
 </div>
 <div class="paragraph">
 <p>Use the hit list size for the current page content and total-hit metadata only when the relation is <code>EQUAL_TO</code>.</p>
+</div>
+<div class="paragraph">
+<p>When you need access to raw search metadata such as facets or federation details, prefer <code>MeilisearchOperations</code> directly instead of adapting repository return types.</p>
 </div>
 </div>
 </div>
