@@ -373,7 +373,7 @@ class MeilisearchTemplateIntegrationTests {
 
 		MeilisearchIndexSettings reset = indexOperations.resetSettings();
 
-		assertThat(reset.getFilterableAttributes()).doesNotContain("genres");
+		assertThat(reset.getFilterableAttributes()).isEmpty();
 	}
 
 	@Test
