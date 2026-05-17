@@ -65,3 +65,28 @@ In this case, `Movie` is used as the index UID.
 
 The https://www.meilisearch.com/docs/learn/core_concepts/primary_key#document-id[Document id] is a unique identifier for a document in an index.
 It can be defined with `@Id` annotation or `id` field.
+
+[[meilisearch.document.mapping]]
+== Document mapping and JSON payloads
+
+Spring Data Meilisearch maps entity instances through `MeilisearchConverter` before they reach the Meilisearch Java SDK.
+The default `MappingMeilisearchConverter` reads and writes a map-shaped `MeilisearchDocument`, applying the mapping metadata and custom conversions registered with `MeilisearchCustomConversions`.
+
+Document payloads are then serialized with the Spring-managed `ObjectMapper` bean named `meilisearchObjectMapper`.
+This keeps entity conversion in Spring Data Meilisearch and sends document requests through the SDK raw JSON APIs where the SDK exposes them.
+The SDK `JsonHandler` is still used for SDK transport concerns, but it is not the entity mapping layer.
+
+.Customizing the document ObjectMapper
+====
+[source,java]
+----
+@Configuration
+public class MyClientConfig extends MeilisearchConfiguration {
+
+    @Bean(name = "meilisearchObjectMapper")
+    public ObjectMapper meilisearchObjectMapper() {
+        return new ObjectMapper();
+    }
+}
+----
+====

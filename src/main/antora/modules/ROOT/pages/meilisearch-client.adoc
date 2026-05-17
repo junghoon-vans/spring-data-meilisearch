@@ -93,7 +93,9 @@ ClientConfiguration clientConfiguration = ClientConfiguration.builder()
 [[meilisearch.json-handler]]
 == JSON handler
 
-The `JSON handler` is used to serialize and deserialize the JSON data.
+The `JSON handler` configures the underlying Meilisearch Java SDK transport.
+Entity document mapping and document JSON payloads are handled by Spring Data Meilisearch through
+`MeilisearchConverter` and the `meilisearchObjectMapper` bean.
 
 [[meilisearch.json-handler.supported]]
 === Supported JSON handlers

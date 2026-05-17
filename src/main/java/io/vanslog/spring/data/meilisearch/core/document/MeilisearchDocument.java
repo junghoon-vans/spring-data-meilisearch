@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 the original author or authors.
+ * Copyright 2023-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.vanslog.spring.data.meilisearch.core;
+package io.vanslog.spring.data.meilisearch.core.document;
+
+import java.util.LinkedHashMap;
 
 /**
- * Facet search hit response.
+ * Map-shaped Meilisearch document representation used between entity mapping and JSON serialization.
  *
  * @author Junghoon Ban
  */
-public record FacetHit(String value, int count) {
+public class MeilisearchDocument extends LinkedHashMap<String, Object> {
+
+	private static final long serialVersionUID = 1L;
+
+	public static MeilisearchDocument create() {
+		return new MeilisearchDocument();
+	}
+
+	public MeilisearchDocument append(String key, Object value) {
+
+		put(key, value);
+		return this;
+	}
 }
