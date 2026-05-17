@@ -19,6 +19,7 @@ on:
         default: true
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
@@ -33,6 +34,7 @@ jobs:
       )
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
     env:
       CHECKOUT_REF: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.ref || 'main' }}
@@ -140,6 +142,13 @@ jobs:
           tag="${{ steps.inspect.outputs.tag }}"
           git tag "$tag" "$RELEASE_SHA"
           git push origin "refs/tags/${tag}"
+
+      - name: Wait for release documentation
+        if: ${{ github.event_name == 'workflow_run' && steps.inspect.outputs.release == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node .github/scripts/release-finalization.mjs wait-docs docs.yml "${{ steps.inspect.outputs.tag }}" "$RELEASE_SHA"
 
       - name: Publish GitHub release
         if: ${{ github.event_name == 'workflow_run' && steps.inspect.outputs.release == 'true' }}

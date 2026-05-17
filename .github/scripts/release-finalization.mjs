@@ -1,7 +1,10 @@
 import { readFileSync, writeFileSync } from 'node:fs';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { pathToFileURL } from 'node:url';
 
 const SEMVER_PATTERN = /^\d+\.\d+\.\d+$/;
+const DEFAULT_WAIT_INTERVAL_MILLIS = 10_000;
+const DEFAULT_WAIT_TIMEOUT_MILLIS = 30 * 60 * 1000;
 
 const VERSION_PATTERNS = {
 	project: /(<artifactId>\s*spring-data-meilisearch\s*<\/artifactId>\s*<version>)([^<]+)(<\/version>)/,
@@ -78,6 +81,77 @@ export function incrementPatch(version) {
 	return parts.join('.');
 }
 
+export function releaseDocumentationPath(tag) {
+	const match = /^v(\d+\.\d+\.\d+)$/.exec(tag);
+
+	if (!match) {
+		throw new Error(`Release tag must use vX.Y.Z format but was "${tag}".`);
+	}
+
+	return match[1];
+}
+
+export function releaseDocumentationUrls(siteUrl, version) {
+	if (!SEMVER_PATTERN.test(version)) {
+		throw new Error(`Version must be semver x.y.z but was "${version}".`);
+	}
+
+	const baseUrl = siteUrl.endsWith('/') ? siteUrl : `${siteUrl}/`;
+	const referenceDocumentation = new URL(`${version}/`, baseUrl).toString();
+	const javadoc = new URL(`${version}/api/java/index.html`, baseUrl).toString();
+
+	return {
+		referenceDocumentation,
+		javadoc,
+	};
+}
+
+export function findWorkflowRun(workflowRuns, { tag, headSha }) {
+	return workflowRuns.find((run) => run.event === 'push'
+		&& run.head_sha === headSha
+		&& (run.head_branch === tag || run.head_branch === null));
+}
+
+export async function waitForWorkflowRun({
+	fetchImpl = fetch,
+	githubToken,
+	repository,
+	workflowFile,
+	tag,
+	headSha,
+	intervalMillis = DEFAULT_WAIT_INTERVAL_MILLIS,
+	timeoutMillis = DEFAULT_WAIT_TIMEOUT_MILLIS,
+}) {
+	if (!githubToken) {
+		throw new Error('GITHUB_TOKEN is required to wait for release documentation.');
+	}
+
+	const [owner, repo] = parseRepository(repository);
+	const deadline = Date.now() + timeoutMillis;
+
+	while (Date.now() <= deadline) {
+		const runs = await listWorkflowRuns(fetchImpl, { githubToken, owner, repo, workflowFile, headSha });
+		const run = findWorkflowRun(runs, { tag, headSha });
+
+		if (!run) {
+			console.log(`Waiting for ${workflowFile} to start for ${tag} at ${headSha}.`);
+		} else if (run.status === 'completed') {
+			if (run.conclusion === 'success') {
+				console.log(`${workflowFile} completed successfully for ${tag}: ${run.html_url}`);
+				return run;
+			}
+
+			throw new Error(`${workflowFile} completed with conclusion "${run.conclusion}" for ${tag}: ${run.html_url}`);
+		} else {
+			console.log(`Waiting for ${workflowFile} run ${run.id} for ${tag}; status=${run.status}.`);
+		}
+
+		await sleep(intervalMillis);
+	}
+
+	throw new Error(`Timed out waiting for ${workflowFile} to complete for ${tag} at ${headSha}.`);
+}
+
 function readRequiredVersion(pomXml, pattern, name) {
 	const match = pattern.exec(pomXml);
 
@@ -112,6 +186,55 @@ function replaceVersion(pomXml, pattern, version, name) {
 	}
 
 	return rewritten;
+}
+
+function parseRepository(repository) {
+	const parts = repository?.split('/') ?? [];
+
+	if (parts.length !== 2 || parts.some((part) => part.length === 0)) {
+		throw new Error(`GITHUB_REPOSITORY must use owner/repo format but was "${repository}".`);
+	}
+
+	return parts;
+}
+
+async function listWorkflowRuns(fetchImpl, { githubToken, owner, repo, workflowFile, headSha }) {
+	const url = new URL(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowFile}/runs`);
+	url.searchParams.set('event', 'push');
+	url.searchParams.set('head_sha', headSha);
+	url.searchParams.set('per_page', '50');
+
+	const response = await fetchImpl(url, {
+		headers: {
+			Accept: 'application/vnd.github+json',
+			Authorization: `Bearer ${githubToken}`,
+			'X-GitHub-Api-Version': '2022-11-28',
+		},
+	});
+
+	if (!response.ok) {
+		throw new Error(`Could not list workflow runs for ${workflowFile}: ${response.status} ${response.statusText}`);
+	}
+
+	const payload = await response.json();
+
+	return payload.workflow_runs ?? [];
+}
+
+async function waitForReleaseDocumentation(workflowFile, tag, headSha) {
+	const version = releaseDocumentationPath(tag);
+	const urls = releaseDocumentationUrls('https://junghoon-vans.github.io/spring-data-meilisearch/', version);
+
+	console.log(`Waiting for release documentation: ${urls.referenceDocumentation}`);
+	console.log(`Waiting for release Javadoc: ${urls.javadoc}`);
+
+	await waitForWorkflowRun({
+		githubToken: process.env.GITHUB_TOKEN,
+		repository: process.env.GITHUB_REPOSITORY,
+		workflowFile,
+		tag,
+		headSha,
+	});
 }
 
 function writeOutput(name, value) {
@@ -150,9 +273,10 @@ function rewritePom(pomPath) {
 function printUsage() {
 	console.error('Usage: node .github/scripts/release-finalization.mjs inspect <pom.xml> <commit-subject>');
 	console.error('   or: node .github/scripts/release-finalization.mjs rewrite <pom.xml>');
+	console.error('   or: node .github/scripts/release-finalization.mjs wait-docs <workflow-file> <tag> <head-sha>');
 }
 
-function main(argv) {
+async function main(argv) {
 	const [command, pomPath, ...args] = argv;
 
 	if (!command || !pomPath) {
@@ -170,15 +294,20 @@ function main(argv) {
 		return 0;
 	}
 
+	if (command === 'wait-docs') {
+		await waitForReleaseDocumentation(pomPath, args[0], args[1]);
+		return 0;
+	}
+
 	printUsage();
 	return 1;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-	try {
-		process.exitCode = main(process.argv.slice(2));
-	} catch (error) {
+	main(process.argv.slice(2)).then((exitCode) => {
+		process.exitCode = exitCode;
+	}).catch((error) => {
 		console.error(error.message);
 		process.exitCode = 1;
-	}
+	});
 }
