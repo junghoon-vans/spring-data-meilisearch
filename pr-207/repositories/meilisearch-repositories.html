@@ -456,6 +456,10 @@ The default implementation delegates to <code>MeilisearchOperations</code>.</p>
 }</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>This is the recommended repository style for the current module.
+It exposes the standard Spring Data CRUD and pagination entry points without implying support for a wider derived-query feature set.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -464,6 +468,10 @@ The default implementation delegates to <code>MeilisearchOperations</code>.</p>
 <div class="paragraph">
 <p>Repository bootstrap inspects the mapped entity type.
 If the entity is annotated with <code>@Document(applySettings = true)</code>, Spring Data Meilisearch applies annotation-driven settings through <code>MeilisearchOperations.applySettings(&#8230;&#8203;)</code> when the repository is created.</p>
+</div>
+<div class="paragraph">
+<p>This behavior is store-specific.
+It means repository creation can have side effects on the target index configuration, which is convenient for local development and controlled deployments but should be understood explicitly in environments where index settings are managed separately.</p>
 </div>
 </div>
 </div>
@@ -484,11 +492,47 @@ If the entity is annotated with <code>@Document(applySettings = true)</code>, Sp
 <li>
 <p><code>count()</code> uses <code>SearchOperations.count(&#8230;&#8203;)</code>.</p>
 </li>
+<li>
+<p><code>save(&#8230;&#8203;)</code>, <code>saveAll(&#8230;&#8203;)</code>, and delete methods delegate to <code>MeilisearchOperations</code> document-oriented write operations.</p>
+</li>
 </ul>
 </div>
 <div class="paragraph">
 <p>That distinction matters because some Meilisearch settings only influence search APIs.
 For example, <code>displayedAttributes</code> affect search results but not the document APIs used by <code>findById(&#8230;&#8203;)</code> and <code>findAllById(&#8230;&#8203;)</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.repositories.lookup-methods.behavior-table"><a class="anchor" href="#meilisearch.repositories.lookup-methods.behavior-table"></a>Method Behavior at a Glance</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 40%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Repository method family</th>
+<th class="tableblock halign-left valign-top">Backing behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findById</code>, <code>findAllById</code>, <code>existsById</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uses direct document lookup APIs after converting the repository id through the configured converter.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll</code>, <code>findAll(Sort)</code>, <code>findAll(Pageable)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Builds a search query and unwraps Meilisearch search hits back into entities.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>count</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Delegates to the operations layer count support rather than maintaining a separate repository-side count strategy.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>save</code>, <code>saveAll</code>, <code>delete*</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Delegates to <code>MeilisearchOperations</code> write and delete operations.</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -499,6 +543,10 @@ For example, <code>displayedAttributes</code> affect search results but not the 
 <p><code>findAll(Pageable)</code> is backed by a <code>BasicQuery</code> plus search result metadata.
 The repository <code>Page</code> total is therefore derived from Meilisearch search totals, not from a separate count query.
 If the index is configured with <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, that limit can cap the reported page total.</p>
+</div>
+<div class="paragraph">
+<p>The same search-backed design also explains why repository pagination does not expose richer search response data such as facets or federation metadata.
+When an application needs those store-specific result structures, prefer calling <code>MeilisearchOperations</code> directly from the service layer.</p>
 </div>
 </div>
 </div>

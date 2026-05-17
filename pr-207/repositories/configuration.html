@@ -456,7 +456,10 @@
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
 
-</span><span class="fold-block">@EnableMeilisearchRepositories(
+import org.springframework.context.annotation.Configuration;
+
+</span><span class="fold-block">@Configuration
+@EnableMeilisearchRepositories(
         basePackages = "com.example.movies",
         meilisearchTemplateRef = "meilisearchTemplate")
 class RepositoryConfig {
@@ -500,6 +503,10 @@ class RepositoryConfig {
 <div class="paragraph">
 <p>If no base packages are configured, Spring Data scans the package of the annotated configuration class.</p>
 </div>
+<div class="paragraph">
+<p>The presence of <code>queryLookupStrategy</code> and <code>namedQueriesLocation</code> on the annotation reflects the standard Spring Data configuration contract.
+However, Spring Data Meilisearch&#8217;s documented repository model currently centers on the built-in repository methods rather than on derived or declared query methods.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -517,7 +524,7 @@ class RepositoryConfig {
 
     &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;
 
-    &lt;meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/&gt;
+    &lt;meilisearch:meilisearch-client id="meilisearchClient" api-key="${MEILISEARCH_API_KEY}"/&gt;
 
     &lt;bean id="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate"&gt;

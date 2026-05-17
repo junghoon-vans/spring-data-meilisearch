@@ -447,6 +447,29 @@
 <div class="paragraph">
 <p>The goal of the repository abstraction is to reduce boilerplate for data-access code while still allowing direct use of <code>MeilisearchOperations</code> when you need lower-level control.</p>
 </div>
+<div class="paragraph">
+<p>The repository chapter follows the general Spring Data reference-manual shape, but its scope is intentionally limited to the repository features that this module actually implements today.
+In particular, Spring Data Meilisearch currently documents:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>repository definitions based on <code>MeilisearchRepository&lt;T, ID&gt;</code>,</p>
+</li>
+<li>
+<p>repository bootstrap through Java configuration and the XML namespace,</p>
+</li>
+<li>
+<p>the built-in CRUD, sorting, and paging methods backed by <code>SimpleMeilisearchRepository</code>,</p>
+</li>
+<li>
+<p>store-specific behavior such as automatic settings application and the difference between document-backed and search-backed methods.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>It does not currently claim support for the richer repository-query model that some other Spring Data modules provide, such as derived finder methods, named queries, or store-specific <code>@Query</code> execution.</p>
+</div>
 <div class="section-summary">
 <h2>Section Summary</h2>
 <ul class="nav-section-summary">

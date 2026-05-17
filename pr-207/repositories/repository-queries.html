@@ -447,6 +447,9 @@
 <div class="paragraph">
 <p>Spring Data Meilisearch currently focuses on the repository base interfaces and on direct use of <code>MeilisearchOperations</code> for advanced search features.</p>
 </div>
+<div class="paragraph">
+<p>This page intentionally documents the boundary of the current repository support so that the manual stays aligned with the implemented code rather than with the broader feature set available in some other Spring Data modules.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -496,6 +499,34 @@
 </div>
 </div>
 <div class="sect1">
+<h2 id="meilisearch.repositories.queries.unsupported"><a class="anchor" href="#meilisearch.repositories.queries.unsupported"></a>Features Not Documented as Repository Capabilities</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The repository documentation intentionally does not advertise the following as supported repository features:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>derived finder methods such as <code>findByTitle(&#8230;&#8203;)</code>,</p>
+</li>
+<li>
+<p>repository <code>@Query</code> methods,</p>
+</li>
+<li>
+<p>named queries,</p>
+</li>
+<li>
+<p>repository-level access to facet or federated-search metadata.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Those topics are common in longer repository chapters from other Spring Data libraries because those modules implement them.
+Spring Data Meilisearch currently keeps advanced querying in the <code>MeilisearchOperations</code> layer instead.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="meilisearch.repositories.queries.notes"><a class="anchor" href="#meilisearch.repositories.queries.notes"></a>Practical Notes</h2>
 <div class="sectionbody">
 <div class="ulist">
@@ -510,6 +541,9 @@
 <p>If your use case depends on advanced query composition or store-specific search options, prefer <code>MeilisearchOperations</code> explicitly in the service layer.</p>
 </li>
 </ul>
+</div>
+<div class="paragraph">
+<p>For many applications, this split is a good fit: repositories cover the common persistence flow, while <code>MeilisearchOperations</code> remains the explicit entry point for Meilisearch-specific search behavior.</p>
 </div>
 </div>
 </div>
