@@ -20,9 +20,9 @@
     <link rel="stylesheet" href="./_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.8.1">
-    <meta name="generation" content="0.8.1">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.8.1/meilisearch-operations.html">
+    <meta name="version" content="0.9.0">
+    <meta name="generation" content="0.9.0">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.9.0/meilisearch-operations.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="true">
     <link rel="icon" href="./_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -249,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.8.1">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.9.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.8.1</span>
+  <span class="version">0.9.0</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -340,7 +340,7 @@
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/blob/v0.8.1/src/main/antora/modules/ROOT/pages/meilisearch-operations.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/meilisearch-operations.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -394,7 +394,13 @@
 <p><code>SearchOperations</code> defines the actions to search for multiple entities using queries.</p>
 </li>
 <li>
-<p><code>MeilisearchOperations</code> combines the <code>DocumentOperations</code> and <code>SearchOperations</code> interfaces.</p>
+<p><code>MeilisearchInstanceOperations</code> defines instance-level actions such as health, version, and stats.</p>
+</li>
+<li>
+<p><code>MeilisearchIndexOperations</code> defines actions scoped to a single index.</p>
+</li>
+<li>
+<p><code>MeilisearchOperations</code> combines the <code>DocumentOperations</code> and <code>SearchOperations</code> interfaces and exposes accessors for instance and index operations.</p>
 </li>
 </ul>
 </div>
@@ -471,6 +477,85 @@ public class MovieController {
 </table>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.operations.instance-index"><a class="anchor" href="#meilisearch.operations.instance-index"></a>Instance and Index Operations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>MeilisearchOperations</code> exposes concern-specific operations for APIs that are not document or search operations.
+Use <code>instanceOps()</code> for Meilisearch instance-level information and <code>indexOps(&#8230;&#8203;)</code> for lifecycle and statistics operations bound to one index.
+Version, stats, and index lifecycle operations use the configured Meilisearch API key, so server-side key permissions and index restrictions still apply.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 2. Instance and index operation usage</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MeilisearchHealth health = meilisearchOperations.instanceOps().health();
+boolean healthy = meilisearchOperations.instanceOps().isHealthy();
+MeilisearchVersion version = meilisearchOperations.instanceOps().version();
+MeilisearchStats stats = meilisearchOperations.instanceOps().stats();
+
+MeilisearchIndexStats movieStats = meilisearchOperations.indexOps(Movie.class).stats(); <i class="conum" data-value="1"></i><b>(1)</b>
+MeilisearchIndexStats namedStats = meilisearchOperations.indexOps("movies").stats(); <i class="conum" data-value="2"></i><b>(2)</b>
+
+MeilisearchIndexOperations catalogIndex = meilisearchOperations.indexOps("catalog");
+MeilisearchIndex created = catalogIndex.create();
+MeilisearchIndex updated = catalogIndex.update(new MeilisearchIndexUpdateRequest("id"));
+MeilisearchIndex loaded = catalogIndex.get();
+MeilisearchIndexList indexes = catalogIndex.list(new MeilisearchIndexQuery(0, 100));
+MeilisearchIndexSettings settings = catalogIndex.getSettings();
+MeilisearchIndexSettings updatedSettings = catalogIndex.updateSettings(
+    MeilisearchIndexSettings.builder()
+        .withSearchableAttributes(List.of("title", "description"))
+        .withFilterableAttributes(List.of("genres"))
+        .withPagination(new MeilisearchIndexSettings.PaginationSettings(1500))
+        .build());
+MeilisearchIndexSettings resetSettings = catalogIndex.resetSettings();
+boolean deleted = catalogIndex.delete();</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Resolve the index uid from the mapping metadata of the <code>@Document</code> entity class.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Bind operations directly to a non-empty index uid.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>indexOps(Class&lt;?&gt;)</code> resolves the index uid from the entity mapping, so <code>indexOps(Movie.class)</code> targets the same <code>@Document(indexUid = "movies")</code> index used by template and repository operations.
+<code>indexOps(String)</code> is available when the index uid is not represented by a mapped entity class.</p>
+</div>
+<div class="paragraph">
+<p>The index lifecycle API returns Spring Data Meilisearch-owned request and response types such as <code>MeilisearchIndex</code>, <code>MeilisearchIndexCreateRequest</code>, <code>MeilisearchIndexUpdateRequest</code>, <code>MeilisearchIndexQuery</code>, and <code>MeilisearchIndexList</code>.
+It does not expose Meilisearch Java SDK model types from public operation signatures.
+Runtime settings APIs follow the same rule: <code>MeilisearchIndexSettings</code> and its nested value types are Spring Data Meilisearch-owned and no <code>com.meilisearch.sdk.model.Settings</code> types are exposed.</p>
+</div>
+<div class="paragraph">
+<p>Meilisearch performs create, update, and delete operations asynchronously.
+The default template waits for the submitted task to complete using the configured request timeout and retry interval before returning from lifecycle methods and from settings update/reset methods.</p>
+</div>
+<div class="paragraph">
+<p><code>list(&#8230;&#8203;)</code> returns a page of indexes for the configured key; it is exposed from <code>indexOps(&#8230;&#8203;)</code> to keep index management under the index operations API rather than introducing a separate admin wrapper.
+Updating an index currently covers the practical Meilisearch lifecycle update exposed for a bound index: assigning the primary key, typically before documents are added.
+Runtime settings management is exposed on the same index-scoped operations object through <code>getSettings()</code>, <code>updateSettings(&#8230;&#8203;)</code>, and <code>resetSettings()</code>.
+<code>updateSettings(&#8230;&#8203;)</code> sends the settings fields present in the provided <code>MeilisearchIndexSettings</code> value to Meilisearch; use empty lists or maps to clear supported list/map settings and use <code>resetSettings()</code> to restore all settings to Meilisearch defaults.
+Do not rely on <code>null</code> values to reset individual settings.
+Annotation-driven <code>applySettings(&#8230;&#8203;)</code> remains available for applying settings declared on mapped entity classes and is separate from ad-hoc runtime settings updates.</p>
+</div>
+<div class="paragraph">
+<p>The API key must be allowed to perform the requested index actions.
+For restricted keys, create, retrieve/list, update, and delete operations require the corresponding Meilisearch index permissions (for example <code>indexes.create</code>, <code>indexes.get</code>, <code>indexes.update</code>, and <code>indexes.delete</code>) and must also match the key&#8217;s index restrictions.
+Deleting or renaming an index outside the mapping does not change <code>@Document(indexUid = &#8230;&#8203;)</code>; repositories continue to target the index uid declared on the entity.</p>
 </div>
 </div>
 </div>
@@ -559,7 +644,7 @@ Spring Data Meilisearch provides several implementations: <code>BasicQuery</code
 <p><code>BasicQuery</code> is the standard implementation for simple search queries:</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 2. Search for movies with a given title</div>
+<div class="title">Example 3. Search for movies with a given title</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -851,26 +936,17 @@ List&lt;Movie&gt; movies = result.getSearchHits().stream()
                           <ul class="versions">
   <li class="version">
     <a href="meilisearch-operations.html">
+      0.9.0
+    </a>
+  </li>
+  <li class="version">
+    <a href="0.8.1/meilisearch-operations.html">
       0.8.1
     </a>
   </li>
   <li class="version">
     <a href="0.8.0/meilisearch-operations.html">
       0.8.0
-    </a>
-  </li>
-</ul>                        </div>
-                        <div class="version-item">
-                          <div>
-                            <button class="version-toggle" type="button">
-                              <span></span>
-                              Snapshot
-                            </button>
-                          </div>
-                          <ul class="versions">
-  <li class="version">
-    <a href="snapshot/meilisearch-operations.html">
-      0.8.2-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
