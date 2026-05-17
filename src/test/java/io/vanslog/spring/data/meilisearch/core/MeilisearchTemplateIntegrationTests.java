@@ -67,7 +67,7 @@ class MeilisearchTemplateIntegrationTests {
 
 	private static final List<String> LIFECYCLE_INDEX_UIDS = List.of("lifecycle-create-index",
 			"lifecycle-get-list-index", "lifecycle-update-index", "lifecycle-delete-index", "runtime-settings-index",
-			"runtime-settings-reset-index");
+			"runtime-settings-reset-index", "nested-movies");
 
 	@BeforeEach
 	void setUp() throws MeilisearchException {
@@ -527,6 +527,21 @@ class MeilisearchTemplateIntegrationTests {
 		assertThat(meilisearchTemplate.exists(documentId, AnnotatedIdField.class)).isTrue();
 	}
 
+	@Test
+	void shouldRoundTripNestedDocumentsThroughTemplateMapping() {
+
+		NestedMovie nestedMovie = new NestedMovie("nested-1", "Nested Search", new MovieDetails("Director", 2026));
+
+		meilisearchTemplate.save(nestedMovie);
+
+		NestedMovie saved = meilisearchTemplate.get("nested-1", NestedMovie.class);
+		SearchHits<NestedMovie> searchHits = meilisearchTemplate.search(new BasicQuery("Nested"), NestedMovie.class);
+
+		assertThat(saved.getDetails().getDirector()).isEqualTo("Director");
+		assertThat(saved.getDetails().getYear()).isEqualTo(2026);
+		assertThat(searchHits.getSearchHit(0).getContent().getDetails().getDirector()).isEqualTo("Director");
+	}
+
 	@Document(indexUid = "annotatedIdField")
 	static class AnnotatedIdField {
 
@@ -538,6 +553,57 @@ class MeilisearchTemplateIntegrationTests {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+	}
+
+	@Document(indexUid = "nested-movies")
+	static class NestedMovie {
+
+		@Id private String id;
+		private String title;
+		private MovieDetails details;
+
+		@SuppressWarnings("unused")
+		NestedMovie() {}
+
+		NestedMovie(String id, String title, MovieDetails details) {
+			this.id = id;
+			this.title = title;
+			this.details = details;
+		}
+
+		public String getId() {
+			return id;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		public MovieDetails getDetails() {
+			return details;
+		}
+	}
+
+	static class MovieDetails {
+
+		private String director;
+		private int year;
+
+		@SuppressWarnings("unused")
+		MovieDetails() {}
+
+		MovieDetails(String director, int year) {
+			this.director = director;
+			this.year = year;
+		}
+
+		public String getDirector() {
+			return director;
+		}
+
+		public int getYear() {
+			return year;
 		}
 	}
 
