@@ -451,6 +451,51 @@ class Product {
 </div>
 </div>
 </div>
+<div class="paragraph">
+<p>Annotation-based settings are mapping metadata.
+They are applied when repositories initialize entities configured with <code>@Document(applySettings = true)</code> or when application code explicitly calls <code>MeilisearchOperations.applySettings(Entity.class)</code>.
+This path remains the preferred option for stable settings that belong to an entity model.</p>
+</div>
+<div class="paragraph">
+<p>Runtime settings operations are available when an application needs to inspect or adjust index settings outside entity bootstrap.
+Use the index-scoped API from <code>MeilisearchOperations.indexOps(&#8230;&#8203;)</code>:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MeilisearchIndexOperations index = meilisearchOperations.indexOps(Product.class);
+
+MeilisearchIndexSettings current = index.getSettings();
+
+MeilisearchIndexSettings updated = index.updateSettings(
+    MeilisearchIndexSettings.builder()
+        .withSearchableAttributes(List.of("description", "brand", "color"))
+        .withDisplayedAttributes(List.of("description", "brand", "color", "productId"))
+        .withFilterableAttributes(List.of("brand", "color", "price"))
+        .withPagination(new MeilisearchIndexSettings.PaginationSettings(2000))
+        .build());
+
+MeilisearchIndexSettings defaults = index.resetSettings();</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The runtime API uses Spring Data Meilisearch-owned <code>MeilisearchIndexSettings</code> values.
+Public method signatures do not expose Meilisearch Java SDK settings, task, pagination, typo tolerance, faceting, embedder, or localized attribute classes.
+Runtime updates use Meilisearch&#8217;s settings update task and the template waits for the task to complete before returning.
+If the task reaches a terminal status other than <code>SUCCEEDED</code>, the template raises <code>TaskStatusException</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>updateSettings(&#8230;&#8203;)</code> updates the settings represented by non-null fields in <code>MeilisearchIndexSettings</code>.
+Use empty lists or maps to clear supported list/map settings and use <code>resetSettings()</code> to reset all index settings to Meilisearch defaults.
+Do not use <code>null</code> values to reset individual settings; Meilisearch SDK serializers omit null fields.</p>
+</div>
+<div class="paragraph">
+<p>The conservative runtime settings surface mirrors the annotation support documented below: searchable, displayed, sortable and filterable attributes, ranking rules, distinct attribute, synonyms, stop words, dictionary, pagination <code>maxTotalHits</code>, faceting <code>maxValuesPerFacet</code>, typo tolerance basics, tokenization settings, proximity precision, search cutoff, localized attributes, and embedders.
+Advanced Meilisearch settings not represented by these Spring Data types can still be managed outside this abstraction if needed.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
