@@ -1,6 +1,6 @@
 {
   "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
-  "generated": "2026-05-17T11:26:29.039Z",
+  "generated": "2026-05-17T11:30:57.554Z",
   "url": "https://junghoon-vans.github.io/spring-data-meilisearch",
   "components": {
     "data-meilisearch": {
@@ -79,7 +79,7 @@
             {
               "path": "repositories/core-concepts.adoc",
               "url": "/repositories/core-concepts.html",
-              "title": "Core concepts"
+              "title": "Core Concepts"
             },
             {
               "path": "repositories/create-instances.adoc",
@@ -99,7 +99,7 @@
             {
               "path": "repositories/repository-queries.adoc",
               "url": "/repositories/repository-queries.html",
-              "title": "Query Methods and Limitations"
+              "title": "Repository Methods and Limitations"
             },
             {
               "path": "search.adoc",

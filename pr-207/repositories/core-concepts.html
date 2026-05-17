@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Core concepts :: Spring Data Meilisearch</title>
+    <title>Core Concepts :: Spring Data Meilisearch</title>
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -323,7 +323,7 @@
     <a class="nav-link"  href="../repositories.html">Repositories</a>
 <ul class="nav-list">
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link"  href="core-concepts.html">Core concepts</a>
+    <a class="nav-link"  href="core-concepts.html">Core Concepts</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="definition.html">Defining Repository Interfaces</a>
@@ -338,7 +338,7 @@
     <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="repository-queries.html">Query Methods and Limitations</a>
+    <a class="nav-link"  href="repository-queries.html">Repository Methods and Limitations</a>
   </li>
 </ul>
   </li>
@@ -396,7 +396,7 @@
   <div class="content">
     <div
       class="toc"
-      data-title="Core concepts"
+      data-title="Core Concepts"
       data-levels="2"
     >
       <div class="toc-menu"></div>
@@ -438,191 +438,126 @@
       <li id="copy-url" title="Copy versioned URL"></li>
       <li><a href="../index.html">Spring Data Meilisearch</a></li>
       <li><a href="../repositories.html">Repositories</a></li>
-      <li><a href="core-concepts.html">Core concepts</a></li>
+      <li><a href="core-concepts.html">Core Concepts</a></li>
     </ul>
   </nav>
-</div><h1 id="page-title" class="page">Core concepts</h1>
+</div><h1 id="page-title" class="page">Core Concepts</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>The central interface in the Spring Data repository abstraction is <code>Repository</code>.
-It takes the domain class to manage as well as the identifier type of the domain class as type arguments.
-This interface acts primarily as a marker interface to capture the types to work with and to help you to discover interfaces that extend this one.</p>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>Spring Data considers domain types to be entities, more specifically aggregates.
-So you will see the term "entity" used throughout the documentation that can be interchanged with the term "domain type" or "aggregate".</p>
+<p>Spring Data Meilisearch supports the core Spring Data repository programming model, but its repository surface is intentionally narrower than stores such as JPA, MongoDB, Elasticsearch, or Redis.</p>
 </div>
 <div class="paragraph">
-<p>As you might have noticed in the introduction it already hinted towards domain-driven concepts.
-We consider domain objects in the sense of DDD.
-Domain objects have identifiers (otherwise these would be identity-less value objects), and we somehow need to refer to identifiers when working with certain patterns to access data.
-Referring to identifiers will become more meaningful as we talk about repositories and query methods.</p>
+<p>The important distinction is that this module currently provides:</p>
 </div>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>The <a href="https://docs.spring.io/spring-data/commons/reference/3.3/api/java/org/springframework/data/repository/CrudRepository.html"><code>CrudRepository</code></a> and <a href="https://docs.spring.io/spring-data/commons/reference/3.3/api/java/org/springframework/data/repository/ListCrudRepository.html"><code>ListCrudRepository</code></a> interfaces provide sophisticated CRUD functionality for the entity class that is being managed.</p>
-</div>
-<div id="repositories.repository" class="listingblock">
-<div class="title"><code>CrudRepository</code> Interface</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface CrudRepository&lt;T, ID&gt; extends Repository&lt;T, ID&gt; {
-
-  &lt;S extends T&gt; S save(S entity);      <i class="conum" data-value="1"></i><b>(1)</b>
-
-  Optional&lt;T&gt; findById(ID primaryKey); <i class="conum" data-value="2"></i><b>(2)</b>
-
-  Iterable&lt;T&gt; findAll();               <i class="conum" data-value="3"></i><b>(3)</b>
-
-  long count();                        <i class="conum" data-value="4"></i><b>(4)</b>
-
-  void delete(T entity);               <i class="conum" data-value="5"></i><b>(5)</b>
-
-  boolean existsById(ID primaryKey);   <i class="conum" data-value="6"></i><b>(6)</b>
-
-  // … more functionality omitted.
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Saves the given entity.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Returns the entity identified by the given ID.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Returns all entities.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Returns the number of entities.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Deletes the given entity.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Indicates whether an entity with the given ID exists.</td>
-</tr>
-</table>
+<div class="ulist">
+<ul>
+<li>
+<p>repository bootstrap through <code>@EnableMeilisearchRepositories</code> and the XML namespace,</p>
+</li>
+<li>
+<p>a store-specific <code>MeilisearchRepository&lt;T, ID&gt;</code> base interface,</p>
+</li>
+<li>
+<p>CRUD and paging/sorting methods implemented by <code>SimpleMeilisearchRepository</code>,</p>
+</li>
+<li>
+<p>direct access to advanced search features through <code>MeilisearchOperations</code>.</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>The methods declared in this interface are commonly referred to as CRUD methods.
-<code>ListCrudRepository</code> offers equivalent methods, but they return <code>List</code> where the <code>CrudRepository</code> methods return an <code>Iterable</code>.</p>
+<p>It does <strong>not</strong> currently document or promise full Spring Data query derivation support, custom <code>@Query</code> methods, or named-query execution.</p>
 </div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
+</div>
+</div>
+<div class="sect1">
+<h2 id="repositories.core-concepts.repository-interface"><a class="anchor" href="#repositories.core-concepts.repository-interface"></a>Repository Interface</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>The repository interface implies a few reserved methods like <code>findById(ID identifier)</code> that target the domain type identifier property regardless of its property name.
-Read more about query method limitations and store-specific behavior in <a href="repository-queries.html" class="xref page">Query Methods and Limitations</a>.</p>
-</div>
-<div class="paragraph">
-<p>You can annotate your query method with <code>@Query</code> to provide a custom query if a property named <code>Id</code> doesn&#8217;t refer to the identifier.
-Following that path can easily lead to confusion and is discouraged as you will quickly hit type limits if the <code>ID</code> type and the type of your <code>Id</code> property deviate.</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-We also provide persistence technology-specific abstractions, such as <code>JpaRepository</code> or <code>MongoRepository</code>.
-Those interfaces extend <code>CrudRepository</code> and expose the capabilities of the underlying persistence technology in addition to the rather generic persistence technology-agnostic interfaces such as <code>CrudRepository</code>.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Additional to the <code>CrudRepository</code>, there are <a href="https://docs.spring.io/spring-data/commons/reference/3.3/api/java/org/springframework/data/repository/PagingAndSortingRepository.html"><code>PagingAndSortingRepository</code></a> and <a href="https://docs.spring.io/spring-data/commons/reference/3.3/api/java/org/springframework/data/repository/ListPagingAndSortingRepository.html"><code>ListPagingAndSortingRepository</code></a> which add additional methods to ease paginated access to entities:</p>
-</div>
-<div class="listingblock">
-<div class="title"><code>PagingAndSortingRepository</code> interface</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface PagingAndSortingRepository&lt;T, ID&gt;  {
-
-  Iterable&lt;T&gt; findAll(Sort sort);
-
-  Page&lt;T&gt; findAll(Pageable pageable);
-}</code></pre>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Extension interfaces are subject to be supported by the actual store module.
-While this documentation explains the general scheme, make sure that your store module supports the interfaces that you want to use.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>To access the second page of <code>User</code> by a page size of 20, you could do something like the following:</p>
+<p><code>MeilisearchRepository&lt;T, ID&gt;</code> extends Spring Data <code>CrudRepository</code> and <code>PagingAndSortingRepository</code>.
+That means the stable repository contract is the built-in CRUD plus sorting/paging methods defined by those interfaces.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">PagingAndSortingRepository&lt;User, Long&gt; repository = // … get access to a bean
-Page&lt;User&gt; users = repository.findAll(PageRequest.of(1, 20));</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><code>ListPagingAndSortingRepository</code> offers equivalent methods, but returns a <code>List</code> where the <code>PagingAndSortingRepository</code> methods return an <code>Iterable</code>.</p>
-</div>
-<div class="paragraph">
-<p>In addition to pagination, scrolling provides a more fine-grained access to iterate through chunks of larger result sets.</p>
-</div>
-<div class="paragraph">
-<p>In addition to query methods, query derivation for both count and delete queries is available.
-The following list shows the interface definition for a derived count query:</p>
-</div>
-<div class="listingblock">
-<div class="title">Derived Count Query</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">interface UserRepository extends CrudRepository&lt;User, Long&gt; {
-
-  long countByLastname(String lastname);
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface MeilisearchRepository&lt;T, ID&gt;
+        extends CrudRepository&lt;T, ID&gt;, PagingAndSortingRepository&lt;T, ID&gt; {
 }</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>The following listing shows the interface definition for a derived delete query:</p>
 </div>
-<div class="listingblock">
-<div class="title">Derived Delete Query</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">interface UserRepository extends CrudRepository&lt;User, Long&gt; {
-
-  long deleteByLastname(String lastname);
-
-  List&lt;User&gt; removeByLastname(String lastname);
-}</code></pre>
+</div>
+<div class="sect1">
+<h2 id="repositories.core-concepts.execution-model"><a class="anchor" href="#repositories.core-concepts.execution-model"></a>Execution Model</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The default repository implementation delegates to <code>MeilisearchOperations</code>, but not every repository method uses the same underlying Meilisearch API:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>findById(&#8230;&#8203;)</code> and <code>findAllById(&#8230;&#8203;)</code> use document APIs.</p>
+</li>
+<li>
+<p><code>findAll()</code>, <code>findAll(Sort)</code>, and <code>findAll(Pageable)</code> use search APIs.</p>
+</li>
+<li>
+<p><code>count()</code> is derived from the search-oriented operations layer.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>That difference matters because Meilisearch search settings can affect search-backed repository methods without affecting document lookups.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="repositories.core-concepts-when-to-use"><a class="anchor" href="#repositories.core-concepts-when-to-use"></a>When to Use Repositories vs. Operations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Use repositories when you want Spring Data&#8217;s familiar persistence model for:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>saving and deleting entities,</p>
+</li>
+<li>
+<p>id-based reads,</p>
+</li>
+<li>
+<p>simple collection reads,</p>
+</li>
+<li>
+<p>sorting and pageable access.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Use <code>MeilisearchOperations</code> when you need store-specific behavior such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>BasicQuery</code>, <code>IndexQuery</code>, <code>FacetQuery</code>, or <code>SimilarQuery</code>,</p>
+</li>
+<li>
+<p>federated multi-search,</p>
+</li>
+<li>
+<p>facet metadata,</p>
+</li>
+<li>
+<p>index lifecycle management,</p>
+</li>
+<li>
+<p>runtime settings updates.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For the concrete store-specific rules and current limitations, see <a href="meilisearch-repositories.html" class="xref page">Meilisearch Repositories</a> and <a href="repository-queries.html" class="xref page">Repository Methods and Limitations</a>.</p>
+</div>
 </div>
 </div>
 </article>  </div>
