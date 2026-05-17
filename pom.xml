@@ -29,7 +29,7 @@
         <meilisearch-java>0.20.1</meilisearch-java>
         <okhttp>5.3.2</okhttp>
         <kotlin-stdlib>2.2.21</kotlin-stdlib>
-        <testcontainers-meilisearch>1.1.0</testcontainers-meilisearch>
+        <testcontainers-meilisearch>2.0.0</testcontainers-meilisearch>
 
         <java-module-name>spring.data.meilisearch</java-module-name>
     </properties>
