@@ -94,4 +94,4 @@ Register a JSON handler bean and reference it from `<meilisearch:meilisearch-cli
 </beans>
 ----
 
-The XML namespace attributes are documented in xref:../appendix/xml-namespace-reference.adoc[XML namespace reference].
+The XML namespace attributes are documented in xref:appendix/xml-namespace-reference.adoc[XML namespace reference].

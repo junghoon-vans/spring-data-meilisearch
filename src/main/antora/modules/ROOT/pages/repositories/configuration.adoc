@@ -61,4 +61,4 @@ If no base packages are configured, Spring Data scans the package of the annotat
 ----
 
 The XML namespace extends the Spring Data repository namespace and adds the `meilisearch-template-ref` attribute.
-See xref:../appendix/xml-namespace-reference.adoc[XML namespace reference] for the full attribute list.
+See xref:appendix/xml-namespace-reference.adoc[XML namespace reference] for the full attribute list.

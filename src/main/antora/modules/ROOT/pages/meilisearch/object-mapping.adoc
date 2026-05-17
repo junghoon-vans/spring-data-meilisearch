@@ -64,7 +64,7 @@ class Product {
 ----
 
 Use annotation-driven settings for stable, entity-owned index defaults.
-Use xref:settings.adoc[runtime settings operations] when settings must be inspected or adjusted dynamically.
+Use xref:meilisearch/settings.adoc[runtime settings operations] when settings must be inspected or adjusted dynamically.
 
 [[meilisearch.mapping.converter]]
 == Mapping Context and Converter
