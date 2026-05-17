@@ -37,7 +37,7 @@ jobs:
     env:
       CHECKOUT_REF: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.ref || 'main' }}
       RELEASE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || '' }}
-      RELEASE_AUTOMATION_TOKEN: ${{ secrets.RELEASE_AUTOMATION_TOKEN }}
+      RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
     steps:
       - name: Require workflow_dispatch dry run
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run != true }}
@@ -96,12 +96,12 @@ jobs:
       - name: Require release automation token
         if: ${{ github.event_name == 'workflow_run' && steps.inspect.outputs.release == 'true' }}
         run: |
-          if [ -z "$RELEASE_AUTOMATION_TOKEN" ]; then
-            echo "::error::RELEASE_AUTOMATION_TOKEN is required for live release finalization."
+          if [ -z "$RELEASE_TOKEN" ]; then
+            echo "::error::RELEASE_TOKEN is required for live release finalization."
             exit 1
           fi
 
-          git remote set-url origin "https://x-access-token:${RELEASE_AUTOMATION_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git remote set-url origin "https://x-access-token:${RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
       - name: Verify release SHA is still origin/main
         if: ${{ github.event_name == 'workflow_run' && steps.inspect.outputs.release == 'true' }}
@@ -151,7 +151,7 @@ jobs:
           name: Spring Data Meilisearch ${{ steps.inspect.outputs.version }}
           commitish: ${{ env.RELEASE_SHA }}
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_AUTOMATION_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Prepare next development iteration
         id: next-snapshot
