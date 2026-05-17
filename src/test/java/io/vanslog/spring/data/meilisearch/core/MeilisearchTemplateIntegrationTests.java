@@ -294,13 +294,17 @@ class MeilisearchTemplateIntegrationTests {
 	void shouldDeleteIndex() {
 
 		meilisearchTemplate.indexOps("lifecycle-delete-index").create(new MeilisearchIndexCreateRequest("id"));
+		meilisearchTemplate.indexOps("lifecycle-get-list-index").create(new MeilisearchIndexCreateRequest("id"));
 
 		boolean deleted = meilisearchTemplate.indexOps("lifecycle-delete-index").delete();
 		MeilisearchIndexList indexes = meilisearchTemplate.indexOps("lifecycle-delete-index")
 				.list(new MeilisearchIndexQuery(0, 100));
+		List<String> indexUids = indexes.getIndexes().stream().map(MeilisearchIndex::getUid).toList();
 
 		assertThat(deleted).isTrue();
-		assertThat(indexes.getIndexes()).extracting(MeilisearchIndex::getUid).doesNotContain("lifecycle-delete-index");
+		assertThat(indexUids).isNotEmpty()
+				.contains("lifecycle-get-list-index")
+				.doesNotContain("lifecycle-delete-index");
 	}
 
 	@Test
