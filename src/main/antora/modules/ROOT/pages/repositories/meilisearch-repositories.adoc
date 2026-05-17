@@ -1,0 +1,38 @@
+[[meilisearch.repositories.store-specific]]
+= Meilisearch Repositories
+
+`MeilisearchRepository<T, ID>` extends Spring Data `CrudRepository` and `PagingAndSortingRepository`.
+The default implementation delegates to `MeilisearchOperations`.
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+
+public interface MovieRepository extends MeilisearchRepository<Movie, String> {
+}
+----
+
+[[meilisearch.repositories.autocreation]]
+== Automatic Settings Application
+
+Repository bootstrap inspects the mapped entity type.
+If the entity is annotated with `@Document(applySettings = true)`, Spring Data Meilisearch applies annotation-driven settings through `MeilisearchOperations.applySettings(...)` when the repository is created.
+
+[[meilisearch.repositories.lookup-methods]]
+== Built-in Repository Methods
+
+The built-in repository methods do not all use the same underlying Meilisearch API:
+
+* `findById(...)` and `findAllById(...)` use document APIs.
+* `findAll()`, `findAll(Sort)`, and `findAll(Pageable)` use search APIs.
+* `count()` uses `SearchOperations.count(...)`.
+
+That distinction matters because some Meilisearch settings only influence search APIs.
+For example, `displayedAttributes` affect search results but not the document APIs used by `findById(...)` and `findAllById(...)`.
+
+[[meilisearch.repositories.paging]]
+== Paging and Totals
+
+`findAll(Pageable)` is backed by a `BasicQuery` plus search result metadata.
+The repository `Page` total is therefore derived from Meilisearch search totals, not from a separate count query.
+If the index is configured with `@Pagination(maxTotalHits = ...)`, that limit can cap the reported page total.

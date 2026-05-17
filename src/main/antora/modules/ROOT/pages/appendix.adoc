@@ -1,0 +1,8 @@
+[[meilisearch.appendix]]
+= Appendix
+:page-section-summary-toc: 1
+
+This appendix contains reference material for Spring Data Meilisearch.
+
+* xref:appendix/xml-namespace-reference.adoc[XML namespace reference]
+* xref:attachment$api/java/index.html[Javadoc]

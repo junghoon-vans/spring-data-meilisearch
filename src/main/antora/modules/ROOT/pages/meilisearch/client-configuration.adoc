@@ -1,0 +1,97 @@
+[[meilisearch.clients]]
+= Client Configuration
+
+Spring Data Meilisearch operates on top of the Meilisearch Java client and exposes a Spring-friendly configuration model for creating and wiring the client.
+
+[[meilisearch.clients.javaconfig]]
+== JavaConfig
+
+Extend `MeilisearchConfiguration` to provide the `ClientConfiguration` bean. The base class also registers the default `GsonJsonHandler`, `MeilisearchClient`, mapping context, converter, and `meilisearchTemplate` bean.
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
+
+class MyClientConfig extends MeilisearchConfiguration {
+
+    @Override
+    public ClientConfiguration clientConfiguration() {
+        return ClientConfiguration.builder()
+                .connectedTo("http://localhost:7700")
+                .withApiKey("masterKey")
+                .withRequestTimeout(2_000)
+                .withRequestInterval(20)
+                .build();
+    }
+}
+----
+
+[[meilisearch.clients.builder]]
+== ClientConfiguration Builder
+
+`ClientConfiguration` exposes the following core options through its builder:
+
+* `connectedTo(...)` or `connectedToLocalhost()` to choose the server endpoint.
+* `withApiKey(...)` to provide the Meilisearch API key.
+* `withClientAgents(...)` to append client agent values.
+* `withRequestTimeout(...)` to configure how long task-based operations wait for completion.
+* `withRequestInterval(...)` to configure the polling interval used while waiting for task completion.
+
+These timeout and interval settings affect operations that submit asynchronous Meilisearch tasks, such as writes, index lifecycle changes, and runtime settings updates.
+
+[[meilisearch.clients.json-handler]]
+== JSON Handler
+
+`MeilisearchConfiguration` registers `GsonJsonHandler` by default.
+Override `jsonHandler()` when you need a different implementation.
+
+[source,java]
+----
+import com.meilisearch.sdk.json.JacksonJsonHandler;
+import com.meilisearch.sdk.json.JsonHandler;
+
+class JsonHandlerConfig extends MeilisearchConfiguration {
+
+    @Override
+    public JsonHandler jsonHandler() {
+        return new JacksonJsonHandler();
+    }
+}
+----
+
+The supported integration styles are:
+
+* `com.meilisearch.sdk.json.GsonJsonHandler`
+* `com.meilisearch.sdk.json.JacksonJsonHandler`
+* Any custom implementation of `com.meilisearch.sdk.json.JsonHandler`
+
+[[meilisearch.clients.namespace]]
+== XML Namespace
+
+Spring Data Meilisearch also provides an XML namespace.
+Register a JSON handler bean and reference it from `<meilisearch:meilisearch-client>` when you do not want to use the default bean name.
+
+[source,xml]
+----
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.vanslog.io/spring/data/meilisearch
+       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
+
+    <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
+
+    <meilisearch:meilisearch-client
+            id="meilisearchClient"
+            host-url="http://localhost:7700"
+            api-key="masterKey"
+            request-timeout="2000"
+            request-interval="20"
+            json-handler-ref="jsonHandler"/>
+</beans>
+----
+
+The XML namespace attributes are documented in xref:../appendix/xml-namespace-reference.adoc[XML namespace reference].

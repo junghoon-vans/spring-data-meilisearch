@@ -1,0 +1,107 @@
+[[meilisearch.operations]]
+= Operations
+
+Spring Data Meilisearch exposes template-style APIs through `MeilisearchOperations`.
+That interface combines document operations, search operations, access to instance-level APIs, and access to index-scoped APIs.
+
+[[meilisearch.operations.entrypoint]]
+== Entry Point
+
+`MeilisearchConfiguration` registers a bean named `meilisearchOperations` and `meilisearchTemplate`.
+Inject that bean when you want direct access to Meilisearch-specific operations instead of the repository abstraction.
+
+[source,java]
+----
+@RestController
+class MovieController {
+
+    private final MeilisearchOperations operations;
+
+    MovieController(MeilisearchOperations operations) {
+        this.operations = operations;
+    }
+
+    @PostMapping("/movies")
+    Movie save(@RequestBody Movie movie) {
+        return operations.save(movie);
+    }
+}
+----
+
+[[meilisearch.operations.documents]]
+== Document Operations
+
+`DocumentOperations` covers id-oriented access to one mapped entity type:
+
+* `save(T)` and `save(List<T>)`
+* `get(String, Class<T>)`
+* `multiGet(...)`
+* `exists(String, Class<?>)`
+* `delete(...)`
+* `deleteAll(Class<?>)`
+
+These methods are appropriate when you already know the target document ids and want direct document-style access.
+
+[[meilisearch.operations.search]]
+== Search Operations
+
+`SearchOperations` covers full-text and search-oriented APIs:
+
+* `search(query, entityType)` for single-index search.
+* `multiSearch(queries, entityType)` for batched non-federated search.
+* `multiSearch(queries, federation, entityType)` for federated multi-search.
+* `facetSearch(query, entityType)` for facet search results.
+* `similarSearch(query, entityType)` for similar-document search.
+* `count(entityType)` for search-backed counting.
+
+[source,java]
+----
+BasicQuery query = BasicQuery.builder()
+        .withQ("Wonder Woman")
+        .withFilter(new String[] { "genres = Action" })
+        .build();
+
+SearchHits<Movie> result = operations.search(query, Movie.class);
+List<Movie> movies = result.getSearchHits().stream()
+        .map(SearchHit::getContent)
+        .toList();
+----
+
+[[meilisearch.operations.queries]]
+== Query Types
+
+Spring Data Meilisearch ships several query value types:
+
+* `BasicQuery` for standard search.
+* `IndexQuery` for multi-index and federated multi-search scenarios.
+* `FacetQuery` for facet search.
+* `SimilarQuery` for similar-document search.
+
+`IndexQuery` adds `indexUid` and optional federation options.
+`SimilarQuery` requires both the source `documentId` and the configured `embedder` name.
+
+[[meilisearch.operations.results]]
+== Search Result Types
+
+Search methods return `SearchHits<T>`.
+Each hit is a `SearchHit<T>` that contains:
+
+* the mapped entity content,
+* processing time,
+* query text,
+* optional facet statistics and facet distribution,
+* optional federation metadata.
+
+`SearchHits#getTotalHits()` is accompanied by `getTotalHitsRelation()`:
+
+* `EQUAL_TO` means the total hit count reflects the exact matching result set reported by Meilisearch.
+* `OFF` means exact total-hit metadata is unavailable.
+
+Use the hit list size for the current page content and total-hit metadata only when the relation is `EQUAL_TO`.
+
+[[meilisearch.operations.notes]]
+== Notes on Search Semantics
+
+* Federated multi-search does not support `Pageable` settings inside the individual queries. Use federation `limit` and `offset` instead.
+* Similar-document search requires a compatible embedder already configured in the target index.
+* Repository methods such as `findAll(Pageable)` are layered on top of these search operations, so search settings such as pagination limits can influence reported page totals.

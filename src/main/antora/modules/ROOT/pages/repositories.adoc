@@ -1,0 +1,7 @@
+[[meilisearch.repositories]]
+= Repositories
+:page-section-summary-toc: 1
+
+This chapter explains the Spring Data repository abstraction and the Meilisearch-specific repository behavior implemented by Spring Data Meilisearch.
+
+The goal of the repository abstraction is to reduce boilerplate for data-access code while still allowing direct use of `MeilisearchOperations` when you need lower-level control.

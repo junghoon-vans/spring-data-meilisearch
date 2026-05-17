@@ -1,0 +1,29 @@
+[[meilisearch.repositories.queries]]
+= Query Methods and Limitations
+
+Spring Data Meilisearch currently focuses on the repository base interfaces and on direct use of `MeilisearchOperations` for advanced search features.
+
+[[meilisearch.repositories.queries.scope]]
+== Recommended Scope
+
+Use repositories for:
+
+* CRUD-style persistence,
+* id-based lookup,
+* simple `findAll`, sorting, and pageable access,
+* integration with the general Spring Data repository programming model.
+
+Use `MeilisearchOperations` when you need:
+
+* full control over `BasicQuery`, `IndexQuery`, `FacetQuery`, or `SimilarQuery`,
+* federated multi-search,
+* facet search,
+* similar-document search,
+* index lifecycle or runtime settings updates.
+
+[[meilisearch.repositories.queries.notes]]
+== Practical Notes
+
+* Search-backed repository methods inherit Meilisearch search semantics, including pagination limits and search-only settings.
+* Document-backed repository methods do not expose search response features such as facet metadata.
+* If your use case depends on advanced query composition or store-specific search options, prefer `MeilisearchOperations` explicitly in the service layer.
