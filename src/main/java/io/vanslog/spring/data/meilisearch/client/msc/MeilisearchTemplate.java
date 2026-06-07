@@ -48,7 +48,6 @@ import com.meilisearch.sdk.model.TaskStatus;
 import io.vanslog.spring.data.meilisearch.DocumentAccessException;
 import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
-import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.core.FacetHit;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchCallback;
@@ -58,7 +57,7 @@ import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
-import io.vanslog.spring.data.meilisearch.core.document.MeilisearchDocument;
+import io.vanslog.spring.data.meilisearch.core.document.Document;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
@@ -146,7 +145,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		String primaryKey = Objects.requireNonNull(idProperty.getField()).getName();
 
 		TaskInfo taskInfo = execute(client -> {
-			List<MeilisearchDocument> documents = entities.stream().map(this::toDocument).toList();
+			List<Document> documents = entities.stream().map(this::toDocument).toList();
 			String document = writeJson(documents);
 			return client.index(indexUid).addDocuments(document, primaryKey);
 		});
@@ -370,14 +369,14 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		}
 	}
 
-	private MeilisearchDocument toDocument(Object entity) {
+	private Document toDocument(Object entity) {
 
-		MeilisearchDocument document = MeilisearchDocument.create();
+		Document document = Document.create();
 		meilisearchConverter.write(entity, document);
 		return document;
 	}
 
-	private String writeJson(List<MeilisearchDocument> documents) {
+	private String writeJson(List<Document> documents) {
 
 		try {
 			return objectMapper.writeValueAsString(documents);
@@ -389,7 +388,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	private <T> T readDocument(String source, Class<T> clazz) {
 
 		try {
-			MeilisearchDocument document = objectMapper.readValue(source, MeilisearchDocument.class);
+			Document document = objectMapper.readValue(source, Document.class);
 			return meilisearchConverter.read(clazz, document);
 		} catch (IOException e) {
 			throw new UncategorizedMeilisearchException("Failed to read Meilisearch document.", e);
@@ -403,7 +402,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 			if (results == null || !results.isArray()) {
 				throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents results.");
 			}
-			List<MeilisearchDocument> documents = objectMapper.readerForListOf(MeilisearchDocument.class)
+			List<Document> documents = objectMapper.readerForListOf(Document.class)
 					.readValue(results);
 			return documents.stream().map(document -> meilisearchConverter.read(clazz, document)).toList();
 		} catch (IOException e) {
@@ -448,7 +447,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	}
 
 	private MeilisearchPersistentEntity<?> getPersistentEntityFor(Class<?> clazz) {
-		Document document = clazz.getAnnotation(Document.class);
+		io.vanslog.spring.data.meilisearch.annotations.Document document = clazz
+				.getAnnotation(io.vanslog.spring.data.meilisearch.annotations.Document.class);
 		Assert.notNull(document, "Given class must be annotated with @Document(indexUid = \"foo\")!");
 		Assert.hasText(document.indexUid(), "Given class must be annotated with @Document(indexUid = \"foo\")!");
 

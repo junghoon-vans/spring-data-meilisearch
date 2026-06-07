@@ -15,7 +15,7 @@
  */
 package io.vanslog.spring.data.meilisearch.core.convert;
 
-import io.vanslog.spring.data.meilisearch.core.document.MeilisearchDocument;
+import io.vanslog.spring.data.meilisearch.core.document.Document;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 
@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * @see MappingContext
  */
 public interface MeilisearchConverter
-		extends EntityConverter<MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty, Object, MeilisearchDocument> {
+		extends EntityConverter<MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty, Object, Document> {
 
 	/**
 	 * Returns the {@link org.springframework.data.mapping.context.MappingContext}. used by the converter.

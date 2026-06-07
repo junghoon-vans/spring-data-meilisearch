@@ -15,7 +15,7 @@
  */
 package io.vanslog.spring.data.meilisearch.core.convert;
 
-import io.vanslog.spring.data.meilisearch.core.document.MeilisearchDocument;
+import io.vanslog.spring.data.meilisearch.core.document.Document;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 
@@ -94,12 +94,12 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 	}
 
 	@Override
-	public <R> R read(Class<R> type, MeilisearchDocument source) {
+	public <R> R read(Class<R> type, Document source) {
 
 		Assert.notNull(type, "Type must not be null");
 		Assert.notNull(source, "Source document must not be null");
 
-		if (conversions.hasCustomReadTarget(MeilisearchDocument.class, type)) {
+		if (conversions.hasCustomReadTarget(Document.class, type)) {
 			R converted = conversionService.convert(source, type);
 			if (converted != null) {
 				return converted;
@@ -131,7 +131,7 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 		return (MeilisearchPersistentEntity<R>) mappingContext.getRequiredPersistentEntity(type);
 	}
 
-	private PropertyValueProvider<MeilisearchPersistentProperty> propertyValueProvider(MeilisearchDocument source) {
+	private PropertyValueProvider<MeilisearchPersistentProperty> propertyValueProvider(Document source) {
 
 		return new PropertyValueProvider<MeilisearchPersistentProperty>() {
 			@Override
@@ -146,7 +146,7 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 	}
 
 	@Override
-	public void write(Object source, MeilisearchDocument sink) {
+	public void write(Object source, Document sink) {
 
 		Assert.notNull(source, "Source object must not be null");
 		Assert.notNull(sink, "Sink document must not be null");
@@ -169,8 +169,8 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 			return null;
 		}
 
-		if (conversions.hasCustomWriteTarget(value.getClass(), MeilisearchDocument.class)) {
-			Object converted = conversionService.convert(value, MeilisearchDocument.class);
+		if (conversions.hasCustomWriteTarget(value.getClass(), Document.class)) {
+			Object converted = conversionService.convert(value, Document.class);
 			if (converted != null) {
 				return converted;
 			}
@@ -205,7 +205,7 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 			return converted;
 		}
 
-		MeilisearchDocument document = MeilisearchDocument.create();
+		Document document = Document.create();
 		write(value, document);
 		return document;
 	}
@@ -245,8 +245,8 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 			}
 		}
 
-		if (value instanceof MeilisearchDocument) {
-			MeilisearchDocument document = (MeilisearchDocument) value;
+		if (value instanceof Document) {
+			Document document = (Document) value;
 			return read(targetType, document);
 		}
 
@@ -272,8 +272,8 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 			}
 		}
 
-		if (element instanceof MeilisearchDocument) {
-			MeilisearchDocument document = (MeilisearchDocument) element;
+		if (element instanceof Document) {
+			Document document = (Document) element;
 			return read(componentType, document);
 		}
 
@@ -314,9 +314,9 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 		abstractMappingContext.setSimpleTypeHolder(conversions.getSimpleTypeHolder());
 	}
 
-	private static MeilisearchDocument toDocument(Map<?, ?> source) {
+	private static Document toDocument(Map<?, ?> source) {
 
-		MeilisearchDocument document = MeilisearchDocument.create();
+		Document document = Document.create();
 		source.forEach((key, value) -> document.put(String.valueOf(key), value));
 		return document;
 	}

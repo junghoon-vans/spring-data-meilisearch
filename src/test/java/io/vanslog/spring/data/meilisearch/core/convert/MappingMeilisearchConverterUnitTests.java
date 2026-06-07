@@ -17,8 +17,7 @@ package io.vanslog.spring.data.meilisearch.core.convert;
 
 import static org.assertj.core.api.Assertions.*;
 
-import io.vanslog.spring.data.meilisearch.annotations.Document;
-import io.vanslog.spring.data.meilisearch.core.document.MeilisearchDocument;
+import io.vanslog.spring.data.meilisearch.core.document.Document;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
 import java.math.BigDecimal;
@@ -62,7 +61,7 @@ class MappingMeilisearchConverterUnitTests {
 	void shouldWriteEntityPropertiesToDocument() {
 
 		SampleBook entity = new SampleBook("book-1", "The Left Hand of Darkness", 1969);
-		MeilisearchDocument document = MeilisearchDocument.create();
+		Document document = Document.create();
 
 		converter.write(entity, document);
 
@@ -73,7 +72,7 @@ class MappingMeilisearchConverterUnitTests {
 	@Test
 	void shouldReadEntityPropertiesFromDocument() {
 
-		MeilisearchDocument document = MeilisearchDocument.create().append("id", "book-2").append("title", "Kindred")
+		Document document = Document.create().append("id", "book-2").append("title", "Kindred")
 				.append("publishedYear", 1979);
 
 		SampleBook entity = converter.read(SampleBook.class, document);
@@ -87,11 +86,11 @@ class MappingMeilisearchConverterUnitTests {
 	void shouldRoundTripNestedObjectAsNestedDocument() {
 
 		BookWithAuthor source = new BookWithAuthor("book-3", "The Dispossessed", new Author("Ursula", "Le Guin"));
-		MeilisearchDocument document = MeilisearchDocument.create();
+		Document document = Document.create();
 
 		converter.write(source, document);
 
-		assertThat(document.get("author")).isEqualTo(MeilisearchDocument.create().append("firstName", "Ursula")
+		assertThat(document.get("author")).isEqualTo(Document.create().append("firstName", "Ursula")
 				.append("lastName", "Le Guin"));
 
 		BookWithAuthor result = converter.read(BookWithAuthor.class, document);
@@ -106,14 +105,14 @@ class MappingMeilisearchConverterUnitTests {
 
 		BookCollection source = new BookCollection("collection-1", List.of("science-fiction", "classic"),
 				List.of(new Author("Octavia", "Butler"), new Author("Nnedi", "Okorafor")));
-		MeilisearchDocument document = MeilisearchDocument.create();
+		Document document = Document.create();
 
 		converter.write(source, document);
 
 		assertThat(document.get("tags")).isEqualTo(List.of("science-fiction", "classic"));
 		assertThat(document.get("contributors")).isEqualTo(List.of(
-				MeilisearchDocument.create().append("firstName", "Octavia").append("lastName", "Butler"),
-				MeilisearchDocument.create().append("firstName", "Nnedi").append("lastName", "Okorafor")));
+				Document.create().append("firstName", "Octavia").append("lastName", "Butler"),
+				Document.create().append("firstName", "Nnedi").append("lastName", "Okorafor")));
 
 		BookCollection result = converter.read(BookCollection.class, document);
 
@@ -124,7 +123,7 @@ class MappingMeilisearchConverterUnitTests {
 	@Test
 	void shouldMaterializeDeclaredSetPropertyWhenReadingDocument() {
 
-		MeilisearchDocument document = MeilisearchDocument.create().append("id", "set-1").append("tags",
+		Document document = Document.create().append("id", "set-1").append("tags",
 				List.of("science-fiction", "classic"));
 
 		BookTagSet result = converter.read(BookTagSet.class, document);
@@ -135,9 +134,9 @@ class MappingMeilisearchConverterUnitTests {
 	@Test
 	void shouldMaterializeDeclaredDequePropertyWithNestedElementsWhenReadingDocument() {
 
-		MeilisearchDocument document = MeilisearchDocument.create().append("id", "deque-1").append("contributors", List.of(
-				MeilisearchDocument.create().append("firstName", "Octavia").append("lastName", "Butler"),
-				MeilisearchDocument.create().append("firstName", "Nnedi").append("lastName", "Okorafor")));
+		Document document = Document.create().append("id", "deque-1").append("contributors", List.of(
+				Document.create().append("firstName", "Octavia").append("lastName", "Butler"),
+				Document.create().append("firstName", "Nnedi").append("lastName", "Okorafor")));
 
 		BookContributorDeque result = converter.read(BookContributorDeque.class, document);
 
@@ -151,12 +150,12 @@ class MappingMeilisearchConverterUnitTests {
 		registerPriceConversions();
 
 		PricedBook source = new PricedBook("book-4", new Price(new BigDecimal("12.99"), "USD"));
-		MeilisearchDocument document = MeilisearchDocument.create();
+		Document document = Document.create();
 
 		converter.write(source, document);
 
 		assertThat(document.get("price"))
-				.isEqualTo(MeilisearchDocument.create().append("amount", "12.99").append("currency", "USD"));
+				.isEqualTo(Document.create().append("amount", "12.99").append("currency", "USD"));
 	}
 
 	@Test
@@ -164,8 +163,8 @@ class MappingMeilisearchConverterUnitTests {
 
 		registerPriceConversions();
 
-		MeilisearchDocument document = MeilisearchDocument.create().append("id", "book-4").append("price",
-				MeilisearchDocument.create().append("amount", "12.99").append("currency", "USD"));
+		Document document = Document.create().append("id", "book-4").append("price",
+				Document.create().append("amount", "12.99").append("currency", "USD"));
 
 		PricedBook result = converter.read(PricedBook.class, document);
 
@@ -176,7 +175,7 @@ class MappingMeilisearchConverterUnitTests {
 	@Test
 	void shouldReadConstructorBoundEntityPropertiesFromDocument() {
 
-		MeilisearchDocument document = MeilisearchDocument.create().append("id", "immutable-1")
+		Document document = Document.create().append("id", "immutable-1")
 				.append("title", "Parable of the Sower");
 
 		ConstructorBoundBook result = converter.read(ConstructorBoundBook.class, document);
@@ -192,7 +191,7 @@ class MappingMeilisearchConverterUnitTests {
 		converter.afterPropertiesSet();
 	}
 
-	@Document(indexUid = "sample-books")
+	@io.vanslog.spring.data.meilisearch.annotations.Document(indexUid = "sample-books")
 	@SuppressWarnings("unused")
 	private static class SampleBook {
 
@@ -222,7 +221,7 @@ class MappingMeilisearchConverterUnitTests {
 		}
 	}
 
-	@Document(indexUid = "books-with-author")
+	@io.vanslog.spring.data.meilisearch.annotations.Document(indexUid = "books-with-author")
 	@SuppressWarnings("unused")
 	private static class BookWithAuthor {
 
@@ -271,7 +270,7 @@ class MappingMeilisearchConverterUnitTests {
 		}
 	}
 
-	@Document(indexUid = "book-collections")
+	@io.vanslog.spring.data.meilisearch.annotations.Document(indexUid = "book-collections")
 	@SuppressWarnings("unused")
 	private static class BookCollection {
 
@@ -297,7 +296,7 @@ class MappingMeilisearchConverterUnitTests {
 		}
 	}
 
-	@Document(indexUid = "book-tag-sets")
+	@io.vanslog.spring.data.meilisearch.annotations.Document(indexUid = "book-tag-sets")
 	@SuppressWarnings("unused")
 	private static class BookTagSet {
 
@@ -309,7 +308,7 @@ class MappingMeilisearchConverterUnitTests {
 		}
 	}
 
-	@Document(indexUid = "book-contributor-deques")
+	@io.vanslog.spring.data.meilisearch.annotations.Document(indexUid = "book-contributor-deques")
 	@SuppressWarnings("unused")
 	private static class BookContributorDeque {
 
@@ -321,7 +320,7 @@ class MappingMeilisearchConverterUnitTests {
 		}
 	}
 
-	@Document(indexUid = "priced-books")
+	@io.vanslog.spring.data.meilisearch.annotations.Document(indexUid = "priced-books")
 	@SuppressWarnings("unused")
 	private static class PricedBook {
 
@@ -360,7 +359,7 @@ class MappingMeilisearchConverterUnitTests {
 		}
 	}
 
-	@Document(indexUid = "constructor-bound-books")
+	@io.vanslog.spring.data.meilisearch.annotations.Document(indexUid = "constructor-bound-books")
 	private static class ConstructorBoundBook {
 
 		@Id private final String id;
@@ -382,20 +381,20 @@ class MappingMeilisearchConverterUnitTests {
 	}
 
 	@WritingConverter
-	private static class PriceToDocumentConverter implements Converter<Price, MeilisearchDocument> {
+	private static class PriceToDocumentConverter implements Converter<Price, Document> {
 
 		@Override
-		public MeilisearchDocument convert(Price source) {
-			return MeilisearchDocument.create().append("amount", source.getAmount().toPlainString()).append("currency",
+		public Document convert(Price source) {
+			return Document.create().append("amount", source.getAmount().toPlainString()).append("currency",
 					source.getCurrency());
 		}
 	}
 
 	@ReadingConverter
-	private static class DocumentToPriceConverter implements Converter<MeilisearchDocument, Price> {
+	private static class DocumentToPriceConverter implements Converter<Document, Price> {
 
 		@Override
-		public Price convert(MeilisearchDocument source) {
+		public Price convert(Document source) {
 			return new Price(new BigDecimal((String) source.get("amount")), (String) source.get("currency"));
 		}
 	}

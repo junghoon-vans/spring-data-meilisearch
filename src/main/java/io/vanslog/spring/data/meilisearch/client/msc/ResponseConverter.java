@@ -22,7 +22,7 @@ import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
 import io.vanslog.spring.data.meilisearch.core.TotalHitsRelation;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
-import io.vanslog.spring.data.meilisearch.core.document.MeilisearchDocument;
+import io.vanslog.spring.data.meilisearch.core.document.Document;
 import io.vanslog.spring.data.meilisearch.core.federation.FederationResponse;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
@@ -148,9 +148,9 @@ public class ResponseConverter {
 		return meilisearchConverter.read(clazz, toDocument(hit));
 	}
 
-	private static MeilisearchDocument toDocument(Map<String, Object> hit) {
+	private static Document toDocument(Map<String, Object> hit) {
 
-		MeilisearchDocument document = MeilisearchDocument.create();
+		Document document = Document.create();
 		document.putAll(hit);
 		return document;
 	}

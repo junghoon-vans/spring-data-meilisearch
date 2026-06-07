@@ -39,11 +39,10 @@ import com.meilisearch.sdk.model.SimilarDocumentsResults;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.TotalHitsRelation;
-import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.core.FacetHit;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions;
-import io.vanslog.spring.data.meilisearch.core.document.MeilisearchDocument;
+import io.vanslog.spring.data.meilisearch.core.document.Document;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
 /**
@@ -272,7 +271,7 @@ class ResponseConverterUnitTests {
 		}
 	}
 
-	@Document(indexUid = "converted-movies")
+	@io.vanslog.spring.data.meilisearch.annotations.Document(indexUid = "converted-movies")
 	static class MovieWithConvertedProperty {
 
 		@Id private String id;
@@ -301,10 +300,10 @@ class ResponseConverterUnitTests {
 	}
 
 	@ReadingConverter
-	static class DocumentToCodeConverter implements Converter<MeilisearchDocument, Code> {
+	static class DocumentToCodeConverter implements Converter<Document, Code> {
 
 		@Override
-		public Code convert(MeilisearchDocument source) {
+		public Code convert(Document source) {
 			return new Code((String) source.get("raw"));
 		}
 	}
