@@ -10,7 +10,27 @@
     <bean name="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate">
         <constructor-arg name="meilisearchClient" ref="meilisearchClient"/>
+        <constructor-arg name="meilisearchConverter" ref="meilisearchConverter"/>
+        <constructor-arg name="objectMapper" ref="meilisearchObjectMapper"/>
     </bean>
+
+    <bean id="meilisearchConverter"
+          class="io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter">
+        <constructor-arg name="mappingContext" ref="meilisearchMappingContext"/>
+        <property name="conversions" ref="meilisearchCustomConversions"/>
+    </bean>
+
+    <bean id="meilisearchMappingContext"
+          class="io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext"/>
+
+    <bean id="meilisearchCustomConversions"
+          class="io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions">
+        <constructor-arg>
+            <list/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="meilisearchObjectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
 
     <meilisearch:repositories
             base-package="io.vanslog.spring.data.meilisearch.config"

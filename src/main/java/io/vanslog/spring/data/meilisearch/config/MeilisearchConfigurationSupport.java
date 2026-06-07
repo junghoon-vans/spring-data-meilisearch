@@ -26,6 +26,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Support class for{@link io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration}.
  *
@@ -68,5 +70,15 @@ public class MeilisearchConfigurationSupport {
 	@Bean
 	public MeilisearchCustomConversions meilisearchCustomConversions() {
 		return new MeilisearchCustomConversions(Collections.emptyList());
+	}
+
+	/**
+	 * Register the {@link ObjectMapper} used for JSON document payloads.
+	 *
+	 * @return never {@literal null}.
+	 */
+	@Bean(name = "meilisearchObjectMapper")
+	public ObjectMapper meilisearchObjectMapper() {
+		return new ObjectMapper();
 	}
 }
