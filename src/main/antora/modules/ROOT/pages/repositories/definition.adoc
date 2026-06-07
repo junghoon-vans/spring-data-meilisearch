@@ -10,17 +10,13 @@ If you want to expose CRUD methods for that domain type, you may extend `CrudRep
 
 There are a few variants how you can get started with your repository interface.
 
-The typical approach is to extend `CrudRepository`, which gives you methods for CRUD functionality.
+The typical Meilisearch approach is to extend `MeilisearchRepository`, which combines Spring Data's blocking `CrudRepository` and `PagingAndSortingRepository` contracts for the mapped domain type.
+`CrudRepository` gives you methods for CRUD functionality.
 CRUD stands for Create, Read, Update, Delete.
-With version 3.0 we also introduced `ListCrudRepository` which is very similar to the `CrudRepository` but for those methods that return multiple entities it returns a `List` instead of an `Iterable` which you might find easier to use.
+`PagingAndSortingRepository` adds methods that accept a `Sort` or `Pageable` abstraction.
 
-If you are using a reactive store you might choose `ReactiveCrudRepository`, or `RxJava3CrudRepository` depending on which reactive framework you are using.
-
-If you are using Kotlin you might pick `CoroutineCrudRepository` which utilizes Kotlin's coroutines.
-
-Additionally you can extend `PagingAndSortingRepository`, `ReactiveSortingRepository`, `RxJava3SortingRepository`, or `CoroutineSortingRepository` if you need methods that allow to specify a `Sort` abstraction or in the first case a `Pageable` abstraction.
-Note that the various sorting repositories no longer extended their respective CRUD repository as they did in Spring Data Versions pre 3.0.
-Therefore, you need to extend both interfaces if you want functionality of both.
+Spring Data Meilisearch currently supports the blocking repository model only.
+Reactive, RxJava 3, and Kotlin coroutine repository variants such as `ReactiveCrudRepository`, `RxJava3CrudRepository`, `ReactiveSortingRepository`, `RxJava3SortingRepository`, `CoroutineCrudRepository`, and `CoroutineSortingRepository` are not supported by this module.
 
 If you do not want to extend Spring Data interfaces, you can also annotate your repository interface with `@RepositoryDefinition`.
 Extending one of the CRUD repository interfaces exposes a complete set of methods to manipulate your entities.
