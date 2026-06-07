@@ -3,8 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Meilisearch Client :: Spring Data Meilisearch</title>
-    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/meilisearch-client.html">
+    <title>Meilisearch Repositories :: Spring Data Meilisearch</title>
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -13,19 +12,19 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'),
   localStorage && localStorage.getItem('nav-width'))
     </script>
-    <link rel="stylesheet" href="../_/css/site.css">
-    <link rel="stylesheet" href="../_/css/vendor/search.css">
-    <link rel="stylesheet" href="../_/css/vendor/page-search.css">
-    <link rel="stylesheet" href="../_/css/vendor/onetrust.css">
-    <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <link rel="stylesheet" href="../../_/css/vendor/search.css">
+    <link rel="stylesheet" href="../../_/css/vendor/page-search.css">
+    <link rel="stylesheet" href="../../_/css/vendor/onetrust.css">
+    <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
     <meta name="version" content="0.9.1">
     <meta name="generation" content="snapshot">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/snapshot/meilisearch-client.html">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/snapshot/repositories/meilisearch-repositories.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
-    <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel="icon" href="../../_/img/favicon.ico" type="image/vnd.microsoft.icon">
   </head>
   <body class="article">
 <header class="header">
@@ -35,7 +34,7 @@
         <img
           id="springlogo"
           class="block"
-          src="../_/img/spring-logo.svg"
+          src="../../_/img/spring-logo.svg"
           alt="Spring"
         />
       </a>
@@ -278,31 +277,67 @@
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="index.html">Overview</a>
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link"  href="../index.html">Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../getting-started.html">Getting Started</a>
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="0">
+  <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <span class="nav-text">Meilisearch</span>
+    <a class="nav-link"  href="../meilisearch.html">Meilisearch</a>
 <ul class="nav-list">
-  <li class="nav-item is-current-page" data-depth="1">
-    <a class="nav-link"  href="meilisearch-client.html">Meilisearch Client</a>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../meilisearch/client-configuration.html">Client Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../meilisearch/object-mapping.html">Object Mapping</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
+  </li>
+</ul>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-document.html">Meilisearch Document</a>
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link"  href="../repositories.html">Repositories</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="core-concepts.html">Core Concepts</a>
   </li>
-  <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-operations.html">Meilisearch Operations</a>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="definition.html">Defining Repository Interfaces</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="create-instances.html">Creating Repository Instances</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="configuration.html">Repository Configuration</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
     <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
-  <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-settings.html">Meilisearch Settings</a>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="repository-queries.html">Repository Methods and Limitations</a>
+  </li>
+</ul>
   </li>
   <li class="nav-item" data-depth="1">
-    <span class="nav-text"><a href="/snapshot/api/java/index.html" class="xref attachment link-external" target="_blank" rel="noopener">Javadoc</a></span>
+    <a class="nav-link"  href="../appendix.html">Appendix</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <span class="nav-text"><a href="https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html" class="link-external" target="_blank" rel="noopener">Javadoc</a></span>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <span class="nav-text"><a href="https://github.com/spring-projects/spring-data-commons/wiki" class="link-external" target="_blank" rel="noopener">Wiki</a></span>
   </li>
 </ul>
   </li>
@@ -334,13 +369,13 @@
   <div class="content">
     <div
       class="toc"
-      data-title="Meilisearch Client"
+      data-title="Meilisearch Repositories"
       data-levels="2"
     >
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/meilisearch-client.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/repositories/meilisearch-repositories.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -374,9 +409,9 @@
   <nav class="breadcrumbs" aria-label="breadcrumbs">
     <ul>
       <li id="copy-url" title="Copy versioned URL"></li>
-      <li><a href="index.html">Spring Data Meilisearch</a></li>
-      <li>Meilisearch</li>
-      <li><a href="meilisearch-client.html">Meilisearch Client</a></li>
+      <li><a href="../index.html">Spring Data Meilisearch</a></li>
+      <li><a href="../repositories.html">Repositories</a></li>
+      <li><a href="meilisearch-repositories.html">Meilisearch Repositories</a></li>
     </ul>
   </nav>
 </div><div class="admonitionblock important latest">
@@ -387,258 +422,123 @@
       </td>
       <td class="content">
         <div class="paragraph">
-          <p>This version is still in development and is not considered stable yet. For the latest stable version, please use <a href="../meilisearch-client.html">Spring Data Meilisearch 0.9.0</a>!</p>
+          <p>This version is still in development and is not considered stable yet. For the latest stable version, please use <a href="../../index.html">Spring Data Meilisearch 0.9.0</a>!</p>
         </div>
       </td>
     </tr></tbody>
   </table>
 </div>
-<h1 id="page-title" class="page">Meilisearch Client</h1>
+<h1 id="page-title" class="page">Meilisearch Repositories</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This chapter describes configuration and usage of the Meilisearch client.</p>
+<p><code>MeilisearchRepository&lt;T, ID&gt;</code> extends Spring Data <code>CrudRepository</code> and <code>PagingAndSortingRepository</code>.
+The default implementation delegates to <code>MeilisearchOperations</code>.</p>
 </div>
 <div class="paragraph">
-<p>Spring Data Meilisearch operates upon a <code>Meilisearch Client</code> (provided by <a href="https://github.com/meilisearch/meilisearch-java">Meilisearch Java</a>) that is connected to a single Meilisearch instance.</p>
+<p>This keeps repository usage aligned with familiar Spring Data patterns while still letting the module preserve Meilisearch-specific behavior underneath the repository facade.</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="meilisearch.client.annotation"><a class="anchor" href="#meilisearch.client.annotation"></a>Annotation based configuration</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The Spring Data Meilisearch client can be configured using the <code>@Configuration</code> annotation.</p>
-</div>
-<div class="exampleblock">
-<div class="title">Example 1. Spring Data Meilisearch client using JavaConfig</div>
-<div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
-import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
-import org.springframework.context.annotation.Configuration;
-
-</span><span class="fold-block">@Configuration
-public class MyClientConfig extends MeilisearchConfiguration {
-
-    @Override
-    public ClientConfiguration clientConfiguration() {
-        return ClientConfiguration.builder()           <i class="conum" data-value="1"></i><b>(1)</b>
-                .connectedToLocalhost()
-                .withApiKey("masterKey")
-                .build();
-    }
+</span><span class="fold-block">public interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
 }</span></code></pre>
 </div>
 </div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>For a detailed description of the builder methods see <a href="#meilisearch.client.configuration">Client Configuration</a>.</td>
-</tr>
-</table>
-</div>
-</div>
+<div class="paragraph">
+<p>This is the recommended repository style for the current module.
+It exposes the standard Spring Data CRUD and pagination entry points without implying support for a wider derived-query feature set.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.client.namespace"><a class="anchor" href="#meilisearch.client.namespace"></a>Spring Namespace</h2>
+<h2 id="meilisearch.repositories.autocreation"><a class="anchor" href="#meilisearch.repositories.autocreation"></a>Automatic Settings Application</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Spring Data Meilisearch client can be configured using the Spring XML namespace.</p>
+<p>Repository bootstrap inspects the mapped entity type.
+If the entity is annotated with <code>@Document(applySettings = true)</code>, Spring Data Meilisearch applies annotation-driven settings through <code>MeilisearchOperations.applySettings(&#8230;&#8203;)</code> when the repository is created.</p>
 </div>
-<div class="exampleblock">
-<div class="title">Example 2. Spring Data Meilisearch client using XML Namespace</div>
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
-       xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.vanslog.io/spring/data/meilisearch
-       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
-
-    &lt;meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/&gt;
-
-&lt;/beans&gt;</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-When setting up a client using the Spring namespace, a JSON handler must be set up.
-Use the <a href="#meilisearch.json-handler.namespace">JSON handler namespace configuration</a>.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>This behavior is store-specific.
+It means repository creation can have side effects on the target index configuration, which is convenient for local development and controlled deployments but should be understood explicitly in environments where index settings are managed separately.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.client.configuration"><a class="anchor" href="#meilisearch.client.configuration"></a>Client Configuration</h2>
+<h2 id="meilisearch.repositories.lookup-methods"><a class="anchor" href="#meilisearch.repositories.lookup-methods"></a>Built-in Repository Methods</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Configuration options are provided by the <code>ClientConfiguration</code> builder.</p>
-</div>
-<div class="exampleblock">
-<div class="title">Example 3. Client Configuration</div>
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">String[] agents = {"Spring Data Meilisearch"};                          <i class="conum" data-value="1"></i><b>(1)</b>
-
-ClientConfiguration clientConfiguration = ClientConfiguration.builder()
-    .connectedTo("http://localhost:7700")                               <i class="conum" data-value="2"></i><b>(2)</b>
-    .withApiKey("masterKey")                                            <i class="conum" data-value="3"></i><b>(3)</b>
-    .withClientAgents(agents)                                           <i class="conum" data-value="4"></i><b>(4)</b>
-    .withRequestTimeout(2000)                                           <i class="conum" data-value="5"></i><b>(5)</b>
-    .withRequestInterval(20)                                            <i class="conum" data-value="6"></i><b>(6)</b>
-    .build();</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Define the client agents that will be sent as a <code>User-Agent</code> header to Meilisearch.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Use the builder to provide the Meilisearch host URL.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Set the Meilisearch API Key to use for authentication.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Set the client agents.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Set the request timeout to 2000 milliseconds.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Set the request interval to 20 milliseconds.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="meilisearch.json-handler"><a class="anchor" href="#meilisearch.json-handler"></a>JSON handler</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The <code>JSON handler</code> is used to serialize and deserialize the JSON data.</p>
-</div>
-<div class="sect2">
-<h3 id="meilisearch.json-handler.supported"><a class="anchor" href="#meilisearch.json-handler.supported"></a>Supported JSON handlers</h3>
-<div class="paragraph">
-<p>The following JSON handlers are supported:</p>
+<p>The built-in repository methods do not all use the same underlying Meilisearch API:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>com.meilisearch.sdk.json.GsonJsonHandler</code></p>
+<p><code>findById(&#8230;&#8203;)</code> and <code>findAllById(&#8230;&#8203;)</code> use document APIs.</p>
 </li>
 <li>
-<p><code>com.meilisearch.sdk.json.JacksonJsonHandler</code></p>
+<p><code>findAll()</code>, <code>findAll(Sort)</code>, and <code>findAll(Pageable)</code> use search APIs.</p>
 </li>
 <li>
-<p>Custom JSON handler that implements <code>com.meilisearch.sdk.json.JsonHandler</code></p>
+<p><code>count()</code> uses <code>SearchOperations.count(&#8230;&#8203;)</code>.</p>
+</li>
+<li>
+<p><code>save(&#8230;&#8203;)</code>, <code>saveAll(&#8230;&#8203;)</code>, and delete methods delegate to <code>MeilisearchOperations</code> document-oriented write operations.</p>
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p>That distinction matters because some Meilisearch settings only influence search APIs.
+For example, <code>displayedAttributes</code> affect search results but not the document APIs used by <code>findById(&#8230;&#8203;)</code> and <code>findAllById(&#8230;&#8203;)</code>.</p>
 </div>
 <div class="sect2">
-<h3 id="meilisearch.json-handler.annotation"><a class="anchor" href="#meilisearch.json-handler.annotation"></a>Annotation based configuration</h3>
-<div class="paragraph">
-<p>You don&#8217;t need to provide a JSON handler if you are using the default JSON handler, <code>GsonJsonHandler</code>.
-But you can override the <code>jsonHandler()</code> method to provide a custom JSON handler.</p>
-</div>
-<div class="exampleblock">
-<div class="title">Example 4. Setting JSON handler using JavaConfig</div>
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
-
-import com.meilisearch.sdk.json.JacksonJsonHandler;
-import com.meilisearch.sdk.json.JsonHandler;
-
-import org.springframework.context.annotation.Configuration;
-
-</span><span class="fold-block">@Configuration
-public class JsonHandlerConfig extends MeilisearchConfiguration {
-
-    @Override
-    public JsonHandler jsonHandler() {
-        return new JacksonJsonHandler();    <i class="conum" data-value="1"></i><b>(1)</b>
-    }
-}</span></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
+<h3 id="meilisearch.repositories.lookup-methods.behavior-table"><a class="anchor" href="#meilisearch.repositories.lookup-methods.behavior-table"></a>Method Behavior at a Glance</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 40%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
 <tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Use Jackson JSON handler instead of the default JSON handler.</td>
+<th class="tableblock halign-left valign-top">Repository method family</th>
+<th class="tableblock halign-left valign-top">Backing behavior</th>
 </tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findById</code>, <code>findAllById</code>, <code>existsById</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uses direct document lookup APIs after converting the repository id through the configured converter.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll</code>, <code>findAll(Sort)</code>, <code>findAll(Pageable)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Builds a search query and unwraps Meilisearch search hits back into entities.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>count</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Delegates to the operations layer count support rather than maintaining a separate repository-side count strategy.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>save</code>, <code>saveAll</code>, <code>delete*</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Delegates to <code>MeilisearchOperations</code> write and delete operations.</p></td>
+</tr>
+</tbody>
 </table>
 </div>
 </div>
 </div>
-</div>
-<div class="sect2">
-<h3 id="meilisearch.json-handler.namespace"><a class="anchor" href="#meilisearch.json-handler.namespace"></a>Spring Namespace</h3>
+<div class="sect1">
+<h2 id="meilisearch.repositories.paging"><a class="anchor" href="#meilisearch.repositories.paging"></a>Paging and Totals</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>Register a JSON handler bean and reference it from <code>&lt;meilisearch:meilisearch-client&gt;</code> using <code>json-handler-ref</code>.
-If <code>json-handler-ref</code> is omitted, the default bean name is <code>jsonHandler</code>.</p>
+<p><code>findAll(Pageable)</code> is backed by a <code>BasicQuery</code> plus search result metadata.
+The repository <code>Page</code> total is therefore derived from Meilisearch search totals, not from a separate count query.
+If the index is configured with <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, that limit can cap the reported page total.</p>
 </div>
-<div class="exampleblock">
-<div class="title">Example 5. Setting JSON handler using XML Namespace</div>
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
-       xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.vanslog.io/spring/data/meilisearch
-       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
-
-    &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;
-
-    &lt;meilisearch:meilisearch-client
-        id="meilisearchClient"
-        api-key="masterKey"
-        json-handler-ref="jsonHandler"/&gt;
-
-&lt;/beans&gt;</code></pre>
+<div class="paragraph">
+<p>The same search-backed design also explains why repository pagination does not expose richer search response data such as facets or federation metadata.
+When an application needs those store-specific result structures, prefer calling <code>MeilisearchOperations</code> directly from the service layer.</p>
 </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="section-summary">
 </div>
 </article>  </div>
 </main>
@@ -655,7 +555,7 @@ If <code>json-handler-ref</code> is omitted, the default bean name is <code>json
                   <ul class="nav-versions">
                       <li class="component">
                         <div>
-                          <a class="title" href="../data-commons/index.html">Spring Data Commons</a>
+                          <a class="title" href="../../data-commons/index.html">Spring Data Commons</a>
                         </div>                        <div class="version-item">
                           <div>
                             <button class="version-toggle" type="button">
@@ -665,7 +565,7 @@ If <code>json-handler-ref</code> is omitted, the default bean name is <code>json
                           </div>
                           <ul class="versions">
   <li class="version">
-    <a href="../data-commons/index.html">
+    <a href="../../data-commons/index.html">
       4.1.0-SNAPSHOT
     </a>
   </li>
@@ -674,7 +574,7 @@ If <code>json-handler-ref</code> is omitted, the default bean name is <code>json
                       </li>
                       <li class="component">
                         <div>
-                          <a class="title" href="../index.html">Spring Data Meilisearch</a>
+                          <a class="title" href="../../index.html">Spring Data Meilisearch</a>
                         </div>                        <div class="version-item is-active">
                           <div>
                             <button class="version-toggle" type="button">
@@ -684,17 +584,17 @@ If <code>json-handler-ref</code> is omitted, the default bean name is <code>json
                           </div>
                           <ul class="versions">
   <li class="version">
-    <a href="../meilisearch-client.html">
+    <a href="../../index.html">
       0.9.0
     </a>
   </li>
   <li class="version">
-    <a href="../0.8.1/meilisearch-client.html">
+    <a href="../../0.8.1/index.html">
       0.8.1
     </a>
   </li>
   <li class="version">
-    <a href="../0.8.0/meilisearch-client.html">
+    <a href="../../0.8.0/index.html">
       0.8.0
     </a>
   </li>
@@ -708,7 +608,7 @@ If <code>json-handler-ref</code> is omitted, the default bean name is <code>json
                           </div>
                           <ul class="versions">
   <li class="version">
-    <a href="meilisearch-client.html">
+    <a href="meilisearch-repositories.html">
       0.9.1-SNAPSHOT
     </a>
   </li>
@@ -969,7 +869,7 @@ If <code>json-handler-ref</code> is omitted, the default bean name is <code>json
 </li>
     </ul>
   </li
-  <li><a href="../spring-projects.html">All Docs...</a></li>
+  <li><a href="../../spring-projects.html">All Docs...</a></li>
 </ul>
                 </div>
               </div>
@@ -981,7 +881,7 @@ If <code>json-handler-ref</code> is omitted, the default bean name is <code>json
 </div>
 <footer class="footer flex">
     <div id="spring-links flex">
-        <img id="springlogo" src="../_/img/spring-logo.svg" alt="Spring">
+        <img id="springlogo" src="../../_/img/spring-logo.svg" alt="Spring">
         <p class="smallest antialiased">Copyright © 2005 - <script>var d = new Date();
         document.write(d.getFullYear());</script> Broadcom. All Rights Reserved. The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.<br /><a href="https://www.vmware.com/help/legal.html">Terms of Use</a> • <a href="https://www.vmware.com/help/privacy.html" rel="noopener noreferrer">Privacy</a> • <a href="https://spring.io/trademarks">Trademark Guidelines</a> <span id="thank-you-mobile">• <a href="https://spring.io/thank-you">Thank you</a></span> • <a href="https://www.vmware.com/help/privacy/california-privacy-rights.html">Your California Privacy Rights</a> • <a class="ot-sdk-show-settings">Cookie Settings</a> <span id="teconsent"></span></p>
         <p class="smallest antialiased has-gray-text">Apache®, Apache Tomcat®, Apache Kafka®, Apache Cassandra&trade;, and Apache Geode&trade; are trademarks or registered trademarks of the Apache Software Foundation in the United States and/or other countries. Java&trade;, Java&trade; SE, Java&trade; EE, and OpenJDK&trade; are trademarks of Oracle and/or its affiliates. Kubernetes® is a registered trademark of the Linux Foundation in the United States and other countries. Linux® is the registered trademark of Linus Torvalds in the United States and other countries. Windows® and Microsoft® Azure are registered trademarks of Microsoft Corporation. “AWS” and “Amazon Web Services” are trademarks or registered trademarks of Amazon.com Inc. or its affiliates. All other trademarks and copyrights are property of their respective owners and are only mentioned for informative purposes. Other names may be trademarks of their respective owners.</p>
@@ -992,9 +892,9 @@ If <code>json-handler-ref</code> is omitted, the default bean name is <code>json
         <a href="https://twitter.com/springcentral" title="Twitter"><svg id="twitter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75.93 75.93"><circle class="cls-1" cx="37.97" cy="37.97" r="37.97"/><path id="Twitter-2" data-name="Twitter" class="cls-2" d="M55.2,22.73a15.43,15.43,0,0,1-4.88,1.91,7.56,7.56,0,0,0-5.61-2.49A7.78,7.78,0,0,0,37,30a7.56,7.56,0,0,0,.2,1.79,21.63,21.63,0,0,1-15.84-8.23,8,8,0,0,0,2.37,10.52,7.66,7.66,0,0,1-3.48-1v.09A7.84,7.84,0,0,0,26.45,41a7.54,7.54,0,0,1-2,.28A7.64,7.64,0,0,1,23,41.09a7.71,7.71,0,0,0,7.18,5.47,15.21,15.21,0,0,1-9.55,3.37,15.78,15.78,0,0,1-1.83-.11,21.41,21.41,0,0,0,11.78,3.54c14.13,0,21.86-12,21.86-22.42,0-.34,0-.68,0-1a15.67,15.67,0,0,0,3.83-4.08,14.9,14.9,0,0,1-4.41,1.24A7.8,7.8,0,0,0,55.2,22.73Z"/></svg></a>
     </div>
 </footer>
-<script src="../_/js/vendor/import.js"></script>
-<script src="../_/js/site.js"></script>
-<script async src="../_/js/vendor/highlight.js"></script>
-<script async src="../_/js/vendor/asciidoctor-tabs.js" data-sync-storage-key="docs:preferred-tab"></script>
+<script src="../../_/js/vendor/import.js"></script>
+<script src="../../_/js/site.js"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+<script async src="../../_/js/vendor/asciidoctor-tabs.js" data-sync-storage-key="docs:preferred-tab"></script>
   </body>
 </html>

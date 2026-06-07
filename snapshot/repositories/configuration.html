@@ -3,8 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Meilisearch Repositories :: Spring Data Meilisearch</title>
-    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/meilisearch-repositories.html">
+    <title>Repository Configuration :: Spring Data Meilisearch</title>
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -13,19 +12,19 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'),
   localStorage && localStorage.getItem('nav-width'))
     </script>
-    <link rel="stylesheet" href="../_/css/site.css">
-    <link rel="stylesheet" href="../_/css/vendor/search.css">
-    <link rel="stylesheet" href="../_/css/vendor/page-search.css">
-    <link rel="stylesheet" href="../_/css/vendor/onetrust.css">
-    <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <link rel="stylesheet" href="../../_/css/vendor/search.css">
+    <link rel="stylesheet" href="../../_/css/vendor/page-search.css">
+    <link rel="stylesheet" href="../../_/css/vendor/onetrust.css">
+    <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
     <meta name="version" content="0.9.1">
     <meta name="generation" content="snapshot">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/snapshot/meilisearch-repositories.html">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/snapshot/repositories/configuration.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
-    <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel="icon" href="../../_/img/favicon.ico" type="image/vnd.microsoft.icon">
   </head>
   <body class="article">
 <header class="header">
@@ -35,7 +34,7 @@
         <img
           id="springlogo"
           class="block"
-          src="../_/img/spring-logo.svg"
+          src="../../_/img/spring-logo.svg"
           alt="Spring"
         />
       </a>
@@ -278,31 +277,67 @@
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="index.html">Overview</a>
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link"  href="../index.html">Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../getting-started.html">Getting Started</a>
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="0">
+  <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <span class="nav-text">Meilisearch</span>
+    <a class="nav-link"  href="../meilisearch.html">Meilisearch</a>
 <ul class="nav-list">
-  <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-client.html">Meilisearch Client</a>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../meilisearch/client-configuration.html">Client Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../meilisearch/object-mapping.html">Object Mapping</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
+  </li>
+</ul>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-document.html">Meilisearch Document</a>
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link"  href="../repositories.html">Repositories</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="core-concepts.html">Core Concepts</a>
   </li>
-  <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-operations.html">Meilisearch Operations</a>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="definition.html">Defining Repository Interfaces</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="create-instances.html">Creating Repository Instances</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link"  href="configuration.html">Repository Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
-  <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-settings.html">Meilisearch Settings</a>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="repository-queries.html">Repository Methods and Limitations</a>
+  </li>
+</ul>
   </li>
   <li class="nav-item" data-depth="1">
-    <span class="nav-text"><a href="/snapshot/api/java/index.html" class="xref attachment link-external" target="_blank" rel="noopener">Javadoc</a></span>
+    <a class="nav-link"  href="../appendix.html">Appendix</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <span class="nav-text"><a href="https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html" class="link-external" target="_blank" rel="noopener">Javadoc</a></span>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <span class="nav-text"><a href="https://github.com/spring-projects/spring-data-commons/wiki" class="link-external" target="_blank" rel="noopener">Wiki</a></span>
   </li>
 </ul>
   </li>
@@ -334,13 +369,13 @@
   <div class="content">
     <div
       class="toc"
-      data-title="Meilisearch Repositories"
+      data-title="Repository Configuration"
       data-levels="2"
     >
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/meilisearch-repositories.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/repositories/configuration.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -374,9 +409,9 @@
   <nav class="breadcrumbs" aria-label="breadcrumbs">
     <ul>
       <li id="copy-url" title="Copy versioned URL"></li>
-      <li><a href="index.html">Spring Data Meilisearch</a></li>
-      <li>Meilisearch</li>
-      <li><a href="meilisearch-repositories.html">Meilisearch Repositories</a></li>
+      <li><a href="../index.html">Spring Data Meilisearch</a></li>
+      <li><a href="../repositories.html">Repositories</a></li>
+      <li><a href="configuration.html">Repository Configuration</a></li>
     </ul>
   </nav>
 </div><div class="admonitionblock important latest">
@@ -387,173 +422,86 @@
       </td>
       <td class="content">
         <div class="paragraph">
-          <p>This version is still in development and is not considered stable yet. For the latest stable version, please use <a href="../meilisearch-repositories.html">Spring Data Meilisearch 0.9.0</a>!</p>
+          <p>This version is still in development and is not considered stable yet. For the latest stable version, please use <a href="../../index.html">Spring Data Meilisearch 0.9.0</a>!</p>
         </div>
       </td>
     </tr></tbody>
   </table>
 </div>
-<h1 id="page-title" class="page">Meilisearch Repositories</h1>
+<h1 id="page-title" class="page">Repository Configuration</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This chapter describes how to use Meilisearch repositories.</p>
+<p>Spring Data Meilisearch repositories are enabled through <code>@EnableMeilisearchRepositories</code> or the XML namespace.</p>
+</div>
+<div class="paragraph">
+<p>As with other Spring Data modules, repository bootstrap is intentionally lightweight. The main store-specific choice is which <code>MeilisearchOperations</code> bean should back discovered repositories.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.repositories.usage"><a class="anchor" href="#meilisearch.repositories.usage"></a>Usage</h2>
+<h2 id="meilisearch.repositories.configuration.annotation"><a class="anchor" href="#meilisearch.repositories.configuration.annotation"></a>JavaConfig</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Meilisearch repositories are used to store and retrieve data from Meilisearch.</p>
-</div>
-<div class="exampleblock">
-<div class="title">Example 1. The sample repository</div>
-<div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
 
-import java.util.List;
+import org.springframework.context.annotation.Configuration;
 
-</span><span class="fold-block">public class MovieService {
-
-	private final MovieRepository repository;
-
-	public MovieService(MovieRepository repository) {
-		this.repository = repository;
-	}
-
-	public List&lt;Movie&gt; showAllMovies() {
-		return repository.findAll();
-	}
-}
-
-public interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
-
+</span><span class="fold-block">@Configuration
+@EnableMeilisearchRepositories(
+        basePackages = "com.example.movies",
+        meilisearchTemplateRef = "meilisearchTemplate")
+class RepositoryConfig {
 }</span></code></pre>
 </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="meilisearch.repositories.autocreation"><a class="anchor" href="#meilisearch.repositories.autocreation"></a>Automatic creation of indexes with the corresponding mapping</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p>If the <code>@Document</code> annotation is present on the entity, the index will be created automatically with the corresponding mapping.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="meilisearch.repositories.lookup.methods"><a class="anchor" href="#meilisearch.repositories.lookup.methods"></a>Lookup methods</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The Meilisearch repository provides the following lookup methods:</p>
+<p><code>@EnableMeilisearchRepositories</code> supports the standard Spring Data repository scanning options, including:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>findById(String id)</code></p>
+<p><code>value</code> and <code>basePackages</code></p>
 </li>
 <li>
-<p><code>findAllById(Iterable&lt;String&gt; ids)</code></p>
+<p><code>basePackageClasses</code></p>
 </li>
 <li>
-<p><code>findAll()</code></p>
+<p><code>includeFilters</code> and <code>excludeFilters</code></p>
 </li>
 <li>
-<p><code>findAll(Sort sort)</code></p>
+<p><code>repositoryImplementationPostfix</code></p>
 </li>
 <li>
-<p><code>findAll(Pageable pageable)</code></p>
+<p><code>namedQueriesLocation</code></p>
+</li>
+<li>
+<p><code>queryLookupStrategy</code></p>
+</li>
+<li>
+<p><code>repositoryFactoryBeanClass</code></p>
+</li>
+<li>
+<p><code>meilisearchTemplateRef</code></p>
+</li>
+<li>
+<p><code>considerNestedRepositories</code></p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Note that the above methods perform different behaviors.
-The <code>findById</code> and <code>findAllById</code> methods use the <a href="https://www.meilisearch.com/docs/reference/api/documents#get-one-document">Get one document</a> or <a href="https://www.meilisearch.com/docs/reference/api/documents#get-documents-with-post">Get documents</a> API.
-However, the <code>findAll</code> method uses the <a href="https://www.meilisearch.com/docs/reference/api/search">Search</a> API.</p>
+<p>If no base packages are configured, Spring Data scans the package of the annotated configuration class.</p>
 </div>
 <div class="paragraph">
-<p>For <code>findAll(Pageable pageable)</code>, the returned <code>Page</code> total elements come from Meilisearch paginated search <code>totalHits</code>.
-The repository does not use estimated totals or a separate <code>count()</code> query for page totals.
-The number of elements in the page content remains the number of hits returned for the requested page.
-If the entity configures <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, Meilisearch can cap the reported <code>totalHits</code>, and the repository <code>Page</code> total reflects that capped value.</p>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-This difference in behavior can also cause results to show differently.
-For example, <code>displayedAttributes</code> in <a href="meilisearch-settings.html" class="xref page">Meilisearch Settings</a> does not work with the Get one document or Get documents API.
-Go to <a href="https://www.meilisearch.com/docs/reference/api/settings#displayed-attributes">Meilisearch documentation</a> for more information.
-</td>
-</tr>
-</table>
+<p>The presence of <code>queryLookupStrategy</code> and <code>namedQueriesLocation</code> on the annotation reflects the standard Spring Data configuration contract.
+However, Spring Data Meilisearch&#8217;s documented repository model currently centers on the built-in repository methods rather than on derived or declared query methods.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.repositories.annotation"><a class="anchor" href="#meilisearch.repositories.annotation"></a>Annotation based configuration</h2>
+<h2 id="meilisearch.repositories.configuration.namespace"><a class="anchor" href="#meilisearch.repositories.configuration.namespace"></a>XML Namespace</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>The Spring Data Meilisearch repositories can be configured using the <code>@EnableMeilisearchRepositories</code> annotation.</p>
-</div>
-<div class="exampleblock">
-<div class="title">Example 2. Spring Data Meilisearch repositories using JavaConfig</div>
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
-import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-</span><span class="fold-block">@Configuration
-@EnableMeilisearchRepositories(                             <i class="conum" data-value="1"></i><b>(1)</b>
-		basePackages = {"com.example.repositories"}
-)
-public class Config {
-
-    @Bean
-    public MeilisearchOperations meilisearchTemplate() {    <i class="conum" data-value="2"></i><b>(2)</b>
-        // ...
-    }
-}</span></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>@EnableMeilisearchRepositories</code> annotation enables Meilisearch repositories.
-If no <code>basePackages</code> are configured, the annotation will scan the package of the annotated configuration class.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Provide a <code>MeilisearchOperations</code> bean to override the default <code>MeilisearchTemplate</code> bean.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="meilisearch.repositories.namespace"><a class="anchor" href="#meilisearch.repositories.namespace"></a>Spring Namespace</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The Spring Data Meilisearch repositories can be configured using the <code>meilisearch</code> namespace.</p>
-</div>
-<div class="exampleblock">
-<div class="title">Example 3. Spring Data Meilisearch repositories using Namespace</div>
-<div class="content">
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -564,48 +512,27 @@ If no <code>basePackages</code> are configured, the annotation will scan the pac
        http://www.vanslog.io/spring/data/meilisearch
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
 
-    &lt;meilisearch:repositories base-package="com.example.repositories"/&gt;             <i class="conum" data-value="1"></i><b>(1)</b>
+    &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;
 
-    &lt;bean name="meilisearchTemplate"                                                <i class="conum" data-value="2"></i><b>(2)</b>
+    &lt;meilisearch:meilisearch-client id="meilisearchClient" api-key="${MEILISEARCH_API_KEY}"/&gt;
+
+    &lt;bean id="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate"&gt;
-        &lt;constructor-arg name="meilisearchClient" ref="meilisearchClient"/&gt;         <i class="conum" data-value="3"></i><b>(3)</b>
+        &lt;constructor-arg name="meilisearchClient" ref="meilisearchClient"/&gt;
+        &lt;constructor-arg name="meilisearchConverter" ref="meilisearchConverter"/&gt;
     &lt;/bean&gt;
 
-    &lt;meilisearch:meilisearch-client id="meilisearchClient" api-key="masterKey"/&gt;    <i class="conum" data-value="4"></i><b>(4)</b>
-    &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;       <i class="conum" data-value="5"></i><b>(5)</b>
+    &lt;meilisearch:repositories
+            base-package="com.example.movies"
+            meilisearch-template-ref="meilisearchTemplate"/&gt;
 &lt;/beans&gt;</code></pre>
 </div>
 </div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>meilisearch:repositories</code> element enables Meilisearch repositories.
-If no <code>base-package</code> is configured, the namespace will scan the package of the configuration file.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>meilisearchTemplate</code> bean must be configured with a <code>MeilisearchClient</code>.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Set the <code>client</code> bean as the constructor argument of the <code>meilisearchTemplate</code>.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>Configure the Meilisearch client with the <code>api-key</code> attribute.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>Configure the <code>jsonHandler</code> bean with the <code>GsonJsonHandler</code> class.</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>The XML namespace extends the Spring Data repository namespace and adds the <code>meilisearch-template-ref</code> attribute.
+See <a href="../appendix.html#meilisearch.appendix.schema" class="xref page">XML namespace reference</a> for the full attribute list.</p>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="section-summary">
 </div>
 </article>  </div>
 </main>
@@ -622,7 +549,7 @@ If no <code>base-package</code> is configured, the namespace will scan the packa
                   <ul class="nav-versions">
                       <li class="component">
                         <div>
-                          <a class="title" href="../data-commons/index.html">Spring Data Commons</a>
+                          <a class="title" href="../../data-commons/index.html">Spring Data Commons</a>
                         </div>                        <div class="version-item">
                           <div>
                             <button class="version-toggle" type="button">
@@ -632,7 +559,7 @@ If no <code>base-package</code> is configured, the namespace will scan the packa
                           </div>
                           <ul class="versions">
   <li class="version">
-    <a href="../data-commons/index.html">
+    <a href="../../data-commons/index.html">
       4.1.0-SNAPSHOT
     </a>
   </li>
@@ -641,7 +568,7 @@ If no <code>base-package</code> is configured, the namespace will scan the packa
                       </li>
                       <li class="component">
                         <div>
-                          <a class="title" href="../index.html">Spring Data Meilisearch</a>
+                          <a class="title" href="../../index.html">Spring Data Meilisearch</a>
                         </div>                        <div class="version-item is-active">
                           <div>
                             <button class="version-toggle" type="button">
@@ -651,17 +578,17 @@ If no <code>base-package</code> is configured, the namespace will scan the packa
                           </div>
                           <ul class="versions">
   <li class="version">
-    <a href="../meilisearch-repositories.html">
+    <a href="../../index.html">
       0.9.0
     </a>
   </li>
   <li class="version">
-    <a href="../0.8.1/meilisearch-repositories.html">
+    <a href="../../0.8.1/index.html">
       0.8.1
     </a>
   </li>
   <li class="version">
-    <a href="../0.8.0/meilisearch-repositories.html">
+    <a href="../../0.8.0/index.html">
       0.8.0
     </a>
   </li>
@@ -675,7 +602,7 @@ If no <code>base-package</code> is configured, the namespace will scan the packa
                           </div>
                           <ul class="versions">
   <li class="version">
-    <a href="meilisearch-repositories.html">
+    <a href="configuration.html">
       0.9.1-SNAPSHOT
     </a>
   </li>
@@ -936,7 +863,7 @@ If no <code>base-package</code> is configured, the namespace will scan the packa
 </li>
     </ul>
   </li
-  <li><a href="../spring-projects.html">All Docs...</a></li>
+  <li><a href="../../spring-projects.html">All Docs...</a></li>
 </ul>
                 </div>
               </div>
@@ -948,7 +875,7 @@ If no <code>base-package</code> is configured, the namespace will scan the packa
 </div>
 <footer class="footer flex">
     <div id="spring-links flex">
-        <img id="springlogo" src="../_/img/spring-logo.svg" alt="Spring">
+        <img id="springlogo" src="../../_/img/spring-logo.svg" alt="Spring">
         <p class="smallest antialiased">Copyright © 2005 - <script>var d = new Date();
         document.write(d.getFullYear());</script> Broadcom. All Rights Reserved. The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.<br /><a href="https://www.vmware.com/help/legal.html">Terms of Use</a> • <a href="https://www.vmware.com/help/privacy.html" rel="noopener noreferrer">Privacy</a> • <a href="https://spring.io/trademarks">Trademark Guidelines</a> <span id="thank-you-mobile">• <a href="https://spring.io/thank-you">Thank you</a></span> • <a href="https://www.vmware.com/help/privacy/california-privacy-rights.html">Your California Privacy Rights</a> • <a class="ot-sdk-show-settings">Cookie Settings</a> <span id="teconsent"></span></p>
         <p class="smallest antialiased has-gray-text">Apache®, Apache Tomcat®, Apache Kafka®, Apache Cassandra&trade;, and Apache Geode&trade; are trademarks or registered trademarks of the Apache Software Foundation in the United States and/or other countries. Java&trade;, Java&trade; SE, Java&trade; EE, and OpenJDK&trade; are trademarks of Oracle and/or its affiliates. Kubernetes® is a registered trademark of the Linux Foundation in the United States and other countries. Linux® is the registered trademark of Linus Torvalds in the United States and other countries. Windows® and Microsoft® Azure are registered trademarks of Microsoft Corporation. “AWS” and “Amazon Web Services” are trademarks or registered trademarks of Amazon.com Inc. or its affiliates. All other trademarks and copyrights are property of their respective owners and are only mentioned for informative purposes. Other names may be trademarks of their respective owners.</p>
@@ -959,9 +886,9 @@ If no <code>base-package</code> is configured, the namespace will scan the packa
         <a href="https://twitter.com/springcentral" title="Twitter"><svg id="twitter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75.93 75.93"><circle class="cls-1" cx="37.97" cy="37.97" r="37.97"/><path id="Twitter-2" data-name="Twitter" class="cls-2" d="M55.2,22.73a15.43,15.43,0,0,1-4.88,1.91,7.56,7.56,0,0,0-5.61-2.49A7.78,7.78,0,0,0,37,30a7.56,7.56,0,0,0,.2,1.79,21.63,21.63,0,0,1-15.84-8.23,8,8,0,0,0,2.37,10.52,7.66,7.66,0,0,1-3.48-1v.09A7.84,7.84,0,0,0,26.45,41a7.54,7.54,0,0,1-2,.28A7.64,7.64,0,0,1,23,41.09a7.71,7.71,0,0,0,7.18,5.47,15.21,15.21,0,0,1-9.55,3.37,15.78,15.78,0,0,1-1.83-.11,21.41,21.41,0,0,0,11.78,3.54c14.13,0,21.86-12,21.86-22.42,0-.34,0-.68,0-1a15.67,15.67,0,0,0,3.83-4.08,14.9,14.9,0,0,1-4.41,1.24A7.8,7.8,0,0,0,55.2,22.73Z"/></svg></a>
     </div>
 </footer>
-<script src="../_/js/vendor/import.js"></script>
-<script src="../_/js/site.js"></script>
-<script async src="../_/js/vendor/highlight.js"></script>
-<script async src="../_/js/vendor/asciidoctor-tabs.js" data-sync-storage-key="docs:preferred-tab"></script>
+<script src="../../_/js/vendor/import.js"></script>
+<script src="../../_/js/site.js"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+<script async src="../../_/js/vendor/asciidoctor-tabs.js" data-sync-storage-key="docs:preferred-tab"></script>
   </body>
 </html>

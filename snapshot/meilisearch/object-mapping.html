@@ -3,8 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Meilisearch Settings :: Spring Data Meilisearch</title>
-    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/meilisearch-settings.html">
+    <title>Object Mapping :: Spring Data Meilisearch</title>
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -13,19 +12,19 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'),
   localStorage && localStorage.getItem('nav-width'))
     </script>
-    <link rel="stylesheet" href="../_/css/site.css">
-    <link rel="stylesheet" href="../_/css/vendor/search.css">
-    <link rel="stylesheet" href="../_/css/vendor/page-search.css">
-    <link rel="stylesheet" href="../_/css/vendor/onetrust.css">
-    <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <link rel="stylesheet" href="../../_/css/vendor/search.css">
+    <link rel="stylesheet" href="../../_/css/vendor/page-search.css">
+    <link rel="stylesheet" href="../../_/css/vendor/onetrust.css">
+    <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
     <meta name="version" content="0.9.1">
     <meta name="generation" content="snapshot">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/snapshot/meilisearch-settings.html">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/snapshot/meilisearch/object-mapping.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
-    <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel="icon" href="../../_/img/favicon.ico" type="image/vnd.microsoft.icon">
   </head>
   <body class="article">
 <header class="header">
@@ -35,7 +34,7 @@
         <img
           id="springlogo"
           class="block"
-          src="../_/img/spring-logo.svg"
+          src="../../_/img/spring-logo.svg"
           alt="Spring"
         />
       </a>
@@ -278,31 +277,67 @@
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="index.html">Overview</a>
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link"  href="../index.html">Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../getting-started.html">Getting Started</a>
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="0">
+  <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <span class="nav-text">Meilisearch</span>
+    <a class="nav-link"  href="../meilisearch.html">Meilisearch</a>
 <ul class="nav-list">
-  <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-client.html">Meilisearch Client</a>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="client-configuration.html">Client Configuration</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link"  href="object-mapping.html">Object Mapping</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="template.html">Operations</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="index-operations.html">Index and Instance Operations</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="settings.html">Settings</a>
+  </li>
+</ul>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-document.html">Meilisearch Document</a>
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link"  href="../repositories.html">Repositories</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../repositories/core-concepts.html">Core Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../repositories/definition.html">Defining Repository Interfaces</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../repositories/create-instances.html">Creating Repository Instances</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../repositories/configuration.html">Repository Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../repositories/meilisearch-repositories.html">Meilisearch Repositories</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="../repositories/repository-queries.html">Repository Methods and Limitations</a>
+  </li>
+</ul>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-operations.html">Meilisearch Operations</a>
+    <a class="nav-link"  href="../appendix.html">Appendix</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
-  </li>
-  <li class="nav-item is-current-page" data-depth="1">
-    <a class="nav-link"  href="meilisearch-settings.html">Meilisearch Settings</a>
+    <span class="nav-text"><a href="https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html" class="link-external" target="_blank" rel="noopener">Javadoc</a></span>
   </li>
   <li class="nav-item" data-depth="1">
-    <span class="nav-text"><a href="/snapshot/api/java/index.html" class="xref attachment link-external" target="_blank" rel="noopener">Javadoc</a></span>
+    <span class="nav-text"><a href="https://github.com/spring-projects/spring-data-commons/wiki" class="link-external" target="_blank" rel="noopener">Wiki</a></span>
   </li>
 </ul>
   </li>
@@ -334,13 +369,13 @@
   <div class="content">
     <div
       class="toc"
-      data-title="Meilisearch Settings"
+      data-title="Object Mapping"
       data-levels="2"
     >
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/meilisearch-settings.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/meilisearch/object-mapping.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -374,9 +409,9 @@
   <nav class="breadcrumbs" aria-label="breadcrumbs">
     <ul>
       <li id="copy-url" title="Copy versioned URL"></li>
-      <li><a href="index.html">Spring Data Meilisearch</a></li>
-      <li>Meilisearch</li>
-      <li><a href="meilisearch-settings.html">Meilisearch Settings</a></li>
+      <li><a href="../index.html">Spring Data Meilisearch</a></li>
+      <li><a href="../meilisearch.html">Meilisearch</a></li>
+      <li><a href="object-mapping.html">Object Mapping</a></li>
     </ul>
   </nav>
 </div><div class="admonitionblock important latest">
@@ -387,544 +422,173 @@
       </td>
       <td class="content">
         <div class="paragraph">
-          <p>This version is still in development and is not considered stable yet. For the latest stable version, please use <a href="../meilisearch-settings.html">Spring Data Meilisearch 0.9.0</a>!</p>
+          <p>This version is still in development and is not considered stable yet. For the latest stable version, please use <a href="../../index.html">Spring Data Meilisearch 0.9.0</a>!</p>
         </div>
       </td>
     </tr></tbody>
   </table>
 </div>
-<h1 id="page-title" class="page">Meilisearch Settings</h1>
+<h1 id="page-title" class="page">Object Mapping</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This chapter covers how to modify search <a href="https://www.meilisearch.com/docs/reference/api/settings">settings</a> in Meilisearch.</p>
+<p>Spring Data Meilisearch maps domain objects to Meilisearch documents through annotation metadata, a mapping context, and a converter.</p>
+</div>
+<div class="paragraph">
+<p>Object mapping is the basis for both repository support and template-style operations because the mapping metadata provides the index uid, document id, and optional settings metadata for each managed entity type.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.settings.overview"><a class="anchor" href="#meilisearch.settings.overview"></a>Overview</h2>
+<h2 id="meilisearch.mapping.document"><a class="anchor" href="#meilisearch.mapping.document"></a>@Document</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Meilisearch settings are used to define the behavior of the search engine.
-Using the <code>@Setting</code> annotation, you can define the basic settings for the index, while complex settings are defined using separate annotations like <code>@TypoTolerance</code>, <code>@Faceting</code>, and <code>@Pagination</code>.</p>
+<p>A persistent type must declare the target index uid explicitly.</p>
 </div>
-<div class="exampleblock">
-<div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "products")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.annotations.Document;
+
+import org.springframework.data.annotation.Id;
+
+</span><span class="fold-block">@Document(indexUid = "movies")
+class Movie {
+
+    @Id
+    private String id;
+    private String title;
+    private String description;
+}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>indexUid</code> is required. Spring Data Meilisearch resolves index-bound operations and repositories from that mapping metadata.</p>
+</div>
+<div class="paragraph">
+<p><code>@Document</code> also exposes <code>applySettings</code>, which defaults to <code>true</code>.
+When repository infrastructure creates a repository for the entity type, Spring Data Meilisearch applies annotation-driven index settings automatically if <code>applySettings</code> remains enabled.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.mapping.id"><a class="anchor" href="#meilisearch.mapping.id"></a>Document Id</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Document identity is resolved from the Spring Data <code>@Id</code> property.
+Repository and template operations convert ids through the configured <code>MeilisearchConverter</code>, so custom id value types can participate as long as the converter can turn them into the document id representation expected by Meilisearch.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.mapping.settings"><a class="anchor" href="#meilisearch.mapping.settings"></a>Annotation-driven Settings Metadata</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Use <code>@Setting</code> and companion annotations such as <code>@TypoTolerance</code>, <code>@Faceting</code>, and <code>@Pagination</code> to define index settings next to the domain type.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.annotations.Faceting;
+import io.vanslog.spring.data.meilisearch.annotations.Pagination;
+import io.vanslog.spring.data.meilisearch.annotations.Setting;
+import io.vanslog.spring.data.meilisearch.annotations.Synonym;
+import io.vanslog.spring.data.meilisearch.annotations.TypoTolerance;
+
+</span><span class="fold-block">@Document(indexUid = "products")
 @Setting(
-  searchableAttributes = { "description", "brand", "color" },
-  displayedAttributes = { "description", "brand", "color", "productId" },
-  sortableAttributes = { "productId" },
-  rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" },
-  distinctAttribute = "productId",
-  filterableAttributes = { "brand", "color", "price" },
-  synonyms = {
-        @Synonym(word = "phone", synonyms = { "mobile", "cellphone" }),
-        @Synonym(word = "laptop", synonyms = { "notebook" })
-  },
-  dictionary = { "netflix", "spotify" },
-  stopWords = { "a", "an", "the" },
-  separatorTokens = { "-", "_", "@" },
-  nonSeparatorTokens = { ".", "#" },
-  proximityPrecision = "byWord",
-  searchCutoffMs = 50
-)
-@TypoTolerance(
-  enabled = true,
-  minWordSizeForTypos = @MinWordSizeForTypos(oneTypo = 5, twoTypos = 9),
-  disableOnWords = {"skype", "zoom"},
-  disableOnAttributes = {"serial_number"}
-)
+        searchableAttributes = { "title", "description" },
+        filterableAttributes = { "brand", "category" },
+        synonyms = {
+                @Synonym(word = "tv", synonyms = { "television" })
+        })
+@TypoTolerance(enabled = true)
 @Faceting(maxValuesPerFacet = 100)
 @Pagination(maxTotalHits = 2000)
 class Product {
-    @Id private String id;
-    private String description;
-    private String brand;
-    private String color;
-    private String productId;
-    private double price;
-}</code></pre>
-</div>
-</div>
+}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Annotation-based settings are mapping metadata.
-They are applied when repositories initialize entities configured with <code>@Document(applySettings = true)</code> or when application code explicitly calls <code>MeilisearchOperations.applySettings(Entity.class)</code>.
-This path remains the preferred option for stable settings that belong to an entity model.</p>
-</div>
-<div class="paragraph">
-<p>Runtime settings operations are available when an application needs to inspect or adjust index settings outside entity bootstrap.
-Use the index-scoped API from <code>MeilisearchOperations.indexOps(&#8230;&#8203;)</code>:</p>
-</div>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MeilisearchIndexOperations index = meilisearchOperations.indexOps(Product.class);
-
-MeilisearchIndexSettings current = index.getSettings();
-
-MeilisearchIndexSettings updated = index.updateSettings(
-    MeilisearchIndexSettings.builder()
-        .withSearchableAttributes(List.of("description", "brand", "color"))
-        .withDisplayedAttributes(List.of("description", "brand", "color", "productId"))
-        .withFilterableAttributes(List.of("brand", "color", "price"))
-        .withPagination(new MeilisearchIndexSettings.PaginationSettings(2000))
-        .build());
-
-MeilisearchIndexSettings defaults = index.resetSettings();</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>The runtime API uses Spring Data Meilisearch-owned <code>MeilisearchIndexSettings</code> values.
-Public method signatures do not expose Meilisearch Java SDK settings, task, pagination, typo tolerance, faceting, embedder, or localized attribute classes.
-Runtime updates use Meilisearch&#8217;s settings update task and the template waits for the task to complete before returning.
-If the task reaches a terminal status other than <code>SUCCEEDED</code>, the template raises <code>TaskStatusException</code>.</p>
-</div>
-<div class="paragraph">
-<p><code>updateSettings(&#8230;&#8203;)</code> updates the settings represented by non-null fields in <code>MeilisearchIndexSettings</code>.
-Use empty lists or maps to clear supported list/map settings and use <code>resetSettings()</code> to reset all index settings to Meilisearch defaults.
-Do not use <code>null</code> values to reset individual settings; Meilisearch SDK serializers omit null fields.</p>
-</div>
-<div class="paragraph">
-<p>The conservative runtime settings surface mirrors the annotation support documented below: searchable, displayed, sortable and filterable attributes, ranking rules, distinct attribute, synonyms, stop words, dictionary, pagination <code>maxTotalHits</code>, faceting <code>maxValuesPerFacet</code>, typo tolerance basics, tokenization settings, proximity precision, search cutoff, localized attributes, and embedders.
-Advanced Meilisearch settings not represented by these Spring Data types can still be managed outside this abstraction if needed.</p>
+<p>Use annotation-driven settings for stable, entity-owned index defaults that should travel with the mapped type.
+Use <a href="settings.html" class="xref page">runtime settings operations</a> when settings must be inspected or adjusted dynamically.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.settings.search"><a class="anchor" href="#meilisearch.settings.search"></a>Search Settings</h2>
+<h2 id="meilisearch.mapping.converter"><a class="anchor" href="#meilisearch.mapping.converter"></a>Mapping Context and Converter</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>These settings control how documents are searched and ranked in Meilisearch.</p>
-</div>
-<div class="sect2">
-<h3 id="meilisearch.settings.search.attributes"><a class="anchor" href="#meilisearch.settings.search.attributes"></a>Searchable and Displayed Attributes</h3>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "products")
-@Setting(
-  searchableAttributes = { "description", "brand", "color" },        <i class="conum" data-value="1"></i><b>(1)</b>
-  displayedAttributes = { "description", "brand", "color", "productId" } <i class="conum" data-value="2"></i><b>(2)</b>
-)
-class Product {
-    @Id private String id;
-    private String description;
-    private String brand;
-    private String color;
-    private String productId;
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>searchableAttributes</code> attribute is used to define the fields that must be used for searching the results.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>displayedAttributes</code> attribute is used to define the fields that must be displayed in the results.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="meilisearch.settings.search.ranking"><a class="anchor" href="#meilisearch.settings.search.ranking"></a>Ranking and Sorting</h3>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "products")
-@Setting(
-  sortableAttributes = { "productId" },                                              <i class="conum" data-value="1"></i><b>(1)</b>
-  rankingRules = { "typo", "words", "proximity", "attribute", "sort", "exactness" }, <i class="conum" data-value="2"></i><b>(2)</b>
-  distinctAttribute = "productId"                                                    <i class="conum" data-value="3"></i><b>(3)</b>
-)
-class Product {
-    @Id private String id;
-    private String productId;
-    // other fields...
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>sortableAttributes</code> attribute is used to define the fields that can be used for sorting the results.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>rankingRules</code> attribute is used to define the ranking rules that must be used for sorting the results.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>The <code>distinctAttribute</code> attribute is used to define the field that must be used to remove duplicates from the results.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="meilisearch.settings.search.filtering"><a class="anchor" href="#meilisearch.settings.search.filtering"></a>Filtering and Faceting</h3>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "products")
-@Setting(
-  filterableAttributes = { "brand", "color", "price" }                               <i class="conum" data-value="1"></i><b>(1)</b>
-)
-@Faceting(maxValuesPerFacet = 100)                                                   <i class="conum" data-value="2"></i><b>(2)</b>
-class Product {
-    @Id private String id;
-    private String brand;
-    private String color;
-    private double price;
-    // other fields...
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>filterableAttributes</code> attribute defines which fields can be used for filtering and faceted search.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>@Faceting</code> annotation configures faceted search behavior.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="meilisearch.settings.search.text"><a class="anchor" href="#meilisearch.settings.search.text"></a>Text Processing Settings</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>These settings control how Meilisearch processes text during indexing and searching.</p>
-</div>
-<div class="sect2">
-<h3 id="meilisearch.settings.search.text.synonyms"><a class="anchor" href="#meilisearch.settings.search.text.synonyms"></a>Synonyms and Dictionary</h3>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "products")
-@Setting(
-  synonyms = {                                                                       <i class="conum" data-value="1"></i><b>(1)</b>
-        @Synonym(
-            word = "phone",
-            synonyms = { "mobile", "cellphone" }
-        ),
-        @Synonym(
-            word = "laptop",
-            synonyms = { "notebook" }
-        )
-  },
-  dictionary = { "netflix", "spotify" },                                             <i class="conum" data-value="2"></i><b>(2)</b>
-  stopWords = { "a", "an", "the" }                                                   <i class="conum" data-value="3"></i><b>(3)</b>
-)
-class Product {
-    @Id private String id;
-    // fields...
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>synonyms</code> attribute defines groups of words that should be considered equivalent in search.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>dictionary</code> attribute adds custom words to the internal dictionary.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>The <code>stopWords</code> attribute defines stop words to ignore while searching.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="meilisearch.settings.search.text.typo"><a class="anchor" href="#meilisearch.settings.search.text.typo"></a>Typo Tolerance</h3>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "products")
-@TypoTolerance(                                                                      <i class="conum" data-value="1"></i><b>(1)</b>
-  enabled = true,
-  minWordSizeForTypos = @MinWordSizeForTypos(
-    oneTypo = 5,
-    twoTypos = 9
-  ),
-  disableOnWords = {"skype", "zoom"},
-  disableOnAttributes = {"serial_number"}
-)
-class Product {
-    @Id private String id;
-    // fields...
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>@TypoTolerance</code> annotation configures the typo tolerance behavior of the search engine.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="meilisearch.settings.search.text.tokenization"><a class="anchor" href="#meilisearch.settings.search.text.tokenization"></a>Tokenization</h3>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "products")
-@Setting(
-  separatorTokens = { "-", "_", "@" },                                               <i class="conum" data-value="1"></i><b>(1)</b>
-  nonSeparatorTokens = { ".", "#" }                                                  <i class="conum" data-value="2"></i><b>(2)</b>
-)
-class Product {
-    @Id private String id;
-    // fields...
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>separatorTokens</code> attribute defines which characters should be considered as word separators.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>nonSeparatorTokens</code> attribute defines which characters should not be considered as word separators.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="meilisearch.settings.search.text.localization"><a class="anchor" href="#meilisearch.settings.search.text.localization"></a>Localization</h3>
-<div class="paragraph">
-<p>By default, Meilisearch automatically detects the languages used in your documents.
-However, you can explicitly define which languages are present in your dataset and in which fields using localized attributes configuration.
-You can configure localized attributes using the <code>@LocalizedAttribute</code> annotation within the <code>@Setting</code> annotation.
-Note that configuring multiple languages for a single index may impact search performance.</p>
-</div>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "products")
-@Setting(
-  localizedAttributes = {
-    @LocalizedAttribute(
-      attributePatterns = { "*En" },                                                <i class="conum" data-value="1"></i><b>(1)</b>
-      locales = { "eng" }                                                           <i class="conum" data-value="2"></i><b>(2)</b>
-    )
-  }
-)
-class Product {
-    @Id private String id;
-    private String nameEn;
-    // fields...
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>attributePatterns</code> specify which fields contain content in the specified languages using patterns.
-These patterns support wildcards (*) to match multiple fields with similar naming conventions:
-<div class="ulist">
-<ul>
-<li>
-<p><code>*En</code> matches fields ending with <code>En</code>, such as <code>nameEn</code> and <code>titleEn</code>.
-These fields are processed according to the language rules of the specified locales.
-The patterns affect <code>searchableAttributes</code>, <code>filterableAttributes</code>, and <code>sortableAttributes</code>.</p>
-</li>
-</ul>
-</div></td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>locales</code> attribute defines the list of supported languages for the specified attributes.
-Each locale follows the ISO-639-3 three-letter, or alternatively use ISO-639-1 two-letter equivalents.
-For a complete list of supported languages, refer to the <a href="https://www.meilisearch.com/docs/reference/api/settings#locales">Meilisearch documentation</a>.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_language_detection_control"><a class="anchor" href="#_language_detection_control"></a>Language Detection Control</h4>
-<div class="paragraph">
-<p>Meilisearch provides two mechanisms for controlling language detection:</p>
+<p><code>MeilisearchConfigurationSupport</code> registers the following infrastructure beans:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Query-level Language Control</strong>: If Meilisearch is detecting incorrect languages because of the query text, you can explicitly set the search language using the <code>locales</code> parameter in your search request.</p>
+<p><code>meilisearchMappingContext</code></p>
 </li>
 <li>
-<p><strong>Document-level Language Control</strong>: If Meilisearch is detecting incorrect languages in your documents, use <code>localizedAttributes</code> to explicitly set the document languages at the index level.</p>
+<p><code>meilisearchCustomConversions</code></p>
+</li>
+<li>
+<p><code>meilisearchConverter</code></p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>For complete control over language detection during both indexing and search time, you can use both <code>locales</code> and <code>localizedAttributes</code> together.</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="meilisearch.settings.ai"><a class="anchor" href="#meilisearch.settings.ai"></a>AI-powered Search Settings</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Meilisearch uses embedders to generate vector embeddings for AI-powered search features such as semantic search and similar document search.
-You can configure embedders with the <code>@Embedder</code> annotation inside <code>@Setting</code>.</p>
-</div>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "movies")
-@Setting(
-  searchableAttributes = { "title", "description" },
-  embedders = {
-    @Embedder(
-      name = "default",
-      source = Embedder.Source.OPEN_AI,
-      apiKey = "sk-...",
-      model = "text-embedding-3-small",
-      documentTemplate = "A movie titled {{doc.title}} whose description starts with {{doc.description|truncatewords: 20}}"
-    )
-  }
-)
-class Movie {
-    @Id private String id;
-    private String title;
-    private String description;
-}</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Each <code>@Embedder</code> requires a unique <code>name</code>, which becomes the key in Meilisearch&#8217;s <code>embedders</code> setting.
-Optional attributes map to the SDK embedder settings, including <code>source</code>, <code>apiKey</code>, <code>model</code>, <code>documentTemplate</code>, <code>dimensions</code>, <code>distributionMean</code>, <code>distributionSigma</code>, <code>documentTemplateMaxBytes</code>, <code>revision</code>, <code>binaryQuantized</code>, REST <code>request</code> and <code>response</code> parameters, <code>headers</code>, <code>url</code>, <code>inputField</code>, <code>inputType</code>, and <code>query</code>.
-<code>distributionMean</code> and <code>distributionSigma</code> must be configured together.
-<code>request</code>, <code>response</code>, and <code>headers</code> use <code>@EmbedderParameter</code> and currently support flat string key-value parameters.</p>
+<p>The default converter is <code>MappingMeilisearchConverter</code>.
+It uses the mapping context for entity metadata and applies any converters declared through <code>MeilisearchCustomConversions</code>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.settings.performance"><a class="anchor" href="#meilisearch.settings.performance"></a>Performance Settings</h2>
+<h2 id="meilisearch.mapping.custom-conversions"><a class="anchor" href="#meilisearch.mapping.custom-conversions"></a>Custom Conversions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>These settings control the performance aspects of Meilisearch.</p>
+<p>Override <code>meilisearchCustomConversions()</code> when you need custom Spring converters.</p>
 </div>
-<div class="exampleblock">
-<div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "products")
-@Setting(
-  proximityPrecision = "byWord",                                                     <i class="conum" data-value="1"></i><b>(1)</b>
-  searchCutoffMs = 50                                                                <i class="conum" data-value="2"></i><b>(2)</b>
-)
-class Product {
-    @Id private String id;
-    // fields...
-}</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
+import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions;
+
+import java.util.List;
+
+import org.springframework.core.convert.converter.Converter;
+
+</span><span class="fold-block">class ConversionConfig extends MeilisearchConfiguration {
+
+    @Override
+    public MeilisearchCustomConversions meilisearchCustomConversions() {
+        Converter&lt;MovieId, String&gt; writingConverter = MovieId::value;
+        return new MeilisearchCustomConversions(List.of(writingConverter));
+    }
+
+    @Override
+    public io.vanslog.spring.data.meilisearch.client.ClientConfiguration clientConfiguration() {
+        return io.vanslog.spring.data.meilisearch.client.ClientConfiguration.builder()
+                .connectedToLocalhost()
+                .withApiKey("masterKey")
+                .build();
+    }
+}</span></code></pre>
 </div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>proximityPrecision</code> attribute defines how word proximity is calculated (<code>byWord</code>, <code>byAttribute</code>).</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>searchCutoffMs</code> attribute sets the maximum processing time for a search query in milliseconds.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="meilisearch.settings.pagination"><a class="anchor" href="#meilisearch.settings.pagination"></a>Pagination</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Meilisearch&#8217;s search function is limited to return a maximum of 1,000 results.
-Therefore, <code>search(SearchRequest searchRequest, Class&lt;?&gt; clazz)</code> in MeilisearchOperation can&#8217;t return more than 1,000 results.</p>
 </div>
 <div class="paragraph">
-<p>If you have more than 1,000 results, you must use <code>@Pagination</code> annotation to extract the remaining results.</p>
+<p>Custom conversions are especially useful when:</p>
 </div>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Document(indexUid = "products")
-@Pagination(maxTotalHits = 2000)                                                     <i class="conum" data-value="1"></i><b>(1)</b>
-class Product {
-    @Id private String id;
-    // fields...
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The <code>maxTotalHits</code> is used to define the maximum number of results that can be reached through search.</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>See the <a href="https://www.meilisearch.com/docs/capabilities/full_text_search/how_to/paginate_search_results">Meilisearch pagination documentation</a> for details on <code>maxTotalHits</code>, <code>estimatedTotalHits</code>, and <code>totalHits</code>.
-This setting can cap the <code>totalHits</code> reported by Meilisearch paginated search responses.
-As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</code> with relation <code>EQUAL_TO</code> and repository <code>Page</code> totals can reflect the capped search total, while the page content size still reflects only the hits returned for the current request.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Your ids are richer value objects.</p>
+</li>
+<li>
+<p>Meilisearch document fields need custom serialization.</p>
+</li>
+<li>
+<p>Repository/template code should stay unaware of low-level value transformations.</p>
+</li>
+</ul>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="section-summary">
 </div>
 </article>  </div>
 </main>
@@ -941,7 +605,7 @@ As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</c
                   <ul class="nav-versions">
                       <li class="component">
                         <div>
-                          <a class="title" href="../data-commons/index.html">Spring Data Commons</a>
+                          <a class="title" href="../../data-commons/index.html">Spring Data Commons</a>
                         </div>                        <div class="version-item">
                           <div>
                             <button class="version-toggle" type="button">
@@ -951,7 +615,7 @@ As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</c
                           </div>
                           <ul class="versions">
   <li class="version">
-    <a href="../data-commons/index.html">
+    <a href="../../data-commons/index.html">
       4.1.0-SNAPSHOT
     </a>
   </li>
@@ -960,7 +624,7 @@ As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</c
                       </li>
                       <li class="component">
                         <div>
-                          <a class="title" href="../index.html">Spring Data Meilisearch</a>
+                          <a class="title" href="../../index.html">Spring Data Meilisearch</a>
                         </div>                        <div class="version-item is-active">
                           <div>
                             <button class="version-toggle" type="button">
@@ -970,17 +634,17 @@ As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</c
                           </div>
                           <ul class="versions">
   <li class="version">
-    <a href="../meilisearch-settings.html">
+    <a href="../../index.html">
       0.9.0
     </a>
   </li>
   <li class="version">
-    <a href="../0.8.1/meilisearch-settings.html">
+    <a href="../../0.8.1/index.html">
       0.8.1
     </a>
   </li>
   <li class="version">
-    <a href="../0.8.0/meilisearch-settings.html">
+    <a href="../../0.8.0/index.html">
       0.8.0
     </a>
   </li>
@@ -994,7 +658,7 @@ As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</c
                           </div>
                           <ul class="versions">
   <li class="version">
-    <a href="meilisearch-settings.html">
+    <a href="object-mapping.html">
       0.9.1-SNAPSHOT
     </a>
   </li>
@@ -1255,7 +919,7 @@ As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</c
 </li>
     </ul>
   </li
-  <li><a href="../spring-projects.html">All Docs...</a></li>
+  <li><a href="../../spring-projects.html">All Docs...</a></li>
 </ul>
                 </div>
               </div>
@@ -1267,7 +931,7 @@ As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</c
 </div>
 <footer class="footer flex">
     <div id="spring-links flex">
-        <img id="springlogo" src="../_/img/spring-logo.svg" alt="Spring">
+        <img id="springlogo" src="../../_/img/spring-logo.svg" alt="Spring">
         <p class="smallest antialiased">Copyright © 2005 - <script>var d = new Date();
         document.write(d.getFullYear());</script> Broadcom. All Rights Reserved. The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.<br /><a href="https://www.vmware.com/help/legal.html">Terms of Use</a> • <a href="https://www.vmware.com/help/privacy.html" rel="noopener noreferrer">Privacy</a> • <a href="https://spring.io/trademarks">Trademark Guidelines</a> <span id="thank-you-mobile">• <a href="https://spring.io/thank-you">Thank you</a></span> • <a href="https://www.vmware.com/help/privacy/california-privacy-rights.html">Your California Privacy Rights</a> • <a class="ot-sdk-show-settings">Cookie Settings</a> <span id="teconsent"></span></p>
         <p class="smallest antialiased has-gray-text">Apache®, Apache Tomcat®, Apache Kafka®, Apache Cassandra&trade;, and Apache Geode&trade; are trademarks or registered trademarks of the Apache Software Foundation in the United States and/or other countries. Java&trade;, Java&trade; SE, Java&trade; EE, and OpenJDK&trade; are trademarks of Oracle and/or its affiliates. Kubernetes® is a registered trademark of the Linux Foundation in the United States and other countries. Linux® is the registered trademark of Linus Torvalds in the United States and other countries. Windows® and Microsoft® Azure are registered trademarks of Microsoft Corporation. “AWS” and “Amazon Web Services” are trademarks or registered trademarks of Amazon.com Inc. or its affiliates. All other trademarks and copyrights are property of their respective owners and are only mentioned for informative purposes. Other names may be trademarks of their respective owners.</p>
@@ -1278,9 +942,9 @@ As a result, exact total hit metadata such as <code>SearchHits#getTotalHits()</c
         <a href="https://twitter.com/springcentral" title="Twitter"><svg id="twitter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 75.93 75.93"><circle class="cls-1" cx="37.97" cy="37.97" r="37.97"/><path id="Twitter-2" data-name="Twitter" class="cls-2" d="M55.2,22.73a15.43,15.43,0,0,1-4.88,1.91,7.56,7.56,0,0,0-5.61-2.49A7.78,7.78,0,0,0,37,30a7.56,7.56,0,0,0,.2,1.79,21.63,21.63,0,0,1-15.84-8.23,8,8,0,0,0,2.37,10.52,7.66,7.66,0,0,1-3.48-1v.09A7.84,7.84,0,0,0,26.45,41a7.54,7.54,0,0,1-2,.28A7.64,7.64,0,0,1,23,41.09a7.71,7.71,0,0,0,7.18,5.47,15.21,15.21,0,0,1-9.55,3.37,15.78,15.78,0,0,1-1.83-.11,21.41,21.41,0,0,0,11.78,3.54c14.13,0,21.86-12,21.86-22.42,0-.34,0-.68,0-1a15.67,15.67,0,0,0,3.83-4.08,14.9,14.9,0,0,1-4.41,1.24A7.8,7.8,0,0,0,55.2,22.73Z"/></svg></a>
     </div>
 </footer>
-<script src="../_/js/vendor/import.js"></script>
-<script src="../_/js/site.js"></script>
-<script async src="../_/js/vendor/highlight.js"></script>
-<script async src="../_/js/vendor/asciidoctor-tabs.js" data-sync-storage-key="docs:preferred-tab"></script>
+<script src="../../_/js/vendor/import.js"></script>
+<script src="../../_/js/site.js"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+<script async src="../../_/js/vendor/asciidoctor-tabs.js" data-sync-storage-key="docs:preferred-tab"></script>
   </body>
 </html>
