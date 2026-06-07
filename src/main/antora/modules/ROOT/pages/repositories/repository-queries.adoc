@@ -1,0 +1,48 @@
+[[meilisearch.repositories.queries]]
+= Repository Methods and Limitations
+
+Spring Data Meilisearch currently focuses on the repository base interfaces and on direct use of `MeilisearchOperations` for advanced search features.
+
+This page intentionally documents the boundary of the current repository support so that the manual stays aligned with the implemented code rather than with the broader feature set available in some other Spring Data modules.
+
+That boundary is deliberate: the repository API covers the common persistence flow, while the operations API remains the explicit place for richer Meilisearch search capabilities.
+
+[[meilisearch.repositories.queries.scope]]
+== Recommended Scope
+
+Use repositories for:
+
+* CRUD-style persistence,
+* id-based lookup,
+* simple `findAll`, sorting, and pageable access,
+* integration with the general Spring Data repository programming model.
+
+Use `MeilisearchOperations` when you need:
+
+* full control over `BasicQuery`, `IndexQuery`, `FacetQuery`, or `SimilarQuery`,
+* federated multi-search,
+* facet search,
+* similar-document search,
+* index lifecycle or runtime settings updates.
+
+[[meilisearch.repositories.queries.unsupported]]
+== Features Not Documented as Repository Capabilities
+
+The repository documentation intentionally does not advertise the following as supported repository features:
+
+* derived finder methods such as `findByTitle(...)`,
+* repository `@Query` methods,
+* named queries,
+* repository-level access to facet or federated-search metadata.
+
+Those topics are common in longer repository chapters from other Spring Data libraries because those modules implement them.
+Spring Data Meilisearch currently keeps advanced querying in the `MeilisearchOperations` layer instead.
+
+[[meilisearch.repositories.queries.notes]]
+== Practical Notes
+
+* Search-backed repository methods inherit Meilisearch search semantics, including pagination limits and search-only settings.
+* Document-backed repository methods do not expose search response features such as facet metadata.
+* If your use case depends on advanced query composition or store-specific search options, prefer `MeilisearchOperations` explicitly in the service layer.
+
+For many applications, this split is a good fit: repositories cover the common persistence flow, while `MeilisearchOperations` remains the explicit entry point for Meilisearch-specific search behavior.

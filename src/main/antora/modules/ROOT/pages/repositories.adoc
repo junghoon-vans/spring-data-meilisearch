@@ -1,0 +1,19 @@
+[[meilisearch.repositories]]
+= Repositories
+:page-section-summary-toc: 1
+
+This chapter explains the Spring Data repository abstraction and the Meilisearch-specific repository behavior implemented by Spring Data Meilisearch.
+
+The goal of the repository abstraction is to reduce boilerplate for data-access code while still allowing direct use of `MeilisearchOperations` when you need lower-level control.
+
+The repository chapter follows the general Spring Data reference-manual shape, but its scope is intentionally limited to the repository features that this module actually implements today.
+In particular, Spring Data Meilisearch currently documents:
+
+* repository definitions based on `MeilisearchRepository<T, ID>`,
+* repository bootstrap through Java configuration and the XML namespace,
+* the built-in CRUD, sorting, and paging methods backed by `SimpleMeilisearchRepository`,
+* store-specific behavior such as automatic settings application and the difference between document-backed and search-backed methods.
+
+It does not currently claim support for the richer repository-query model that some other Spring Data modules provide, such as derived finder methods, named queries, or store-specific `@Query` execution.
+
+Read the common repository fundamentals first, then continue with the store-specific pages in this chapter to understand the exact repository surface exposed by Spring Data Meilisearch.

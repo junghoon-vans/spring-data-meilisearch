@@ -269,6 +269,9 @@
                     <plugin>
                         <groupId>org.antora</groupId>
                         <artifactId>antora-maven-plugin</artifactId>
+                        <configuration>
+                            <nodeVersion>v22.21.1</nodeVersion>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

@@ -1,0 +1,71 @@
+[[meilisearch.repositories.store-specific]]
+= Meilisearch Repositories
+
+`MeilisearchRepository<T, ID>` extends Spring Data `CrudRepository` and `PagingAndSortingRepository`.
+The default implementation delegates to `MeilisearchOperations`.
+
+This keeps repository usage aligned with familiar Spring Data patterns while still letting the module preserve Meilisearch-specific behavior underneath the repository facade.
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+
+public interface MovieRepository extends MeilisearchRepository<Movie, String> {
+}
+----
+
+This is the recommended repository style for the current module.
+It exposes the standard Spring Data CRUD and pagination entry points without implying support for a wider derived-query feature set.
+
+[[meilisearch.repositories.autocreation]]
+== Automatic Settings Application
+
+Repository bootstrap inspects the mapped entity type.
+If the entity is annotated with `@Document(applySettings = true)`, Spring Data Meilisearch applies annotation-driven settings through `MeilisearchOperations.applySettings(...)` when the repository is created.
+
+This behavior is store-specific.
+It means repository creation can have side effects on the target index configuration, which is convenient for local development and controlled deployments but should be understood explicitly in environments where index settings are managed separately.
+
+[[meilisearch.repositories.lookup-methods]]
+== Built-in Repository Methods
+
+The built-in repository methods do not all use the same underlying Meilisearch API:
+
+* `findById(...)` and `findAllById(...)` use document APIs.
+* `findAll()`, `findAll(Sort)`, and `findAll(Pageable)` use search APIs.
+* `count()` uses `SearchOperations.count(...)`.
+* `save(...)`, `saveAll(...)`, and delete methods delegate to `MeilisearchOperations` document-oriented write operations.
+
+That distinction matters because some Meilisearch settings only influence search APIs.
+For example, `displayedAttributes` affect search results but not the document APIs used by `findById(...)` and `findAllById(...)`.
+
+[[meilisearch.repositories.lookup-methods.behavior-table]]
+=== Method Behavior at a Glance
+
+[cols="2,3",options="header"]
+|===
+| Repository method family
+| Backing behavior
+
+| `findById`, `findAllById`, `existsById`
+| Uses direct document lookup APIs after converting the repository id through the configured converter.
+
+| `findAll`, `findAll(Sort)`, `findAll(Pageable)`
+| Builds a search query and unwraps Meilisearch search hits back into entities.
+
+| `count`
+| Delegates to the operations layer count support rather than maintaining a separate repository-side count strategy.
+
+| `save`, `saveAll`, `delete*`
+| Delegates to `MeilisearchOperations` write and delete operations.
+|===
+
+[[meilisearch.repositories.paging]]
+== Paging and Totals
+
+`findAll(Pageable)` is backed by a `BasicQuery` plus search result metadata.
+The repository `Page` total is therefore derived from Meilisearch search totals, not from a separate count query.
+If the index is configured with `@Pagination(maxTotalHits = ...)`, that limit can cap the reported page total.
+
+The same search-backed design also explains why repository pagination does not expose richer search response data such as facets or federation metadata.
+When an application needs those store-specific result structures, prefer calling `MeilisearchOperations` directly from the service layer.
