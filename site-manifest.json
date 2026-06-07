@@ -1,6 +1,6 @@
 {
   "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
-  "generated": "2026-06-07T09:12:26.680Z",
+  "generated": "2026-06-07T09:21:22.769Z",
   "url": "https://junghoon-vans.github.io/spring-data-meilisearch",
   "components": {
     "data-commons": {
@@ -234,6 +234,103 @@
       "title": "Spring Data Meilisearch",
       "latest": "0.10.0",
       "versions": {
+        "0.10.1": {
+          "prerelease": true,
+          "displayVersion": "0.10.1-SNAPSHOT",
+          "url": "/snapshot/index.html",
+          "pages": [
+            {
+              "path": "index.adoc",
+              "url": "/snapshot/index.html",
+              "title": "Spring Data Meilisearch"
+            },
+            {
+              "path": "appendix.adoc",
+              "url": "/snapshot/appendix.html",
+              "title": "Appendix"
+            },
+            {
+              "path": "getting-started.adoc",
+              "url": "/snapshot/getting-started.html",
+              "title": "Getting Started"
+            },
+            {
+              "path": "meilisearch.adoc",
+              "url": "/snapshot/meilisearch.html",
+              "title": "Meilisearch"
+            },
+            {
+              "path": "meilisearch/client-configuration.adoc",
+              "url": "/snapshot/meilisearch/client-configuration.html",
+              "title": "Client Configuration"
+            },
+            {
+              "path": "meilisearch/index-operations.adoc",
+              "url": "/snapshot/meilisearch/index-operations.html",
+              "title": "Index and Instance Operations"
+            },
+            {
+              "path": "meilisearch/object-mapping.adoc",
+              "url": "/snapshot/meilisearch/object-mapping.html",
+              "title": "Object Mapping"
+            },
+            {
+              "path": "meilisearch/settings.adoc",
+              "url": "/snapshot/meilisearch/settings.html",
+              "title": "Settings"
+            },
+            {
+              "path": "meilisearch/template.adoc",
+              "url": "/snapshot/meilisearch/template.html",
+              "title": "Operations"
+            },
+            {
+              "path": "repositories.adoc",
+              "url": "/snapshot/repositories.html",
+              "title": "Repositories"
+            },
+            {
+              "path": "repositories/configuration.adoc",
+              "url": "/snapshot/repositories/configuration.html",
+              "title": "Repository Configuration"
+            },
+            {
+              "path": "repositories/core-concepts.adoc",
+              "url": "/snapshot/repositories/core-concepts.html",
+              "title": "Core Concepts"
+            },
+            {
+              "path": "repositories/create-instances.adoc",
+              "url": "/snapshot/repositories/create-instances.html",
+              "title": "Creating Repository Instances"
+            },
+            {
+              "path": "repositories/definition.adoc",
+              "url": "/snapshot/repositories/definition.html",
+              "title": "Defining Repository Interfaces"
+            },
+            {
+              "path": "repositories/meilisearch-repositories.adoc",
+              "url": "/snapshot/repositories/meilisearch-repositories.html",
+              "title": "Meilisearch Repositories"
+            },
+            {
+              "path": "repositories/repository-queries.adoc",
+              "url": "/snapshot/repositories/repository-queries.html",
+              "title": "Repository Methods and Limitations"
+            },
+            {
+              "path": "search.adoc",
+              "url": "/snapshot/search.html",
+              "title": "Search"
+            },
+            {
+              "path": "spring-projects.adoc",
+              "url": "/snapshot/spring-projects.html",
+              "title": "Spring Projects"
+            }
+          ]
+        },
         "0.10.0": {
           "url": "/index.html",
           "pages": [
