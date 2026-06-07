@@ -340,13 +340,7 @@
 </ul>
   </li>
   <li class="nav-item is-current-page" data-depth="1">
-    <button class="nav-item-toggle"></button>
     <a class="nav-link"  href="appendix.html">Appendix</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="appendix/xml-namespace-reference.html">XML Namespace Reference</a>
-  </li>
-</ul>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link link-external"  target="_blank" href="https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html">Javadoc</a>
@@ -449,7 +443,130 @@
 <h2 id="meilisearch.appendix.schema"><a class="anchor" href="#meilisearch.appendix.schema"></a>Schema</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="appendix/xml-namespace-reference.html" class="xref page">Spring Data Meilisearch Schema (meilisearch-namespace)</a></p>
+<p>The Spring Data Meilisearch XML namespace lives under <code><a href="http://www.vanslog.io/spring/data/meilisearch" class="bare">www.vanslog.io/spring/data/meilisearch</a></code> and is backed by <code>spring-meilisearch-1.0.xsd</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.appendix.xml-namespace.client"><a class="anchor" href="#meilisearch.appendix.xml-namespace.client"></a><code>&lt;meilisearch:meilisearch-client&gt;</code></h3>
+<div class="paragraph">
+<p>Creates a <code>MeilisearchClient</code> bean.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Attribute</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bean id for the client instance.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>host-url</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="http://localhost:7700" class="bare">localhost:7700</a></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The Meilisearch server URL.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>api-key</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The API key used for authentication.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client-agents</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Comma-delimited client agent values sent with requests.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>request-timeout</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How long to wait, in milliseconds, for task-based operations to complete.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>request-interval</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Polling interval, in milliseconds, used while waiting for task completion.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>json-handler-ref</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>jsonHandler</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference to a bean implementing <code>com.meilisearch.sdk.json.JsonHandler</code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.appendix.xml-namespace.repositories"><a class="anchor" href="#meilisearch.appendix.xml-namespace.repositories"></a><code>&lt;meilisearch:repositories&gt;</code></h3>
+<div class="paragraph">
+<p>Enables Meilisearch repository scanning.
+It extends the generic Spring Data repository namespace and therefore also supports the standard repository namespace attributes.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Attribute</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>base-package</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Package to scan for repository interfaces.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>meilisearch-template-ref</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>meilisearchTemplate</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference to the <code>MeilisearchOperations</code> bean used to back discovered repositories.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="meilisearch.appendix.xml-namespace.example"><a class="anchor" href="#meilisearch.appendix.xml-namespace.example"></a>Example</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.vanslog.io/spring/data/meilisearch
+       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
+
+    &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;
+
+    &lt;meilisearch:meilisearch-client
+            id="meilisearchClient"
+            host-url="http://localhost:7700"
+            api-key="${MEILISEARCH_API_KEY}"
+            json-handler-ref="jsonHandler"/&gt;
+
+    &lt;bean id="meilisearchTemplate"
+          class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate"&gt;
+        &lt;constructor-arg name="meilisearchClient" ref="meilisearchClient"/&gt;
+        &lt;constructor-arg name="meilisearchConverter" ref="meilisearchConverter"/&gt;
+    &lt;/bean&gt;
+
+    &lt;meilisearch:repositories
+            base-package="com.example.movies"
+            meilisearch-template-ref="meilisearchTemplate"/&gt;
+&lt;/beans&gt;</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>

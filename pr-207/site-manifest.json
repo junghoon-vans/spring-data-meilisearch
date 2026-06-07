@@ -1,6 +1,6 @@
 {
   "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
-  "generated": "2026-06-07T06:55:23.184Z",
+  "generated": "2026-06-07T07:04:49.507Z",
   "url": "https://junghoon-vans.github.io/spring-data-meilisearch",
   "components": {
     "data-meilisearch": {
@@ -21,11 +21,6 @@
               "path": "appendix.adoc",
               "url": "/appendix.html",
               "title": "Appendix"
-            },
-            {
-              "path": "appendix/xml-namespace-reference.adoc",
-              "url": "/appendix/xml-namespace-reference.html",
-              "title": "XML Namespace Reference"
             },
             {
               "path": "getting-started.adoc",
