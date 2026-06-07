@@ -17,6 +17,7 @@ package io.vanslog.spring.data.meilisearch.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.entities.TotalHitsLimited;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
@@ -46,11 +48,13 @@ class MeilisearchRepositoryIntegrationTests {
 
 	@Autowired private MovieRepository movieRepository;
 	@Autowired private TotalHitsLimitedRepository totalHitsLimitedRepository;
+	@Autowired private NestedMovieRepository nestedMovieRepository;
 
 	@BeforeEach
 	void setUp() {
 		movieRepository.deleteAll();
 		totalHitsLimitedRepository.deleteAll();
+		nestedMovieRepository.deleteAll();
 	}
 
 	@Test
@@ -69,6 +73,22 @@ class MeilisearchRepositoryIntegrationTests {
 		// then
 		Optional<Movie> saved = movieRepository.findById(documentId);
 		assertThat(saved).isPresent();
+	}
+
+	@Test
+	void shouldFindNestedDocumentByIdThroughRepository() {
+		// given
+		NestedMovie nestedMovie = new NestedMovie("nested-1", "Nested Search", new MovieDetails("Director", 2026));
+
+		// when
+		nestedMovieRepository.save(nestedMovie);
+
+		// then
+		Optional<NestedMovie> saved = nestedMovieRepository.findById("nested-1");
+		assertThat(saved).isPresent();
+		assertThat(saved.get().getDetails()).isNotNull();
+		assertThat(saved.get().getDetails().getDirector()).isEqualTo("Director");
+		assertThat(saved.get().getDetails().getYear()).isEqualTo(2026);
 	}
 
 	@Test
@@ -327,6 +347,59 @@ class MeilisearchRepositoryIntegrationTests {
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
 
 	interface TotalHitsLimitedRepository extends MeilisearchRepository<TotalHitsLimited, String> {}
+
+	interface NestedMovieRepository extends MeilisearchRepository<NestedMovie, String> {}
+
+	@Document(indexUid = "nested-movies")
+	static class NestedMovie {
+
+		@Id private String id;
+		private String title;
+		private MovieDetails details;
+
+		@SuppressWarnings("unused")
+		NestedMovie() {}
+
+		NestedMovie(String id, String title, MovieDetails details) {
+			this.id = id;
+			this.title = title;
+			this.details = details;
+		}
+
+		public String getId() {
+			return id;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		public MovieDetails getDetails() {
+			return details;
+		}
+	}
+
+	static class MovieDetails {
+
+		private String director;
+		private int year;
+
+		@SuppressWarnings("unused")
+		MovieDetails() {}
+
+		MovieDetails(String director, int year) {
+			this.director = director;
+			this.year = year;
+		}
+
+		public String getDirector() {
+			return director;
+		}
+
+		public int getYear() {
+			return year;
+		}
+	}
 
 	@Configuration
 	@Import(MeilisearchTestConfiguration.class)
