@@ -8,7 +8,7 @@ This appendix contains reference material for Spring Data Meilisearch.
 
 https://github.com/junghoon-vans/spring-data-meilisearch/blob/main/src/main/resources/io/vanslog/spring/data/meilisearch/config/spring-meilisearch-1.0.xsd[Spring Data Meilisearch Schema (meilisearch-namespace)]
 
-The Spring Data Meilisearch XML namespace lives under `http://www.vanslog.io/spring/data/meilisearch`.
+Spring Data Meilisearch uses `http://www.vanslog.io/spring/data/meilisearch` as its XML namespace URI and resolves the schema from the classpath through Spring's `META-INF/spring.schemas` mechanism.
 
 [[meilisearch.appendix.xml-namespace.client]]
 === `<meilisearch:meilisearch-client>`
