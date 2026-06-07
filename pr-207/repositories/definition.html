@@ -455,20 +455,14 @@ If you want to expose CRUD methods for that domain type, you may extend <code>Cr
 <p>There are a few variants how you can get started with your repository interface.</p>
 </div>
 <div class="paragraph">
-<p>The typical approach is to extend <code>CrudRepository</code>, which gives you methods for CRUD functionality.
+<p>The typical Meilisearch approach is to extend <code>MeilisearchRepository</code>, which combines Spring Data&#8217;s blocking <code>CrudRepository</code> and <code>PagingAndSortingRepository</code> contracts for the mapped domain type.
+<code>CrudRepository</code> gives you methods for CRUD functionality.
 CRUD stands for Create, Read, Update, Delete.
-With version 3.0 we also introduced <code>ListCrudRepository</code> which is very similar to the <code>CrudRepository</code> but for those methods that return multiple entities it returns a <code>List</code> instead of an <code>Iterable</code> which you might find easier to use.</p>
+<code>PagingAndSortingRepository</code> adds methods that accept a <code>Sort</code> or <code>Pageable</code> abstraction.</p>
 </div>
 <div class="paragraph">
-<p>If you are using a reactive store you might choose <code>ReactiveCrudRepository</code>, or <code>RxJava3CrudRepository</code> depending on which reactive framework you are using.</p>
-</div>
-<div class="paragraph">
-<p>If you are using Kotlin you might pick <code>CoroutineCrudRepository</code> which utilizes Kotlin&#8217;s coroutines.</p>
-</div>
-<div class="paragraph">
-<p>Additionally you can extend <code>PagingAndSortingRepository</code>, <code>ReactiveSortingRepository</code>, <code>RxJava3SortingRepository</code>, or <code>CoroutineSortingRepository</code> if you need methods that allow to specify a <code>Sort</code> abstraction or in the first case a <code>Pageable</code> abstraction.
-Note that the various sorting repositories no longer extended their respective CRUD repository as they did in Spring Data Versions pre 3.0.
-Therefore, you need to extend both interfaces if you want functionality of both.</p>
+<p>Spring Data Meilisearch currently supports the blocking repository model only.
+Reactive, RxJava 3, and Kotlin coroutine repository variants such as <code>ReactiveCrudRepository</code>, <code>RxJava3CrudRepository</code>, <code>ReactiveSortingRepository</code>, <code>RxJava3SortingRepository</code>, <code>CoroutineCrudRepository</code>, and <code>CoroutineSortingRepository</code> are not supported by this module.</p>
 </div>
 <div class="paragraph">
 <p>If you do not want to extend Spring Data interfaces, you can also annotate your repository interface with <code>@RepositoryDefinition</code>.
