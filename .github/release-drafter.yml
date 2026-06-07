@@ -12,6 +12,7 @@ categories:
 
 exclude-contributors:
   - 'junghoon-vans'
+  - 'github-actions[bot]'
 
 change-template: '* $TITLE #$NUMBER'
 template: |
