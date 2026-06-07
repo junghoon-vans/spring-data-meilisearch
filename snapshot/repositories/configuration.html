@@ -516,10 +516,29 @@ However, Spring Data Meilisearch&#8217;s documented repository model currently c
 
     &lt;meilisearch:meilisearch-client id="meilisearchClient" api-key="${MEILISEARCH_API_KEY}"/&gt;
 
+    &lt;bean id="meilisearchConverter"
+          class="io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter"&gt;
+        &lt;constructor-arg name="mappingContext" ref="meilisearchMappingContext"/&gt;
+        &lt;property name="conversions" ref="meilisearchCustomConversions"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="meilisearchMappingContext"
+          class="io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext"/&gt;
+
+    &lt;bean id="meilisearchCustomConversions"
+          class="io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions"&gt;
+        &lt;constructor-arg&gt;
+            &lt;list/&gt;
+        &lt;/constructor-arg&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="meilisearchObjectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/&gt;
+
     &lt;bean id="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate"&gt;
         &lt;constructor-arg name="meilisearchClient" ref="meilisearchClient"/&gt;
         &lt;constructor-arg name="meilisearchConverter" ref="meilisearchConverter"/&gt;
+        &lt;constructor-arg name="objectMapper" ref="meilisearchObjectMapper"/&gt;
     &lt;/bean&gt;
 
     &lt;meilisearch:repositories
@@ -530,7 +549,8 @@ However, Spring Data Meilisearch&#8217;s documented repository model currently c
 </div>
 <div class="paragraph">
 <p>The XML namespace extends the Spring Data repository namespace and adds the <code>meilisearch-template-ref</code> attribute.
-See <a href="../appendix.html#meilisearch.appendix.schema" class="xref page">XML namespace reference</a> for the full attribute list.</p>
+See <a href="../appendix.html#meilisearch.appendix.schema" class="xref page">XML namespace reference</a> for the full attribute list.
+The manual <code>meilisearchTemplate</code> bean must be wired with a <code>MeilisearchConverter</code> for entity mapping and the <code>meilisearchObjectMapper</code> bean for JSON document payload serialization.</p>
 </div>
 </div>
 </div>

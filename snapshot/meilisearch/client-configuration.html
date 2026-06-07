@@ -504,6 +504,8 @@ class MyClientConfig extends MeilisearchConfiguration {
 <div class="sectionbody">
 <div class="paragraph">
 <p><code>MeilisearchConfiguration</code> registers <code>GsonJsonHandler</code> by default.
+The <code>JsonHandler</code> configures the underlying Meilisearch Java SDK transport.
+Entity document mapping and document JSON payloads are handled by Spring Data Meilisearch through <code>MeilisearchConverter</code> and the <code>meilisearchObjectMapper</code> bean.
 Override <code>jsonHandler()</code> when you need a different implementation.</p>
 </div>
 <div class="listingblock">

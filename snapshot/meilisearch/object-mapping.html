@@ -540,6 +540,37 @@ It uses the mapping context for entity metadata and applies any converters decla
 </div>
 </div>
 <div class="sect1">
+<h2 id="meilisearch.mapping.payloads"><a class="anchor" href="#meilisearch.mapping.payloads"></a>Document Mapping and JSON Payloads</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Data Meilisearch maps entity instances through <code>MeilisearchConverter</code> before they reach the Meilisearch Java SDK.
+The default <code>MappingMeilisearchConverter</code> reads and writes a map-shaped <code>Document</code>, applying the mapping metadata and custom conversions registered with <code>MeilisearchCustomConversions</code>.</p>
+</div>
+<div class="paragraph">
+<p>Document payloads are then serialized with the Spring-managed <code>ObjectMapper</code> bean named <code>meilisearchObjectMapper</code>.
+This keeps entity conversion in Spring Data Meilisearch and sends document requests through the SDK raw JSON APIs where the SDK exposes them.
+The SDK <code>JsonHandler</code> is still used for SDK transport concerns, but it is not the entity mapping layer.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 1. Customizing the document ObjectMapper</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class MyClientConfig extends MeilisearchConfiguration {
+
+	@Bean(name = "meilisearchObjectMapper")
+	public ObjectMapper meilisearchObjectMapper() {
+		return new ObjectMapper();
+	}
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="meilisearch.mapping.custom-conversions"><a class="anchor" href="#meilisearch.mapping.custom-conversions"></a>Custom Conversions</h2>
 <div class="sectionbody">
 <div class="paragraph">
