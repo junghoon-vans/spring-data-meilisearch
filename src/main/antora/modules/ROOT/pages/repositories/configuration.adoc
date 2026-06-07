@@ -69,4 +69,4 @@ However, Spring Data Meilisearch's documented repository model currently centers
 ----
 
 The XML namespace extends the Spring Data repository namespace and adds the `meilisearch-template-ref` attribute.
-See xref:appendix/xml-namespace-reference.adoc[XML namespace reference] for the full attribute list.
+See xref:appendix.adoc#meilisearch.appendix.schema[XML namespace reference] for the full attribute list.

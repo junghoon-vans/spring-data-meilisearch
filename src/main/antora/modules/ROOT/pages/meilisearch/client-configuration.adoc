@@ -103,4 +103,4 @@ For production deployments, prefer a scoped API key rather than the Meilisearch 
 </beans>
 ----
 
-The XML namespace attributes are documented in xref:appendix/xml-namespace-reference.adoc[XML namespace reference].
+The XML namespace attributes are documented in xref:appendix.adoc#meilisearch.appendix.schema[XML namespace reference].
