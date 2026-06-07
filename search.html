@@ -20,9 +20,9 @@
     <link rel="stylesheet" href="./_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.9.0">
-    <meta name="generation" content="0.9.0">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.9.0/search.html">
+    <meta name="version" content="0.10.0">
+    <meta name="generation" content="0.10.0">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.10.0/search.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="true">
     <link rel="icon" href="./_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -249,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.9.0">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.10.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.9.0</span>
+  <span class="version">0.10.0</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -278,31 +278,67 @@
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
     <a class="nav-link"  href="index.html">Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="getting-started.html">Getting Started</a>
   </li>
 </ul>
   </li>
-  <li class="nav-item" data-depth="0">
+  <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <span class="nav-text">Meilisearch</span>
+    <a class="nav-link"  href="meilisearch.html">Meilisearch</a>
 <ul class="nav-list">
-  <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-client.html">Meilisearch Client</a>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="meilisearch/client-configuration.html">Client Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="meilisearch/object-mapping.html">Object Mapping</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="meilisearch/template.html">Operations</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="meilisearch/index-operations.html">Index and Instance Operations</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="meilisearch/settings.html">Settings</a>
+  </li>
+</ul>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-document.html">Meilisearch Document</a>
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link"  href="repositories.html">Repositories</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="repositories/core-concepts.html">Core Concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="repositories/definition.html">Defining Repository Interfaces</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="repositories/create-instances.html">Creating Repository Instances</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="repositories/configuration.html">Repository Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="repositories/meilisearch-repositories.html">Meilisearch Repositories</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link"  href="repositories/repository-queries.html">Repository Methods and Limitations</a>
+  </li>
+</ul>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-operations.html">Meilisearch Operations</a>
+    <a class="nav-link"  href="appendix.html">Appendix</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
+    <span class="nav-text"><a href="https://junghoon-vans.github.io/spring-data-meilisearch/api/java/index.html" class="link-external" target="_blank" rel="noopener">Javadoc</a></span>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link"  href="meilisearch-settings.html">Meilisearch Settings</a>
-  </li>
-  <li class="nav-item" data-depth="1">
-    <span class="nav-text"><a href="api/java/index.html" class="xref attachment link-external" target="_blank" rel="noopener">Javadoc</a></span>
+    <span class="nav-text"><a href="https://github.com/spring-projects/spring-data-commons/wiki" class="link-external" target="_blank" rel="noopener">Wiki</a></span>
   </li>
 </ul>
   </li>
@@ -407,6 +443,11 @@
                           <ul class="versions">
   <li class="version">
     <a href="search.html">
+      0.10.0
+    </a>
+  </li>
+  <li class="version">
+    <a href="0.9.0/search.html">
       0.9.0
     </a>
   </li>
@@ -418,20 +459,6 @@
   <li class="version">
     <a href="0.8.0/search.html">
       0.8.0
-    </a>
-  </li>
-</ul>                        </div>
-                        <div class="version-item">
-                          <div>
-                            <button class="version-toggle" type="button">
-                              <span></span>
-                              Snapshot
-                            </button>
-                          </div>
-                          <ul class="versions">
-  <li class="version">
-    <a href="snapshot/search.html">
-      0.9.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
