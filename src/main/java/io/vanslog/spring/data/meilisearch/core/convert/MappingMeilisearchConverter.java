@@ -20,16 +20,20 @@ import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEnti
 import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 
 import java.lang.reflect.Array;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Queue;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
@@ -222,8 +226,8 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 
 		if (Collection.class.isAssignableFrom(targetType) && value instanceof Collection<?>) {
 			Collection<?> collection = (Collection<?>) value;
-			Collection<Object> converted = new ArrayList<>(collection.size());
 			Class<?> elementType = componentType != null ? componentType : Object.class;
+			Collection<Object> converted = createCollection(targetType, elementType, collection.size());
 			for (Object element : collection) {
 				converted.add(readCollectionElement(element, elementType));
 			}
@@ -279,6 +283,15 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 		}
 
 		return element;
+	}
+
+	private static Collection<Object> createCollection(Class<?> targetType, Class<?> elementType, int size) {
+
+		if (Queue.class == targetType || Deque.class == targetType) {
+			return new ArrayDeque<>(size);
+		}
+
+		return CollectionFactory.createCollection(targetType, elementType, size);
 	}
 
 	private boolean isSimpleType(Class<?> type) {

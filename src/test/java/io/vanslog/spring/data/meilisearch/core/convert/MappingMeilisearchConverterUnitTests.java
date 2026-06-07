@@ -22,7 +22,9 @@ import io.vanslog.spring.data.meilisearch.core.document.MeilisearchDocument;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
 import java.math.BigDecimal;
+import java.util.Deque;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -116,6 +118,30 @@ class MappingMeilisearchConverterUnitTests {
 		BookCollection result = converter.read(BookCollection.class, document);
 
 		assertThat(result.getTags()).containsExactly("science-fiction", "classic");
+		assertThat(result.getContributors()).extracting(Author::getLastName).containsExactly("Butler", "Okorafor");
+	}
+
+	@Test
+	void shouldMaterializeDeclaredSetPropertyWhenReadingDocument() {
+
+		MeilisearchDocument document = MeilisearchDocument.create().append("id", "set-1").append("tags",
+				List.of("science-fiction", "classic"));
+
+		BookTagSet result = converter.read(BookTagSet.class, document);
+
+		assertThat(result.getTags()).containsExactly("science-fiction", "classic");
+	}
+
+	@Test
+	void shouldMaterializeDeclaredDequePropertyWithNestedElementsWhenReadingDocument() {
+
+		MeilisearchDocument document = MeilisearchDocument.create().append("id", "deque-1").append("contributors", List.of(
+				MeilisearchDocument.create().append("firstName", "Octavia").append("lastName", "Butler"),
+				MeilisearchDocument.create().append("firstName", "Nnedi").append("lastName", "Okorafor")));
+
+		BookContributorDeque result = converter.read(BookContributorDeque.class, document);
+
+		assertThat(result.getContributors()).isInstanceOf(Deque.class);
 		assertThat(result.getContributors()).extracting(Author::getLastName).containsExactly("Butler", "Okorafor");
 	}
 
@@ -267,6 +293,30 @@ class MappingMeilisearchConverterUnitTests {
 		}
 
 		List<Author> getContributors() {
+			return contributors;
+		}
+	}
+
+	@Document(indexUid = "book-tag-sets")
+	@SuppressWarnings("unused")
+	private static class BookTagSet {
+
+		@Id private String id;
+		private Set<String> tags;
+
+		Set<String> getTags() {
+			return tags;
+		}
+	}
+
+	@Document(indexUid = "book-contributor-deques")
+	@SuppressWarnings("unused")
+	private static class BookContributorDeque {
+
+		@Id private String id;
+		private Deque<Author> contributors;
+
+		Deque<Author> getContributors() {
 			return contributors;
 		}
 	}
