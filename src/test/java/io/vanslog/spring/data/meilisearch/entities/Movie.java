@@ -86,11 +86,10 @@ public class Movie {
 			return true;
 		}
 
-		if (object == null || getClass() != object.getClass()) {
+		if (!(object instanceof Movie movie) || getClass() != movie.getClass()) {
 			return false;
 		}
 
-		Movie movie = (Movie) object;
 		return id == movie.id && Objects.equals(title, movie.title) && Objects.equals(description, movie.description)
 				&& Arrays.equals(genres, movie.genres);
 	}

@@ -82,16 +82,14 @@ public class ResponseConverter {
 	public <T> SearchHits<T> mapHits(Searchable searchable, Class<T> clazz) {
 		List<SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
-		if (searchable instanceof MeilisearchSearchResult) {
-			MeilisearchSearchResult result = (MeilisearchSearchResult) searchable;
+		if (searchable instanceof MeilisearchSearchResult result) {
 			if (result.hasTotalHits()) {
 				return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(),
 						TotalHitsRelation.EQUAL_TO);
 			}
 		}
 
-		if (searchable instanceof SearchResultPaginated) {
-			SearchResultPaginated result = (SearchResultPaginated) searchable;
+		if (searchable instanceof SearchResultPaginated result) {
 			return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(),
 					TotalHitsRelation.EQUAL_TO);
 		}

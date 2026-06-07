@@ -314,8 +314,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		try {
 			return callback.doWithClient(meilisearchClient);
 		} catch (MeilisearchException e) {
-			if (e instanceof MeilisearchApiException) {
-				MeilisearchApiException ex = (MeilisearchApiException) e;
+			if (e instanceof MeilisearchApiException ex) {
 				handleApiException(ex);
 			}
 			throw new UncategorizedMeilisearchException(e.getMessage(), e.getCause());

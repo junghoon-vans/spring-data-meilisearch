@@ -180,8 +180,7 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 			return value;
 		}
 
-		if (value instanceof Collection<?>) {
-			Collection<?> collection = (Collection<?>) value;
+		if (value instanceof Collection<?> collection) {
 			Collection<Object> converted = new ArrayList<>(collection.size());
 			for (Object element : collection) {
 				converted.add(writeValue(element));
@@ -198,8 +197,7 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 			return converted;
 		}
 
-		if (value instanceof Map<?, ?>) {
-			Map<?, ?> map = (Map<?, ?>) value;
+		if (value instanceof Map<?, ?> map) {
 			Map<String, Object> converted = new LinkedHashMap<>(map.size());
 			map.forEach((key, mapValue) -> converted.put(String.valueOf(key), writeValue(mapValue)));
 			return converted;
@@ -224,8 +222,7 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 			}
 		}
 
-		if (Collection.class.isAssignableFrom(targetType) && value instanceof Collection<?>) {
-			Collection<?> collection = (Collection<?>) value;
+		if (Collection.class.isAssignableFrom(targetType) && value instanceof Collection<?> collection) {
 			Class<?> elementType = componentType != null ? componentType : Object.class;
 			Collection<Object> converted = createCollection(targetType, elementType, collection.size());
 			for (Object element : collection) {
@@ -245,13 +242,11 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 			}
 		}
 
-		if (value instanceof Document) {
-			Document document = (Document) value;
+		if (value instanceof Document document) {
 			return read(targetType, document);
 		}
 
-		if (value instanceof Map<?, ?>) {
-			Map<?, ?> map = (Map<?, ?>) value;
+		if (value instanceof Map<?, ?> map) {
 			return read(targetType, toDocument(map));
 		}
 
@@ -272,13 +267,11 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 			}
 		}
 
-		if (element instanceof Document) {
-			Document document = (Document) element;
+		if (element instanceof Document document) {
 			return read(componentType, document);
 		}
 
-		if (element instanceof Map<?, ?>) {
-			Map<?, ?> map = (Map<?, ?>) element;
+		if (element instanceof Map<?, ?> map) {
 			return read(componentType, toDocument(map));
 		}
 
@@ -300,17 +293,14 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 
 	private void updateMappingContextSimpleTypeHolder() {
 
-		if (mappingContext instanceof AbstractMappingContext<?, ?>) {
-			setSimpleTypeHolder(mappingContext, conversions);
+		if (mappingContext instanceof AbstractMappingContext<?, ?> abstractMappingContext) {
+			setSimpleTypeHolder(abstractMappingContext, conversions);
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	private static void setSimpleTypeHolder(
-			MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext,
+	private static void setSimpleTypeHolder(AbstractMappingContext<?, ?> abstractMappingContext,
 			CustomConversions conversions) {
 
-		AbstractMappingContext abstractMappingContext = (AbstractMappingContext) mappingContext;
 		abstractMappingContext.setSimpleTypeHolder(conversions.getSimpleTypeHolder());
 	}
 
