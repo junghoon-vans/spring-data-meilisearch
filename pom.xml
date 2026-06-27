@@ -35,6 +35,7 @@
         <sonar.issue.ignore.multicriteria>queryFactoryBraceStyle</sonar.issue.ignore.multicriteria>
         <sonar.issue.ignore.multicriteria.queryFactoryBraceStyle.ruleKey>java:S1106</sonar.issue.ignore.multicriteria.queryFactoryBraceStyle.ruleKey>
         <sonar.issue.ignore.multicriteria.queryFactoryBraceStyle.resourceKey>src/main/java/io/vanslog/spring/data/meilisearch/repository/support/MeilisearchRepositoryFactory.java</sonar.issue.ignore.multicriteria.queryFactoryBraceStyle.resourceKey>
+        <sonar.coverage.exclusions>src/main/kotlin/**/*Extensions.kt</sonar.coverage.exclusions>
     </properties>
 
     <developers>
@@ -104,6 +105,44 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin-stdlib}</version>
+                <configuration>
+                    <languageVersion>2.2</languageVersion>
+                    <apiVersion>2.2</apiVersion>
+                    <jvmTarget>17</jvmTarget>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                                <sourceDir>${project.basedir}/src/main/java</sourceDir>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                                <sourceDir>${project.basedir}/src/test/java</sourceDir>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
