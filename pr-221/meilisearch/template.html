@@ -629,7 +629,7 @@ These extensions use reified type parameters so Kotlin callers can omit explicit
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val movie = operations.get&lt;Movie&gt;("movie-1")
-val hits = operations.search&lt;Movie, BasicQuery&gt;(query)
+val hits = operations.search&lt;Movie&gt;(query)
 val count = operations.count&lt;Movie&gt;()
 val index = operations.indexOps&lt;Movie&gt;()
 
