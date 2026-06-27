@@ -29,6 +29,7 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
+import org.springframework.lang.Nullable;
 
 /**
  * Factory to create {@link SimpleMeilisearchRepository} instances.
@@ -69,16 +70,19 @@ public class MeilisearchRepositoryFactory extends RepositoryFactorySupport {
 	}
 
 	@Override
-	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(QueryLookupStrategy.Key key,
-			QueryMethodEvaluationContextProvider evaluationContextProvider) {
+	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(@Nullable QueryLookupStrategy.Key key,
+			QueryMethodEvaluationContextProvider evaluationContextProvider)
+	{
 		return Optional.of(new UnsupportedMeilisearchQueryLookupStrategy());
 	}
 
-	private static class UnsupportedMeilisearchQueryLookupStrategy implements QueryLookupStrategy {
+	private static class UnsupportedMeilisearchQueryLookupStrategy implements QueryLookupStrategy
+	{
 
 		@Override
 		public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, ProjectionFactory factory,
-				NamedQueries namedQueries) {
+				NamedQueries namedQueries)
+		{
 
 			throw new IllegalStateException(QUERY_METHODS_NOT_SUPPORTED + ": " + method.getName()
 					+ ". " + QUERY_METHODS_GUIDANCE);

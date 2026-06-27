@@ -42,12 +42,14 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@Test
-	void shouldCreateRepositoryForBaseRepositoryMethods() {
-		assertThat(repositoryFactory.getRepository(MovieRepository.class)).isNotNull();
+	void testShouldCreateRepositoryForBaseRepositoryMethods() {
+		assertThat(repositoryFactory.getRepository(MovieRepository.class))
+				.as("base repository methods should not require query lookup resolution")
+				.isNotNull();
 	}
 
 	@Test
-	void shouldRejectDerivedQueryMethodsWithClearMessage() {
+	void testShouldRejectDerivedQueryMethodsWithClearMessage() {
 		assertThatThrownBy(() -> repositoryFactory.getRepository(DerivedMovieRepository.class))
 				.hasMessageContaining("Meilisearch repository query methods are not supported")
 				.hasMessageContaining("findByTitle");

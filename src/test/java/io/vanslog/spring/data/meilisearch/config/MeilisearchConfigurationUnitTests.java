@@ -101,8 +101,9 @@ class MeilisearchConfigurationUnitTests {
 	}
 
 	@Test
-	void shouldDefaultToDeclaredQueryLookupStrategy() throws NoSuchMethodException {
+	void testShouldDefaultToDeclaredQueryLookupStrategy() throws NoSuchMethodException {
 		assertThat(EnableMeilisearchRepositories.class.getMethod("queryLookupStrategy").getDefaultValue())
+				.as("repository scanning should fail undeclared query methods by default")
 				.isEqualTo(Key.USE_DECLARED_QUERY);
 	}
 
