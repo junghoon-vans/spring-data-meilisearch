@@ -36,7 +36,6 @@ import org.springframework.lang.Nullable;
  *
  * @author Junghoon Ban
  */
-@SuppressWarnings("java:S1106")
 public class MeilisearchRepositoryFactory extends RepositoryFactorySupport {
 
 	private static final String QUERY_METHODS_NOT_SUPPORTED =
