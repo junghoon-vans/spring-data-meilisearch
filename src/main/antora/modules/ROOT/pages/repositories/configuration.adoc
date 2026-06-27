@@ -22,22 +22,24 @@ class RepositoryConfig {
 }
 ----
 
-`@EnableMeilisearchRepositories` supports the standard Spring Data repository scanning options, including:
+`@EnableMeilisearchRepositories` supports the standard Spring Data repository bootstrap options for scanning and
+repository factory selection, including:
 
 * `value` and `basePackages`
 * `basePackageClasses`
 * `includeFilters` and `excludeFilters`
 * `repositoryImplementationPostfix`
-* `namedQueriesLocation`
-* `queryLookupStrategy`
 * `repositoryFactoryBeanClass`
 * `meilisearchTemplateRef`
 * `considerNestedRepositories`
 
 If no base packages are configured, Spring Data scans the package of the annotated configuration class.
 
-The presence of `queryLookupStrategy` and `namedQueriesLocation` on the annotation reflects the standard Spring Data configuration contract.
-However, Spring Data Meilisearch's documented repository model currently centers on the built-in repository methods rather than on derived or declared query methods.
+`namedQueriesLocation` and `queryLookupStrategy` are retained on the annotation because they are part of the standard
+Spring Data repository configuration contract.
+Changing those attributes does not enable repository query methods in Spring Data Meilisearch.
+Derived finder methods, declared `@Query` methods, and named queries are rejected during repository bootstrap with a
+Meilisearch-specific message until repository query method support is implemented.
 
 [[meilisearch.repositories.configuration.namespace]]
 == XML Namespace

@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -97,6 +98,12 @@ class MeilisearchConfigurationUnitTests {
 	@Test
 	void shouldCreateMeilisearchRepository() {
 		assertThat(applySettingsFalseRepository).isNotNull();
+	}
+
+	@Test
+	void shouldDefaultToDeclaredQueryLookupStrategy() throws NoSuchMethodException {
+		assertThat(EnableMeilisearchRepositories.class.getMethod("queryLookupStrategy").getDefaultValue())
+				.isEqualTo(Key.USE_DECLARED_QUERY);
 	}
 
 	interface ApplySettingsFalseRepository extends MeilisearchRepository<ApplySettingsFalseEntity, String> {}

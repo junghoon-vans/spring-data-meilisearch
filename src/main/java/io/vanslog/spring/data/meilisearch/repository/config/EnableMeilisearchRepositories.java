@@ -94,19 +94,24 @@ public @interface EnableMeilisearchRepositories {
 
 	/**
 	 * Configures the location of where to find the Spring Data named queries properties file.
+	 * <p>
+	 * Meilisearch repository query methods are not supported yet, so configured named queries are rejected during
+	 * repository bootstrap.
 	 *
 	 * @return String
 	 */
 	String namedQueriesLocation() default "";
 
 	/**
-	 * Returns the key of the {@link org.springframework.data.repository.query.QueryLookupStrategy} to be used for lookup
-	 * queries for query methods. Defaults to
-	 * {@link org.springframework.data.repository.query.QueryLookupStrategy.Key#CREATE_IF_NOT_FOUND}.
+	 * Returns the key of the {@link org.springframework.data.repository.query.QueryLookupStrategy} to be used for query
+	 * method lookup. Meilisearch repository query methods are not supported yet, so derived, declared, and named query
+	 * methods are rejected during repository bootstrap. Defaults to
+	 * {@link org.springframework.data.repository.query.QueryLookupStrategy.Key#USE_DECLARED_QUERY} to avoid signaling
+	 * derived query creation support.
 	 *
 	 * @return Key
 	 */
-	Key queryLookupStrategy() default Key.CREATE_IF_NOT_FOUND;
+	Key queryLookupStrategy() default Key.USE_DECLARED_QUERY;
 
 	/**
 	 * Returns the {@link org.springframework.beans.factory.FactoryBean} class to be used for each repository instance.
