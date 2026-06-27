@@ -32,6 +32,7 @@
         <testcontainers-meilisearch>2.0.0</testcontainers-meilisearch>
 
         <java-module-name>spring.data.meilisearch</java-module-name>
+        <sonar.coverage.exclusions>src/main/kotlin/**/*Extensions.kt</sonar.coverage.exclusions>
     </properties>
 
     <developers>
