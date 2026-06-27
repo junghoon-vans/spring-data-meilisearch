@@ -71,18 +71,15 @@ public class MeilisearchRepositoryFactory extends RepositoryFactorySupport {
 
 	@Override
 	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(@Nullable QueryLookupStrategy.Key key,
-			QueryMethodEvaluationContextProvider evaluationContextProvider)
-	{
+			QueryMethodEvaluationContextProvider evaluationContextProvider) {
 		return Optional.of(new UnsupportedMeilisearchQueryLookupStrategy());
 	}
 
-	private static class UnsupportedMeilisearchQueryLookupStrategy implements QueryLookupStrategy
-	{
+	private static class UnsupportedMeilisearchQueryLookupStrategy implements QueryLookupStrategy {
 
 		@Override
 		public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, ProjectionFactory factory,
-				NamedQueries namedQueries)
-		{
+				NamedQueries namedQueries) {
 
 			throw new IllegalStateException(QUERY_METHODS_NOT_SUPPORTED + ": " + method.getName()
 					+ ". " + QUERY_METHODS_GUIDANCE);
