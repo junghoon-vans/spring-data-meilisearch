@@ -110,7 +110,7 @@ These extensions use reified type parameters so Kotlin callers can omit explicit
 [source,kotlin]
 ----
 val movie = operations.get<Movie>("movie-1")
-val hits = operations.search<Movie, BasicQuery>(query)
+val hits = operations.search<Movie>(query)
 val count = operations.count<Movie>()
 val index = operations.indexOps<Movie>()
 

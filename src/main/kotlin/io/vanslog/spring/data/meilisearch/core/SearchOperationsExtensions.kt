@@ -22,16 +22,16 @@ import io.vanslog.spring.data.meilisearch.core.query.SimilarQuery
 
 inline fun <reified T : Any> SearchOperations.count(): Long = count(T::class.java)
 
-inline fun <reified T : Any, Q : BaseQuery> SearchOperations.search(query: Q): SearchHits<T> =
+inline fun <reified T : Any> SearchOperations.search(query: BaseQuery): SearchHits<T> =
     search(query, T::class.java)
 
-inline fun <reified T : Any, Q : BaseQuery> SearchOperations.multiSearch(queries: List<Q>): SearchHits<T> =
-    multiSearch(queries.toMutableList(), T::class.java)
+inline fun <reified T : Any> SearchOperations.multiSearch(queries: List<BaseQuery>): SearchHits<T> =
+    multiSearch(queries, T::class.java)
 
-inline fun <reified T : Any, Q : BaseQuery> SearchOperations.multiSearch(
-    queries: List<Q>,
+inline fun <reified T : Any> SearchOperations.multiSearch(
+    queries: List<BaseQuery>,
     federation: MultiSearchFederation,
-): SearchHits<T> = multiSearch(queries.toMutableList(), federation, T::class.java)
+): SearchHits<T> = multiSearch(queries, federation, T::class.java)
 
 inline fun <reified T : Any> SearchOperations.facetSearch(query: FacetQuery): SearchHits<FacetHit> =
     facetSearch(query, T::class.java)

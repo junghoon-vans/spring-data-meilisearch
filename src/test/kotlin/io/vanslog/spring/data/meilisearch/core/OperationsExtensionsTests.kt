@@ -37,8 +37,11 @@ class OperationsExtensionsTests {
         operations.get<Movie>(documentId)
         operations.multiGet<Movie>()
         operations.multiGet<Movie>(10, 20)
+        operations.multiGet<Movie>(listOf(documentId))
+        operations.multiGet<Movie>(listOf(documentId), 10, 20)
         operations.exists<Movie>(documentId)
         operations.delete<Movie>(documentId)
+        operations.delete<Movie>(listOf(documentId))
         operations.deleteAll<Movie>()
 
         // then
@@ -46,7 +49,10 @@ class OperationsExtensionsTests {
             "get:Movie:$documentId",
             "multiGet:Movie",
             "multiGet:Movie:10:20",
+            "multiGet:Movie:$documentId",
+            "multiGet:Movie:$documentId:10:20",
             "exists:Movie:$documentId",
+            "delete:Movie:$documentId",
             "delete:Movie:$documentId",
             "deleteAll:Movie",
         )
@@ -63,9 +69,9 @@ class OperationsExtensionsTests {
 
         // when
         operations.count<Movie>()
-        operations.search<Movie, BaseQuery>(query)
-        operations.multiSearch<Movie, BaseQuery>(listOf(query))
-        operations.multiSearch<Movie, BaseQuery>(listOf(query), federation)
+        operations.search<Movie>(query)
+        operations.multiSearch<Movie>(listOf(query))
+        operations.multiSearch<Movie>(listOf(query), federation)
         operations.facetSearch<Movie>(facetQuery)
         operations.similarSearch<Movie>(similarQuery)
 
@@ -147,7 +153,8 @@ class OperationsExtensionsTests {
         }
 
         override fun <T : Any?> multiGet(clazz: Class<T>, documentIds: MutableList<String>): MutableList<T> {
-            throw UnsupportedOperationException()
+            calls.add("multiGet:${clazz.simpleName}:${documentIds.joinToString()}")
+            return mutableListOf()
         }
 
         override fun <T : Any?> multiGet(
@@ -156,7 +163,8 @@ class OperationsExtensionsTests {
             offset: Int,
             limit: Int,
         ): MutableList<T> {
-            throw UnsupportedOperationException()
+            calls.add("multiGet:${clazz.simpleName}:${documentIds.joinToString()}:$offset:$limit")
+            return mutableListOf()
         }
 
         override fun exists(documentId: String, clazz: Class<*>): Boolean {
@@ -174,7 +182,8 @@ class OperationsExtensionsTests {
         }
 
         override fun delete(clazz: Class<*>, documentIds: MutableList<String>): Boolean {
-            throw UnsupportedOperationException()
+            calls.add("delete:${clazz.simpleName}:${documentIds.joinToString()}")
+            return true
         }
 
         override fun <T : Any?> delete(entities: MutableList<T>): Boolean {

@@ -22,8 +22,20 @@ inline fun <reified T : Any> DocumentOperations.multiGet(): List<T> = multiGet(T
 inline fun <reified T : Any> DocumentOperations.multiGet(offset: Int, limit: Int): List<T> =
     multiGet(T::class.java, offset, limit)
 
+inline fun <reified T : Any> DocumentOperations.multiGet(documentIds: List<String>): List<T> =
+    multiGet(T::class.java, documentIds)
+
+inline fun <reified T : Any> DocumentOperations.multiGet(
+    documentIds: List<String>,
+    offset: Int,
+    limit: Int,
+): List<T> = multiGet(T::class.java, documentIds, offset, limit)
+
 inline fun <reified T : Any> DocumentOperations.exists(documentId: String): Boolean = exists(documentId, T::class.java)
 
 inline fun <reified T : Any> DocumentOperations.delete(documentId: String): Boolean = delete(documentId, T::class.java)
+
+inline fun <reified T : Any> DocumentOperations.delete(documentIds: List<String>): Boolean =
+    delete(T::class.java, documentIds)
 
 inline fun <reified T : Any> DocumentOperations.deleteAll(): Boolean = deleteAll(T::class.java)
