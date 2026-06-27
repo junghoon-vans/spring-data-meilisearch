@@ -101,6 +101,25 @@ Use the hit list size for the current page content and total-hit metadata only w
 
 When you need access to raw search metadata such as facets or federation details, prefer `MeilisearchOperations` directly instead of adapting repository return types.
 
+[[meilisearch.operations.kotlin]]
+== Kotlin Extensions
+
+Spring Data Meilisearch provides Kotlin extension functions for the blocking operations APIs that take an entity `Class` argument.
+These extensions use reified type parameters so Kotlin callers can omit explicit `::class.java` arguments.
+
+[source,kotlin]
+----
+val movie = operations.get<Movie>("movie-1")
+val hits = operations.search<Movie>(query)
+val count = operations.count<Movie>()
+val index = operations.indexOps<Movie>()
+
+operations.applySettings<Movie>()
+----
+
+The extensions are thin wrappers over the existing Java contracts.
+They do not change blocking execution behavior and do not add reactive or coroutine repository support.
+
 [[meilisearch.operations.notes]]
 == Notes on Search Semantics
 
