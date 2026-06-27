@@ -27,6 +27,7 @@ import java.lang.reflect.Proxy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.repository.NoRepositoryBean;
 
 class MeilisearchRepositoryFactoryUnitTests {
 
@@ -65,9 +66,11 @@ class MeilisearchRepositoryFactoryUnitTests {
 				});
 	}
 
+	@NoRepositoryBean
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {
 	}
 
+	@NoRepositoryBean
 	interface DerivedMovieRepository extends MeilisearchRepository<Movie, Integer> {
 
 		Movie findByTitle(String title);
