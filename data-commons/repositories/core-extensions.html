@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/repositories/core-extensions.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -617,7 +617,6 @@ It also detects Spring HATEOAS on the classpath and registers integration compon
 <div class="sect2">
 <h3 id="core.web.basic"><a class="anchor" href="#core.web.basic"></a>Basic Web Support</h3>
 <div class="paragraph">
-<div class="title">Enabling Spring Data web support in XML</div>
 <p>The configuration shown in the <a href="#core.web">previous section</a> registers a few basic components:</p>
 </div>
 <div class="ulist">
@@ -723,6 +722,20 @@ class UserController {
 </tr>
 </tbody>
 </table>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p><code>Sort.Order</code> instances resolved from request parameters are plain transfer objects carrying property names as is, without any validation against the domain model. Applications are responsible for verifying these values to prevent unintended sorting.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>To customize this behavior, register a bean that implements the <code>PageableHandlerMethodArgumentResolverCustomizer</code> interface or the <code>SortHandlerMethodArgumentResolverCustomizer</code> interface, respectively.
 Its <code>customize()</code> method gets called, letting you change settings, as the following example shows:</p>
@@ -770,7 +783,7 @@ We still ultimately recommend to leverage <a href="#core.web.pageables">the inte
 But as of version 3.3 Spring Data ships a page rendering mechanism that is convenient to use but does not require the inclusion of Spring HATEOAS.</p>
 </div>
 <div class="sect3">
-<h4 id="core.web.page.paged-model"><a class="anchor" href="#core.web.page.paged-model"></a>Using Spring Data' <code>PagedModel</code></h4>
+<h4 id="core.web.page.paged-model"><a class="anchor" href="#core.web.page.paged-model"></a>Using Spring Data&#8217;s <code>PagedModel</code></h4>
 <div class="paragraph">
 <p>At its core, the support consists of a simplified version of Spring HATEOAS' <code>PagedModel</code> (the Spring Data one located in the <code>org.springframework.data.web</code> package).
 It can be used to wrap <code>Page</code> instances and result in a simplified representation that reflects the structure established by Spring HATEOAS but omits the navigation links.</p>
@@ -930,9 +943,9 @@ You can now trigger a request (<code>GET <a href="http://localhost:8080/people" 
 </td>
 <td class="content">
 The JSON envelope format shown here doesn&#8217;t follow any formally specified structure and it&#8217;s not guaranteed stable and we might change it at any time.
-It&#8217;s highly recommended to enable the rendering as a hypermedia-enabled, official media type, supported by Spring HATEOAS, like <a href="https://docs.spring.io/spring-hateoas/docs/3.1.0-RC1/reference/html/#mediatypes.hal">HAL</a>.
+It&#8217;s highly recommended to enable the rendering as a hypermedia-enabled, official media type, supported by Spring HATEOAS, like <a href="https://docs.spring.io/spring-hateoas/docs/3.1.1/reference/html/#mediatypes.hal">HAL</a>.
 Those can be activated by using its <code>@EnableHypermediaSupport</code> annotation.
-Find more information in the <a href="https://docs.spring.io/spring-hateoas/docs/3.1.0-RC1/reference/html/#configuration.at-enable">Spring HATEOAS reference documentation</a>.
+Find more information in the <a href="https://docs.spring.io/spring-hateoas/docs/3.1.1/reference/html/#configuration.at-enable">Spring HATEOAS reference documentation</a>.
 </td>
 </tr>
 </table>
@@ -948,7 +961,21 @@ By default, the assembler points to the controller method it was invoked in, but
 <h3 id="core.web.basic.jackson-mappers"><a class="anchor" href="#core.web.basic.jackson-mappers"></a>Spring Data Jackson Modules</h3>
 <div class="paragraph">
 <p>The core module, and some of the store specific ones, ship with a set of Jackson Modules for types, like <code>org.springframework.data.geo.Distance</code> and <code>org.springframework.data.geo.Point</code>, used by the Spring Data domain.<br>
-Those modules are imported once <a href="#core.web">web support</a> is enabled and <code>tools.jackson.databind.ObjectMapper</code> is available.</p>
+Those modules are imported once <a href="#core.web">web support</a> is enabled and a <code>tools.jackson.databind.ObjectMapper</code> (Jackson 3) is available on the classpath.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>tools.jackson.databind</code> is the Jackson 3 package prefix.
+Jackson 2 used <code>com.fasterxml.jackson.databind</code>.
+Jackson 2 support is deprecated and will be removed in a future release; see the <a href="https://github.com/FasterXML/jackson/wiki/Jackson-Release-3.0">Jackson 3 migration guide</a> for upgrade instructions.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>During initialization <code>SpringDataJackson3Modules</code>, like the <code>SpringDataJackson3Configuration</code>, get picked up by the infrastructure, so that the declared <code>tools.jackson.databind.JacksonModule</code>s are made available to the Jackson <code>ObjectMapper</code>.</p>
@@ -975,20 +1002,6 @@ org.springframework.data.geo.Polygon</pre>
 <div class="paragraph">
 <p>The individual module may provide additional <code>SpringDataJackson3Modules</code>.<br>
 Please refer to the store specific section for more details.</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>Jackson 2 support is deprecated and will be removed in a future release.</p>
 </div>
 </td>
 </tr>
@@ -1033,6 +1046,18 @@ For usage with <code>RestTemplate</code>, register a <code>ProjectingJacksonHttp
 </div>
 <div class="paragraph">
 <p>For more information, see the <a href="https://github.com/spring-projects/spring-data-examples/tree/main/web/projection">web projection example</a> in the canonical <a href="https://github.com/spring-projects/spring-data-examples">Spring Data Examples repository</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+By default, binding collection-like properties is capped at 1024 entries. You can override this limit by setting the <code>spring.data.web.projection.collection-limit</code> property through a <code>spring.properties</code> file or as a system property.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
@@ -1295,7 +1320,7 @@ The following example shows how to unmarshall a repository populator with JAXB:<
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

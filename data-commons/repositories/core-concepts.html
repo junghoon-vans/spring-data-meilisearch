@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/repositories/core-concepts.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -502,7 +502,7 @@ Referring to identifiers will become more meaningful as we talk about repositori
 </table>
 </div>
 <div class="paragraph">
-<p>The <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/repository/CrudRepository.html"><code>CrudRepository</code></a> and <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/repository/ListCrudRepository.html"><code>ListCrudRepository</code></a> interfaces provide sophisticated CRUD functionality for the entity class that is being managed.</p>
+<p>The <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/repository/CrudRepository.html"><code>CrudRepository</code></a> and <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/repository/ListCrudRepository.html"><code>ListCrudRepository</code></a> interfaces provide sophisticated CRUD functionality for the entity class that is being managed.</p>
 </div>
 <div id="repositories.repository" class="listingblock">
 <div class="title"><code>CrudRepository</code> Interface</div>
@@ -590,12 +590,12 @@ Those interfaces extend <code>CrudRepository</code> and expose the capabilities 
 </table>
 </div>
 <div class="paragraph">
-<p>Additional to the <code>CrudRepository</code>, there are <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/repository/PagingAndSortingRepository.html"><code>PagingAndSortingRepository</code></a> and <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/repository/ListPagingAndSortingRepository.html"><code>ListPagingAndSortingRepository</code></a> which add additional methods to ease paginated access to entities:</p>
+<p>In addition to <code>CrudRepository</code>, there are <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/repository/PagingAndSortingRepository.html"><code>PagingAndSortingRepository</code></a> and <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/repository/ListPagingAndSortingRepository.html"><code>ListPagingAndSortingRepository</code></a> which add additional methods to ease paginated access to entities:</p>
 </div>
 <div class="listingblock">
 <div class="title"><code>PagingAndSortingRepository</code> interface</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface PagingAndSortingRepository&lt;T, ID&gt;  {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">interface PagingAndSortingRepository&lt;T, ID&gt; extends Repository&lt;T, ID&gt; {
 
   Iterable&lt;T&gt; findAll(Sort sort);
 
@@ -684,7 +684,7 @@ The following list shows the interface definition for a derived count query:</p>
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

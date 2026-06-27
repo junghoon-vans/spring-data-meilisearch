@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/kotlin/null-safety.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -480,31 +480,29 @@
 This makes applications safer through nullability declarations and the expression of &#8220;value or no value&#8221; semantics without paying the cost of wrappers, such as <code>Optional</code>.
 (Kotlin allows using functional constructs with nullable values. See this <a href="https://www.baeldung.com/kotlin/null-safety">comprehensive guide to Kotlin null safety</a>.)</p>
 </div>
-<div class="paragraph">
-<p>Although Java does not let you express null safety in its type system, Spring Data API is annotated with <a href="https://jcp.org/en/jsr/detail?id=305">JSR-305</a> tooling friendly annotations declared in the <code>org.springframework.lang</code> package.
-By default, types from Java APIs used in Kotlin are recognized as <a href="https://kotlinlang.org/docs/reference/java-interop.html#null-safety-and-platform-types">platform types</a>, for which null checks are relaxed.
-<a href="https://kotlinlang.org/docs/reference/java-interop.html#jsr-305-support">Kotlin support for JSR-305 annotations</a> and Spring nullability annotations provide null safety for the whole Spring Data API to Kotlin developers, with the advantage of dealing with <code>null</code> related issues at compile time.</p>
-</div>
-<div class="paragraph">
-<p>See <a href="../repositories/null-handling.html" class="xref page">Null Handling of Repository Methods</a> how null safety applies to Spring Data Repositories.</p>
-</div>
-<div class="admonitionblock tip">
+<div class="admonitionblock note">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>You can configure JSR-305 checks by adding the <code>-Xjsr305</code> compiler flag with the following options: <code>-Xjsr305={strict|warn|ignore}</code>.</p>
-</div>
-<div class="paragraph">
-<p>For Kotlin versions 1.1+, the default behavior is the same as <code>-Xjsr305=warn</code>.
-The <code>strict</code> value is required take Spring Data API null-safety into account. Kotlin types inferred from Spring API but should be used with the knowledge that Spring API nullability declaration could evolve, even between minor releases and that more checks may be added in the future.</p>
+<p>As of Spring Framework 7 and Spring Data 4, Spring Data uses <a href="https://jspecify.dev/docs/start-here/">JSpecify</a> for nullability annotations.
+The earlier <a href="https://jcp.org/en/jsr/detail?id=305">JSR-305</a>-based <code>org.springframework.lang</code> annotations are deprecated and should no longer be relied upon.
+See <a href="../repositories/null-handling.html" class="xref page">Null Handling of Repository Methods</a> for the current recommended approach.</p>
 </div>
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>Although Java does not let you express null safety in its type system, the Spring Data API is annotated with JSpecify annotations.
+By default, types from Java APIs used in Kotlin are recognized as <a href="https://kotlinlang.org/docs/reference/java-interop.html#null-safety-and-platform-types">platform types</a>, for which null checks are relaxed.
+JSpecify annotations provide null safety for the whole Spring Data API to Kotlin developers, with the advantage of dealing with <code>null</code>-related issues at compile time.</p>
+</div>
+<div class="paragraph">
+<p>See <a href="../repositories/null-handling.html" class="xref page">Null Handling of Repository Methods</a> for details on how null safety applies to Spring Data repositories.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -513,7 +511,7 @@ The <code>strict</code> value is required take Spring Data API null-safety into 
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Generic type arguments, varargs, and array elements nullability are not supported yet, but should be in an upcoming release.
+Generic type arguments, varargs, and array element nullability are not supported yet, but should be in an upcoming release.
 </td>
 </tr>
 </table>
@@ -544,7 +542,7 @@ Generic type arguments, varargs, and array elements nullability are not supporte
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/object-mapping.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -809,7 +809,7 @@ If you want Spring Data to use the factory method for object instantiation, anno
 <ul>
 <li>
 <p><em>Try to stick to immutable objects</em>&#8201;&#8212;&#8201;Immutable objects are straightforward to create as materializing an object is then a matter of calling its constructor only.
-Also, this avoids your domain objects to be littered with setter methods that allow client code to manipulate the objects state.
+Also, this avoids littering your domain objects with setter methods that allow client code to manipulate the object&#8217;s state.
 If you need those, prefer to make them package protected so that they can only be invoked by a limited amount of co-located types.
 Constructor-only materialization is up to 30% faster than properties population.</p>
 </li>
@@ -991,7 +991,7 @@ When Spring Data detects a constructor with parameter defaulting, then it leaves
 </td>
 <td class="content">
 Delegated properties are not supported with Spring Data. The mapping metadata filters delegated properties for Kotlin Data classes.
-In all other cases you can exclude synthetic fields for delegated properties by annotating the property with <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/annotation/Transient.html"><code>@Transient</code></a>.
+In all other cases you can exclude synthetic fields for delegated properties by annotating the property with <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/annotation/Transient.html"><code>@Transient</code></a>.
 </td>
 </tr>
 </table>
@@ -1168,7 +1168,7 @@ Nullable primitive value types or nullable value-in-value types are represented 
                           <ul class="versions">
   <li class="version">
     <a href="index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

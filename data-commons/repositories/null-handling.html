@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/repositories/null-handling.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -508,7 +508,7 @@ See &#8220;<a href="query-return-types-reference.html" class="xref page">Reposit
 <div class="sect2">
 <h3 id="_jspecify"><a class="anchor" href="#_jspecify"></a>JSpecify</h3>
 <div class="paragraph">
-<p>As on Spring Framework 7 and Spring Data 4, you can express nullability constraints for repository methods by using <a href="https://jspecify.dev/docs/start-here/">JSpecify</a>.
+<p>As of Spring Framework 7 and Spring Data 4, you can express nullability constraints for repository methods by using <a href="https://jspecify.dev/docs/start-here/">JSpecify</a>.
 JSpecify is well integrated into IntelliJ and Eclipse to provide a tooling-friendly approach and opt-in <code>null</code> checks during runtime, as follows:</p>
 </div>
 <div class="ulist">
@@ -517,7 +517,7 @@ JSpecify is well integrated into IntelliJ and Eclipse to provide a tooling-frien
 <p><a href="https://jspecify.dev/docs/api/org/jspecify/annotations/NullMarked.html"><code>@NullMarked</code></a>: Used on the module-, package- and class-level to declare that the default behavior for parameters and return values is, respectively, neither to accept nor to produce <code>null</code> values.</p>
 </li>
 <li>
-<p><a href="https://jspecify.dev/docs/api/org/jspecify/annotations/NonNull.html"><code>@NonNull</code></a>: Used on a type level for parameter or return values that must not be <code>null</code> (not needed value where <code>@NullMarked</code> applies).</p>
+<p><a href="https://jspecify.dev/docs/api/org/jspecify/annotations/NonNull.html"><code>@NonNull</code></a>: Used on a type level for parameter or return values that must not be <code>null</code> (not needed on parameters and return values already covered by <code>@NullMarked</code>).</p>
 </li>
 <li>
 <p><a href="https://jspecify.dev/docs/api/org/jspecify/annotations/Nullable.html"><code>@Nullable</code></a>: Used on the type level for parameter or return values that can be <code>null</code>.</p>
@@ -614,7 +614,7 @@ Pay attention to the syntax
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-As on Spring Framework 7, Spring&#8217;s nullability annotations are deprecated in favor of JSpecify.
+As of Spring Framework 7, Spring&#8217;s nullability annotations are deprecated in favor of JSpecify.
 Consult the framework documentation on <a href="https://docs.spring.io/spring-framework/reference/7.0/core/null-safety.html">Migrating from Spring null-safety annotations to JSpecify</a> for more information.
 </td>
 </tr>
@@ -626,13 +626,13 @@ Consult the framework documentation on <a href="https://docs.spring.io/spring-fr
 <div class="ulist">
 <ul>
 <li>
-<p><a href="https://docs.spring.io/spring-framework/docs/7.0.8-SNAPSHOT/javadoc-api/org/springframework/lang/NonNullApi.html"><code>@NonNullApi</code></a>: Used on the package level to declare that the default behavior for parameters and return values is, respectively, neither to accept nor to produce <code>null</code> values.</p>
+<p><a href="https://docs.spring.io/spring-framework/docs/7.0.8/javadoc-api/org/springframework/lang/NonNullApi.html"><code>@NonNullApi</code></a>: Used on the package level to declare that the default behavior for parameters and return values is, respectively, neither to accept nor to produce <code>null</code> values.</p>
 </li>
 <li>
-<p><a href="https://docs.spring.io/spring-framework/docs/7.0.8-SNAPSHOT/javadoc-api/org/springframework/lang/NonNull.html"><code>@NonNull</code></a>: Used on a parameter or return value that must not be <code>null</code> (not needed on a parameter and return value where <code>@NonNullApi</code> applies).</p>
+<p><a href="https://docs.spring.io/spring-framework/docs/7.0.8/javadoc-api/org/springframework/lang/NonNull.html"><code>@NonNull</code></a>: Used on a parameter or return value that must not be <code>null</code> (not needed on a parameter and return value where <code>@NonNullApi</code> applies).</p>
 </li>
 <li>
-<p><a href="https://docs.spring.io/spring-framework/docs/7.0.8-SNAPSHOT/javadoc-api/org/springframework/lang/Nullable.html"><code>@Nullable</code></a>: Used on a parameter or return value that can be <code>null</code>.</p>
+<p><a href="https://docs.spring.io/spring-framework/docs/7.0.8/javadoc-api/org/springframework/lang/Nullable.html"><code>@Nullable</code></a>: Used on a parameter or return value that can be <code>null</code>.</p>
 </li>
 </ul>
 </div>
@@ -763,7 +763,7 @@ If the query yields an empty result, an <code>EmptyResultDataAccessException</co
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

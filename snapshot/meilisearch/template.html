@@ -617,6 +617,29 @@ Each hit is a <code>SearchHit&lt;T&gt;</code> that contains:</p>
 </div>
 </div>
 <div class="sect1">
+<h2 id="meilisearch.operations.kotlin"><a class="anchor" href="#meilisearch.operations.kotlin"></a>Kotlin Extensions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Data Meilisearch provides Kotlin extension functions for the blocking operations APIs that take an entity <code>Class</code> argument.
+These extensions use reified type parameters so Kotlin callers can omit explicit <code>::class.java</code> arguments.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val movie = operations.get&lt;Movie&gt;("movie-1")
+val hits = operations.search&lt;Movie&gt;(query)
+val count = operations.count&lt;Movie&gt;()
+val index = operations.indexOps&lt;Movie&gt;()
+
+operations.applySettings&lt;Movie&gt;()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The extensions are thin wrappers over the existing Java contracts.
+They do not change blocking execution behavior and do not add reactive or coroutine repository support.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="meilisearch.operations.notes"><a class="anchor" href="#meilisearch.operations.notes"></a>Notes on Search Semantics</h2>
 <div class="sectionbody">
 <div class="ulist">
@@ -660,7 +683,7 @@ Each hit is a <code>SearchHit&lt;T&gt;</code> that contains:</p>
                           <ul class="versions">
   <li class="version">
     <a href="../../data-commons/index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

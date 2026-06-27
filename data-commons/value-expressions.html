@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/value-expressions.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -692,8 +692,7 @@ Accepting user-provided expressions can create an entry path to exploit the appl
 <code>ExtensionAwareEvaluationContextProvider</code> and its reactive variant <code>ReactiveExtensionAwareEvaluationContextProvider</code> are default implementations that determine context extensions from an application context, specifically <code>ListableBeanFactory</code>.</p>
 </div>
 <div class="paragraph">
-<p>Extensions implement either <code>EvaluationContextExtension</code> or <code>ReactiveEvaluationContextExtension</code> to provide extension support to hydrate <code>EvaluationContext</code>.
-That are a root object, properties and functions (top-level methods).</p>
+<p>Extensions implement either <code>EvaluationContextExtension</code> or <code>ReactiveEvaluationContextExtension</code> to hydrate an <code>EvaluationContext</code> with: a root object, named properties, and functions (top-level methods).</p>
 </div>
 <div class="paragraph">
 <p>The following example shows a context extension that provides a root object, properties, functions and an aliased function.</p>
@@ -908,7 +907,7 @@ You can find more details on the property placeholders in <a href="https://docs.
                           <ul class="versions">
   <li class="version">
     <a href="index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/repositories/query-methods-details.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -825,7 +825,7 @@ class Products implements Streamable&lt;Product&gt; {         <i class="conum" d
   }
 }
 
-interface ProductRepository implements Repository&lt;Product, Long&gt; {
+interface ProductRepository extends Repository&lt;Product, Long&gt; {
   Products findAllByDescriptionContaining(String text); <i class="conum" data-value="5"></i><b>(5)</b>
 }</code></pre>
 </div>
@@ -906,7 +906,7 @@ That is, a <code>java.util.List</code> is turned into a Vavr <code>List</code> o
 <h2 id="repositories.query-streaming"><a class="anchor" href="#repositories.query-streaming"></a>Streaming Query Results</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can process the results of query methods incrementally by using a Java 8 <code>Stream&lt;T&gt;</code> as the return type.
+<p>You can process the results of query methods incrementally by using a <code>Stream&lt;T&gt;</code> as the return type.
 Instead of wrapping the query results in a <code>Stream</code>, data store-specific methods are used to perform the streaming, as shown in the following example:</p>
 </div>
 <div class="listingblock">
@@ -929,7 +929,7 @@ Stream&lt;User&gt; streamAllPaged(Pageable pageable);</code></pre>
 </td>
 <td class="content">
 A <code>Stream</code> potentially wraps underlying data store-specific resources and must, therefore, be closed after usage.
-You can either manually close the <code>Stream</code> by using the <code>close()</code> method or by using a Java 7 <code>try-with-resources</code> block, as shown in the following example:
+You can either manually close the <code>Stream</code> by using the <code>close()</code> method or by using a <code>try</code>-with-resources block, as shown in the following example:
 </td>
 </tr>
 </table>
@@ -983,7 +983,7 @@ CompletableFuture&lt;User&gt; findOneByFirstname(String firstname); <i class="co
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Use a Java 8 <code>java.util.concurrent.CompletableFuture</code> as the return type.</td>
+<td>Use <code>java.util.concurrent.CompletableFuture</code> as the return type.</td>
 </tr>
 </table>
 </div>
@@ -1090,7 +1090,7 @@ Please consider the following list of invalid parameter combinations.</p>
 </tbody>
 </table>
 <div class="paragraph">
-<p>The <code>Top</code> keyword used to limit results can be used to along with <code>Pageable</code> whereas <code>Top</code> defines the total maximum of results, whereas the Pageable parameter may reduce this number.</p>
+<p>The <code>Top</code> keyword can be used together with <code>Pageable</code>: <code>Top</code> defines the total maximum number of results, while the <code>Pageable</code> parameter may reduce this number further.</p>
 </div>
 </td>
 </tr>
@@ -1211,7 +1211,7 @@ Sort sort = person.by(Person::getFirstname).ascending()
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<code>TypedSort.by(…)</code> makes use of runtime proxies by (typically) using CGlib, which may interfere with native image compilation when using tools such as Graal VM Native.
+<code>TypedSort.by(…)</code> makes use of runtime proxies by (typically) using CGlib, which may interfere with native image compilation when using tools such as GraalVM Native Image.
 </td>
 </tr>
 </table>
@@ -1302,7 +1302,7 @@ Limiting the results in combination with dynamic sorting by using a <code>Sort</
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

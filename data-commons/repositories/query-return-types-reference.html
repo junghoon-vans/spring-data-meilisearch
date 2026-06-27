@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/repositories/query-return-types-reference.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -538,15 +538,15 @@ Some store modules may define their own result wrapper types.
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Optional&lt;T&gt;</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A Java 8 or Guava <code>Optional</code>. Expects the query method to return one result at most. If no result is found, <code>Optional.empty()</code> or <code>Optional.absent()</code> is returned. More than one result triggers an <code>IncorrectResultSizeDataAccessException</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A Java <code>Optional</code> or Guava <code>Optional</code>. Expects the query method to return one result at most. If no result is found, <code>Optional.empty()</code> or <code>Optional.absent()</code> is returned. More than one result triggers an <code>IncorrectResultSizeDataAccessException</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Option&lt;T&gt;</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Either a Scala or Vavr <code>Option</code> type. Semantically the same behavior as Java 8&#8217;s <code>Optional</code>, described earlier.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Either a Scala or Vavr <code>Option</code> type. Semantically the same behavior as Java&#8217;s <code>Optional</code>, described earlier.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Stream&lt;T&gt;</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A Java 8 <code>Stream</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A Java <code>Stream</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Streamable&lt;T&gt;</code></p></td>
@@ -566,7 +566,7 @@ Some store modules may define their own result wrapper types.
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>CompletableFuture&lt;T&gt;</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A Java 8 <code>CompletableFuture</code>. Expects a method to be annotated with <code>@Async</code> and requires Spring&#8217;s asynchronous method execution capability to be enabled.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A <code>CompletableFuture</code>. Expects a method to be annotated with <code>@Async</code> and requires Spring&#8217;s asynchronous method execution capability to be enabled.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Slice&lt;T&gt;</code></p></td>
@@ -610,11 +610,11 @@ Some store modules may define their own result wrapper types.
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Single&lt;T&gt;</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A RxJava <code>Single</code> emitting a single element using reactive repositories. Expects the query method to return one result at most. If no result is found, <code>Mono.empty()</code> is returned. More than one result triggers an <code>IncorrectResultSizeDataAccessException</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A RxJava <code>Single</code> emitting a single element using reactive repositories. Expects the query method to return one result at most. If no result is found, an error signal (e.g. <code>EmptyResultDataAccessException</code>) is emitted. More than one result triggers an <code>IncorrectResultSizeDataAccessException</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Maybe&lt;T&gt;</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A RxJava <code>Maybe</code> emitting zero or one element using reactive repositories. Expects the query method to return one result at most. If no result is found, <code>Mono.empty()</code> is returned. More than one result triggers an <code>IncorrectResultSizeDataAccessException</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A RxJava <code>Maybe</code> emitting zero or one element using reactive repositories. Expects the query method to return one result at most. If no result is found, <code>Maybe.empty()</code> is returned. More than one result triggers an <code>IncorrectResultSizeDataAccessException</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Flowable&lt;T&gt;</code></p></td>
@@ -650,7 +650,7 @@ Some store modules may define their own result wrapper types.
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

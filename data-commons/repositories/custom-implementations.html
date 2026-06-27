@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/repositories/custom-implementations.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -1061,7 +1061,7 @@ class ApplicationConfiguration { … }</code></pre>
 <h2 id="repositories.customize-repository-factory"><a class="anchor" href="#repositories.customize-repository-factory"></a>Customizing the Repository Factory</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Customizing the <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/repository/core/support/RepositoryFactorySupport.html">repository factory</a> through <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/repository/core/support/RepositoryFactoryCustomizer.html"><code>RepositoryFactoryCustomizer</code></a> provides direct access to components involved with repository instance creation.
+<p>Customizing the <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/repository/core/support/RepositoryFactorySupport.html">repository factory</a> through <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/repository/core/support/RepositoryFactoryCustomizer.html"><code>RepositoryFactoryCustomizer</code></a> provides direct access to components involved with repository instance creation.
 This mechanism is useful when you want to adjust selected aspects of proxy creation without introducing a fully custom repository factory bean.
 The following example, demonstrates registering additional listeners and proxy advisors:</p>
 </div>
@@ -1071,7 +1071,7 @@ The following example, demonstrates registering additional listeners and proxy a
 	repositoryFactory.addInvocationListener(…);
 	repositoryFactory.addQueryCreationListener(…);
 
-	repositoryFactory.addRepositoryProxyPostProcessor((factory, repositoryInformation) -&gt; factory.addAdvice(…)));
+	repositoryFactory.addRepositoryProxyPostProcessor((factory, repositoryInformation) -&gt; factory.addAdvice(…));
 });</code></pre>
 </div>
 </div>
@@ -1085,15 +1085,15 @@ Note that customizer beans are not applied automatically to prevent unwanted wir
 <h2 id="repositories.customize-repository-factory-bean"><a class="anchor" href="#repositories.customize-repository-factory-bean"></a>Customize the Repository Factory Bean</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The most powerful approach to customize repository creation is to provide a custom repository factory bean, typically a subclass of <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/repository/core/support/RepositoryFactorySupport.html"><code>RepositoryFactorySupport</code></a>,
-<a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/repository/core/support/TransactionalRepositoryFactoryBeanSupport.html"><code>TransactionalRepositoryFactoryBeanSupport</code></a> or the store-specific repository factory bean.</p>
+<p>The most powerful approach to customize repository creation is to provide a custom repository factory bean, typically a subclass of <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/repository/core/support/RepositoryFactorySupport.html"><code>RepositoryFactorySupport</code></a>,
+<a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/repository/core/support/TransactionalRepositoryFactoryBeanSupport.html"><code>TransactionalRepositoryFactoryBeanSupport</code></a> or the store-specific repository factory bean.</p>
 </div>
 <div class="paragraph">
 <p>Customizing the repository factory bean allows you to change repository creation entirely with full access to the underlying repository factory.</p>
 </div>
 <div class="paragraph">
 <p>Note that this approach requires the most effort and is typically only needed when you want to change core aspects of repository creation.
-Also, you need to take in consideration repository metadata derivation that is used to identify query methods, base implementation methods and custom implementations.
+Also, you need to take into consideration repository metadata derivation that is used to identify query methods, base implementation methods and custom implementations.
 The following summary outlines the key aspects:</p>
 </div>
 <div class="ulist">
@@ -1102,7 +1102,7 @@ The following summary outlines the key aspects:</p>
 <p><code>repositoryBaseClass</code>: The repository base class defines which methods are implemented by the base class and which methods require additional handling through aspects or custom implementations.</p>
 </li>
 <li>
-<p><code>repositoryFragmentsContributor</code>: A <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/repository/core/support/RepositoryFragmentsContributor.html"><code>RepositoryFragmentsContributor</code></a> allows contributions to repository composition after all standard fragments have been collected.
+<p><code>repositoryFragmentsContributor</code>: A <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/repository/core/support/RepositoryFragmentsContributor.html"><code>RepositoryFragmentsContributor</code></a> allows contributions to repository composition after all standard fragments have been collected.
 Store modules use this mechanism to add features such as Querydsl or Query-by-Example support.
 It also serves as an SPI for third-party extensions.</p>
 </li>
@@ -1139,7 +1139,7 @@ It also serves as an SPI for third-party extensions.</p>
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

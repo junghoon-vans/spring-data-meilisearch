@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/property-paths.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -642,8 +642,8 @@ For implementation details, refer to <a href="#property-path-internals">Property
 <div class="sect2">
 <h3 id="property-path-internals"><a class="anchor" href="#property-path-internals"></a>Property Path Internals</h3>
 <div class="paragraph">
-<p>The <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/core/package-summary.html"><code>org.springframework.data.core</code></a> package is the basis for Spring Data&#8217;s navigation across domain classes.
-The <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/core/TypeInformation.html"><code>TypeInformation</code></a> interface provides type introspection capable of resolving the type of a property. <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/core/PropertyPath.html"><code>PropertyPath</code></a> represents a textual navigation path through a domain class.</p>
+<p>The <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/core/package-summary.html"><code>org.springframework.data.core</code></a> package is the basis for Spring Data&#8217;s navigation across domain classes.
+The <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/core/TypeInformation.html"><code>TypeInformation</code></a> interface provides type introspection capable of resolving the type of a property. <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/core/PropertyPath.html"><code>PropertyPath</code></a> represents a textual navigation path through a domain class.</p>
 </div>
 <div class="paragraph">
 <p>Together they provide:</p>
@@ -673,7 +673,7 @@ This section explains how method references can be used to express refactoring-s
 </div>
 <div class="paragraph">
 <p>While a property path is a simple representation of object navigation, String-based property paths are inherently fragile during refactoring as they can be easily missed with an increasing distance between the property definition and its usage.
-Type-safe alternatives through <a href="https://docs.spring.io/spring-data/commons/reference/4.1.0-SNAPSHOT/api/java/org/springframework/data/core/TypedPropertyPath.html"><code>TypedPropertyPath</code></a> derive property paths from method references, enabling the compiler to validate property names and IDEs to support refactoring operations.</p>
+Type-safe alternatives through <a href="https://docs.spring.io/spring-data/commons/reference/4.2.0-SNAPSHOT/api/java/org/springframework/data/core/TypedPropertyPath.html"><code>TypedPropertyPath</code></a> derive property paths from method references, enabling the compiler to validate property names and IDEs to support refactoring operations.</p>
 </div>
 <div id="_tabs_2" class="openblock tabs is-sync is-loading">
 <div class="content">
@@ -830,7 +830,7 @@ Note also, when using lambda expressions instead of method references you will h
                           <ul class="versions">
   <li class="version">
     <a href="index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="../../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="4.1.0">
+    <meta name="version" content="4.2.0">
     <meta name="generation" content="data-commons">
     <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/data-commons/repositories/definition.html">
     <meta name="component" content="data-commons">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-commons" data-version="4.1.0">
+<div class="nav-container" data-component="data-commons" data-version="4.2.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Commons</span>
-  <span class="version">4.1.0-SNAPSHOT</span>
+  <span class="version">4.2.0-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -488,7 +488,7 @@ If you want to expose CRUD methods for that domain type, you may extend <code>Cr
 <h2 id="repositories.definition-tuning"><a class="anchor" href="#repositories.definition-tuning"></a>Fine-tuning Repository Definition</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>There are a few variants how you can get started with your repository interface.</p>
+<p>There are a few ways to get started with your repository interface.</p>
 </div>
 <div class="paragraph">
 <p>The typical approach is to extend <code>CrudRepository</code>, which gives you methods for CRUD functionality.
@@ -503,7 +503,7 @@ With version 3.0 we also introduced <code>ListCrudRepository</code> which is ver
 </div>
 <div class="paragraph">
 <p>Additionally you can extend <code>PagingAndSortingRepository</code>, <code>ReactiveSortingRepository</code>, <code>RxJava3SortingRepository</code>, or <code>CoroutineSortingRepository</code> if you need methods that allow to specify a <code>Sort</code> abstraction or in the first case a <code>Pageable</code> abstraction.
-Note that the various sorting repositories no longer extended their respective CRUD repository as they did in Spring Data Versions pre 3.0.
+Note that the various sorting repositories no longer extend their respective CRUD repository as they did in Spring Data versions prior to 3.0.
 Therefore, you need to extend both interfaces if you want functionality of both.</p>
 </div>
 <div class="paragraph">
@@ -721,7 +721,7 @@ class Configuration { … }</code></pre>
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      4.1.0-SNAPSHOT
+      4.2.0-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
