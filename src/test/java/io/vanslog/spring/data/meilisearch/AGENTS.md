@@ -20,7 +20,7 @@ test/.../meilisearch/
 
 | Task | Location | Notes |
 |------|----------|-------|
-| Integration harness | `junit/jupiter/MeilisearchTest.java` | default `v1.54.0`; explicit `v1.12.3` for older-server coverage |
+| Integration harness | `junit/jupiter/MeilisearchTest.java` | default `v1.54.0`; explicit `v1.13.3` for the pre-1.14 boundary |
 | Container lifecycle | `junit/jupiter/MeilisearchConnection.java` | selects image from annotation version; `masterKey` |
 | Spring test wiring | `junit/jupiter/MeilisearchTestConfiguration.java` | builds client config from container connection |
 | Shared entities | `entities/` | `Movie`, `ComicsMovie`, `SortableMovie`, `TotalHitsLimited` |

@@ -34,7 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
  *
  * @author Junghoon Ban
  */
-@MeilisearchTest(version = "v1.12.3")
+@MeilisearchTest(version = "v1.13.3")
 @ContextConfiguration(classes = MeilisearchLegacyBulkRetrievalIntegrationTests.Config.class)
 class MeilisearchLegacyBulkRetrievalIntegrationTests {
 
@@ -47,7 +47,7 @@ class MeilisearchLegacyBulkRetrievalIntegrationTests {
 
 	@Test // GH-233
 	void fallsBackToIndividualLookupsInRequestOrder() {
-		assertThat(operations.instanceOps().version().getPackageVersion()).isEqualTo("1.12.3");
+		assertThat(operations.instanceOps().version().getPackageVersion()).isEqualTo("1.13.3");
 		operations.save(List.of(new Movie(1, "One", "Description", new String[] { "Drama" }),
 				new Movie(3, "Three", "Description", new String[] { "Drama" })));
 
