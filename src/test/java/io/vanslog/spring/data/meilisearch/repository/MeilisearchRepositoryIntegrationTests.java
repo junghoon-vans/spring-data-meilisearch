@@ -27,6 +27,7 @@ import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRep
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -336,7 +338,7 @@ class MeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
-	void shouldLimitRepositoryPageHitsWhileReportingEstimatedTotal() {
+	void shouldReturnEveryUnpagedDocumentWhilePageHitsRemainCapped() {
 		// given
 		int elementCount = 11;
 
@@ -355,6 +357,18 @@ class MeilisearchRepositoryIntegrationTests {
 		assertThat(page).hasSize(10);
 		assertThat(page.getTotalElements()).isEqualTo(elementCount);
 		assertThat(page.getTotalPages()).isEqualTo(1);
+		assertThat(totalHitsLimitedRepository.findAll()).hasSize(elementCount);
+		assertThat(totalHitsLimitedRepository.findAll(Sort.by("name"))).extracting(entity -> entity.name).containsExactly(
+				"name0", "name1", "name10", "name2", "name3", "name4", "name5", "name6", "name7", "name8", "name9");
+	}
+
+	@Test
+	void shouldRetrieveUnpagedDocumentsAcrossBatchBoundary() {
+		List<Movie> movies = IntStream.range(0, 501)
+				.mapToObj(id -> new Movie(id, "Movie " + id, "Description", new String[] { "Drama" })).toList();
+		movieRepository.saveAll(movies);
+
+		assertThat(movieRepository.findAll()).containsExactlyInAnyOrderElementsOf(movies);
 	}
 
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}

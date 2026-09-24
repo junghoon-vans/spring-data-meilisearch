@@ -42,10 +42,10 @@ class MovieController {
 
 These methods are appropriate when you already know the target document ids and want direct document-style access.
 
-For multiple requested ids, `multiGet(...)` batches native ID-list reads on Meilisearch 1.14 and later.
-The template checks the server version on the first such read and remembers the result for its lifetime.
-Older servers, or API keys without the `version` action, continue to retrieve each id directly.
-The returned entities retain the requested id order, excluding ids that do not exist.
+For multiple requested ids, `multiGet(...)` batches native ID-list reads and returns entities in
+requested id order, excluding ids that do not exist. The operations require Meilisearch 1.16 or later.
+Document listing through `multiGet(Class<T>, int, int, Sort)` uses the document fetch API,
+so unlike search results it is not limited by `@Pagination(maxTotalHits = ...)`.
 
 [[meilisearch.operations.search]]
 == Search Operations

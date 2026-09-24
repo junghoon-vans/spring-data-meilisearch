@@ -80,4 +80,19 @@ public class MeilisearchClient extends Client {
 		return httpTransport.post("/indexes/" + indexUid + "/documents/fetch",
 				Map.of("ids", documentIds, "limit", documentIds.size()));
 	}
+
+	/**
+	 * Fetch raw documents in server sort order. The SDK's {@code DocumentsQuery} does not yet expose sorting.
+	 *
+	 * @param indexUid index containing the documents
+	 * @param offset number of documents to skip
+	 * @param limit maximum number of documents to return
+	 * @param sort sort expressions in {@code attribute:direction} form
+	 * @return the raw fetch response
+	 * @throws MeilisearchException if the request fails
+	 */
+	public String getRawDocuments(String indexUid, int offset, int limit, String[] sort) throws MeilisearchException {
+		return httpTransport.post("/indexes/" + indexUid + "/documents/fetch",
+				Map.of("offset", offset, "limit", limit, "sort", sort));
+	}
 }

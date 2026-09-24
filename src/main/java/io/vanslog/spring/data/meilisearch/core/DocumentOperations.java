@@ -17,6 +17,7 @@ package io.vanslog.spring.data.meilisearch.core;
 
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 
 /**
@@ -76,6 +77,18 @@ public interface DocumentOperations {
 	 * @param <T> entity type
 	 */
 	<T> List<T> multiGet(Class<T> clazz, int offset, int limit);
+
+	/**
+	 * Retrieves documents using the given server-side sort, offset, and limit.
+	 *
+	 * @param clazz the entity class
+	 * @param offset the number of documents to skip
+	 * @param limit the maximum number of documents to return
+	 * @param sort the sort order, whose properties must be sortable in the index
+	 * @param <T> the entity type
+	 * @return the matching entities in sorted order
+	 */
+	<T> List<T> multiGet(Class<T> clazz, int offset, int limit, Sort sort);
 
 	/**
 	 * Retrieves all entities of the given type with the given document ids.

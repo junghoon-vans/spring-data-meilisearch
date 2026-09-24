@@ -16,7 +16,6 @@
 package io.vanslog.spring.data.meilisearch.repository.support;
 
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
-import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHitSupport;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.SearchPage;
@@ -25,13 +24,10 @@ import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.core.EntityInformation;
@@ -47,6 +43,8 @@ import org.springframework.util.Assert;
  * @see MeilisearchRepository
  */
 public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository<T, ID> {
+
+	private static final int DOCUMENTS_BATCH_SIZE = 500;
 
 	private final MeilisearchOperations meilisearchOperations;
 	private final Class<T> entityType;
@@ -133,33 +131,28 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 
 	@Override
 	public Iterable<T> findAll() {
-		int itemCount = (int) this.count();
-
-		if (itemCount == 0) {
-			return new PageImpl<>(Collections.emptyList());
-		}
-		return this.findAll(PageRequest.of(0, Math.max(1, itemCount)));
+		return retrieveAll(Sort.unsorted());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Iterable<T> findAll(Sort sort) {
 		Assert.notNull(sort, "sort must not be null");
+		return retrieveAll(sort);
+	}
 
-		int itemCount = (int) this.count();
-		if (itemCount == 0) {
-			return new PageImpl<>(Collections.emptyList());
+	private List<T> retrieveAll(Sort sort) {
+		List<T> documents = new ArrayList<>();
+		for (int offset = 0;; offset += DOCUMENTS_BATCH_SIZE) {
+			List<T> batch = sort.isSorted() ? meilisearchOperations.multiGet(entityType, offset, DOCUMENTS_BATCH_SIZE, sort)
+					: meilisearchOperations.multiGet(entityType, offset, DOCUMENTS_BATCH_SIZE);
+			documents.addAll(batch);
+			if (batch.size() < DOCUMENTS_BATCH_SIZE) {
+				return documents;
+			}
+			if (offset > Integer.MAX_VALUE - DOCUMENTS_BATCH_SIZE) {
+				throw new IllegalStateException("Too many documents to retrieve with integer offsets.");
+			}
 		}
-
-		BaseQuery query = BasicQuery.builder() //
-				.withSort(sort) //
-				.withPageable(PageRequest.of(0, Math.max(1, itemCount))) //
-				.build();
-
-		SearchHits<T> searchHits = meilisearchOperations.search(query, entityType);
-		List<SearchHit<T>> searchHitList = searchHits.getSearchHits();
-		// noinspection ConstantConditions
-		return (List<T>) SearchHitSupport.unwrapSearchHits(searchHitList);
 	}
 
 	@SuppressWarnings("unchecked")

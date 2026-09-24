@@ -39,7 +39,7 @@ import org.springframework.test.context.ContextConfiguration;
  *
  * @author Junghoon Ban
  */
-@MeilisearchTest
+@MeilisearchTest(version = "v1.16.0")
 @ContextConfiguration(classes = SortableMeilisearchRepositoryIntegrationTests.Config.class)
 class SortableMeilisearchRepositoryIntegrationTests {
 
