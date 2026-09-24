@@ -82,6 +82,14 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 - If local/global instructions conflict with this repository's observed branch or commit style, follow this repository's observed style and note the reason.
 - Prefer matching the surrounding branch/PR style when in doubt; otherwise leave title wording to maintainer judgment.
 
+## PULL REQUEST MERGING
+
+- Keep the repository's squash-only, one-commit-per-PR history. Do not change merge method based on CLI defaults or personal preference.
+- Before merging, confirm the linked issue when applicable, reviewed head SHA, required reviews and checks, and recent `main` commit message style. Stop if requirements are unmet; never use `--admin` unless the user explicitly authorizes a bypass.
+- For an issue-scoped PR, set the squash commit subject to a concise English sentence without an auto-appended `(#PR)` and the body to `Closes #<issue-number>`. Do not accept GitHub's generated squash message or copy the PR description as the commit body.
+- Merge explicitly with `gh pr merge <PR> --squash --subject "<subject>" --body "Closes #<issue-number>" --match-head-commit <reviewed-SHA>`. For a PR without a linked issue (such as Dependabot), choose an appropriate body instead of inventing an issue number.
+- After merging, inspect the resulting commit message on `main` and report any mismatch immediately.
+
 ## ANTI-PATTERNS (THIS PROJECT)
 
 - Do not add Boot auto-config assumptions; no `spring.factories` or `AutoConfiguration.imports` exists.
