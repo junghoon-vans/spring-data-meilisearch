@@ -24,6 +24,7 @@ import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -118,6 +119,18 @@ class MeilisearchRepositoryIntegrationTests {
 		assertThat(saved1).isPresent();
 		Optional<Movie> saved2 = movieRepository.findById(documentId2);
 		assertThat(saved2).isPresent();
+	}
+
+	@Test
+	void shouldFindDocumentByIdBeyondFirstDocumentsPage() {
+		List<Movie> movies = new ArrayList<>();
+		for (int id = 1; id <= 25; id++) {
+			movies.add(new Movie(id, "Movie " + id, "description", new String[] { "Drama" }));
+		}
+		movieRepository.saveAll(movies);
+
+		assertThat(movieRepository.findById(25)).isPresent();
+		assertThat(movieRepository.findAllById(List.of(25))).extracting(Movie::getId).containsExactly(25);
 	}
 
 	@Test
