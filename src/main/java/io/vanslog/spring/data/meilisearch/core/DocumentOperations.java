@@ -79,7 +79,9 @@ public interface DocumentOperations {
 	<T> List<T> multiGet(Class<T> clazz, int offset, int limit);
 
 	/**
-	 * Retrieves documents using the given server-side sort, offset, and limit.
+	 * Retrieves documents using the given server-side sort, offset, and limit. Sorting requires Meilisearch 1.16 or
+	 * later. On 1.16 through 1.26, pagination across sorted batches can duplicate or omit documents; use 1.27 or later
+	 * for reliable sorted pagination.
 	 *
 	 * @param clazz the entity class
 	 * @param offset the number of documents to skip, or negative to use the server default
@@ -91,7 +93,8 @@ public interface DocumentOperations {
 	<T> List<T> multiGet(Class<T> clazz, int offset, int limit, Sort sort);
 
 	/**
-	 * Retrieves all entities of the given type with the given document ids.
+	 * Retrieves all entities of the given type with the given document ids. Native ID-list retrieval requires Meilisearch
+	 * 1.14 or later.
 	 *
 	 * @param documentIds the document ids of the entities
 	 * @param clazz the entity class, must be annotated with
@@ -104,6 +107,7 @@ public interface DocumentOperations {
 	/**
 	 * Retrieves entities by the given document ids, applying offset and limit to the requested ids in their given order.
 	 * Missing documents are omitted from the result. Negative offset or limit values leave that bound unrestricted.
+	 * Native ID-list retrieval requires Meilisearch 1.14 or later.
 	 *
 	 * @param clazz the entity class
 	 * @param documentIds the document ids of the entities

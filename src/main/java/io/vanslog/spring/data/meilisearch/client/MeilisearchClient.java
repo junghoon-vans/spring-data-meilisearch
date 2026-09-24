@@ -70,7 +70,8 @@ public class MeilisearchClient extends Client {
 	}
 
 	/**
-	 * Fetch raw documents by ID through the internal HTTP transport.
+	 * Fetch raw documents by ID through the internal HTTP transport. Native ID-list retrieval requires Meilisearch 1.14
+	 * or later.
 	 *
 	 * @param indexUid index containing the documents
 	 * @param documentIds requested document IDs
@@ -83,7 +84,8 @@ public class MeilisearchClient extends Client {
 	}
 
 	/**
-	 * Fetch raw documents in server sort order. The SDK's {@code DocumentsQuery} does not yet expose sorting.
+	 * Fetch raw documents in server sort order. The SDK's {@code DocumentsQuery} does not yet expose sorting. Sorting
+	 * documents requires Meilisearch 1.16 or later.
 	 *
 	 * @param indexUid index containing the documents
 	 * @param offset number of documents to skip, or negative to use the server default

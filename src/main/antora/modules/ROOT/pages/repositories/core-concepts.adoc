@@ -30,9 +30,9 @@ public interface MeilisearchRepository<T, ID>
 
 The default repository implementation delegates to `MeilisearchOperations`, but not every repository method uses the same underlying Meilisearch API:
 
-* `findById(...)` and `findAllById(...)` use document APIs.
-* `findAll()`, `findAll(Sort)`, and `findAll(Pageable)` use search APIs.
-* `count()` is derived from the search-oriented operations layer.
+* `findById(...)` uses direct document lookup; `findAllById(...)` uses native ID-list fetch.
+* `findAll()` and `findAll(Sort)` list documents in batches.
+* `findAll(Pageable)` and `count()` use search APIs.
 
 That difference matters because Meilisearch search settings can affect search-backed repository methods without affecting document lookups.
 

@@ -40,12 +40,13 @@ class MovieController {
 * `delete(...)`
 * `deleteAll(Class<?>)`
 
-These methods are appropriate when you already know the target document ids and want direct document-style access.
+Direct `get(...)` reads a known id, while `multiGet(...)` also supports document listing and ID-list retrieval.
 
-For multiple requested ids, `multiGet(...)` batches native ID-list reads and returns entities in
-requested id order, excluding ids that do not exist. The operations require Meilisearch 1.16 or later.
-Document listing through `multiGet(Class<T>, int, int, Sort)` uses the document fetch API,
-so unlike search results it is not limited by `@Pagination(maxTotalHits = ...)`.
+For multiple requested ids, `multiGet(Class<T>, List<String>)` and its offset/limit overload use native ID-list
+reads available from Meilisearch 1.14; there is no individual-lookup fallback on older servers.
+The returned entities retain requested id order, excluding ids that do not exist.
+Document listing through `multiGet(Class<T>, int, int, Sort)` uses server-side sorting available from
+Meilisearch 1.16 and is not limited by `@Pagination(maxTotalHits = ...)`.
 Sorted document pagination across batches is reliable from Meilisearch 1.27.
 On 1.16 through 1.26, the server may duplicate or omit documents when sorting and paginating
 (see https://github.com/meilisearch/meilisearch/issues/5943[upstream issue #5943]).
