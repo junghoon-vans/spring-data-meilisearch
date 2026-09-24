@@ -95,8 +95,8 @@ public @interface EnableMeilisearchRepositories {
 	/**
 	 * Configures the location of where to find the Spring Data named queries properties file.
 	 * <p>
-	 * Meilisearch repository query methods are not supported yet, so configured named queries are rejected during
-	 * repository bootstrap.
+	 * Meilisearch repository query methods are not supported yet. Methods backed by named queries are rejected during
+	 * repository bootstrap; configuring this location alone does not reject repositories without query methods.
 	 *
 	 * @return String
 	 */

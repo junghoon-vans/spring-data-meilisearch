@@ -38,8 +38,8 @@ If no base packages are configured, Spring Data scans the package of the annotat
 `namedQueriesLocation` and `queryLookupStrategy` are retained on the annotation because they are part of the standard
 Spring Data repository configuration contract.
 Changing those attributes does not enable repository query methods in Spring Data Meilisearch.
-Derived finder methods, declared `@Query` methods, and named queries are rejected during repository bootstrap with a
-Meilisearch-specific message until repository query method support is implemented.
+Derived finder methods, declared `@Query` methods, and named-query-backed methods are rejected during repository
+bootstrap with a Meilisearch-specific message until repository query method support is implemented.
 
 [[meilisearch.repositories.configuration.namespace]]
 == XML Namespace

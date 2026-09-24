@@ -41,8 +41,8 @@ public class MeilisearchRepositoryFactory extends RepositoryFactorySupport {
 	private static final String QUERY_METHODS_NOT_SUPPORTED =
 			"Meilisearch repository query methods are not supported yet";
 
-	private static final String QUERY_METHODS_GUIDANCE =
-			"Use MeilisearchOperations for custom searches. Derived, declared, and named query support is tracked by issue #78.";
+	private static final String QUERY_METHODS_GUIDANCE = "Use MeilisearchOperations for custom searches. "
+			+ "Derived finder support is tracked by issue #78; declared and named query support by issue #225.";
 
 	private final MeilisearchOperations meilisearchOperations;
 	private final MeilisearchEntityInformationCreator entityInformationCreator;
