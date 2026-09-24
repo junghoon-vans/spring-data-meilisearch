@@ -51,7 +51,7 @@ import com.meilisearch.sdk.model.TaskInfo;
  *
  * @author Junghoon Ban
  */
-@MeilisearchTest
+@MeilisearchTest(version = "v1.12.3")
 @ContextConfiguration(classes = { MeilisearchTestConfiguration.class })
 class MeilisearchTemplateIntegrationTests {
 
@@ -135,6 +135,7 @@ class MeilisearchTemplateIntegrationTests {
 
 	@Test
 	void shouldGetCertainEntities() {
+		assertThat(meilisearchTemplate.instanceOps().version().getPackageVersion()).isEqualTo("1.12.3");
 
 		List<Movie> movies = List.of(movie1, movie2, movie3);
 		meilisearchTemplate.save(movies);

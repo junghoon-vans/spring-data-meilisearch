@@ -15,8 +15,12 @@
  */
 package io.vanslog.spring.data.meilisearch.client;
 
+import java.util.List;
+import java.util.Map;
+
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Config;
+import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.json.GsonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
@@ -29,6 +33,7 @@ import com.meilisearch.sdk.json.JsonHandler;
 public class MeilisearchClient extends Client {
 
 	private final JsonHandler jsonHandler;
+	private final MeilisearchHttpTransport httpTransport;
 	private final int requestTimeout;
 	private final int requestInterval;
 
@@ -37,10 +42,15 @@ public class MeilisearchClient extends Client {
 	}
 
 	public MeilisearchClient(ClientConfiguration clientConfiguration, JsonHandler jsonHandler) {
+		this(new Config(clientConfiguration.getHostUrl(), clientConfiguration.getApiKey(), jsonHandler,
+				clientConfiguration.getClientAgents()), clientConfiguration, jsonHandler);
+	}
 
-		super(new Config(clientConfiguration.getHostUrl(), clientConfiguration.getApiKey(), jsonHandler,
-				clientConfiguration.getClientAgents()));
+	private MeilisearchClient(Config config, ClientConfiguration clientConfiguration, JsonHandler jsonHandler) {
 
+		super(config);
+
+		this.httpTransport = new MeilisearchHttpTransport(config, jsonHandler);
 		this.requestTimeout = clientConfiguration.getRequestTimeout();
 		this.requestInterval = clientConfiguration.getRequestInterval();
 		this.jsonHandler = jsonHandler;
@@ -56,5 +66,18 @@ public class MeilisearchClient extends Client {
 
 	public int getRequestInterval() {
 		return requestInterval;
+	}
+
+	/**
+	 * Fetch raw documents by ID through the internal HTTP transport.
+	 *
+	 * @param indexUid index containing the documents
+	 * @param documentIds requested document IDs
+	 * @return the raw fetch response
+	 * @throws MeilisearchException if the request fails
+	 */
+	public String getRawDocumentsByIds(String indexUid, List<String> documentIds) throws MeilisearchException {
+		return httpTransport.post("/indexes/" + indexUid + "/documents/fetch",
+				Map.of("ids", documentIds, "limit", documentIds.size()));
 	}
 }

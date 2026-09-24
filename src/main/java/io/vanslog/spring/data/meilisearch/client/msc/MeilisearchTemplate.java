@@ -19,10 +19,13 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.data.mapping.PersistentProperty;
+import org.springframework.data.util.Version;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -75,6 +78,9 @@ import io.vanslog.spring.data.meilisearch.core.query.SimilarQuery;
  */
 public class MeilisearchTemplate implements MeilisearchOperations {
 
+	private static final int DOCUMENT_IDS_BATCH_SIZE = 500;
+	private static final Version BULK_DOCUMENT_IDS_VERSION = Version.parse("1.14.0");
+
 	private final MeilisearchClient meilisearchClient;
 	private final MeilisearchConverter meilisearchConverter;
 	private final ObjectMapper objectMapper;
@@ -82,6 +88,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	private final ResponseConverter responseConverter;
 	private final InstanceResponseConverter instanceResponseConverter;
 	private final MeilisearchInstanceOperations instanceOperations;
+	@Nullable private volatile Boolean supportsBulkDocumentIds;
 
 	public MeilisearchTemplate(MeilisearchClient meilisearchClient) {
 		this(meilisearchClient, null, new ObjectMapper());
@@ -197,6 +204,25 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		int from = Math.min(Math.max(offset, 0), documentIds.size());
 		int to = limit < 0 ? documentIds.size() : from + Math.min(limit, documentIds.size() - from);
 		List<T> entities = new ArrayList<>(to - from);
+		if (to - from > 1 && supportsBulkDocumentIds()) {
+			String indexUid = getIndexUidFor(clazz);
+			for (int start = from; start < to; start += DOCUMENT_IDS_BATCH_SIZE) {
+				List<String> ids = documentIds.subList(start, Math.min(start + DOCUMENT_IDS_BATCH_SIZE, to));
+				String results = execute(client -> meilisearchClient.getRawDocumentsByIds(indexUid, ids));
+				Map<String, T> documentsById = new HashMap<>();
+				for (T entity : readDocuments(results, clazz)) {
+					documentsById.put(getDocumentIdFor(entity), entity);
+				}
+				for (String id : ids) {
+					T entity = documentsById.get(id);
+					if (entity != null) {
+						entities.add(entity);
+					}
+				}
+			}
+			return entities;
+		}
+
 		for (int i = from; i < to; i++) {
 			T entity = get(documentIds.get(i), clazz);
 			if (entity != null) {
@@ -204,6 +230,32 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 			}
 		}
 		return entities;
+	}
+
+	private boolean supportsBulkDocumentIds() {
+
+		Boolean supported = supportsBulkDocumentIds;
+		if (supported != null) {
+			return supported;
+		}
+		synchronized (this) {
+			if (supportsBulkDocumentIds == null) {
+				try {
+					String version = instanceResponseConverter.mapVersion(meilisearchClient.getVersion())
+							.getPackageVersion();
+					Assert.hasText(version, "Meilisearch server version must not be empty");
+					supportsBulkDocumentIds = Version.parse(version).isGreaterThanOrEqualTo(BULK_DOCUMENT_IDS_VERSION);
+				} catch (MeilisearchApiException e) {
+					if (!"auth".equals(e.getType())) {
+						throw new UncategorizedMeilisearchException(e.getMessage(), e);
+					}
+					supportsBulkDocumentIds = false;
+				} catch (MeilisearchException e) {
+					throw new UncategorizedMeilisearchException(e.getMessage(), e);
+				}
+			}
+			return supportsBulkDocumentIds;
+		}
 	}
 
 	@Override

@@ -30,3 +30,8 @@ class MeilisearchTest {
 The `MeilisearchTest` annotation means that the test is run in integration with Meilisearch.
 This code makes it easy to run the container.
 `MeilisearchTestConfiguration` is a configuration class for providing a `Client` associated with a container run by MeilisearchTest.
+
+The default container image is Meilisearch `v1.12.3`. To exercise a version-specific API, set
+`@MeilisearchTest(version = "v1.14.0")` on a separate test class. Give that class its own
+`@ContextConfiguration` configuration type so Spring does not reuse a context bound to a different container.
+See `MeilisearchBulkRetrievalIntegrationTests` for the 1.14 example.
