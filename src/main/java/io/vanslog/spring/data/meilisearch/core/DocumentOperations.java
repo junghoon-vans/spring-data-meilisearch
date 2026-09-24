@@ -21,6 +21,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * The operations for the <a href="https://www.meilisearch.com/docs/reference/api/documents">Documents API</a>.
+ *
+ * @author Junghoon Ban
  */
 public interface DocumentOperations {
 
