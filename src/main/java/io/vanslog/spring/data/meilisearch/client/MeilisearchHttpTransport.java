@@ -77,8 +77,7 @@ final class MeilisearchHttpTransport {
 
 	private HttpRequest postRequest(String path, Object body) {
 		HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(config.getHostUrl() + path))
-				.timeout(REQUEST_TIMEOUT)
-				.header("Content-Type", "application/json");
+				.timeout(REQUEST_TIMEOUT).header("Content-Type", "application/json");
 		if (config.getApiKey() != null && !config.getApiKey().isEmpty()) {
 			builder.header("Authorization", config.getBearerApiKey());
 		}

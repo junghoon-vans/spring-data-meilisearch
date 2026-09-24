@@ -62,8 +62,8 @@ class MeilisearchHttpTransportTests {
 		});
 		server.start();
 		try {
-			Config config = new Config("http://127.0.0.1:" + server.getAddress().getPort(), "test-key",
-					new GsonJsonHandler(), new String[] { "bulk-lookup" });
+			Config config = new Config("http://127.0.0.1:" + server.getAddress().getPort(), "test-key", new GsonJsonHandler(),
+					new String[] { "bulk-lookup" });
 			MeilisearchHttpTransport transport = new MeilisearchHttpTransport(config, config.getJsonHandler());
 			CompletableFuture<HttpResponse<String>> response = transport.postAsync("/indexes/movies/documents/fetch",
 					Map.of("ids", new String[] { "1" }));

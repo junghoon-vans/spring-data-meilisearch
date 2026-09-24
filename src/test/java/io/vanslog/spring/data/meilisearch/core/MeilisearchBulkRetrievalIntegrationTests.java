@@ -50,11 +50,10 @@ class MeilisearchBulkRetrievalIntegrationTests {
 		List<String> ids = IntStream.range(0, 30).mapToObj(String::valueOf).toList();
 		assertThat(operations.multiGet(Movie.class, ids)).extracting(Movie::getId)
 				.containsExactlyElementsOf(IntStream.range(0, 30).boxed().toList());
-		assertThat(operations.multiGet(Movie.class, List.of("29", "9999", "0", "21", "29")))
-				.extracting(Movie::getId).containsExactly(29, 0, 21, 29);
+		assertThat(operations.multiGet(Movie.class, List.of("29", "9999", "0", "21", "29"))).extracting(Movie::getId)
+				.containsExactly(29, 0, 21, 29);
 	}
 
 	@Configuration
-	static class Config extends MeilisearchTestConfiguration {
-	}
+	static class Config extends MeilisearchTestConfiguration {}
 }

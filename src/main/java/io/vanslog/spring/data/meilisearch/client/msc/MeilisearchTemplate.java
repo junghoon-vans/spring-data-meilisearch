@@ -241,8 +241,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		synchronized (this) {
 			if (supportsBulkDocumentIds == null) {
 				try {
-					String version = instanceResponseConverter.mapVersion(meilisearchClient.getVersion())
-							.getPackageVersion();
+					String version = instanceResponseConverter.mapVersion(meilisearchClient.getVersion()).getPackageVersion();
 					Assert.hasText(version, "Meilisearch server version must not be empty");
 					supportsBulkDocumentIds = Version.parse(version).isGreaterThanOrEqualTo(BULK_DOCUMENT_IDS_VERSION);
 				} catch (MeilisearchApiException e) {

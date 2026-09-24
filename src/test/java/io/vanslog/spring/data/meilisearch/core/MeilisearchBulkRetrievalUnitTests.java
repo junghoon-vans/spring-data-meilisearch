@@ -85,12 +85,12 @@ class MeilisearchBulkRetrievalUnitTests {
 		assertThat(directRequests).hasValue(0);
 		assertThat(versionRequests).hasValue(1);
 
-		assertThat(template.multiGet(Movie.class, List.of("7", "9999", "1", "7"), 0, 4))
-				.extracting(Movie::getId).containsExactly(7, 1, 7);
+		assertThat(template.multiGet(Movie.class, List.of("7", "9999", "1", "7"), 0, 4)).extracting(Movie::getId)
+				.containsExactly(7, 1, 7);
 		assertThat(versionRequests).hasValue(1);
 		assertThat(fetchRequests).hasValue(4);
-		assertThat(template.multiGet(Movie.class, List.of("3", "2", "1", "0"), 1, 2))
-				.extracting(Movie::getId).containsExactly(2, 1);
+		assertThat(template.multiGet(Movie.class, List.of("3", "2", "1", "0"), 1, 2)).extracting(Movie::getId)
+				.containsExactly(2, 1);
 		assertThat(fetchRequests).hasValue(5);
 		assertThat(versionRequests).hasValue(1);
 	}
@@ -100,8 +100,8 @@ class MeilisearchBulkRetrievalUnitTests {
 		serverVersion = "1.12.3";
 		MeilisearchTemplate template = template();
 
-		assertThat(template.multiGet(Movie.class, List.of("23", "9999", "1"))).extracting(Movie::getId)
-				.containsExactly(23, 1);
+		assertThat(template.multiGet(Movie.class, List.of("23", "9999", "1"))).extracting(Movie::getId).containsExactly(23,
+				1);
 		assertThat(versionRequests).hasValue(1);
 		assertThat(fetchRequests).hasValue(0);
 		assertThat(directRequests).hasValue(3);
@@ -112,10 +112,9 @@ class MeilisearchBulkRetrievalUnitTests {
 		denyVersion = true;
 		MeilisearchTemplate template = template();
 
-		assertThat(template.multiGet(Movie.class, List.of("23", "9999", "1"))).extracting(Movie::getId)
-				.containsExactly(23, 1);
-		assertThat(template.multiGet(Movie.class, List.of("1", "23"))).extracting(Movie::getId)
-				.containsExactly(1, 23);
+		assertThat(template.multiGet(Movie.class, List.of("23", "9999", "1"))).extracting(Movie::getId).containsExactly(23,
+				1);
+		assertThat(template.multiGet(Movie.class, List.of("1", "23"))).extracting(Movie::getId).containsExactly(1, 23);
 		assertThat(versionRequests).hasValue(1);
 		assertThat(fetchRequests).hasValue(0);
 		assertThat(directRequests).hasValue(5);
@@ -130,8 +129,7 @@ class MeilisearchBulkRetrievalUnitTests {
 				.isInstanceOf(UncategorizedMeilisearchException.class);
 		assertThat(directRequests).hasValue(0);
 		failVersion = false;
-		assertThat(template.multiGet(Movie.class, List.of("1", "2"))).extracting(Movie::getId)
-				.containsExactly(1, 2);
+		assertThat(template.multiGet(Movie.class, List.of("1", "2"))).extracting(Movie::getId).containsExactly(1, 2);
 		assertThat(versionRequests).hasValue(2);
 		assertThat(fetchRequests).hasValue(1);
 	}
@@ -142,8 +140,7 @@ class MeilisearchBulkRetrievalUnitTests {
 		MeilisearchTemplate template = template();
 
 		assertThatThrownBy(() -> template.multiGet(Movie.class, List.of("1", "2")))
-				.isInstanceOf(UncategorizedMeilisearchException.class)
-				.hasMessageContaining("The API key is invalid");
+				.isInstanceOf(UncategorizedMeilisearchException.class).hasMessageContaining("The API key is invalid");
 		assertThat(fetchRequests).hasValue(1);
 		assertThat(directRequests).hasValue(0);
 	}
