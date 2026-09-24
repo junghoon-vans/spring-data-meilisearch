@@ -87,13 +87,14 @@ public interface DocumentOperations {
 	<T> List<T> multiGet(Class<T> clazz, List<String> documentIds);
 
 	/**
-	 * Retrieves all entities of the given type with the given document ids and offset and limit.
+	 * Retrieves entities by the given document ids, applying offset and limit to the requested ids in their given order.
+	 * Missing documents are omitted from the result. Negative offset or limit values leave that bound unrestricted.
 	 *
-	 * @param clazz must not be {@literal null}.
-	 * @param documentIds must not be {@literal null}.
-	 * @param offset must not be {@literal null}.
-	 * @param limit must not be {@literal null}.
-	 * @return entities
+	 * @param clazz the entity class
+	 * @param documentIds the document ids of the entities
+	 * @param offset the number of requested ids to skip
+	 * @param limit the maximum number of requested ids to look up
+	 * @return entities in the order of the requested ids
 	 * @param <T> entity type
 	 */
 	<T> List<T> multiGet(Class<T> clazz, List<String> documentIds, int offset, int limit);

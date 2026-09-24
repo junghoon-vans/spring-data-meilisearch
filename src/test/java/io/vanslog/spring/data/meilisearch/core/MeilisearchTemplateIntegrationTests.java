@@ -142,6 +142,7 @@ class MeilisearchTemplateIntegrationTests {
 		List<Movie> savedMovies = meilisearchTemplate.multiGet(Movie.class, List.of("1", "3"));
 
 		assertThat(savedMovies).containsExactlyInAnyOrder(movie1, movie3);
+		assertThat(meilisearchTemplate.multiGet(Movie.class, List.of("3", "99", "1"))).containsExactly(movie3, movie1);
 	}
 
 	@Test
@@ -153,6 +154,7 @@ class MeilisearchTemplateIntegrationTests {
 		List<Movie> savedMovies = meilisearchTemplate.multiGet(Movie.class, List.of("1", "3"), 0, 1);
 
 		assertThat(savedMovies).containsExactlyInAnyOrder(movie1);
+		assertThat(meilisearchTemplate.multiGet(Movie.class, List.of("1", "3"), 1, 1)).containsExactly(movie3);
 	}
 
 	@Test

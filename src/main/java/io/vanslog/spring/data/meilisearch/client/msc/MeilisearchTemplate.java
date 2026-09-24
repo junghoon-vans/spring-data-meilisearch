@@ -17,6 +17,7 @@ package io.vanslog.spring.data.meilisearch.client.msc;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -191,8 +192,18 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public <T> List<T> multiGet(Class<T> clazz, List<String> documentIds, int offset, int limit) {
-		List<T> entities = multiGet(clazz, offset, limit);
-		return entities.stream().filter(entity -> documentIds.contains(getDocumentIdFor(entity))).toList();
+		Assert.notNull(documentIds, "Document ids must not be null");
+
+		int from = Math.min(Math.max(offset, 0), documentIds.size());
+		int to = limit < 0 ? documentIds.size() : from + Math.min(limit, documentIds.size() - from);
+		List<T> entities = new ArrayList<>(to - from);
+		for (int i = from; i < to; i++) {
+			T entity = get(documentIds.get(i), clazz);
+			if (entity != null) {
+				entities.add(entity);
+			}
+		}
+		return entities;
 	}
 
 	@Override
