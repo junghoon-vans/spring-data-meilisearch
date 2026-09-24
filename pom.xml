@@ -32,6 +32,9 @@
         <testcontainers-meilisearch>2.0.0</testcontainers-meilisearch>
 
         <java-module-name>spring.data.meilisearch</java-module-name>
+        <sonar.issue.ignore.multicriteria>queryFactoryBraceStyle</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.queryFactoryBraceStyle.ruleKey>java:S1106</sonar.issue.ignore.multicriteria.queryFactoryBraceStyle.ruleKey>
+        <sonar.issue.ignore.multicriteria.queryFactoryBraceStyle.resourceKey>src/main/java/io/vanslog/spring/data/meilisearch/repository/support/MeilisearchRepositoryFactory.java</sonar.issue.ignore.multicriteria.queryFactoryBraceStyle.resourceKey>
         <sonar.coverage.exclusions>src/main/kotlin/**/*Extensions.kt</sonar.coverage.exclusions>
     </properties>
 
