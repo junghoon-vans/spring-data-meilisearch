@@ -497,13 +497,14 @@ class MovieController {
 </ul>
 </div>
 <div class="paragraph">
-<p>These methods are appropriate when you already know the target document ids and want direct document-style access.</p>
+<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id, while <code>multiGet(&#8230;&#8203;)</code> also supports document listing and ID-list retrieval.</p>
 </div>
 <div class="paragraph">
-<p>For multiple requested ids, <code>multiGet(&#8230;&#8203;)</code> batches native ID-list reads and returns entities in
-requested id order, excluding ids that do not exist. The operations require Meilisearch 1.16 or later.
-Document listing through <code>multiGet(Class&lt;T&gt;, int, int, Sort)</code> uses the document fetch API,
-so unlike search results it is not limited by <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>.
+<p>For multiple requested ids, <code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code> and its offset/limit overload use native ID-list
+reads available from Meilisearch 1.14; there is no individual-lookup fallback on older servers.
+The returned entities retain requested id order, excluding ids that do not exist.
+Document listing through <code>multiGet(Class&lt;T&gt;, int, int, Sort)</code> uses server-side sorting available from
+Meilisearch 1.16 and is not limited by <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>.
 Sorted document pagination across batches is reliable from Meilisearch 1.27.
 On 1.16 through 1.26, the server may duplicate or omit documents when sorting and paginating
 (see <a href="https://github.com/meilisearch/meilisearch/issues/5943">upstream issue #5943</a>).</p>
