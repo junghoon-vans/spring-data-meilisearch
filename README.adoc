@@ -14,7 +14,8 @@ The Spring Data Meilisearch project provides integration with the Meilisearch se
 
 == Getting Started
 
-Requires Meilisearch 1.27 or later for reliable sorted document pagination.
+Requires Meilisearch 1.16 or later. Sorted document pagination is reliable from 1.27;
+earlier servers may duplicate or omit documents across batches (see https://github.com/meilisearch/meilisearch/issues/5943[upstream issue #5943]).
 
 Here is a quick teaser of an application using Spring Data Repositories in Java:
 

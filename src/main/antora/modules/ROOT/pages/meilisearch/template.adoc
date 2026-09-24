@@ -43,9 +43,12 @@ class MovieController {
 These methods are appropriate when you already know the target document ids and want direct document-style access.
 
 For multiple requested ids, `multiGet(...)` batches native ID-list reads and returns entities in
-requested id order, excluding ids that do not exist. The operations require Meilisearch 1.27 or later.
+requested id order, excluding ids that do not exist. The operations require Meilisearch 1.16 or later.
 Document listing through `multiGet(Class<T>, int, int, Sort)` uses the document fetch API,
 so unlike search results it is not limited by `@Pagination(maxTotalHits = ...)`.
+Sorted document pagination across batches is reliable from Meilisearch 1.27.
+On 1.16 through 1.26, the server may duplicate or omit documents when sorting and paginating
+(see https://github.com/meilisearch/meilisearch/issues/5943[upstream issue #5943]).
 
 [[meilisearch.operations.search]]
 == Search Operations
