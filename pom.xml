@@ -26,7 +26,7 @@
 
     <properties>
         <springdata.commons>3.3.13-SNAPSHOT</springdata.commons>
-        <meilisearch-java>0.20.1</meilisearch-java>
+        <meilisearch-java>0.21.0</meilisearch-java>
         <okhttp>5.3.2</okhttp>
         <kotlin-stdlib>2.2.21</kotlin-stdlib>
         <testcontainers-meilisearch>2.0.0</testcontainers-meilisearch>
