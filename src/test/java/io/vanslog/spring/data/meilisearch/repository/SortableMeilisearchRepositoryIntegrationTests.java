@@ -17,12 +17,14 @@ package io.vanslog.spring.data.meilisearch.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.entities.SortableMovie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,11 +41,12 @@ import org.springframework.test.context.ContextConfiguration;
  *
  * @author Junghoon Ban
  */
-@MeilisearchTest(version = "v1.16.0")
+@MeilisearchTest(version = "v1.27.0")
 @ContextConfiguration(classes = SortableMeilisearchRepositoryIntegrationTests.Config.class)
 class SortableMeilisearchRepositoryIntegrationTests {
 
 	private SortableMovieRepository movieRepository;
+	@Autowired MeilisearchOperations operations;
 
 	@Autowired
 	void SortableMeilisearchRepositoryIntegrationTests(SortableMovieRepository movieRepository) {
@@ -89,6 +92,22 @@ class SortableMeilisearchRepositoryIntegrationTests {
 		// then
 		assertThat(descOrdered).hasSize(3).containsExactly(movie2, movie3, movie1);
 		assertThat(ascOrdered).hasSize(3).containsExactly(movie1, movie3, movie2);
+		assertThat(operations.multiGet(SortableMovie.class, -1, -1, Sort.by("title"))).containsExactly(movie1, movie3,
+				movie2);
+	}
+
+	@Test
+	void shouldSortDocumentsAcrossBatchBoundary() {
+		List<SortableMovie> movies = IntStream.range(0, 501).mapToObj(id -> {
+			SortableMovie movie = new SortableMovie();
+			movie.setId(id);
+			movie.setTitle("Movie " + (999 - id));
+			return movie;
+		}).toList();
+		movieRepository.saveAll(movies);
+
+		assertThat(movieRepository.findAll(Sort.by("title"))).extracting(SortableMovie::getId)
+				.containsExactlyElementsOf(IntStream.rangeClosed(0, 500).map(id -> 500 - id).boxed().toList());
 	}
 
 	@Test

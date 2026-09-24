@@ -82,8 +82,8 @@ public interface DocumentOperations {
 	 * Retrieves documents using the given server-side sort, offset, and limit.
 	 *
 	 * @param clazz the entity class
-	 * @param offset the number of documents to skip
-	 * @param limit the maximum number of documents to return
+	 * @param offset the number of documents to skip, or negative to use the server default
+	 * @param limit the maximum number of documents to return, or negative to use the server default
 	 * @param sort the sort order, whose properties must be sortable in the index
 	 * @param <T> the entity type
 	 * @return the matching entities in sorted order
