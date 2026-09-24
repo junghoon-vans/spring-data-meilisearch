@@ -518,6 +518,11 @@
 <p>Those topics are common in longer repository chapters from other Spring Data libraries because those modules implement them.
 Spring Data Meilisearch currently keeps advanced querying in the <code>MeilisearchOperations</code> layer instead.</p>
 </div>
+<div class="paragraph">
+<p>Repository interfaces that declare derived finder methods, repository <code>@Query</code> methods, or named-query-backed methods fail
+during repository bootstrap with a Meilisearch-specific message.
+This keeps unsupported query-method configuration from looking like an implemented feature.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
