@@ -20,8 +20,8 @@ test/.../meilisearch/
 
 | Task | Location | Notes |
 |------|----------|-------|
-| Integration harness | `junit/jupiter/MeilisearchTest.java` | meta-annotation for live Meilisearch tests |
-| Container lifecycle | `junit/jupiter/MeilisearchConnection.java` | `getmeili/meilisearch:v1.12.3`, `masterKey` |
+| Integration harness | `junit/jupiter/MeilisearchTest.java` | default `v1.54.0`; explicit `v1.13.3` for the pre-1.14 boundary |
+| Container lifecycle | `junit/jupiter/MeilisearchConnection.java` | selects image from annotation version; `masterKey` |
 | Spring test wiring | `junit/jupiter/MeilisearchTestConfiguration.java` | builds client config from container connection |
 | Shared entities | `entities/` | `Movie`, `ComicsMovie`, `SortableMovie`, `TotalHitsLimited` |
 | Template contract | `core/MeilisearchTemplateIntegrationTests.java` | broad runtime behavior coverage |
@@ -34,7 +34,7 @@ test/.../meilisearch/
 - Surefire runs both `*Test.java` and `*Tests.java`.
 - Integration tests use `*IntegrationTests`, `@MeilisearchTest`, and `@ContextConfiguration(...)`.
 - Unit-style tests usually use `*UnitTests`; legacy singular `*UnitTest` files exist and are included.
-- Integration tests clean state in `@BeforeEach` (`deleteAll()` / `deleteAllDocuments()`).
+- Integration tests clean state per test: `@BeforeEach` when the index exists, `@AfterEach` when the test creates it.
 - No separate `src/integrationTest`, no Failsafe split, no integration-test Maven profile/tag.
 - No Mockito convention was found; tests prefer real objects, Spring contexts, or live container.
 

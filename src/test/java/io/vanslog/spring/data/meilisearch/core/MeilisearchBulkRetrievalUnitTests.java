@@ -96,8 +96,8 @@ class MeilisearchBulkRetrievalUnitTests {
 	}
 
 	@Test // GH-229
-	void usesDirectIdsOnOlderServer() {
-		serverVersion = "1.12.3";
+	void usesDirectIdsImmediatelyBeforeBulkRetrievalSupport() {
+		serverVersion = "1.13.3";
 		MeilisearchTemplate template = template();
 
 		assertThat(template.multiGet(Movie.class, List.of("23", "9999", "1"))).extracting(Movie::getId).containsExactly(23,

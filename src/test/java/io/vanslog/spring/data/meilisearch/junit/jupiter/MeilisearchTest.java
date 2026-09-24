@@ -41,5 +41,5 @@ public @interface MeilisearchTest {
 	 *
 	 * @return image tag
 	 */
-	String version() default "v1.12.3";
+	String version() default "v1.54.0";
 }
