@@ -58,7 +58,7 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 - JDK 17 is the encoded baseline in README and all workflows.
 - Surefire includes only `**/*Tests.java` and `**/*Test.java`.
 - Checkstyle/no-http and JaCoCo run only with `-Pci`.
-- Formatting is delegated to Spring Data shared IDE formatters from `spring-data-build/etc/ide`; no local `.editorconfig`.
+- Java formatting uses `etc/ide/eclipse-formatting.xml`, the Spring Data Eclipse profile with Java 17 compiler settings. Run `./mvnw formatter:format` after Java changes; Kotlin and XML are not covered.
 - PR template asks to use Spring Data formatters, add tests, and update author/date headers on touched/new classes.
 - Reference docs are rooted at `src/main/antora/`; generated HTML is under `target/site/`.
 - XML namespace resources are a public contract: `spring.handlers`, `spring.schemas`, and `spring-meilisearch-1.0.xsd` must match parser/docs.
@@ -69,7 +69,7 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 - Use issue templates: feature requests get `status: waiting-for-triage` + `type: enhancement`; bug reports get `status: waiting-for-triage` + `type: bug`.
 - Link PRs to issues with `Closes #<issue-number>` in the PR body. Example: PR #171 closes issue #162.
 - Pick labels consistent with release-drafter categories: `type: enhancement`, `type: bug`, `type: documentation`, `type: dependency-upgrade`; add area labels such as `in: core` or `in: repository` when applicable.
-- Before opening PR: apply Spring Data formatters, add/update tests, and update author/date/license headers on touched/new Java classes per `.github/PULL_REQUEST_TEMPLATE.md`.
+- Before opening PR: run `./mvnw formatter:format` for Java changes, add/update tests, and update author/date/license headers on touched/new Java classes per `.github/PULL_REQUEST_TEMPLATE.md`.
 - Keep PRs issue-scoped; one issue should normally map to one focused PR unless explicitly split.
 
 ## TITLE / COMMIT STYLE
@@ -98,6 +98,8 @@ Ignore generated/editor output: `target/`, `build/`, `.idea/`, `.vscode/`.
 ```bash
 ./mvnw test
 ./mvnw clean install
+./mvnw formatter:format
+./mvnw formatter:validate -Dformatter.cache.skip=true
 ./mvnw verify -Pci
 ./mvnw -Pantora antora:antora
 ```

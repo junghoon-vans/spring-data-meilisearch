@@ -1,3 +1,22 @@
 = Spring Data contribution guidelines
 
 You find the contribution guidelines for Spring Data projects https://github.com/spring-projects/spring-data-build/blob/main/CONTRIBUTING.adoc[here].
+
+== Format Java sources
+
+Before submitting a pull request, format Java source and test files with the project's
+link:etc/ide/eclipse-formatting.xml[Spring Data Eclipse formatter profile] (configured for Java 17):
+
+[source,bash]
+----
+./mvnw formatter:format
+----
+
+The formatter changes only Java files and uses LF line endings. To check formatting without changing files, run:
+
+[source,bash]
+----
+./mvnw formatter:validate -Dformatter.cache.skip=true
+----
+
+CI runs the same validation before the build.
