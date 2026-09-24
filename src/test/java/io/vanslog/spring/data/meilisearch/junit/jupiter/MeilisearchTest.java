@@ -36,4 +36,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public @interface MeilisearchTest {
+	/**
+	 * Meilisearch Docker image tag for this test class.
+	 *
+	 * @return image tag
+	 */
+	String version() default "v1.12.3";
 }

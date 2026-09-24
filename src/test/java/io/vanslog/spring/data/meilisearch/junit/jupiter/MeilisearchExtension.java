@@ -34,7 +34,9 @@ public class MeilisearchExtension implements BeforeAllCallback {
 	public void beforeAll(ExtensionContext context) {
 		initLock.lock();
 		try {
-			new MeilisearchConnection();
+			String version = context.getRequiredTestClass().getAnnotation(MeilisearchTest.class).version();
+			context.getStore(ExtensionContext.Namespace.create(MeilisearchExtension.class, context.getRequiredTestClass()))
+					.put("connection", new MeilisearchConnection(version));
 		} finally {
 			initLock.unlock();
 		}

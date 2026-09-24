@@ -31,14 +31,13 @@ public class MeilisearchConnection implements ExtensionContext.Store.CloseableRe
 
 	private static final Log LOGGER = LogFactory.getLog(MeilisearchConnection.class);
 	private static final String TESTCONTAINERS_IMAGE_NAME = "getmeili/meilisearch";
-	private static final String TESTCONTAINERS_IMAGE_VERSION = "v1.12.3";
 	private static final int MEILISEARCH_DEFAULT_PORT = 7700;
-	private static final String MEILISEARCH_DEFAULT_MASTER_KEY = "masterKey";
+	private static final String MEILISEARCH_DEFAULT_MASTER_KEY = "integration-test-master-key";
 	private static final ThreadLocal<MeilisearchConnectionInfo> meilisearchConnectionInfoThreadLocal = new ThreadLocal<>();
 	private final MeilisearchConnectionInfo meilisearchConnectionInfo;
 
-	public MeilisearchConnection() {
-		meilisearchConnectionInfo = createConnectionInfo();
+	public MeilisearchConnection(String version) {
+		meilisearchConnectionInfo = createConnectionInfo(version);
 		if (meilisearchConnectionInfo != null) {
 			meilisearchConnectionInfoThreadLocal.set(meilisearchConnectionInfo);
 		}
@@ -52,9 +51,8 @@ public class MeilisearchConnection implements ExtensionContext.Store.CloseableRe
 		return meilisearchConnectionInfo;
 	}
 
-	public MeilisearchConnectionInfo createConnectionInfo() {
-		DockerImageName dockerImageName = DockerImageName.parse(TESTCONTAINERS_IMAGE_NAME)
-				.withTag(TESTCONTAINERS_IMAGE_VERSION);
+	private MeilisearchConnectionInfo createConnectionInfo(String version) {
+		DockerImageName dockerImageName = DockerImageName.parse(TESTCONTAINERS_IMAGE_NAME).withTag(version);
 		MeilisearchContainer meilisearchContainer = new MeilisearchContainer(dockerImageName)
 				.withMasterKey(MEILISEARCH_DEFAULT_MASTER_KEY);
 		meilisearchContainer.start();
@@ -71,6 +69,7 @@ public class MeilisearchConnection implements ExtensionContext.Store.CloseableRe
 			LOGGER.debug("stopping MeilisearchConnection");
 			meilisearchConnectionInfo.getMeilisearchContainer().stop();
 		}
+		meilisearchConnectionInfoThreadLocal.remove();
 		LOGGER.debug("closed MeilisearchConnection");
 	}
 }
