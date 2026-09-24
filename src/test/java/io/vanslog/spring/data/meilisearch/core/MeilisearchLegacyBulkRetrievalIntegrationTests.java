@@ -18,7 +18,6 @@ package io.vanslog.spring.data.meilisearch.core;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
@@ -31,13 +30,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
- * Native document ID-list retrieval on the default Meilisearch release.
+ * Individual document lookups on Meilisearch before native ID-list retrieval.
  *
  * @author Junghoon Ban
  */
-@MeilisearchTest
-@ContextConfiguration(classes = MeilisearchBulkRetrievalIntegrationTests.Config.class)
-class MeilisearchBulkRetrievalIntegrationTests {
+@MeilisearchTest(version = "v1.12.3")
+@ContextConfiguration(classes = MeilisearchLegacyBulkRetrievalIntegrationTests.Config.class)
+class MeilisearchLegacyBulkRetrievalIntegrationTests {
 
 	@Autowired MeilisearchOperations operations;
 
@@ -46,17 +45,14 @@ class MeilisearchBulkRetrievalIntegrationTests {
 		operations.deleteAll(Movie.class);
 	}
 
-	@Test // GH-229
-	void retrievesBeyondDefaultPageInRequestOrderAndOmitsMissingIds() {
-		List<Movie> movies = IntStream.range(0, 30)
-				.mapToObj(id -> new Movie(id, "Movie " + id, "Description", new String[] { "Drama" })).toList();
-		operations.save(movies);
+	@Test // GH-233
+	void fallsBackToIndividualLookupsInRequestOrder() {
+		assertThat(operations.instanceOps().version().getPackageVersion()).isEqualTo("1.12.3");
+		operations.save(List.of(new Movie(1, "One", "Description", new String[] { "Drama" }),
+				new Movie(3, "Three", "Description", new String[] { "Drama" })));
 
-		List<String> ids = IntStream.range(0, 30).mapToObj(String::valueOf).toList();
-		assertThat(operations.multiGet(Movie.class, ids)).extracting(Movie::getId)
-				.containsExactlyElementsOf(IntStream.range(0, 30).boxed().toList());
-		assertThat(operations.multiGet(Movie.class, List.of("29", "9999", "0", "21", "29"))).extracting(Movie::getId)
-				.containsExactly(29, 0, 21, 29);
+		assertThat(operations.multiGet(Movie.class, List.of("3", "99", "1", "3"))).extracting(Movie::getId)
+				.containsExactly(3, 1, 3);
 	}
 
 	@Configuration
