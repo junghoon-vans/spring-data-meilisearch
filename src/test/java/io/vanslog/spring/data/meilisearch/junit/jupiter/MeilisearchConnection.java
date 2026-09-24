@@ -61,9 +61,8 @@ public class MeilisearchConnection implements ExtensionContext.Store.CloseableRe
 		String host = meilisearchContainer.getHost();
 		int port = meilisearchContainer.getMappedPort(MEILISEARCH_DEFAULT_PORT);
 
-		return MeilisearchConnectionInfo.builder().endpoint(meilisearchContainer.getEndpoint()).host(host)
-				.port(port).masterKey(MEILISEARCH_DEFAULT_MASTER_KEY)
-				.meilisearchContainer(meilisearchContainer).build();
+		return MeilisearchConnectionInfo.builder().endpoint(meilisearchContainer.getEndpoint()).host(host).port(port)
+				.masterKey(MEILISEARCH_DEFAULT_MASTER_KEY).meilisearchContainer(meilisearchContainer).build();
 	}
 
 	@Override

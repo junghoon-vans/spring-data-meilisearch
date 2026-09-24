@@ -72,8 +72,8 @@ class MappingMeilisearchConverterUnitTests {
 	@Test
 	void shouldReadEntityPropertiesFromDocument() {
 
-		Document document = Document.create().append("id", "book-2").append("title", "Kindred")
-				.append("publishedYear", 1979);
+		Document document = Document.create().append("id", "book-2").append("title", "Kindred").append("publishedYear",
+				1979);
 
 		SampleBook entity = converter.read(SampleBook.class, document);
 
@@ -90,8 +90,8 @@ class MappingMeilisearchConverterUnitTests {
 
 		converter.write(source, document);
 
-		assertThat(document.get("author")).isEqualTo(Document.create().append("firstName", "Ursula")
-				.append("lastName", "Le Guin"));
+		assertThat(document.get("author"))
+				.isEqualTo(Document.create().append("firstName", "Ursula").append("lastName", "Le Guin"));
 
 		BookWithAuthor result = converter.read(BookWithAuthor.class, document);
 
@@ -110,9 +110,9 @@ class MappingMeilisearchConverterUnitTests {
 		converter.write(source, document);
 
 		assertThat(document.get("tags")).isEqualTo(List.of("science-fiction", "classic"));
-		assertThat(document.get("contributors")).isEqualTo(List.of(
-				Document.create().append("firstName", "Octavia").append("lastName", "Butler"),
-				Document.create().append("firstName", "Nnedi").append("lastName", "Okorafor")));
+		assertThat(document.get("contributors"))
+				.isEqualTo(List.of(Document.create().append("firstName", "Octavia").append("lastName", "Butler"),
+						Document.create().append("firstName", "Nnedi").append("lastName", "Okorafor")));
 
 		BookCollection result = converter.read(BookCollection.class, document);
 
@@ -123,8 +123,7 @@ class MappingMeilisearchConverterUnitTests {
 	@Test
 	void shouldMaterializeDeclaredSetPropertyWhenReadingDocument() {
 
-		Document document = Document.create().append("id", "set-1").append("tags",
-				List.of("science-fiction", "classic"));
+		Document document = Document.create().append("id", "set-1").append("tags", List.of("science-fiction", "classic"));
 
 		BookTagSet result = converter.read(BookTagSet.class, document);
 
@@ -134,9 +133,9 @@ class MappingMeilisearchConverterUnitTests {
 	@Test
 	void shouldMaterializeDeclaredDequePropertyWithNestedElementsWhenReadingDocument() {
 
-		Document document = Document.create().append("id", "deque-1").append("contributors", List.of(
-				Document.create().append("firstName", "Octavia").append("lastName", "Butler"),
-				Document.create().append("firstName", "Nnedi").append("lastName", "Okorafor")));
+		Document document = Document.create().append("id", "deque-1").append("contributors",
+				List.of(Document.create().append("firstName", "Octavia").append("lastName", "Butler"),
+						Document.create().append("firstName", "Nnedi").append("lastName", "Okorafor")));
 
 		BookContributorDeque result = converter.read(BookContributorDeque.class, document);
 
@@ -154,8 +153,7 @@ class MappingMeilisearchConverterUnitTests {
 
 		converter.write(source, document);
 
-		assertThat(document.get("price"))
-				.isEqualTo(Document.create().append("amount", "12.99").append("currency", "USD"));
+		assertThat(document.get("price")).isEqualTo(Document.create().append("amount", "12.99").append("currency", "USD"));
 	}
 
 	@Test
@@ -175,8 +173,7 @@ class MappingMeilisearchConverterUnitTests {
 	@Test
 	void shouldReadConstructorBoundEntityPropertiesFromDocument() {
 
-		Document document = Document.create().append("id", "immutable-1")
-				.append("title", "Parable of the Sower");
+		Document document = Document.create().append("id", "immutable-1").append("title", "Parable of the Sower");
 
 		ConstructorBoundBook result = converter.read(ConstructorBoundBook.class, document);
 
@@ -186,8 +183,8 @@ class MappingMeilisearchConverterUnitTests {
 
 	private void registerPriceConversions() {
 
-		converter.setConversions(new MeilisearchCustomConversions(
-				List.of(new PriceToDocumentConverter(), new DocumentToPriceConverter())));
+		converter.setConversions(
+				new MeilisearchCustomConversions(List.of(new PriceToDocumentConverter(), new DocumentToPriceConverter())));
 		converter.afterPropertiesSet();
 	}
 

@@ -19,6 +19,8 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: 'maven'
+      - name: Check Java formatting
+        run: ./mvnw formatter:validate -Dformatter.cache.skip=true
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
         with:

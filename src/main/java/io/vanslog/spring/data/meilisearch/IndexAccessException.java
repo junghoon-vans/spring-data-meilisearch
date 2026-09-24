@@ -28,7 +28,7 @@ public class IndexAccessException extends NonTransientDataAccessResourceExceptio
 
 	/**
 	 * Constructor for IndexAccessException.
-	 * 
+	 *
 	 * @param indexUid the index uid
 	 */
 	public IndexAccessException(String indexUid) {
@@ -38,7 +38,7 @@ public class IndexAccessException extends NonTransientDataAccessResourceExceptio
 
 	/**
 	 * Constructor for IndexAccessException.
-	 * 
+	 *
 	 * @param indexUid the index uid
 	 * @param cause the root cause from the data access API in use
 	 */

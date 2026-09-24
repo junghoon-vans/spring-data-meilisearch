@@ -249,19 +249,19 @@ public class SimpleMeilisearchPersistentEntity<T> extends BasicPersistentEntity<
 		private com.meilisearch.sdk.model.Embedder createMeiliEmbedder(Embedder embedder) {
 			var meiliEmbedder = new com.meilisearch.sdk.model.Embedder();
 			Optional.of(embedder.source()).filter(it -> it != Embedder.Source.DEFAULT)
-					.map(it -> com.meilisearch.sdk.model.EmbedderSource.valueOf(it.name()))
-					.ifPresent(meiliEmbedder::setSource);
+					.map(it -> com.meilisearch.sdk.model.EmbedderSource.valueOf(it.name())).ifPresent(meiliEmbedder::setSource);
 			Optional.of(embedder.apiKey()).filter(it -> !it.isBlank()).ifPresent(meiliEmbedder::setApiKey);
 			Optional.of(embedder.model()).filter(it -> !it.isBlank()).ifPresent(meiliEmbedder::setModel);
-			Optional.of(embedder.documentTemplate()).filter(it -> !it.isBlank()).ifPresent(meiliEmbedder::setDocumentTemplate);
+			Optional.of(embedder.documentTemplate()).filter(it -> !it.isBlank())
+					.ifPresent(meiliEmbedder::setDocumentTemplate);
 			Optional.of(embedder.dimensions()).filter(it -> it > 0).ifPresent(meiliEmbedder::setDimensions);
 			boolean hasDistributionMean = !Double.isNaN(embedder.distributionMean());
 			boolean hasDistributionSigma = !Double.isNaN(embedder.distributionSigma());
 			Assert.isTrue(hasDistributionMean == hasDistributionSigma,
 					"Embedder distributionMean and distributionSigma must be configured together");
 			if (hasDistributionMean) {
-				meiliEmbedder.setDistribution(com.meilisearch.sdk.model.EmbedderDistribution
-						.custom(embedder.distributionMean(), embedder.distributionSigma()));
+				meiliEmbedder.setDistribution(com.meilisearch.sdk.model.EmbedderDistribution.custom(embedder.distributionMean(),
+						embedder.distributionSigma()));
 			}
 			Optional.of(embedder.request()).filter(it -> it.length > 0).map(SettingsParameter::createParameterMap)
 					.ifPresent(meiliEmbedder::setRequest);

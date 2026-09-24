@@ -56,12 +56,13 @@ final class MeilisearchSearchResult implements Searchable {
 
 		ArrayList<HashMap<String, Object>> hits = readHits(source, objectMapper);
 		Object facetDistribution = source.has("facetDistribution")
-				? objectMapper.convertValue(source.get("facetDistribution"), Object.class) : null;
+				? objectMapper.convertValue(source.get("facetDistribution"), Object.class)
+				: null;
 		HashMap<String, FacetRating> facetStats = readFacetStats(source, objectMapper);
 		Integer totalHits = source.has("totalHits") ? source.get("totalHits").asInt() : null;
 
-		return new MeilisearchSearchResult(hits, facetDistribution, facetStats,
-				source.path("processingTimeMs").asInt(), source.path("query").asText(), totalHits);
+		return new MeilisearchSearchResult(hits, facetDistribution, facetStats, source.path("processingTimeMs").asInt(),
+				source.path("query").asText(), totalHits);
 	}
 
 	@SuppressWarnings("unchecked")

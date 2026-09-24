@@ -27,7 +27,7 @@ public interface MeilisearchPersistentProperty extends PersistentProperty<Meilis
 
 	/**
 	 * Returns the name of the field a property is persisted to.
-	 * 
+	 *
 	 * @return the field name
 	 */
 	String getFieldName();
@@ -38,7 +38,7 @@ public interface MeilisearchPersistentProperty extends PersistentProperty<Meilis
 
 		/**
 		 * Convert the persistent property into a Meilisearch field name.
-		 * 
+		 *
 		 * @param source the persistent property
 		 * @return the field name
 		 */

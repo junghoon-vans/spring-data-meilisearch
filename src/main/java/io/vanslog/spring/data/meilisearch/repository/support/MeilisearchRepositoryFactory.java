@@ -38,8 +38,7 @@ import org.springframework.lang.Nullable;
  */
 public class MeilisearchRepositoryFactory extends RepositoryFactorySupport {
 
-	private static final String QUERY_METHODS_NOT_SUPPORTED =
-			"Meilisearch repository query methods are not supported yet";
+	private static final String QUERY_METHODS_NOT_SUPPORTED = "Meilisearch repository query methods are not supported yet";
 
 	private static final String QUERY_METHODS_GUIDANCE = "Use MeilisearchOperations for custom searches. "
 			+ "Derived finder support is tracked by issue #78; declared and named query support by issue #225.";
@@ -81,8 +80,8 @@ public class MeilisearchRepositoryFactory extends RepositoryFactorySupport {
 		public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, ProjectionFactory factory,
 				NamedQueries namedQueries) {
 
-			throw new IllegalStateException(QUERY_METHODS_NOT_SUPPORTED + ": " + method.getName()
-					+ ". " + QUERY_METHODS_GUIDANCE);
+			throw new IllegalStateException(
+					QUERY_METHODS_NOT_SUPPORTED + ": " + method.getName() + ". " + QUERY_METHODS_GUIDANCE);
 		}
 	}
 }

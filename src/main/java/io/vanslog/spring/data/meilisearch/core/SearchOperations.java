@@ -61,7 +61,7 @@ public interface SearchOperations {
 	 * Execute non-federated multi-search query against Meilisearch and return the result. This method allows you to
 	 * perform multiple search queries in a single HTTP request, When using {@link IndexQuery}, you can search across
 	 * multiple indexes simultaneously.
-	 * 
+	 *
 	 * @param queries the list of queries to execute. Each query can target different indexes and have different search
 	 *          parameters
 	 * @param clazz the entity class, must be annotated with
@@ -99,8 +99,8 @@ public interface SearchOperations {
 	SearchHits<FacetHit> facetSearch(FacetQuery query, Class<?> clazz);
 
 	/**
-	 * Execute the similar documents search query against meilisearch and return the result.
-	 * This method performs AI-powered semantic search to find documents similar to the given document.
+	 * Execute the similar documents search query against meilisearch and return the result. This method performs
+	 * AI-powered semantic search to find documents similar to the given document.
 	 *
 	 * @param query the similar query to execute, containing the document ID and embedder
 	 * @param clazz the entity class, must be annotated with

@@ -44,8 +44,7 @@ class MeilisearchRepositoryFactoryUnitTests {
 	@Test
 	void testShouldCreateRepositoryForBaseRepositoryMethods() {
 		assertThat(repositoryFactory.getRepository(MovieRepository.class))
-				.as("base repository methods should not require query lookup resolution")
-				.isNotNull();
+				.as("base repository methods should not require query lookup resolution").isNotNull();
 	}
 
 	@Test
@@ -69,8 +68,7 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@NoRepositoryBean
-	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {
-	}
+	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
 
 	@NoRepositoryBean
 	interface DerivedMovieRepository extends MeilisearchRepository<Movie, Integer> {

@@ -50,7 +50,7 @@ public class MeilisearchRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
 
 	/**
 	 * Configures the {@link MeilisearchOperations} to be used to create the repository.
-	 * 
+	 *
 	 * @param meilisearchOperations operations to be used
 	 */
 	public void setMeilisearchOperations(MeilisearchOperations meilisearchOperations) {

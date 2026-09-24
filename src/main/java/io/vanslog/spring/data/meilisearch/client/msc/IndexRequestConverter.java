@@ -160,13 +160,13 @@ class IndexRequestConverter {
 	private static com.meilisearch.sdk.model.LocalizedAttribute[] toLocalizedAttributes(
 			List<LocalizedAttributeSettings> source) {
 
-		return source.stream().map(it -> new com.meilisearch.sdk.model.LocalizedAttribute(
-				toArray(it.getAttributePatterns()), toArray(it.getLocales())))
+		return source.stream()
+				.map(it -> new com.meilisearch.sdk.model.LocalizedAttribute(toArray(it.getAttributePatterns()),
+						toArray(it.getLocales())))
 				.toArray(com.meilisearch.sdk.model.LocalizedAttribute[]::new);
 	}
 
-	private static HashMap<String, com.meilisearch.sdk.model.Embedder> toEmbedders(
-			Map<String, EmbedderSettings> source) {
+	private static HashMap<String, com.meilisearch.sdk.model.Embedder> toEmbedders(Map<String, EmbedderSettings> source) {
 
 		HashMap<String, com.meilisearch.sdk.model.Embedder> embedders = new HashMap<>();
 		source.forEach((name, embedder) -> {

@@ -84,14 +84,12 @@ public class ResponseConverter {
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
 		if (searchable instanceof MeilisearchSearchResult result) {
 			if (result.hasTotalHits()) {
-				return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(),
-						TotalHitsRelation.EQUAL_TO);
+				return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(), TotalHitsRelation.EQUAL_TO);
 			}
 		}
 
 		if (searchable instanceof SearchResultPaginated result) {
-			return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(),
-					TotalHitsRelation.EQUAL_TO);
+			return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(), TotalHitsRelation.EQUAL_TO);
 		}
 		return new SearchHitsImpl<>(executionDuration, searchHits);
 	}
@@ -106,7 +104,8 @@ public class ResponseConverter {
 		List<? extends SearchHit<T>> searchHits = result.getHits().stream() //
 				.map(hit -> {
 					Map<String, Object> source = new LinkedHashMap<>(hit);
-					FederationResponse federation = objectMapper.convertValue(source.remove("_federation"), FederationResponse.class);
+					FederationResponse federation = objectMapper.convertValue(source.remove("_federation"),
+							FederationResponse.class);
 					return new SearchHit<>(readHit(source, clazz), result, federation);
 				}).toList();
 

@@ -65,9 +65,9 @@ class MeilisearchTemplateIntegrationTests {
 	ComicsMovie comics1 = new ComicsMovie(1, "Wonder Woman", "A superhero comic", new String[] { "Comics", "Action" });
 	ComicsMovie comics2 = new ComicsMovie(2, "Batman", "A superhero comic", new String[] { "Comics", "Action" });
 
-	private static final List<String> LIFECYCLE_INDEX_UIDS = List.of("lifecycle-create-index",
-			"lifecycle-get-list-index", "lifecycle-update-index", "lifecycle-delete-index", "runtime-settings-index",
-			"runtime-settings-reset-index", "nested-movies");
+	private static final List<String> LIFECYCLE_INDEX_UIDS = List.of("lifecycle-create-index", "lifecycle-get-list-index",
+			"lifecycle-update-index", "lifecycle-delete-index", "runtime-settings-index", "runtime-settings-reset-index",
+			"nested-movies");
 
 	@BeforeEach
 	void setUp() throws MeilisearchException {
@@ -306,9 +306,7 @@ class MeilisearchTemplateIntegrationTests {
 		List<String> indexUids = indexes.getIndexes().stream().map(MeilisearchIndex::getUid).toList();
 
 		assertThat(deleted).isTrue();
-		assertThat(indexUids).isNotEmpty()
-				.contains("lifecycle-get-list-index")
-				.doesNotContain("lifecycle-delete-index");
+		assertThat(indexUids).isNotEmpty().contains("lifecycle-get-list-index").doesNotContain("lifecycle-delete-index");
 	}
 
 	@Test
@@ -339,14 +337,13 @@ class MeilisearchTemplateIntegrationTests {
 				.withSynonyms(Map.of("hero", List.of("superhero"))) //
 				.withPagination(new MeilisearchIndexSettings.PaginationSettings(1500)) //
 				.withFaceting(new MeilisearchIndexSettings.FacetingSettings(75)) //
-				.withTypoTolerance(new MeilisearchIndexSettings.TypoToleranceSettings(true, 5, 9,
-						List.of("skype"), List.of("serial_number"))) //
+				.withTypoTolerance(
+						new MeilisearchIndexSettings.TypoToleranceSettings(true, 5, 9, List.of("skype"), List.of("serial_number"))) //
 				.withProximityPrecision("byWord") //
 				.withSearchCutoffMs(50) //
 				.build();
 
-		MeilisearchIndexSettings updated = meilisearchTemplate.indexOps("runtime-settings-index")
-				.updateSettings(settings);
+		MeilisearchIndexSettings updated = meilisearchTemplate.indexOps("runtime-settings-index").updateSettings(settings);
 
 		assertThat(updated.getSearchableAttributes()).containsExactly("title", "description");
 		assertThat(updated.getDisplayedAttributes()).containsExactly("id", "title", "description");

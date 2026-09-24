@@ -75,12 +75,9 @@ class ResponseConverterUnitTests {
 	@Test
 	void shouldConvertRawPaginatedTotalHitsMetadataToSearchHits() throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
-		MeilisearchSearchResult result = MeilisearchSearchResult.from(objectMapper.readTree("{"
-				+ "\"hits\": [{\"id\": \"143\", \"title\": \"Escape Room\"}],"
-				+ "\"processingTimeMs\": 25,"
-				+ "\"query\": \"escape\","
-				+ "\"totalHits\": 10"
-				+ "}"), objectMapper);
+		MeilisearchSearchResult result = MeilisearchSearchResult
+				.from(objectMapper.readTree("{" + "\"hits\": [{\"id\": \"143\", \"title\": \"Escape Room\"}],"
+						+ "\"processingTimeMs\": 25," + "\"query\": \"escape\"," + "\"totalHits\": 10" + "}"), objectMapper);
 
 		SearchHits<SimilarMovie> searchHits = converter.mapHits(result, SimilarMovie.class);
 
@@ -92,12 +89,11 @@ class ResponseConverterUnitTests {
 	@Test
 	void shouldConvertRawFacetStatsToFacetRating() throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
-		MeilisearchSearchResult result = MeilisearchSearchResult.from(objectMapper.readTree("{"
-				+ "\"hits\": [{\"id\": \"143\", \"title\": \"Escape Room\"}],"
-				+ "\"processingTimeMs\": 25,"
-				+ "\"query\": \"escape\","
-				+ "\"facetStats\": {\"rating\": {\"min\": 1, \"max\": 5}}"
-				+ "}"), objectMapper);
+		MeilisearchSearchResult result = MeilisearchSearchResult.from(
+				objectMapper
+						.readTree("{" + "\"hits\": [{\"id\": \"143\", \"title\": \"Escape Room\"}]," + "\"processingTimeMs\": 25,"
+								+ "\"query\": \"escape\"," + "\"facetStats\": {\"rating\": {\"min\": 1, \"max\": 5}}" + "}"),
+				objectMapper);
 
 		SearchHits<SimilarMovie> searchHits = converter.mapHits(result, SimilarMovie.class);
 
