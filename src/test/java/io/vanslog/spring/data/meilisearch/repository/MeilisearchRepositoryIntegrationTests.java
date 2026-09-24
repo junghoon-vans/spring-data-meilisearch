@@ -336,7 +336,7 @@ class MeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
-	void shouldUseMaxTotalHitsCapAsRepositoryPageTotal() {
+	void shouldLimitRepositoryPageHitsWhileReportingEstimatedTotal() {
 		// given
 		int elementCount = 11;
 
@@ -353,7 +353,7 @@ class MeilisearchRepositoryIntegrationTests {
 		// then
 		assertThat(totalHitsLimitedRepository.count()).isEqualTo(elementCount);
 		assertThat(page).hasSize(10);
-		assertThat(page.getTotalElements()).isEqualTo(10);
+		assertThat(page.getTotalElements()).isEqualTo(elementCount);
 		assertThat(page.getTotalPages()).isEqualTo(1);
 	}
 
