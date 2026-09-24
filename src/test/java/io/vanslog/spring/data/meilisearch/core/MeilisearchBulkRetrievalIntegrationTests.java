@@ -24,6 +24,7 @@ import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +40,11 @@ import org.springframework.test.context.ContextConfiguration;
 class MeilisearchBulkRetrievalIntegrationTests {
 
 	@Autowired MeilisearchOperations operations;
+
+	@AfterEach
+	void tearDown() {
+		operations.deleteAll(Movie.class);
+	}
 
 	@Test // GH-229
 	void retrievesBeyondDefaultPageInRequestOrderAndOmitsMissingIds() {
