@@ -128,8 +128,7 @@ class IndexSettingsResponseConverter {
 			com.meilisearch.sdk.model.LocalizedAttribute[] source) {
 
 		return Arrays.stream(source)
-				.map(it -> new LocalizedAttributeSettings(toList(it.getAttributePatterns()), toList(it.getLocales())))
-				.toList();
+				.map(it -> new LocalizedAttributeSettings(toList(it.getAttributePatterns()), toList(it.getLocales()))).toList();
 	}
 
 	private static Map<String, EmbedderSettings> toEmbedderSettings(
@@ -151,8 +150,8 @@ class IndexSettingsResponseConverter {
 		builder.withDocumentTemplate(source.getDocumentTemplate());
 		builder.withDimensions(source.getDimensions());
 		if (source.getDistribution() != null) {
-			builder.withDistribution(new EmbedderDistributionSettings(source.getDistribution().getMean(),
-					source.getDistribution().getSigma()));
+			builder.withDistribution(
+					new EmbedderDistributionSettings(source.getDistribution().getMean(), source.getDistribution().getSigma()));
 		}
 		if (source.getRequest() != null) {
 			builder.withRequest(source.getRequest());

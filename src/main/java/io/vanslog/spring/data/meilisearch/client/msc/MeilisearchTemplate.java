@@ -313,7 +313,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	/**
 	 * Execute the given {@link MeilisearchCallback}.
-	 * 
+	 *
 	 * @param callback must not be {@literal null}.
 	 * @return a result object returned by the action or {@literal null}.
 	 * @param <T> the type of the result object
@@ -334,7 +334,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	/**
 	 * Handle the given {@link MeilisearchApiException}.
-	 * 
+	 *
 	 * @param e the {@link MeilisearchApiException} to handle
 	 */
 	private void handleApiException(MeilisearchApiException e) {
@@ -345,7 +345,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	/**
 	 * Checks if the given {@link TaskInfo} is succeeded.
-	 * 
+	 *
 	 * @param indexUid the index uid
 	 * @param taskInfo the {@link TaskInfo} to check
 	 * @return {@literal true} if the task is succeeded
@@ -412,8 +412,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 			if (results == null || !results.isArray()) {
 				throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents results.");
 			}
-			List<Document> documents = objectMapper.readerForListOf(Document.class)
-					.readValue(results);
+			List<Document> documents = objectMapper.readerForListOf(Document.class).readValue(results);
 			return documents.stream().map(document -> meilisearchConverter.read(clazz, document)).toList();
 		} catch (IOException e) {
 			throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents.", e);

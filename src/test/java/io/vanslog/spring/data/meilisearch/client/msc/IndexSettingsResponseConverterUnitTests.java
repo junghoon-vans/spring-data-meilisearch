@@ -61,9 +61,9 @@ class IndexSettingsResponseConverterUnitTests {
 		sdkSettings.setLocalizedAttributes(new com.meilisearch.sdk.model.LocalizedAttribute[] {
 				new com.meilisearch.sdk.model.LocalizedAttribute(new String[] { "title_*" }, new String[] { "eng" }) });
 		HashMap<String, com.meilisearch.sdk.model.Embedder> embedders = new HashMap<>();
-		embedders.put("default", new com.meilisearch.sdk.model.Embedder()
-				.setSource(com.meilisearch.sdk.model.EmbedderSource.REST).setUrl("https://example.com/embed")
-				.setInputType(com.meilisearch.sdk.model.EmbedderInputType.TEXT_ARRAY));
+		embedders.put("default",
+				new com.meilisearch.sdk.model.Embedder().setSource(com.meilisearch.sdk.model.EmbedderSource.REST)
+						.setUrl("https://example.com/embed").setInputType(com.meilisearch.sdk.model.EmbedderInputType.TEXT_ARRAY));
 		sdkSettings.setEmbedders(embedders);
 
 		MeilisearchIndexSettings settings = converter.fromSettings(sdkSettings);

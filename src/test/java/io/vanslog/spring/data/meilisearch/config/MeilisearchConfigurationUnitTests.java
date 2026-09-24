@@ -51,7 +51,8 @@ class MeilisearchConfigurationUnitTests {
 	@Autowired private MeilisearchClient meilisearchClient;
 	@Autowired private MeilisearchOperations meilisearchTemplate;
 	@Autowired private io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate clientMeilisearchTemplate;
-	@Autowired @Qualifier("meilisearchObjectMapper") private ObjectMapper objectMapper;
+	@Autowired
+	@Qualifier("meilisearchObjectMapper") private ObjectMapper objectMapper;
 	@Autowired private ApplySettingsFalseRepository applySettingsFalseRepository;
 
 	@Test
@@ -103,8 +104,7 @@ class MeilisearchConfigurationUnitTests {
 	@Test
 	void testShouldDefaultToDeclaredQueryLookupStrategy() throws NoSuchMethodException {
 		assertThat(EnableMeilisearchRepositories.class.getMethod("queryLookupStrategy").getDefaultValue())
-				.as("repository scanning should fail undeclared query methods by default")
-				.isEqualTo(Key.USE_DECLARED_QUERY);
+				.as("repository scanning should fail undeclared query methods by default").isEqualTo(Key.USE_DECLARED_QUERY);
 	}
 
 	interface ApplySettingsFalseRepository extends MeilisearchRepository<ApplySettingsFalseEntity, String> {}

@@ -53,7 +53,7 @@ public class TaskStatusException extends DataAccessException {
 
 	/**
 	 * Return the task status.
-	 * 
+	 *
 	 * @return the task status
 	 */
 	public TaskStatus getTaskStatus() {

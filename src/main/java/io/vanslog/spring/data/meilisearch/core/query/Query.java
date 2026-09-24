@@ -43,7 +43,7 @@ public interface Query {
 
 	/**
 	 * Get the search filter
-	 * 
+	 *
 	 * @return null if not set
 	 */
 	@Nullable
@@ -58,7 +58,7 @@ public interface Query {
 
 	/**
 	 * Get the search filter array
-	 * 
+	 *
 	 * @return null if not set
 	 */
 	@Nullable

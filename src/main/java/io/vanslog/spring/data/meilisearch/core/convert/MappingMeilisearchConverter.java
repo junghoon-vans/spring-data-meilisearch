@@ -68,7 +68,7 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 	/**
 	 * Creates a new {@link io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter} given the
 	 * {@link org.springframework.data.mapping.context.MappingContext}.
-	 * 
+	 *
 	 * @param mappingContext must not be {@literal null}.
 	 */
 	public MappingMeilisearchConverter(
@@ -138,8 +138,7 @@ public class MappingMeilisearchConverter implements MeilisearchConverter, Applic
 			@SuppressWarnings("unchecked")
 			public <T> T getPropertyValue(MeilisearchPersistentProperty property) {
 				String fieldName = property.getFieldName();
-				Class<?> componentType = property.isCollectionLike() ? property.getComponentType()
-						: property.getActualType();
+				Class<?> componentType = property.isCollectionLike() ? property.getComponentType() : property.getActualType();
 				return (T) readValue(source.get(fieldName), property.getType(), componentType);
 			}
 		};

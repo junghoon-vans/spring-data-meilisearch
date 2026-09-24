@@ -52,7 +52,7 @@ public interface MeilisearchOperations extends DocumentOperations, SearchOperati
 
 	/**
 	 * Apply the default settings for the given entity class.
-	 * 
+	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
 	 * @param <T> the type of the entity

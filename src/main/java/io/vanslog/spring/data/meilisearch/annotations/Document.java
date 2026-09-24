@@ -37,7 +37,7 @@ public @interface Document {
 
 	/**
 	 * UID of the Meilisearch index.
-	 * 
+	 *
 	 * @return Index UID
 	 */
 	String indexUid();

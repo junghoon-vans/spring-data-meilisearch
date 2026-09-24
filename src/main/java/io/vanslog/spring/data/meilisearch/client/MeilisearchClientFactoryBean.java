@@ -63,7 +63,7 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 
 	/**
 	 * Set the host URL.
-	 * 
+	 *
 	 * @param hostUrl the host URL
 	 */
 	public void setHostUrl(String hostUrl) {
@@ -72,7 +72,7 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 
 	/**
 	 * Set the API key.
-	 * 
+	 *
 	 * @param apiKey the API key
 	 */
 	public void setApiKey(String apiKey) {
@@ -81,7 +81,7 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 
 	/**
 	 * Set the JSON handler.
-	 * 
+	 *
 	 * @param jsonHandler the JSON handler
 	 */
 	public void setJsonHandler(JsonHandler jsonHandler) {
@@ -90,7 +90,7 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 
 	/**
 	 * Set the client agents.
-	 * 
+	 *
 	 * @param clientAgents the client agents
 	 */
 	public void setClientAgents(String[] clientAgents) {
@@ -99,7 +99,7 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 
 	/**
 	 * Set request timeout to wait for task to complete.
-	 * 
+	 *
 	 * @param requestTimeout in milliseconds
 	 */
 	public void setRequestTimeout(int requestTimeout) {

@@ -105,8 +105,7 @@ class InstanceResponseConverter {
 
 		Map<String, Long> fieldDistribution = new LinkedHashMap<>();
 		if (stats.getFieldDistribution() != null) {
-			stats.getFieldDistribution()
-					.forEach((fieldName, count) -> fieldDistribution.put(fieldName, count.longValue()));
+			stats.getFieldDistribution().forEach((fieldName, count) -> fieldDistribution.put(fieldName, count.longValue()));
 		}
 
 		return new MeilisearchIndexStats(stats.getNumberOfDocuments(), stats.isIndexing(), fieldDistribution,

@@ -46,8 +46,8 @@ public class MeilisearchConnectionInfo {
 
 	@Override
 	public String toString() {
-		return "MeilisearchConnectionInfo{" + "endpoint='" + endpoint + '\'' + ", host='" + host + '\'' + ", port="
-				+ port + ", masterKey='" + masterKey + '\'' + ", meilisearchContainer=" + meilisearchContainer + '}';
+		return "MeilisearchConnectionInfo{" + "endpoint='" + endpoint + '\'' + ", host='" + host + '\'' + ", port=" + port
+				+ ", masterKey='" + masterKey + '\'' + ", meilisearchContainer=" + meilisearchContainer + '}';
 	}
 
 	public String getEndpoint() {

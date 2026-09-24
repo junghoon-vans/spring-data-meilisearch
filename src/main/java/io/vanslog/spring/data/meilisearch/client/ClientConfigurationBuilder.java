@@ -89,7 +89,7 @@ public class ClientConfigurationBuilder {
 
 	/**
 	 * Configure request timeout to wait for task to complete.
-	 * 
+	 *
 	 * @param requestTimeout in milliseconds
 	 * @return {@link ClientConfigurationBuilder}
 	 */
@@ -100,7 +100,7 @@ public class ClientConfigurationBuilder {
 
 	/**
 	 * Configure request interval to wait for task to complete.
-	 * 
+	 *
 	 * @param requestInterval in milliseconds
 	 * @return {@link ClientConfigurationBuilder}
 	 */

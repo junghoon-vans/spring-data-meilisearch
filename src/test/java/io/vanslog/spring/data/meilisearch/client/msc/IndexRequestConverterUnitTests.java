@@ -58,8 +58,7 @@ class IndexRequestConverterUnitTests {
 				.withDictionary(List.of("meilisearch")) //
 				.withPagination(new PaginationSettings(1500)) //
 				.withFaceting(new FacetingSettings(75)) //
-				.withTypoTolerance(new TypoToleranceSettings(true, 5, 9, List.of("skype"),
-						List.of("serial_number"))) //
+				.withTypoTolerance(new TypoToleranceSettings(true, 5, 9, List.of("skype"), List.of("serial_number"))) //
 				.withProximityPrecision("byWord") //
 				.withSearchCutoffMs(50) //
 				.withSeparatorTokens(List.of("-")) //
@@ -113,8 +112,7 @@ class IndexRequestConverterUnitTests {
 		assertThat(sdkSettings.getEmbedders().get("default").getDistribution().getSigma()).isEqualTo(0.25);
 		assertThat(sdkSettings.getEmbedders().get("default").getRequest()).containsEntry("text", "{{text}}");
 		assertThat(sdkSettings.getEmbedders().get("default").getResponse()).containsEntry("embedding", "$.embedding");
-		assertThat(sdkSettings.getEmbedders().get("default").getHeaders())
-				.containsEntry("Authorization", "Bearer token");
+		assertThat(sdkSettings.getEmbedders().get("default").getHeaders()).containsEntry("Authorization", "Bearer token");
 		assertThat(sdkSettings.getEmbedders().get("default").getBinaryQuantized()).isTrue();
 	}
 

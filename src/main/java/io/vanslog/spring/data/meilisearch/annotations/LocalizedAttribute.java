@@ -35,5 +35,6 @@ import org.springframework.data.annotation.Persistent;
 public @interface LocalizedAttribute {
 
 	String[] attributePatterns() default {};
+
 	String[] locales() default {};
 }
