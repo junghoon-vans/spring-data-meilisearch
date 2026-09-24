@@ -861,7 +861,7 @@ You do not need to return <code>Streamable&lt;Product&gt;</code> and manually wr
 <h3 id="repositories.collections-and-iterables.vavr"><a class="anchor" href="#repositories.collections-and-iterables.vavr"></a>Support for Vavr Collections</h3>
 <div class="paragraph">
 <p><a href="https://www.vavr.io/">Vavr</a> is a library that embraces functional programming concepts in Java.
-It ships with a custom set of collection types that you can use as query method return types, as the following table shows:</p>
+It ships with a custom set of collection types that you can use as query method argument and return types, as the following table shows:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
@@ -895,9 +895,17 @@ It ships with a custom set of collection types that you can use as query method 
 </tbody>
 </table>
 <div class="paragraph">
-<p>You can use the types in the first column (or subtypes thereof) as query method return types and get the types in the second column used as implementation type, depending on the Java type of the actual query result (third column).
+<p>You can use the types in the first column (or subtypes thereof) as query method return type and get the types in the second column used as implementation type, depending on the Java type of the actual query result (third column).
 Alternatively, you can declare <code>Traversable</code> (the Vavr <code>Iterable</code> equivalent), and we then derive the implementation class from the actual return value.
 That is, a <code>java.util.List</code> is turned into a Vavr <code>List</code> or <code>Seq</code>, a <code>java.util.Set</code> becomes a Vavr <code>LinkedHashSet</code> <code>Set</code>, and so on.</p>
+</div>
+<div class="paragraph">
+<p>Vavr types are also accepted as query method parameters.
+If a repository method parameter uses one of the types above (or <code>Traversable</code>), Spring Data automatically unwraps it into its Java-native equivalent before running the query.</p>
+</div>
+<div class="paragraph">
+<p>For example, a derived query method declared as <code>findAllByIdIn(io.vavr.collection.List&lt;Long&gt; ids)</code> accepts a Vavr <code>List</code> and unwraps it to a <code>java.util.List</code> so that it binds correctly to an <code>IN</code>-clause.
+A Vavr <code>Option</code> parameter is similarly unwrapped to its inner value (or <code>null</code>).</p>
 </div>
 </div>
 </div>
@@ -960,7 +968,7 @@ Not all Spring Data modules currently support <code>Stream&lt;T&gt;</code> as a 
 <h2 id="repositories.query-async"><a class="anchor" href="#repositories.query-async"></a>Asynchronous Query Results</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can run repository queries asynchronously by using <a href="https://docs.spring.io/spring-framework/reference/7.0/integration/scheduling.html">Spring&#8217;s asynchronous method running capability</a>.
+<p>You can run repository queries asynchronously by using <a href="https://docs.spring.io/spring-framework/reference/7.1/integration/scheduling.html">Spring&#8217;s asynchronous method running capability</a>.
 This means the method returns immediately upon invocation while the actual query occurs in a task that has been submitted to a Spring <code>TaskExecutor</code>.
 Asynchronous queries differ from reactive queries and should not be mixed.
 See the store-specific documentation for more details on reactive support.

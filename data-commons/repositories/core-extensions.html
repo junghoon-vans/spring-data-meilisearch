@@ -943,9 +943,9 @@ You can now trigger a request (<code>GET <a href="http://localhost:8080/people" 
 </td>
 <td class="content">
 The JSON envelope format shown here doesn&#8217;t follow any formally specified structure and it&#8217;s not guaranteed stable and we might change it at any time.
-It&#8217;s highly recommended to enable the rendering as a hypermedia-enabled, official media type, supported by Spring HATEOAS, like <a href="https://docs.spring.io/spring-hateoas/docs/3.1.1/reference/html/#mediatypes.hal">HAL</a>.
+It&#8217;s highly recommended to enable the rendering as a hypermedia-enabled, official media type, supported by Spring HATEOAS, like <a href="https://docs.spring.io/spring-hateoas/docs/3.2.0-SNAPSHOT/reference/html/#mediatypes.hal">HAL</a>.
 Those can be activated by using its <code>@EnableHypermediaSupport</code> annotation.
-Find more information in the <a href="https://docs.spring.io/spring-hateoas/docs/3.1.1/reference/html/#configuration.at-enable">Spring HATEOAS reference documentation</a>.
+Find more information in the <a href="https://docs.spring.io/spring-hateoas/docs/3.2.0-SNAPSHOT/reference/html/#configuration.at-enable">Spring HATEOAS reference documentation</a>.
 </td>
 </tr>
 </table>
@@ -1030,11 +1030,15 @@ public interface UserPayload {
 </div>
 </div>
 <div class="paragraph">
-<p>You can use the type shown in the preceding example as a Spring MVC handler method argument or by using <code>ParameterizedTypeReference</code> on one of methods of the <code>RestTemplate</code>.
+<p>You can use the type shown in the preceding example as a Spring MVC handler method argument or by using <code>ParameterizedTypeReference</code> on one of the methods of <code>RestTemplate</code>.
 The preceding method declarations would try to find <code>firstname</code> anywhere in the given document.
 The <code>lastname</code> XML lookup is performed on the top-level of the incoming document.
 The JSON variant of that tries a top-level <code>lastname</code> first but also tries <code>lastname</code> nested in a <code>user</code> sub-document if the former does not return a value.
 That way, changes in the structure of the source document can be mitigated easily without having clients calling the exposed methods (usually a drawback of class-based payload binding).</p>
+</div>
+<div class="paragraph">
+<p>For Spring MVC handler method argument resolution, annotate either the handler method parameter or the projection interface with <code>@ProjectedPayload</code>.
+Interfaces without <code>@ProjectedPayload</code> on either the handler method parameter or the interface type are not considered projection payloads.</p>
 </div>
 <div class="paragraph">
 <p>Nested projections are supported as described in <a href="projections.html" class="xref page">Projections</a>.
@@ -1266,7 +1270,7 @@ The infrastructure eventually selects the appropriate repository to handle the o
 <div class="paragraph">
 <p>To instead use XML to define the data the repositories should be populated with, you can use the <code>unmarshaller-populator</code> element.
 You configure it to use one of the XML marshaller options available in Spring OXM.
-See the <a href="https://docs.spring.io/spring-framework/reference/7.0/data-access/oxm.html">Spring reference documentation</a> for details.
+See the <a href="https://docs.spring.io/spring-framework/reference/7.1/data-access/oxm.html">Spring reference documentation</a> for details.
 The following example shows how to unmarshall a repository populator with JAXB:</p>
 </div>
 <div class="listingblock">

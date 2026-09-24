@@ -477,7 +477,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Value Expressions are a combination of <a href="https://docs.spring.io/spring-framework/reference/7.0/core/expressions.html">Spring Expression Language (SpEL)</a> and <a href="https://docs.spring.io/spring-framework/reference/7.0/core/beans/annotation-config/value-annotations.html">Property Placeholder Resolution</a>.
+<p>Value Expressions are a combination of <a href="https://docs.spring.io/spring-framework/reference/7.1/core/expressions.html">Spring Expression Language (SpEL)</a> and <a href="https://docs.spring.io/spring-framework/reference/7.1/core/beans/annotation-config/value-annotations.html">Property Placeholder Resolution</a>.
 They combine powerful evaluation of programmatic expressions with the simplicity to resort to property-placeholder resolution to obtain values from the <code>Environment</code> such as configuration properties.</p>
 </div>
 <div class="paragraph">
@@ -609,7 +609,7 @@ Doing so requires evaluation of the expression on each usage and, therefore, val
 </table>
 </div>
 <div class="paragraph">
-<p><a href="https://docs.spring.io/spring-framework/reference/7.0/core/expressions/language-ref.html">Spring Expression Language (SpEL)</a> and <a href="https://docs.spring.io/spring-framework/reference/7.0/core/beans/annotation-config/value-annotations.html">Property Placeholder Resolution</a> explain the syntax and capabilities of SpEL and Property Placeholders in detail.</p>
+<p><a href="https://docs.spring.io/spring-framework/reference/7.1/core/expressions/language-ref.html">Spring Expression Language (SpEL)</a> and <a href="https://docs.spring.io/spring-framework/reference/7.1/core/beans/annotation-config/value-annotations.html">Property Placeholder Resolution</a> explain the syntax and capabilities of SpEL and Property Placeholders in detail.</p>
 </div>
 </div>
 </div>
@@ -668,7 +668,7 @@ val result: Any = expression.evaluate(context)</code></pre>
 <h2 id="valueexpressions.spel"><a class="anchor" href="#valueexpressions.spel"></a>SpEL Expressions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="https://docs.spring.io/spring-framework/reference/7.0/core/expressions.html">SpEL Expressions</a> follow the Template style where the expression is expected to be enclosed within the <code>#{…}</code> format.
+<p><a href="https://docs.spring.io/spring-framework/reference/7.1/core/expressions.html">SpEL Expressions</a> follow the Template style where the expression is expected to be enclosed within the <code>#{…}</code> format.
 Expressions are evaluated using an <code>EvaluationContext</code> that is provided by <code>EvaluationContextProvider</code>.
 The context itself is a powerful <code>StandardEvaluationContext</code> allowing a wide range of operations, access to static types and context extensions.</p>
 </div>
@@ -877,7 +877,7 @@ The method is exposed as function and redirects into the method <code>extensionM
 <div class="paragraph">
 <p>Property placeholders following the form <code>${…}</code> refer to properties provided typically by a <code>PropertySource</code> through <code>Environment</code>.
 Properties are useful to resolve against system properties, application configuration files, environment configuration or property sources contributed by secret management systems.
-You can find more details on the property placeholders in <a href="https://docs.spring.io/spring-framework/reference/7.0/core/beans/annotation-config/value-annotations.html#page-title">Spring Framework&#8217;s documentation on <code>@Value</code> usage</a>.</p>
+You can find more details on the property placeholders in <a href="https://docs.spring.io/spring-framework/reference/7.1/core/beans/annotation-config/value-annotations.html#page-title">Spring Framework&#8217;s documentation on <code>@Value</code> usage</a>.</p>
 </div>
 </div>
 </div>
