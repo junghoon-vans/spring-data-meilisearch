@@ -496,6 +496,12 @@ class MovieController {
 <div class="paragraph">
 <p>These methods are appropriate when you already know the target document ids and want direct document-style access.</p>
 </div>
+<div class="paragraph">
+<p>For multiple requested ids, <code>multiGet(&#8230;&#8203;)</code> batches native ID-list reads on Meilisearch 1.14 and later.
+The template checks the server version on the first such read and remembers the result for its lifetime.
+Older servers, or API keys without the <code>version</code> action, continue to retrieve each id directly.
+The returned entities retain the requested id order, excluding ids that do not exist.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
