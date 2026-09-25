@@ -32,7 +32,8 @@ The default repository implementation delegates to `MeilisearchOperations`, but 
 
 * `findById(...)` uses direct document lookup; `findAllById(...)` uses native ID-list fetch.
 * `findAll()` retrieves all documents in one request; sorted `findAll(Sort)` counts first, then fetches once.
-* `findAll(Pageable)` and `count()` use search APIs.
+* Paged `findAll(Pageable)` uses search APIs; an unpaged `Pageable` uses document listing and counts first if sorted.
+* `count()` uses search APIs.
 
 That difference matters because Meilisearch search settings can affect search-backed repository methods without affecting document lookups.
 
