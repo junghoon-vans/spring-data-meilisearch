@@ -500,8 +500,8 @@ class MovieController {
 </ul>
 </div>
 <div class="paragraph">
-<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id. <code>findAll(&#8230;&#8203;)</code> lists every document in batches,
-then returns the complete result in memory; it does not return a single server-default-sized page.
+<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id. <code>findAll(&#8230;&#8203;)</code> requests every document at once and returns the complete result in memory;
+it does not return a single server-default-sized page.
 <code>multiGet(&#8230;&#8203;)</code> reads only the document ids supplied by the caller.</p>
 </div>
 <div class="paragraph">
@@ -509,10 +509,7 @@ then returns the complete result in memory; it does not return a single server-d
 reads available from Meilisearch 1.14; there is no individual-lookup fallback on older servers.
 The returned entities retain requested id order, excluding ids that do not exist.
 Document listing through <code>findAll(Class&lt;T&gt;, Sort)</code> uses server-side sorting available from
-Meilisearch 1.16 and is not limited by <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>.
-Sorted document pagination across batches is reliable from Meilisearch 1.27.
-On 1.16 through 1.26, the server may duplicate or omit documents when sorting and paginating
-(see <a href="https://github.com/meilisearch/meilisearch/issues/5943">upstream issue #5943</a>).</p>
+Meilisearch 1.16 and is not limited by <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>.</p>
 </div>
 </div>
 </div>

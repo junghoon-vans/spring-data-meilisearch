@@ -481,7 +481,7 @@ It means repository creation can have side effects on the target index configura
 <p><code>findById(&#8230;&#8203;)</code> and <code>existsById(&#8230;&#8203;)</code> use direct document lookup; <code>findAllById(&#8230;&#8203;)</code> uses native ID-list fetch.</p>
 </li>
 <li>
-<p><code>findAll()</code> and <code>findAll(Sort)</code> list documents in batches; a paged <code>findAll(Pageable)</code> uses search APIs, while an unpaged <code>Pageable</code> uses the document API.</p>
+<p><code>findAll()</code> and <code>findAll(Sort)</code> list documents in one request; a paged <code>findAll(Pageable)</code> uses search APIs, while an unpaged <code>Pageable</code> uses the document API.</p>
 </li>
 <li>
 <p><code>count()</code> uses <code>SearchOperations.count(&#8230;&#8203;)</code>.</p>
@@ -520,11 +520,11 @@ Document-backed reads require a key with <code>documents.get</code> permission.<
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll</code>, <code>findAll(Sort)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Lists documents in batches; sorting uses the document API from Meilisearch 1.16.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lists documents in one request; sorting uses the document API from Meilisearch 1.16.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll(Pageable)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A paged <code>Pageable</code> builds a search query and unwraps Meilisearch search hits back into entities; an unpaged <code>Pageable</code> lists all documents in batches and preserves its sort.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A paged <code>Pageable</code> builds a search query and unwraps Meilisearch search hits back into entities; an unpaged <code>Pageable</code> lists all documents in one request and preserves its sort.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>count</code></p></td>
@@ -536,12 +536,6 @@ Document-backed reads require a key with <code>documents.get</code> permission.<
 </tr>
 </tbody>
 </table>
-<div class="paragraph">
-<p>Sorting through the document API requires Meilisearch 1.16. On versions 1.16 through 1.26,
-pagination across sorted batches may duplicate or omit documents
-(see <a href="https://github.com/meilisearch/meilisearch/issues/5943">upstream issue #5943</a>).
-Use Meilisearch 1.27 or later for reliable sorted retrieval.</p>
-</div>
 </div>
 </div>
 </div>
@@ -555,7 +549,7 @@ Its <code>Page</code> total is therefore derived from Meilisearch search totals,
 If the index is configured with <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, that limit can cap the returned search content even when the reported total is larger.</p>
 </div>
 <div class="paragraph">
-<p>An unpaged <code>Pageable</code> (including <code>Pageable.unpaged(Sort)</code>) uses document-backed batch retrieval and returns the complete content in the requested order.
+<p>An unpaged <code>Pageable</code> (including <code>Pageable.unpaged(Sort)</code>) retrieves documents in one request and returns the complete content in the requested order.
 Its <code>Page</code> total is based on the retrieved document count and is not capped by <code>maxTotalHits</code>.</p>
 </div>
 <div class="paragraph">
