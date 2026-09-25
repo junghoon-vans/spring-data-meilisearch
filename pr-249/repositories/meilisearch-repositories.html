@@ -492,8 +492,9 @@ It means repository creation can have side effects on the target index configura
 </ul>
 </div>
 <div class="paragraph">
-<p>That distinction matters because some Meilisearch settings only influence search APIs.
-For example, <code>displayedAttributes</code> affect paged <code>findAll(Pageable)</code> search results but not document-backed reads, including unpaged <code>Pageable</code> calls.</p>
+<p><code>pagination.maxTotalHits</code> limits search-backed reads, not document-backed listing.
+<code>displayedAttributes</code> can still restrict fields returned by document-list requests that omit <code>fields</code>, leaving mapped entities incomplete.
+Document-backed reads require a key with <code>documents.get</code> permission.</p>
 </div>
 <div class="sect2">
 <h3 id="meilisearch.repositories.lookup-methods.behavior-table"><a class="anchor" href="#meilisearch.repositories.lookup-methods.behavior-table"></a>Method Behavior at a Glance</h3>
