@@ -58,7 +58,7 @@ Document-backed reads require a key with `documents.get` permission.
 | Lists documents in one fetch; sorting counts first and uses the document API from Meilisearch 1.16.
 
 | `findAll(Pageable)`
-| A paged `Pageable` builds a search query and unwraps Meilisearch search hits back into entities; an unpaged `Pageable` lists all documents in one request and preserves its sort.
+| A paged `Pageable` builds a search query and unwraps Meilisearch search hits back into entities; an unpaged `Pageable` lists all documents in one fetch, counting first if sorted.
 
 | `count`
 | Delegates to the operations layer count support rather than maintaining a separate repository-side count strategy.
@@ -75,7 +75,7 @@ A paged `Pageable` is backed by a `BasicQuery` plus search result metadata.
 Its `Page` total is therefore derived from Meilisearch search totals, not from a separate count query.
 If the index is configured with `@Pagination(maxTotalHits = ...)`, that limit can cap the returned search content even when the reported total is larger.
 
-An unpaged `Pageable` (including `Pageable.unpaged(Sort)`) retrieves documents in one request and returns the complete content in the requested order.
+An unpaged `Pageable` (including `Pageable.unpaged(Sort)`) returns complete content in the requested order. Sorting requires a preliminary count before the document fetch.
 Its `Page` total is based on the retrieved document count and is not capped by `maxTotalHits`.
 
 The search-backed design for paged repository pagination explains why those results do not expose richer search response data such as facets or federation metadata.
