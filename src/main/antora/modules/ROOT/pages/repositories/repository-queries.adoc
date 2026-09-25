@@ -45,9 +45,9 @@ This keeps unsupported query-method configuration from looking like an implement
 [[meilisearch.repositories.queries.notes]]
 == Practical Notes
 
-* `findAll()` and `findAll(Sort)` read every document in batches through the document API; sorting requires a sortable attribute in the index settings.
+* `findAll()` reads every document in one request through the document API; sorted `findAll(Sort)` counts first, then fetches once. Sorting requires a sortable attribute in the index settings.
 * `findAllById(...)` uses native ID-list fetch, available from Meilisearch 1.14.
-* Sorted `findAll(Sort)` requires Meilisearch 1.16; on 1.16 through 1.26, pagination across batches may duplicate or omit documents.
+* Sorted `findAll(Sort)` requires Meilisearch 1.16.
 * `findAll(Pageable)` remains search-backed and inherits Meilisearch search pagination limits and search-only settings.
 * Document-backed repository methods do not expose search response features such as facet metadata.
 * If your use case depends on advanced query composition or store-specific search options, prefer `MeilisearchOperations` explicitly in the service layer.

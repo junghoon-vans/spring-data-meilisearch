@@ -31,25 +31,25 @@ class MovieController {
 [[meilisearch.operations.documents]]
 == Document Operations
 
-`DocumentOperations` covers id-oriented access to one mapped entity type:
+`DocumentOperations` covers document access to one mapped entity type:
 
 * `save(T)` and `save(List<T>)`
 * `get(String, Class<T>)`
-* `multiGet(...)`
+* `findAll(Class<T>)` and `findAll(Class<T>, Sort)` for complete document listing
+* `multiGet(...)` for ID-list retrieval
 * `exists(String, Class<?>)`
 * `delete(...)`
 * `deleteAll(Class<?>)`
 
-Direct `get(...)` reads a known id, while `multiGet(...)` also supports document listing and ID-list retrieval.
+Direct `get(...)` reads a known id. `findAll(...)` returns the complete result in memory rather than a server-default-sized page.
+Sorted listing counts documents first, then fetches them in one request; if the index grows between requests, it fails instead of returning a partial result.
+`multiGet(...)` reads only the document ids supplied by the caller.
 
 For multiple requested ids, `multiGet(Class<T>, List<String>)` and its offset/limit overload use native ID-list
 reads available from Meilisearch 1.14; there is no individual-lookup fallback on older servers.
 The returned entities retain requested id order, excluding ids that do not exist.
-Document listing through `multiGet(Class<T>, int, int, Sort)` uses server-side sorting available from
+Document listing through `findAll(Class<T>, Sort)` uses server-side sorting available from
 Meilisearch 1.16 and is not limited by `@Pagination(maxTotalHits = ...)`.
-Sorted document pagination across batches is reliable from Meilisearch 1.27.
-On 1.16 through 1.26, the server may duplicate or omit documents when sorting and paginating
-(see https://github.com/meilisearch/meilisearch/issues/5943[upstream issue #5943]).
 
 [[meilisearch.operations.search]]
 == Search Operations

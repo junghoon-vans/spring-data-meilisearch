@@ -32,7 +32,7 @@ It means repository creation can have side effects on the target index configura
 The built-in repository methods do not all use the same underlying Meilisearch API:
 
 * `findById(...)` and `existsById(...)` use direct document lookup; `findAllById(...)` uses native ID-list fetch.
-* `findAll()` and `findAll(Sort)` list documents in batches; `findAll(Pageable)` uses search APIs.
+* `findAll()` lists documents in one request; sorted `findAll(Sort)` counts first, then fetches once. `findAll(Pageable)` uses search APIs.
 * `count()` uses `SearchOperations.count(...)`.
 * `save(...)`, `saveAll(...)`, and delete methods delegate to `MeilisearchOperations` document-oriented write operations.
 
@@ -55,7 +55,7 @@ Document-backed reads require a key with `documents.get` permission.
 | Uses native ID-list fetch, available from Meilisearch 1.14.
 
 | `findAll`, `findAll(Sort)`
-| Lists documents in batches; sorting uses the document API from Meilisearch 1.16.
+| Lists documents in one fetch; sorting counts first and uses the document API from Meilisearch 1.16.
 
 | `findAll(Pageable)`
 | Builds a search query and unwraps Meilisearch search hits back into entities.
@@ -66,11 +66,6 @@ Document-backed reads require a key with `documents.get` permission.
 | `save`, `saveAll`, `delete*`
 | Delegates to `MeilisearchOperations` write and delete operations.
 |===
-
-Sorting through the document API requires Meilisearch 1.16. On versions 1.16 through 1.26,
-pagination across sorted batches may duplicate or omit documents
-(see https://github.com/meilisearch/meilisearch/issues/5943[upstream issue #5943]).
-Use Meilisearch 1.27 or later for reliable sorted retrieval.
 
 [[meilisearch.repositories.paging]]
 == Paging and Totals

@@ -41,13 +41,11 @@ public interface MeilisearchRepository<T, ID> extends CrudRepository<T, ID>, Pag
 	Iterable<T> findAllById(Iterable<ID> ids);
 
 	/**
-	 * Retrieves every document in batches. When sorting is requested, the server's document sort option requires
-	 * Meilisearch 1.16 or later. On Meilisearch 1.16 through 1.26, sorted pagination may duplicate or omit documents
-	 * across batches; use Meilisearch 1.27 or later for reliable sorted retrieval.
+	 * Retrieves every document. Sorted listing first counts the documents; concurrent additions can cause the call to
+	 * fail rather than return a partial result. Server-side sorting requires Meilisearch 1.16 or later.
 	 *
 	 * @param sort the sort order; attributes must be sortable in the index settings
 	 * @return the documents in the requested order when sorted
-	 * @see <a href="https://github.com/meilisearch/meilisearch/issues/5943">Meilisearch sorted pagination issue</a>
 	 */
 	@Override
 	Iterable<T> findAll(Sort sort);

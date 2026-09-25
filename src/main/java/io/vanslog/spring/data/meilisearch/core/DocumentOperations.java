@@ -58,39 +58,27 @@ public interface DocumentOperations {
 	<T> T get(String documentId, Class<T> clazz);
 
 	/**
-	 * Retrieves all entities of the given type.
+	 * Retrieves all entities of the given type in one document request. The entire result is held in memory.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
 	 * @param <T> the type of the entity
-	 * @return all entities
+	 * @return all entities of the given type
 	 */
-	<T> List<T> multiGet(Class<T> clazz);
+	<T> List<T> findAll(Class<T> clazz);
 
 	/**
-	 * Retrieves all entities of the given type with the given offset and limit.
+	 * Retrieves all entities of the given type in the given order. Sorted listing first counts the documents, then
+	 * fetches them in one request; concurrent additions can cause the call to fail rather than return a partial result.
+	 * The entire result is held in memory. Sorting requires Meilisearch 1.16 or later.
 	 *
-	 * @param clazz must not be {@literal null}.
-	 * @param offset must not be {@literal null}.
-	 * @param limit must not be {@literal null}.
-	 * @return entities
-	 * @param <T> entity type
-	 */
-	<T> List<T> multiGet(Class<T> clazz, int offset, int limit);
-
-	/**
-	 * Retrieves documents using the given server-side sort, offset, and limit. Sorting requires Meilisearch 1.16 or
-	 * later. On 1.16 through 1.26, pagination across sorted batches can duplicate or omit documents; use 1.27 or later
-	 * for reliable sorted pagination.
-	 *
-	 * @param clazz the entity class
-	 * @param offset the number of documents to skip, or negative to use the server default
-	 * @param limit the maximum number of documents to return, or negative to use the server default
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
 	 * @param sort the sort order, whose properties must be sortable in the index
-	 * @param <T> the entity type
-	 * @return the matching entities in sorted order
+	 * @param <T> the type of the entity
+	 * @return all entities in sorted order
 	 */
-	<T> List<T> multiGet(Class<T> clazz, int offset, int limit, Sort sort);
+	<T> List<T> findAll(Class<T> clazz, Sort sort);
 
 	/**
 	 * Retrieves all entities of the given type with the given document ids. Native ID-list retrieval requires Meilisearch

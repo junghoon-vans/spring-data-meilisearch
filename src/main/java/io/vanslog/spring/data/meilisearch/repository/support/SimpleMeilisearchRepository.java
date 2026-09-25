@@ -44,8 +44,6 @@ import org.springframework.util.Assert;
  */
 public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository<T, ID> {
 
-	private static final int DOCUMENTS_BATCH_SIZE = 500;
-
 	private final MeilisearchOperations meilisearchOperations;
 	private final Class<T> entityType;
 
@@ -131,28 +129,13 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 
 	@Override
 	public Iterable<T> findAll() {
-		return retrieveAll(Sort.unsorted());
+		return meilisearchOperations.findAll(entityType);
 	}
 
 	@Override
 	public Iterable<T> findAll(Sort sort) {
 		Assert.notNull(sort, "sort must not be null");
-		return retrieveAll(sort);
-	}
-
-	private List<T> retrieveAll(Sort sort) {
-		List<T> documents = new ArrayList<>();
-		for (int offset = 0;; offset += DOCUMENTS_BATCH_SIZE) {
-			List<T> batch = sort.isSorted() ? meilisearchOperations.multiGet(entityType, offset, DOCUMENTS_BATCH_SIZE, sort)
-					: meilisearchOperations.multiGet(entityType, offset, DOCUMENTS_BATCH_SIZE);
-			documents.addAll(batch);
-			if (batch.size() < DOCUMENTS_BATCH_SIZE) {
-				return documents;
-			}
-			if (offset > Integer.MAX_VALUE - DOCUMENTS_BATCH_SIZE) {
-				throw new IllegalStateException("Too many documents to retrieve with integer offsets.");
-			}
-		}
+		return meilisearchOperations.findAll(entityType, sort);
 	}
 
 	@SuppressWarnings("unchecked")
