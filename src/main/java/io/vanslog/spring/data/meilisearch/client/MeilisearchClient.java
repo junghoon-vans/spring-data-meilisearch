@@ -15,6 +15,7 @@
  */
 package io.vanslog.spring.data.meilisearch.client;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -69,7 +70,8 @@ public class MeilisearchClient extends Client {
 	}
 
 	/**
-	 * Fetch raw documents by ID through the internal HTTP transport.
+	 * Fetch raw documents by ID through the internal HTTP transport. Native ID-list retrieval requires Meilisearch 1.14
+	 * or later.
 	 *
 	 * @param indexUid index containing the documents
 	 * @param documentIds requested document IDs
@@ -79,5 +81,28 @@ public class MeilisearchClient extends Client {
 	public String getRawDocumentsByIds(String indexUid, List<String> documentIds) throws MeilisearchException {
 		return httpTransport.post("/indexes/" + indexUid + "/documents/fetch",
 				Map.of("ids", documentIds, "limit", documentIds.size()));
+	}
+
+	/**
+	 * Fetch raw documents in server sort order. The SDK's {@code DocumentsQuery} does not yet expose sorting. Sorting
+	 * documents requires Meilisearch 1.16 or later.
+	 *
+	 * @param indexUid index containing the documents
+	 * @param offset number of documents to skip, or negative to use the server default
+	 * @param limit maximum number of documents to return, or negative to use the server default
+	 * @param sort sort expressions in {@code attribute:direction} form
+	 * @return the raw fetch response
+	 * @throws MeilisearchException if the request fails
+	 */
+	public String getRawDocuments(String indexUid, int offset, int limit, String[] sort) throws MeilisearchException {
+		Map<String, Object> request = new HashMap<>();
+		if (offset >= 0) {
+			request.put("offset", offset);
+		}
+		if (limit >= 0) {
+			request.put("limit", limit);
+		}
+		request.put("sort", sort);
+		return httpTransport.post("/indexes/" + indexUid + "/documents/fetch", request);
 	}
 }

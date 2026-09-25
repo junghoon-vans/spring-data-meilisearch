@@ -24,6 +24,7 @@ import io.vanslog.spring.data.meilisearch.core.query.SimilarQuery
 import java.time.Duration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.data.domain.Sort
 
 class OperationsExtensionsTests {
 
@@ -150,6 +151,10 @@ class OperationsExtensionsTests {
         override fun <T : Any?> multiGet(clazz: Class<T>, offset: Int, limit: Int): MutableList<T> {
             calls.add("multiGet:${clazz.simpleName}:$offset:$limit")
             return mutableListOf()
+        }
+
+        override fun <T : Any?> multiGet(clazz: Class<T>, offset: Int, limit: Int, sort: Sort): MutableList<T> {
+            throw UnsupportedOperationException()
         }
 
         override fun <T : Any?> multiGet(clazz: Class<T>, documentIds: MutableList<String>): MutableList<T> {

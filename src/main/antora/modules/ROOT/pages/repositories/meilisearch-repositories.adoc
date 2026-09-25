@@ -31,13 +31,14 @@ It means repository creation can have side effects on the target index configura
 
 The built-in repository methods do not all use the same underlying Meilisearch API:
 
-* `findById(...)` and `findAllById(...)` use document APIs.
-* `findAll()`, `findAll(Sort)`, and `findAll(Pageable)` use search APIs.
+* `findById(...)` and `existsById(...)` use direct document lookup; `findAllById(...)` uses native ID-list fetch.
+* `findAll()` and `findAll(Sort)` list documents in batches; `findAll(Pageable)` uses search APIs.
 * `count()` uses `SearchOperations.count(...)`.
 * `save(...)`, `saveAll(...)`, and delete methods delegate to `MeilisearchOperations` document-oriented write operations.
 
-That distinction matters because some Meilisearch settings only influence search APIs.
-For example, `displayedAttributes` affect search results but not the document APIs used by `findById(...)` and `findAllById(...)`.
+`pagination.maxTotalHits` limits search-backed reads, not document-backed listing.
+`displayedAttributes` can still restrict fields returned by document-list requests that omit `fields`, leaving mapped entities incomplete.
+Document-backed reads require a key with `documents.get` permission.
 
 [[meilisearch.repositories.lookup-methods.behavior-table]]
 === Method Behavior at a Glance
@@ -47,10 +48,16 @@ For example, `displayedAttributes` affect search results but not the document AP
 | Repository method family
 | Backing behavior
 
-| `findById`, `findAllById`, `existsById`
-| Uses direct document lookup APIs after converting the repository id through the configured converter.
+| `findById`, `existsById`
+| Uses direct document lookup after converting the repository id through the configured converter.
 
-| `findAll`, `findAll(Sort)`, `findAll(Pageable)`
+| `findAllById`
+| Uses native ID-list fetch, available from Meilisearch 1.14.
+
+| `findAll`, `findAll(Sort)`
+| Lists documents in batches; sorting uses the document API from Meilisearch 1.16.
+
+| `findAll(Pageable)`
 | Builds a search query and unwraps Meilisearch search hits back into entities.
 
 | `count`
@@ -59,6 +66,11 @@ For example, `displayedAttributes` affect search results but not the document AP
 | `save`, `saveAll`, `delete*`
 | Delegates to `MeilisearchOperations` write and delete operations.
 |===
+
+Sorting through the document API requires Meilisearch 1.16. On versions 1.16 through 1.26,
+pagination across sorted batches may duplicate or omit documents
+(see https://github.com/meilisearch/meilisearch/issues/5943[upstream issue #5943]).
+Use Meilisearch 1.27 or later for reliable sorted retrieval.
 
 [[meilisearch.repositories.paging]]
 == Paging and Totals

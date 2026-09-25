@@ -139,7 +139,7 @@ public class RequestConverter {
 	}
 
 	@Nullable
-	private String[] convertSortToSortOptions(@Nullable Sort sort) {
+	String[] convertSortToSortOptions(@Nullable Sort sort) {
 		if (sort == null) {
 			return null;
 		}
