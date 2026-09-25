@@ -183,16 +183,20 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	public <T> List<T> findAll(Class<T> clazz, Sort sort) {
 		Assert.notNull(sort, "Sort must not be null");
 		String indexUid = getIndexUidFor(clazz);
-		String results;
 		if (sort.isUnsorted()) {
 			DocumentsQuery query = new DocumentsQuery();
 			query.setLimit(Integer.MAX_VALUE);
-			results = execute(client -> client.index(indexUid).getRawDocuments(query));
-		} else {
-			String[] sortOptions = requestConverter.convertSortToSortOptions(sort);
-			results = execute(client -> meilisearchClient.getRawDocuments(indexUid, 0, Integer.MAX_VALUE, sortOptions));
+			return readDocuments(execute(client -> client.index(indexUid).getRawDocuments(query)), clazz);
 		}
-		return readDocuments(results, clazz);
+
+		long documentCount = count(clazz);
+		if (documentCount > Integer.MAX_VALUE) {
+			throw new IllegalStateException("Too many documents to retrieve with an integer limit.");
+		}
+		String[] sortOptions = requestConverter.convertSortToSortOptions(sort);
+		String results = execute(
+				client -> meilisearchClient.getRawDocuments(indexUid, 0, (int) documentCount, sortOptions));
+		return readCompleteDocuments(results, clazz);
 	}
 
 	@Override
@@ -428,31 +432,50 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		}
 	}
 
-	private <T> List<T> readDocuments(String source, Class<T> clazz) {
-
+	private <T> List<T> readCompleteDocuments(String source, Class<T> clazz) {
 		try {
-			JsonNode results = objectMapper.readTree(source).get("results");
-			if (results == null || !results.isArray()) {
-				throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents results.");
+			JsonNode response = objectMapper.readTree(source);
+			List<T> documents = readDocumentsFromResponse(response, clazz);
+			if (documents.size() != readTotalFromResponse(response)) {
+				throw new IllegalStateException("Incomplete sorted document listing; the index may have changed.");
 			}
-			List<Document> documents = objectMapper.readerForListOf(Document.class).readValue(results);
-			return documents.stream().map(document -> meilisearchConverter.read(clazz, document)).toList();
+			return documents;
 		} catch (IOException e) {
 			throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents.", e);
 		}
 	}
 
-	private long readTotal(String source) {
-
+	private <T> List<T> readDocuments(String source, Class<T> clazz) {
 		try {
-			JsonNode total = objectMapper.readTree(source).get("total");
-			if (total == null || !total.canConvertToLong()) {
-				throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents total.");
-			}
-			return total.asLong();
+			return readDocumentsFromResponse(objectMapper.readTree(source), clazz);
+		} catch (IOException e) {
+			throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents.", e);
+		}
+	}
+
+	private <T> List<T> readDocumentsFromResponse(JsonNode response, Class<T> clazz) throws IOException {
+		JsonNode results = response.get("results");
+		if (results == null || !results.isArray()) {
+			throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents results.");
+		}
+		List<Document> documents = objectMapper.readerForListOf(Document.class).readValue(results);
+		return documents.stream().map(document -> meilisearchConverter.read(clazz, document)).toList();
+	}
+
+	private long readTotal(String source) {
+		try {
+			return readTotalFromResponse(objectMapper.readTree(source));
 		} catch (IOException e) {
 			throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents total.", e);
 		}
+	}
+
+	private long readTotalFromResponse(JsonNode response) {
+		JsonNode total = response.get("total");
+		if (total == null || !total.canConvertToLong()) {
+			throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents total.");
+		}
+		return total.asLong();
 	}
 
 	private Searchable readSearchResult(String source) {

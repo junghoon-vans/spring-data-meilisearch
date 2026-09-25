@@ -17,6 +17,8 @@ package io.vanslog.spring.data.meilisearch.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
+import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.entities.SortableMovie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
@@ -36,12 +38,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.meilisearch.sdk.exceptions.MeilisearchException;
+
 /**
  * Integration tests for {@link MeilisearchRepository}.
  *
  * @author Junghoon Ban
  */
-@MeilisearchTest(version = "v1.27.0")
+@MeilisearchTest(version = "v1.16.0")
 @ContextConfiguration(classes = SortableMeilisearchRepositoryIntegrationTests.Config.class)
 class SortableMeilisearchRepositoryIntegrationTests {
 
@@ -107,6 +111,28 @@ class SortableMeilisearchRepositoryIntegrationTests {
 
 		assertThat(movieRepository.findAll(Sort.by("title"))).extracting(SortableMovie::getId)
 				.containsExactlyElementsOf(IntStream.rangeClosed(0, 500).map(id -> 500 - id).boxed().toList());
+	}
+
+	@Test
+	void shouldRejectIncompleteSortedListingAfterConcurrentAddition() {
+		SortableMovie initial = new SortableMovie();
+		initial.setId(1);
+		initial.setTitle("First");
+		movieRepository.save(initial);
+
+		SortableMovie added = new SortableMovie();
+		added.setId(2);
+		added.setTitle("Second");
+		MeilisearchClient client = new MeilisearchClient(new MeilisearchTestConfiguration().clientConfiguration()) {
+			@Override
+			public String getRawDocuments(String indexUid, int offset, int limit, String[] sort) throws MeilisearchException {
+				operations.save(added);
+				return super.getRawDocuments(indexUid, offset, limit, sort);
+			}
+		};
+
+		assertThatThrownBy(() -> new MeilisearchTemplate(client).findAll(SortableMovie.class, Sort.by("title")))
+				.isInstanceOf(IllegalStateException.class).hasMessageContaining("Incomplete sorted document listing");
 	}
 
 	@Test
