@@ -669,7 +669,7 @@ They do not change blocking execution behavior and do not add reactive or corout
 <p>Similar-document search requires a compatible embedder already configured in the target index.</p>
 </li>
 <li>
-<p>Repository methods such as <code>findAll(Pageable)</code> are layered on top of these search operations, so search settings such as pagination limits can influence reported page totals.</p>
+<p>Repository <code>findAll(Pageable)</code> uses search operations only for a paged argument; an unpaged argument uses document-backed retrieval. Search pagination limits can cap paged content.</p>
 </li>
 </ul>
 </div>
