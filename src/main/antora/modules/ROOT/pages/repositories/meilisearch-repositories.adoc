@@ -36,8 +36,9 @@ The built-in repository methods do not all use the same underlying Meilisearch A
 * `count()` uses `SearchOperations.count(...)`.
 * `save(...)`, `saveAll(...)`, and delete methods delegate to `MeilisearchOperations` document-oriented write operations.
 
-That distinction matters because some Meilisearch settings only influence search APIs.
-For example, `displayedAttributes` affect `findAll(Pageable)` search results but not document-backed reads.
+`pagination.maxTotalHits` limits search-backed reads, not document-backed listing.
+`displayedAttributes` can still restrict fields returned by document-list requests that omit `fields`, leaving mapped entities incomplete.
+Document-backed reads require a key with `documents.get` permission.
 
 [[meilisearch.repositories.lookup-methods.behavior-table]]
 === Method Behavior at a Glance
