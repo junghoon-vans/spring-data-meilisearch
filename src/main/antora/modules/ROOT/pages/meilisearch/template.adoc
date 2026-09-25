@@ -134,4 +134,4 @@ They do not change blocking execution behavior and do not add reactive or corout
 
 * Federated multi-search does not support `Pageable` settings inside the individual queries. Use federation `limit` and `offset` instead.
 * Similar-document search requires a compatible embedder already configured in the target index.
-* Repository methods such as `findAll(Pageable)` are layered on top of these search operations, so search settings such as pagination limits can influence reported page totals.
+* Repository `findAll(Pageable)` uses search operations only for a paged argument; an unpaged argument uses document-backed retrieval. Search pagination limits can cap paged content.
