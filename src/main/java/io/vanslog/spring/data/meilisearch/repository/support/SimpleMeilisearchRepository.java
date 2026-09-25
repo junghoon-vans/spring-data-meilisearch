@@ -144,7 +144,7 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	public Page<T> findAll(Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
 		if (pageable.isUnpaged()) {
-			List<T> documents = retrieveAll(pageable.getSort());
+			List<T> documents = meilisearchOperations.findAll(entityType, pageable.getSort());
 			return new PageImpl<>(documents, pageable, documents.size());
 		}
 
