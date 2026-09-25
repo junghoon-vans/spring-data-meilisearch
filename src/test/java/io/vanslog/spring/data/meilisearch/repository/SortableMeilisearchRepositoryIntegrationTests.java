@@ -96,7 +96,7 @@ class SortableMeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
-	void shouldSortDocumentsAcrossBatchBoundary() {
+	void shouldSortMoreThanLegacyBatchSize() {
 		List<SortableMovie> movies = IntStream.range(0, 501).mapToObj(id -> {
 			SortableMovie movie = new SortableMovie();
 			movie.setId(id);

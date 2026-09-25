@@ -79,7 +79,6 @@ import io.vanslog.spring.data.meilisearch.core.query.SimilarQuery;
 public class MeilisearchTemplate implements MeilisearchOperations {
 
 	private static final int DOCUMENT_IDS_BATCH_SIZE = 500;
-	private static final int DOCUMENTS_BATCH_SIZE = 500;
 
 	private final MeilisearchClient meilisearchClient;
 	private final MeilisearchConverter meilisearchConverter;
@@ -184,32 +183,14 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	public <T> List<T> findAll(Class<T> clazz, Sort sort) {
 		Assert.notNull(sort, "Sort must not be null");
 		String indexUid = getIndexUidFor(clazz);
-		String[] sortOptions = sort.isSorted() ? requestConverter.convertSortToSortOptions(sort) : null;
-		List<T> documents = new ArrayList<>();
-		int offset = 0;
-		while (true) {
-			List<T> batch = fetchDocumentBatch(indexUid, clazz, offset, sortOptions);
-			documents.addAll(batch);
-			if (batch.size() < DOCUMENTS_BATCH_SIZE) {
-				return documents;
-			}
-			if (offset > Integer.MAX_VALUE - DOCUMENTS_BATCH_SIZE) {
-				throw new IllegalStateException("Too many documents to retrieve with integer offsets.");
-			}
-			offset += DOCUMENTS_BATCH_SIZE;
-		}
-	}
-
-	private <T> List<T> fetchDocumentBatch(String indexUid, Class<T> clazz, int offset, @Nullable String[] sortOptions) {
 		String results;
-		if (sortOptions == null) {
+		if (sort.isUnsorted()) {
 			DocumentsQuery query = new DocumentsQuery();
-			query.setOffset(offset);
-			query.setLimit(DOCUMENTS_BATCH_SIZE);
+			query.setLimit(Integer.MAX_VALUE);
 			results = execute(client -> client.index(indexUid).getRawDocuments(query));
 		} else {
-			results = execute(
-					client -> meilisearchClient.getRawDocuments(indexUid, offset, DOCUMENTS_BATCH_SIZE, sortOptions));
+			String[] sortOptions = requestConverter.convertSortToSortOptions(sort);
+			results = execute(client -> meilisearchClient.getRawDocuments(indexUid, 0, Integer.MAX_VALUE, sortOptions));
 		}
 		return readDocuments(results, clazz);
 	}

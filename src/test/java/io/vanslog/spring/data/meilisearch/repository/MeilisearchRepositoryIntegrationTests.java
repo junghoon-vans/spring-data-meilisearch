@@ -363,7 +363,7 @@ class MeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
-	void shouldRetrieveUnpagedDocumentsAcrossBatchBoundary() {
+	void shouldRetrieveMoreThanLegacyBatchSize() {
 		List<Movie> movies = IntStream.range(0, 501)
 				.mapToObj(id -> new Movie(id, "Movie " + id, "Description", new String[] { "Drama" })).toList();
 		movieRepository.saveAll(movies);

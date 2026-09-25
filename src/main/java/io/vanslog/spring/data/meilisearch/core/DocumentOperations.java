@@ -58,7 +58,7 @@ public interface DocumentOperations {
 	<T> T get(String documentId, Class<T> clazz);
 
 	/**
-	 * Retrieves all entities of the given type through batched document reads. The entire result is held in memory.
+	 * Retrieves all entities of the given type in one document request. The entire result is held in memory.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
@@ -68,9 +68,8 @@ public interface DocumentOperations {
 	<T> List<T> findAll(Class<T> clazz);
 
 	/**
-	 * Retrieves all entities of the given type in the given order through batched document reads. The entire result is
-	 * held in memory. Sorting requires Meilisearch 1.16 or later. On 1.16 through 1.26, pagination across sorted batches
-	 * can duplicate or omit documents; use 1.27 or later for reliable sorted retrieval.
+	 * Retrieves all entities of the given type in the given order in one document request. The entire result is held in
+	 * memory. Sorting requires Meilisearch 1.16 or later. Large results can exhaust server or client memory.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}

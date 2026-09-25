@@ -41,8 +41,8 @@ class MovieController {
 * `delete(...)`
 * `deleteAll(Class<?>)`
 
-Direct `get(...)` reads a known id. `findAll(...)` lists every document in batches,
-then returns the complete result in memory; it does not return a single server-default-sized page.
+Direct `get(...)` reads a known id. `findAll(...)` requests every document at once and returns the complete result in memory;
+it does not return a single server-default-sized page.
 `multiGet(...)` reads only the document ids supplied by the caller.
 
 For multiple requested ids, `multiGet(Class<T>, List<String>)` and its offset/limit overload use native ID-list
@@ -50,9 +50,6 @@ reads available from Meilisearch 1.14; there is no individual-lookup fallback on
 The returned entities retain requested id order, excluding ids that do not exist.
 Document listing through `findAll(Class<T>, Sort)` uses server-side sorting available from
 Meilisearch 1.16 and is not limited by `@Pagination(maxTotalHits = ...)`.
-Sorted document pagination across batches is reliable from Meilisearch 1.27.
-On 1.16 through 1.26, the server may duplicate or omit documents when sorting and paginating
-(see https://github.com/meilisearch/meilisearch/issues/5943[upstream issue #5943]).
 
 [[meilisearch.operations.search]]
 == Search Operations
