@@ -58,40 +58,27 @@ public interface DocumentOperations {
 	<T> T get(String documentId, Class<T> clazz);
 
 	/**
-	 * Retrieves a server-default-sized page of entities of the given type.
+	 * Retrieves all entities of the given type through batched document reads. The entire result is held in memory.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
 	 * @param <T> the type of the entity
-	 * @return a server-default-sized page of entities
+	 * @return all entities of the given type
 	 */
-	<T> List<T> getDocuments(Class<T> clazz);
+	<T> List<T> findAll(Class<T> clazz);
 
 	/**
-	 * Retrieves a page of entities of the given type with the given offset and limit.
+	 * Retrieves all entities of the given type in the given order through batched document reads. The entire result is
+	 * held in memory. Sorting requires Meilisearch 1.16 or later. On 1.16 through 1.26, pagination across sorted batches
+	 * can duplicate or omit documents; use 1.27 or later for reliable sorted retrieval.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
-	 * @param offset the number of documents to skip, or a negative value to use the server default
-	 * @param limit the maximum number of documents to return, or a negative value to use the server default
-	 * @return entities in the requested page
-	 * @param <T> the type of the entity
-	 */
-	<T> List<T> getDocuments(Class<T> clazz, int offset, int limit);
-
-	/**
-	 * Retrieves documents using the given server-side sort, offset, and limit. Sorting requires Meilisearch 1.16 or
-	 * later. On 1.16 through 1.26, pagination across sorted batches can duplicate or omit documents; use 1.27 or later
-	 * for reliable sorted pagination.
-	 *
-	 * @param clazz the entity class
-	 * @param offset the number of documents to skip, or negative to use the server default
-	 * @param limit the maximum number of documents to return, or negative to use the server default
 	 * @param sort the sort order, whose properties must be sortable in the index
-	 * @param <T> the entity type
-	 * @return the matching entities in sorted order
+	 * @param <T> the type of the entity
+	 * @return all entities in sorted order
 	 */
-	<T> List<T> getDocuments(Class<T> clazz, int offset, int limit, Sort sort);
+	<T> List<T> findAll(Class<T> clazz, Sort sort);
 
 	/**
 	 * Retrieves all entities of the given type with the given document ids. Native ID-list retrieval requires Meilisearch

@@ -19,13 +19,9 @@ import org.springframework.data.domain.Sort
 
 inline fun <reified T : Any> DocumentOperations.get(documentId: String): T? = get(documentId, T::class.java)
 
-inline fun <reified T : Any> DocumentOperations.getDocuments(): List<T> = getDocuments(T::class.java)
+inline fun <reified T : Any> DocumentOperations.findAll(): List<T> = findAll(T::class.java)
 
-inline fun <reified T : Any> DocumentOperations.getDocuments(offset: Int, limit: Int): List<T> =
-    getDocuments(T::class.java, offset, limit)
-
-inline fun <reified T : Any> DocumentOperations.getDocuments(offset: Int, limit: Int, sort: Sort): List<T> =
-    getDocuments(T::class.java, offset, limit, sort)
+inline fun <reified T : Any> DocumentOperations.findAll(sort: Sort): List<T> = findAll(T::class.java, sort)
 
 inline fun <reified T : Any> DocumentOperations.multiGet(documentIds: List<String>): List<T> =
     multiGet(T::class.java, documentIds)

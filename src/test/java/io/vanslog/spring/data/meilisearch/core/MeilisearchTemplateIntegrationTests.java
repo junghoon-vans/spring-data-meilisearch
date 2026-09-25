@@ -32,6 +32,7 @@ import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfigura
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,25 +113,13 @@ class MeilisearchTemplateIntegrationTests {
 	}
 
 	@Test
-	void shouldGetEntities() {
+	void shouldFindAllEntities() {
 
-		List<Movie> movies = List.of(movie1, movie2, movie3);
+		List<Movie> movies = IntStream.range(0, 21)
+				.mapToObj(id -> new Movie(id, "Movie " + id, "A film", new String[] { "Drama" })).toList();
 		meilisearchTemplate.save(movies);
 
-		List<Movie> savedMovies = meilisearchTemplate.getDocuments(Movie.class);
-
-		assertThat(savedMovies).containsExactlyInAnyOrder(movie1, movie2, movie3);
-	}
-
-	@Test
-	void shouldGetEntitiesWithPagination() {
-
-		List<Movie> movies = List.of(movie1, movie2, movie3);
-		meilisearchTemplate.save(movies);
-
-		List<Movie> savedMovies = meilisearchTemplate.getDocuments(Movie.class, 1, 2);
-
-		assertThat(savedMovies).containsExactlyInAnyOrder(movie2, movie3);
+		assertThat(meilisearchTemplate.findAll(Movie.class)).containsExactlyInAnyOrderElementsOf(movies);
 	}
 
 	@Test

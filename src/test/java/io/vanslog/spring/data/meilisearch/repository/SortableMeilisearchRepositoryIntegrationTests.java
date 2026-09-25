@@ -92,8 +92,7 @@ class SortableMeilisearchRepositoryIntegrationTests {
 		// then
 		assertThat(descOrdered).hasSize(3).containsExactly(movie2, movie3, movie1);
 		assertThat(ascOrdered).hasSize(3).containsExactly(movie1, movie3, movie2);
-		assertThat(operations.getDocuments(SortableMovie.class, -1, -1, Sort.by("title"))).containsExactly(movie1, movie3,
-				movie2);
+		assertThat(operations.findAll(SortableMovie.class, Sort.by("title"))).containsExactly(movie1, movie3, movie2);
 	}
 
 	@Test
