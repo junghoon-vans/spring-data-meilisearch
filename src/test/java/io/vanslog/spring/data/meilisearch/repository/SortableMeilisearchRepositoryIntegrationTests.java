@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -100,7 +101,7 @@ class SortableMeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
-	void shouldSortMoreThanLegacyBatchSize() {
+	void shouldSortUnpagedDocumentsBeyondLegacyBatchSize() {
 		List<SortableMovie> movies = IntStream.range(0, 501).mapToObj(id -> {
 			SortableMovie movie = new SortableMovie();
 			movie.setId(id);
@@ -109,8 +110,14 @@ class SortableMeilisearchRepositoryIntegrationTests {
 		}).toList();
 		movieRepository.saveAll(movies);
 
-		assertThat(movieRepository.findAll(Sort.by("title"))).extracting(SortableMovie::getId)
-				.containsExactlyElementsOf(IntStream.rangeClosed(0, 500).map(id -> 500 - id).boxed().toList());
+		Sort sort = Sort.by("title");
+		List<Integer> expectedIds = IntStream.rangeClosed(0, 500).map(id -> 500 - id).boxed().toList();
+		Iterable<SortableMovie> sorted = movieRepository.findAll(sort);
+		Page<SortableMovie> page = movieRepository.findAll(Pageable.unpaged(sort));
+
+		assertThat(sorted).extracting(SortableMovie::getId).containsExactlyElementsOf(expectedIds);
+		assertThat(page.getContent()).extracting(SortableMovie::getId).containsExactlyElementsOf(expectedIds);
+		assertThat(page.getTotalElements()).isEqualTo(movies.size());
 	}
 
 	@Test

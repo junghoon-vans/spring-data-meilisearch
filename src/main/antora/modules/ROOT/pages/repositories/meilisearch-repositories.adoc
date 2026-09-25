@@ -32,7 +32,7 @@ It means repository creation can have side effects on the target index configura
 The built-in repository methods do not all use the same underlying Meilisearch API:
 
 * `findById(...)` and `existsById(...)` use direct document lookup; `findAllById(...)` uses native ID-list fetch.
-* `findAll()` lists documents in one request; sorted `findAll(Sort)` counts first, then fetches once. `findAll(Pageable)` uses search APIs.
+* `findAll()` lists documents in one request; sorted `findAll(Sort)` counts first, then fetches once. A paged `findAll(Pageable)` uses search APIs, while an unpaged `Pageable` uses document listing.
 * `count()` uses `SearchOperations.count(...)`.
 * `save(...)`, `saveAll(...)`, and delete methods delegate to `MeilisearchOperations` document-oriented write operations.
 
@@ -58,7 +58,7 @@ Document-backed reads require a key with `documents.get` permission.
 | Lists documents in one fetch; sorting counts first and uses the document API from Meilisearch 1.16.
 
 | `findAll(Pageable)`
-| Builds a search query and unwraps Meilisearch search hits back into entities.
+| A paged `Pageable` builds a search query and unwraps Meilisearch search hits back into entities; an unpaged `Pageable` lists all documents in batches and preserves its sort.
 
 | `count`
 | Delegates to the operations layer count support rather than maintaining a separate repository-side count strategy.
@@ -70,9 +70,13 @@ Document-backed reads require a key with `documents.get` permission.
 [[meilisearch.repositories.paging]]
 == Paging and Totals
 
-`findAll(Pageable)` is backed by a `BasicQuery` plus search result metadata.
-The repository `Page` total is therefore derived from Meilisearch search totals, not from a separate count query.
-If the index is configured with `@Pagination(maxTotalHits = ...)`, that limit can cap the reported page total.
+`findAll(Pageable)` selects its backing API based on whether the `Pageable` is paged.
+A paged `Pageable` is backed by a `BasicQuery` plus search result metadata.
+Its `Page` total is therefore derived from Meilisearch search totals, not from a separate count query.
+If the index is configured with `@Pagination(maxTotalHits = ...)`, that limit can cap the returned search content even when the reported total is larger.
 
-The same search-backed design also explains why repository pagination does not expose richer search response data such as facets or federation metadata.
+An unpaged `Pageable` (including `Pageable.unpaged(Sort)`) uses document-backed batch retrieval and returns the complete content in the requested order.
+Its `Page` total is based on the retrieved document count and is not capped by `maxTotalHits`.
+
+The search-backed design for paged repository pagination explains why those results do not expose richer search response data such as facets or federation metadata.
 When an application needs those store-specific result structures, prefer calling `MeilisearchOperations` directly from the service layer.

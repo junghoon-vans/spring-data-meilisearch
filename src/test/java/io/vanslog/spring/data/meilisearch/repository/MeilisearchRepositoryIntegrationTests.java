@@ -37,6 +37,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -351,12 +352,17 @@ class MeilisearchRepositoryIntegrationTests {
 
 		// when
 		Page<TotalHitsLimited> page = totalHitsLimitedRepository.findAll(PageRequest.of(0, elementCount));
+		Page<TotalHitsLimited> unpaged = totalHitsLimitedRepository.findAll(Pageable.unpaged());
 
 		// then
 		assertThat(totalHitsLimitedRepository.count()).isEqualTo(elementCount);
 		assertThat(page).hasSize(10);
 		assertThat(page.getTotalElements()).isEqualTo(elementCount);
 		assertThat(page.getTotalPages()).isEqualTo(1);
+		assertThat(unpaged.getContent()).hasSize(elementCount);
+		assertThat(unpaged.getTotalElements()).isEqualTo(elementCount);
+		assertThat(unpaged.getContent()).extracting(entity -> entity.name)
+				.containsExactlyInAnyOrderElementsOf(IntStream.range(0, elementCount).mapToObj(i -> "name" + i).toList());
 		assertThat(totalHitsLimitedRepository.findAll()).hasSize(elementCount);
 		assertThat(totalHitsLimitedRepository.findAll(Sort.by("name"))).extracting(entity -> entity.name).containsExactly(
 				"name0", "name1", "name10", "name2", "name3", "name4", "name5", "name6", "name7", "name8", "name9");

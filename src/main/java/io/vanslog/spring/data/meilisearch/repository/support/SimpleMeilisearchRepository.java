@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.core.EntityInformation;
@@ -142,6 +143,11 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	@Override
 	public Page<T> findAll(Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
+		if (pageable.isUnpaged()) {
+			List<T> documents = retrieveAll(pageable.getSort());
+			return new PageImpl<>(documents, pageable, documents.size());
+		}
+
 		BaseQuery query = BasicQuery.builder().withPageable(pageable).build();
 		SearchHits<T> searchHits = meilisearchOperations.search(query, entityType);
 		SearchPage<T> page = SearchHitSupport.searchPageFor(searchHits, query.getPageable(), searchHits.getTotalHits());
