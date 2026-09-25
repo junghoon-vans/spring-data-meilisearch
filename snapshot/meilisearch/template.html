@@ -469,7 +469,7 @@ class MovieController {
 <h2 id="meilisearch.operations.documents"><a class="anchor" href="#meilisearch.operations.documents"></a>Document Operations</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>DocumentOperations</code> covers id-oriented access to one mapped entity type:</p>
+<p><code>DocumentOperations</code> covers document access to one mapped entity type:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -480,7 +480,10 @@ class MovieController {
 <p><code>get(String, Class&lt;T&gt;)</code></p>
 </li>
 <li>
-<p><code>multiGet(&#8230;&#8203;)</code></p>
+<p><code>findAll(Class&lt;T&gt;)</code> and <code>findAll(Class&lt;T&gt;, Sort)</code> for complete document listing</p>
+</li>
+<li>
+<p><code>multiGet(&#8230;&#8203;)</code> for ID-list retrieval</p>
 </li>
 <li>
 <p><code>exists(String, Class&lt;?&gt;)</code></p>
@@ -494,17 +497,16 @@ class MovieController {
 </ul>
 </div>
 <div class="paragraph">
-<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id, while <code>multiGet(&#8230;&#8203;)</code> also supports document listing and ID-list retrieval.</p>
+<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id. <code>findAll(&#8230;&#8203;)</code> returns the complete result in memory rather than a server-default-sized page.
+Sorted listing counts documents first, then fetches them in one request; if the index grows between requests, it fails instead of returning a partial result.
+<code>multiGet(&#8230;&#8203;)</code> reads only the document ids supplied by the caller.</p>
 </div>
 <div class="paragraph">
 <p>For multiple requested ids, <code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code> and its offset/limit overload use native ID-list
 reads available from Meilisearch 1.14; there is no individual-lookup fallback on older servers.
 The returned entities retain requested id order, excluding ids that do not exist.
-Document listing through <code>multiGet(Class&lt;T&gt;, int, int, Sort)</code> uses server-side sorting available from
-Meilisearch 1.16 and is not limited by <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>.
-Sorted document pagination across batches is reliable from Meilisearch 1.27.
-On 1.16 through 1.26, the server may duplicate or omit documents when sorting and paginating
-(see <a href="https://github.com/meilisearch/meilisearch/issues/5943">upstream issue #5943</a>).</p>
+Document listing through <code>findAll(Class&lt;T&gt;, Sort)</code> uses server-side sorting available from
+Meilisearch 1.16 and is not limited by <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>.</p>
 </div>
 </div>
 </div>
