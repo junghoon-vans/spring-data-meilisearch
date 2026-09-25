@@ -1,6 +1,6 @@
 {
   "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
-  "generated": "2026-09-25T06:11:49.485Z",
+  "generated": "2026-09-25T13:42:50.966Z",
   "url": "https://junghoon-vans.github.io/spring-data-meilisearch",
   "components": {
     "data-meilisearch": {
