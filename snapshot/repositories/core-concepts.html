@@ -490,7 +490,10 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
 <p><code>findAll()</code> retrieves all documents in one request; sorted <code>findAll(Sort)</code> counts first, then fetches once.</p>
 </li>
 <li>
-<p><code>findAll(Pageable)</code> and <code>count()</code> use search APIs.</p>
+<p>Paged <code>findAll(Pageable)</code> uses search APIs; an unpaged <code>Pageable</code> uses document listing and counts first if sorted.</p>
+</li>
+<li>
+<p><code>count()</code> uses search APIs.</p>
 </li>
 </ul>
 </div>

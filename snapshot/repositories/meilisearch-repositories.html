@@ -478,7 +478,7 @@ It means repository creation can have side effects on the target index configura
 <p><code>findById(&#8230;&#8203;)</code> and <code>existsById(&#8230;&#8203;)</code> use direct document lookup; <code>findAllById(&#8230;&#8203;)</code> uses native ID-list fetch.</p>
 </li>
 <li>
-<p><code>findAll()</code> lists documents in one request; sorted <code>findAll(Sort)</code> counts first, then fetches once. <code>findAll(Pageable)</code> uses search APIs.</p>
+<p><code>findAll()</code> lists documents in one request; sorted <code>findAll(Sort)</code> counts first, then fetches once. A paged <code>findAll(Pageable)</code> uses search APIs, while an unpaged <code>Pageable</code> uses document listing.</p>
 </li>
 <li>
 <p><code>count()</code> uses <code>SearchOperations.count(&#8230;&#8203;)</code>.</p>
@@ -521,7 +521,7 @@ Document-backed reads require a key with <code>documents.get</code> permission.<
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll(Pageable)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Builds a search query and unwraps Meilisearch search hits back into entities.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A paged <code>Pageable</code> builds a search query and unwraps Meilisearch search hits back into entities; an unpaged <code>Pageable</code> lists all documents in one fetch, counting first if sorted.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>count</code></p></td>
@@ -540,12 +540,17 @@ Document-backed reads require a key with <code>documents.get</code> permission.<
 <h2 id="meilisearch.repositories.paging"><a class="anchor" href="#meilisearch.repositories.paging"></a>Paging and Totals</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>findAll(Pageable)</code> is backed by a <code>BasicQuery</code> plus search result metadata.
-The repository <code>Page</code> total is therefore derived from Meilisearch search totals, not from a separate count query.
-If the index is configured with <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, that limit can cap the reported page total.</p>
+<p><code>findAll(Pageable)</code> selects its backing API based on whether the <code>Pageable</code> is paged.
+A paged <code>Pageable</code> is backed by a <code>BasicQuery</code> plus search result metadata.
+Its <code>Page</code> total is therefore derived from Meilisearch search totals, not from a separate count query.
+If the index is configured with <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, that limit can cap the returned search content even when the reported total is larger.</p>
 </div>
 <div class="paragraph">
-<p>The same search-backed design also explains why repository pagination does not expose richer search response data such as facets or federation metadata.
+<p>An unpaged <code>Pageable</code> (including <code>Pageable.unpaged(Sort)</code>) returns complete content in the requested order. Sorting requires a preliminary count before the document fetch.
+Its <code>Page</code> total is based on the retrieved document count and is not capped by <code>maxTotalHits</code>.</p>
+</div>
+<div class="paragraph">
+<p>The search-backed design for paged repository pagination explains why those results do not expose richer search response data such as facets or federation metadata.
 When an application needs those store-specific result structures, prefer calling <code>MeilisearchOperations</code> directly from the service layer.</p>
 </div>
 </div>

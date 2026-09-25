@@ -534,13 +534,13 @@ This keeps unsupported query-method configuration from looking like an implement
 <p><code>findAllById(&#8230;&#8203;)</code> uses native ID-list fetch, available from Meilisearch 1.14.</p>
 </li>
 <li>
-<p>Sorted <code>findAll(Sort)</code> requires Meilisearch 1.16.</p>
+<p>Sorted <code>findAll(Sort)</code> and sorted unpaged <code>findAll(Pageable)</code> require Meilisearch 1.16.</p>
 </li>
 <li>
-<p><code>findAll(Pageable)</code> remains search-backed and inherits Meilisearch search pagination limits and search-only settings.</p>
+<p>Paged <code>findAll(Pageable)</code> remains search-backed and inherits Meilisearch search pagination limits and search-only settings.</p>
 </li>
 <li>
-<p>Document-backed repository methods do not expose search response features such as facet metadata.</p>
+<p>An unpaged <code>Pageable</code> uses document-backed listing (with a preliminary count if sorted), so its content and total are not capped by <code>maxTotalHits</code>.</p>
 </li>
 <li>
 <p>If your use case depends on advanced query composition or store-specific search options, prefer <code>MeilisearchOperations</code> explicitly in the service layer.</p>
