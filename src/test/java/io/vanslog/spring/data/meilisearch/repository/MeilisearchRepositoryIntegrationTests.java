@@ -129,7 +129,7 @@ class MeilisearchRepositoryIntegrationTests {
 		Movie movie = new Movie(1, "Carol", "A love story", new String[] { "Romance" });
 		movieRepository.save(movie);
 
-		assertThat(movieRepository.saveAll(List.<Movie>of())).isEmpty();
+		assertThat(movieRepository.saveAll(List.<Movie> of())).isEmpty();
 		assertThat(movieRepository.findAll()).containsExactly(movie);
 	}
 
@@ -223,7 +223,7 @@ class MeilisearchRepositoryIntegrationTests {
 		Movie movie = new Movie(1, "Carol", "A love story", new String[] { "Romance" });
 		movieRepository.save(movie);
 
-		movieRepository.deleteAll(List.<Movie>of());
+		movieRepository.deleteAll(List.<Movie> of());
 
 		assertThat(movieRepository.findAll()).containsExactly(movie);
 	}
