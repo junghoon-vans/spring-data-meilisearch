@@ -85,7 +85,7 @@ public class MeilisearchClient extends Client {
 
 	/**
 	 * Fetch raw documents in server sort order. The SDK's {@code DocumentsQuery} does not yet expose sorting. Sorting
-	 * requires Meilisearch 1.16 or later; paginating sorted requests reliably requires 1.27 or later.
+	 * documents requires Meilisearch 1.16 or later.
 	 *
 	 * @param indexUid index containing the documents
 	 * @param offset number of documents to skip, or negative to use the server default
