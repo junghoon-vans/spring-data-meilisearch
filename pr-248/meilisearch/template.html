@@ -500,8 +500,8 @@ class MovieController {
 </ul>
 </div>
 <div class="paragraph">
-<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id. <code>findAll(&#8230;&#8203;)</code> requests every document at once and returns the complete result in memory;
-it does not return a single server-default-sized page.
+<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id. <code>findAll(&#8230;&#8203;)</code> returns the complete result in memory rather than a server-default-sized page.
+Sorted listing counts documents first, then fetches them in one request; if the index grows between requests, it fails instead of returning a partial result.
 <code>multiGet(&#8230;&#8203;)</code> reads only the document ids supplied by the caller.</p>
 </div>
 <div class="paragraph">
