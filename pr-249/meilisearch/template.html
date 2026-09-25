@@ -483,7 +483,7 @@ class MovieController {
 <p><code>get(String, Class&lt;T&gt;)</code></p>
 </li>
 <li>
-<p><code>getDocuments(&#8230;&#8203;)</code> for document listing</p>
+<p><code>findAll(Class&lt;T&gt;)</code> and <code>findAll(Class&lt;T&gt;, Sort)</code> for complete document listing</p>
 </li>
 <li>
 <p><code>multiGet(&#8230;&#8203;)</code> for ID-list retrieval</p>
@@ -500,16 +500,15 @@ class MovieController {
 </ul>
 </div>
 <div class="paragraph">
-<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id. <code>getDocuments(&#8230;&#8203;)</code> lists documents without an
-id filter: its no-argument overload returns one server-default-sized page, while
-the offset/limit overloads request a specific page. <code>multiGet(&#8230;&#8203;)</code> reads the
-document ids supplied by the caller.</p>
+<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id. <code>findAll(&#8230;&#8203;)</code> lists every document in batches,
+then returns the complete result in memory; it does not return a single server-default-sized page.
+<code>multiGet(&#8230;&#8203;)</code> reads only the document ids supplied by the caller.</p>
 </div>
 <div class="paragraph">
 <p>For multiple requested ids, <code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code> and its offset/limit overload use native ID-list
 reads available from Meilisearch 1.14; there is no individual-lookup fallback on older servers.
 The returned entities retain requested id order, excluding ids that do not exist.
-Document listing through <code>getDocuments(Class&lt;T&gt;, int, int, Sort)</code> uses server-side sorting available from
+Document listing through <code>findAll(Class&lt;T&gt;, Sort)</code> uses server-side sorting available from
 Meilisearch 1.16 and is not limited by <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>.
 Sorted document pagination across batches is reliable from Meilisearch 1.27.
 On 1.16 through 1.26, the server may duplicate or omit documents when sorting and paginating
