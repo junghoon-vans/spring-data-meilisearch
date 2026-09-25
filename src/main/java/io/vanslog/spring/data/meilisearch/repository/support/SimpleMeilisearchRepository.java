@@ -143,8 +143,9 @@ public class SimpleMeilisearchRepository<T, ID> implements MeilisearchRepository
 	private List<T> retrieveAll(Sort sort) {
 		List<T> documents = new ArrayList<>();
 		for (int offset = 0;; offset += DOCUMENTS_BATCH_SIZE) {
-			List<T> batch = sort.isSorted() ? meilisearchOperations.multiGet(entityType, offset, DOCUMENTS_BATCH_SIZE, sort)
-					: meilisearchOperations.multiGet(entityType, offset, DOCUMENTS_BATCH_SIZE);
+			List<T> batch = sort.isSorted()
+					? meilisearchOperations.getDocuments(entityType, offset, DOCUMENTS_BATCH_SIZE, sort)
+					: meilisearchOperations.getDocuments(entityType, offset, DOCUMENTS_BATCH_SIZE);
 			documents.addAll(batch);
 			if (batch.size() < DOCUMENTS_BATCH_SIZE) {
 				return documents;

@@ -175,12 +175,12 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	}
 
 	@Override
-	public <T> List<T> multiGet(Class<T> clazz) {
-		return multiGet(clazz, -1, -1);
+	public <T> List<T> getDocuments(Class<T> clazz) {
+		return getDocuments(clazz, -1, -1);
 	}
 
 	@Override
-	public <T> List<T> multiGet(Class<T> clazz, int offset, int limit) {
+	public <T> List<T> getDocuments(Class<T> clazz, int offset, int limit) {
 		String indexUid = getIndexUidFor(clazz);
 		DocumentsQuery query = new DocumentsQuery();
 		query.setOffset(offset);
@@ -191,7 +191,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	}
 
 	@Override
-	public <T> List<T> multiGet(Class<T> clazz, int offset, int limit, Sort sort) {
+	public <T> List<T> getDocuments(Class<T> clazz, int offset, int limit, Sort sort) {
 		Assert.notNull(sort, "Sort must not be null");
 		String indexUid = getIndexUidFor(clazz);
 		String[] sortOptions = requestConverter.convertSortToSortOptions(sort);

@@ -58,25 +58,26 @@ public interface DocumentOperations {
 	<T> T get(String documentId, Class<T> clazz);
 
 	/**
-	 * Retrieves all entities of the given type.
+	 * Retrieves a server-default-sized page of entities of the given type.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
 	 * @param <T> the type of the entity
-	 * @return all entities
+	 * @return a server-default-sized page of entities
 	 */
-	<T> List<T> multiGet(Class<T> clazz);
+	<T> List<T> getDocuments(Class<T> clazz);
 
 	/**
-	 * Retrieves all entities of the given type with the given offset and limit.
+	 * Retrieves a page of entities of the given type with the given offset and limit.
 	 *
-	 * @param clazz must not be {@literal null}.
-	 * @param offset must not be {@literal null}.
-	 * @param limit must not be {@literal null}.
-	 * @return entities
-	 * @param <T> entity type
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @param offset the number of documents to skip, or a negative value to use the server default
+	 * @param limit the maximum number of documents to return, or a negative value to use the server default
+	 * @return entities in the requested page
+	 * @param <T> the type of the entity
 	 */
-	<T> List<T> multiGet(Class<T> clazz, int offset, int limit);
+	<T> List<T> getDocuments(Class<T> clazz, int offset, int limit);
 
 	/**
 	 * Retrieves documents using the given server-side sort, offset, and limit. Sorting requires Meilisearch 1.16 or
@@ -90,7 +91,7 @@ public interface DocumentOperations {
 	 * @param <T> the entity type
 	 * @return the matching entities in sorted order
 	 */
-	<T> List<T> multiGet(Class<T> clazz, int offset, int limit, Sort sort);
+	<T> List<T> getDocuments(Class<T> clazz, int offset, int limit, Sort sort);
 
 	/**
 	 * Retrieves all entities of the given type with the given document ids. Native ID-list retrieval requires Meilisearch
