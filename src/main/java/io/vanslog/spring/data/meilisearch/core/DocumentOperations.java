@@ -68,9 +68,9 @@ public interface DocumentOperations {
 	<T> List<T> findAll(Class<T> clazz);
 
 	/**
-	 * Retrieves entities of the given type in the given order. Sorted listing first counts the documents, then fetches
-	 * up to that count in one request; concurrent additions can leave the returned result short of the current total.
-	 * The entire result is held in memory. Sorting requires Meilisearch 1.16 or later.
+	 * Retrieves entities of the given type in the given order. Sorted listing first counts the documents, then fetches up
+	 * to that count in one request; concurrent additions can leave the returned result short of the current total. The
+	 * entire result is held in memory. Sorting requires Meilisearch 1.16 or later.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}

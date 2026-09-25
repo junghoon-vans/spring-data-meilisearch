@@ -42,8 +42,8 @@ public interface MeilisearchRepository<T, ID> extends CrudRepository<T, ID>, Pag
 
 	/**
 	 * Retrieves documents in the requested order. Sorted listing first counts the documents, then fetches up to that
-	 * count; concurrent additions can leave the result short of the current total. Sorting requires Meilisearch 1.16
-	 * or later.
+	 * count; concurrent additions can leave the result short of the current total. Sorting requires Meilisearch 1.16 or
+	 * later.
 	 *
 	 * @param sort the sort order; attributes must be sortable in the index settings
 	 * @return the documents in the requested order when sorted
