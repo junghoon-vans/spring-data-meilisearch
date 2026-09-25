@@ -136,7 +136,8 @@ public interface DocumentOperations {
 	<T> boolean delete(T entity);
 
 	/**
-	 * Deletes all entities of the given type with the given document ids.
+	 * Deletes all entities of the given type with the given document ids. An empty list succeeds without a server
+	 * request.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}

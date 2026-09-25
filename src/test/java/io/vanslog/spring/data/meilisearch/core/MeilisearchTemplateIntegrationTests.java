@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
+import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.core.federation.FederationResponse;
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.MergeFacets;
 import com.meilisearch.sdk.MultiSearchFederation;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
@@ -195,6 +197,18 @@ class MeilisearchTemplateIntegrationTests {
 		boolean result = meilisearchTemplate.delete(Movie.class, List.of("1", "2"));
 
 		assertThat(result).isTrue();
+	}
+
+	@Test
+	void shouldSkipClientForEmptyDocumentIdDeletion() {
+		MeilisearchClient client = new MeilisearchClient(new MeilisearchTestConfiguration().clientConfiguration()) {
+			@Override
+			public Index index(String indexUid) {
+				throw new AssertionError("Empty deletion must not access the client");
+			}
+		};
+
+		assertThat(new MeilisearchTemplate(client).delete(Movie.class, List.of())).isTrue();
 	}
 
 	@Test

@@ -269,6 +269,10 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public boolean delete(Class<?> clazz, List<String> documentIds) {
+		if (documentIds.isEmpty()) {
+			return true;
+		}
+
 		String indexUid = getIndexUidFor(clazz);
 		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteDocuments(documentIds));
 		return isTaskSucceeded(indexUid, taskInfo);
