@@ -531,13 +531,13 @@ This keeps unsupported query-method configuration from looking like an implement
 <div class="ulist">
 <ul>
 <li>
-<p><code>findAll()</code> and <code>findAll(Sort)</code> read every document in batches through the document API; sorting requires a sortable attribute in the index settings.</p>
+<p><code>findAll()</code> reads every document in one request through the document API; sorted <code>findAll(Sort)</code> counts first, then fetches once. Sorting requires a sortable attribute in the index settings.</p>
 </li>
 <li>
 <p><code>findAllById(&#8230;&#8203;)</code> uses native ID-list fetch, available from Meilisearch 1.14.</p>
 </li>
 <li>
-<p>Sorted <code>findAll(Sort)</code> requires Meilisearch 1.16; on 1.16 through 1.26, pagination across batches may duplicate or omit documents.</p>
+<p>Sorted <code>findAll(Sort)</code> requires Meilisearch 1.16.</p>
 </li>
 <li>
 <p><code>findAll(Pageable)</code> remains search-backed and inherits Meilisearch search pagination limits and search-only settings.</p>

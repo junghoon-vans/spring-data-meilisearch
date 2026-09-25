@@ -490,7 +490,7 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
 <p><code>findById(&#8230;&#8203;)</code> uses direct document lookup; <code>findAllById(&#8230;&#8203;)</code> uses native ID-list fetch.</p>
 </li>
 <li>
-<p><code>findAll()</code> and <code>findAll(Sort)</code> list documents in batches.</p>
+<p><code>findAll()</code> retrieves all documents in one request; sorted <code>findAll(Sort)</code> counts first, then fetches once.</p>
 </li>
 <li>
 <p><code>findAll(Pageable)</code> and <code>count()</code> use search APIs.</p>
