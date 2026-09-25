@@ -41,8 +41,9 @@ public interface MeilisearchRepository<T, ID> extends CrudRepository<T, ID>, Pag
 	Iterable<T> findAllById(Iterable<ID> ids);
 
 	/**
-	 * Retrieves every document. Sorted listing first counts the documents; concurrent additions can cause the call to
-	 * fail rather than return a partial result. Server-side sorting requires Meilisearch 1.16 or later.
+	 * Retrieves documents in the requested order. Sorted listing first counts the documents, then fetches up to that
+	 * count; concurrent additions can leave the result short of the current total. Sorting requires Meilisearch 1.16
+	 * or later.
 	 *
 	 * @param sort the sort order; attributes must be sortable in the index settings
 	 * @return the documents in the requested order when sorted
