@@ -9,70 +9,64 @@ The Spring Data Meilisearch project provides integration with the Meilisearch se
 
 == Features
 
-* Spring Configuration support using Java based `@Configuration` classes or an XML namespace for the Meilisearch client.
-* Implementation of CRUD methods for Meilisearch Documents.
+* JavaConfig and XML namespace configuration for the Meilisearch client and repositories.
+* Entity mapping, document and search operations, index management, and index settings.
+* Blocking Spring Data repositories for CRUD, sorting, and paging.
 
 == Getting Started
 
-Requires Meilisearch 1.16 or later.
-
-Here is a quick teaser of an application using Spring Data Repositories in Java:
+Requires JDK 17 or newer and a reachable Meilisearch instance; individual APIs have server-version requirements (for example, sorted document listing needs Meilisearch 1.16 or later).
+The following example assumes the classes are in `com.example.movies` and the usual Spring Data Meilisearch imports are present:
 
 [source,java]
 ----
-public interface MovieRepository extends CrudRepository<Movie, Integer> { }
+@Document(indexUid = "movies")
+class Movie {
+    @Id String id;
+    String title;
+}
 
-@Service
-public class MyService {
-
-    @Autowired private MovieRepository repository;
-
-    public void doWork(Movie movie) {
-        repository.save(movie);
-    }
+interface MovieRepository extends MeilisearchRepository<Movie, String> {
 }
 
 @Configuration
-@EnableMeilisearchRepositories
-public class Config extends MeilisearchConfiguration {
+@EnableMeilisearchRepositories(basePackages = "com.example.movies")
+class Config extends MeilisearchConfiguration {
 
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
                 .connectedToLocalhost()
-                .withApiKey("masterKey")
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
                 .build();
     }
 }
 ----
 
+Inject `MovieRepository` into a Spring bean and call `repository.save(movie)`.
+Use an API key with the required permissions; do not embed the Meilisearch master key in application code.
+See the link:https://junghoon-vans.github.io/spring-data-meilisearch/getting-started.html[getting-started guide] for more setup and repository usage.
+
 === Maven configuration
 
-Add the Maven dependency:
+Set `spring-data-meilisearch.version` in your POM to a published version from the Maven Central badge above, then add the dependency:
 
 [source,xml]
 ----
 <dependency>
   <groupId>io.vanslog</groupId>
   <artifactId>spring-data-meilisearch</artifactId>
-  <version>${version}</version>
+  <version>${spring-data-meilisearch.version}</version>
 </dependency>
 ----
 
-If you’d rather like the latest snapshots of the upcoming major version, use our Maven snapshot repository and declare the appropriate dependency version.
+To use a development snapshot, set the dependency version property to the *exact* published `-SNAPSHOT` version and add the Central snapshots repository to your Maven `<repositories>`:
 
 [source,xml]
 ----
-<dependency>
-    <groupId>io.vanslog</groupId>
-    <artifactId>spring-data-meilisearch</artifactId>
-    <version>${version}-SNAPSHOT</version>
-</dependency>
-
 <repository>
-    <id>sonatype-snapshots</id>
-    <name>Sonatype Snapshot Repository</name>
-    <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+  <id>central-snapshots</id>
+  <url>https://central.sonatype.com/repository/maven-snapshots/</url>
 </repository>
 ----
 
@@ -95,15 +89,14 @@ Attach a link to your code or a compressed file containing your code.
 
 == Building from Source
 
-Spring Data can be easily built with the https://github.com/takari/maven-wrapper[maven wrapper].
-You also need JDK 17 or above.
+Build with the bundled https://maven.apache.org/wrapper/[Maven Wrapper] and JDK 17 or newer.
 
 [source,bash]
 ----
- $ ./mvnw clean install
+./mvnw clean install
 ----
 
-If you want to build with the regular `mvn` command, you will need https://maven.apache.org/run-maven/index.html[Maven v3.5.0 or above].
+If you use `mvn` instead, Maven 3.9.6 is the version pinned by this project's wrapper.
 
 _Also see link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] if you wish to submit pull requests._
 
@@ -113,7 +106,7 @@ Build the authoring/PR preview documentation from the checked-out HEAD with Mave
 
 [source,bash]
 ----
- $ ./mvnw -Pantora antora:antora
+./mvnw -Pantora antora:antora
 ----
 
 The generated documentation is available from `target/site/index.html`.
@@ -122,12 +115,12 @@ To build the published aggregate site locally, fetch `main` and release tags fir
 
 [source,bash]
 ----
- $ git fetch --tags origin main
- $ ./mvnw -Pantora antora:antora
- $ rm -rf target/site
- $ node src/main/antora/generate-publish-playbook.mjs
- $ npx --offline antora --to-dir target/site target/antora-publish-playbook.yml
- $ node src/main/antora/copy-latest-stable-version.mjs
+git fetch --tags origin main
+./mvnw -Pantora antora:antora
+rm -rf target/site
+node src/main/antora/generate-publish-playbook.mjs
+npx --offline antora --to-dir target/site target/antora-publish-playbook.yml
+node src/main/antora/copy-latest-stable-version.mjs
 ----
 
 == License

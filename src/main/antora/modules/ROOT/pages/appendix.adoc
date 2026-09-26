@@ -15,6 +15,8 @@ Spring Data Meilisearch uses `http://www.vanslog.io/spring/data/meilisearch` as 
 
 Creates a `MeilisearchClient` bean.
 
+When omitted, the XML factory leaves the optional task-wait timeout attributes at `0`, unlike the Java builder defaults of 5,000 ms and 50 ms. Set both attributes for applications that save documents or run other task-based operations.
+
 [cols="1,1,3"]
 |===
 |Attribute | Default | Description
@@ -28,24 +30,24 @@ Creates a `MeilisearchClient` bean.
 |The Meilisearch server URL.
 
 |`api-key`
-|
-|The API key used for authentication.
+|Required
+|API key used for authentication. The XML parser rejects a missing or blank value.
 
 |`client-agents`
 |
-|Comma-delimited client agent values sent with requests.
+|Comma-delimited client-agent values sent in the `User-Agent` header.
 
 |`request-timeout`
-|
-|How long to wait, in milliseconds, for task-based operations to complete.
+|`0` ms when omitted
+|Task-completion wait timeout in milliseconds. This is not an HTTP connection timeout.
 
 |`request-interval`
-|
-|Polling interval, in milliseconds, used while waiting for task completion.
+|`0` ms when omitted
+|Polling interval in milliseconds while waiting for task completion.
 
 |`json-handler-ref`
 |`jsonHandler`
-|Reference to a bean implementing `com.meilisearch.sdk.json.JsonHandler`.
+|Reference to a bean implementing `com.meilisearch.sdk.json.JsonHandler`. The XML namespace does not create this bean; declare it yourself.
 |===
 
 [[meilisearch.appendix.xml-namespace.repositories]]
@@ -70,15 +72,22 @@ It extends the generic Spring Data repository namespace and therefore also suppo
 [[meilisearch.appendix.xml-namespace.example]]
 === Example
 
+The example uses `MeilisearchTemplate`'s one-argument constructor, which creates the default mapping converter and Jackson `ObjectMapper`. Wire the converter and mapper explicitly if you need custom conversions.
+
 [source,xml]
 ----
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
        http://www.vanslog.io/spring/data/meilisearch
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
+
+    <context:property-placeholder/>
 
     <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
 
@@ -86,12 +95,13 @@ It extends the generic Spring Data repository namespace and therefore also suppo
             id="meilisearchClient"
             host-url="http://localhost:7700"
             api-key="${MEILISEARCH_API_KEY}"
+            request-timeout="5000"
+            request-interval="50"
             json-handler-ref="jsonHandler"/>
 
     <bean id="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate">
-        <constructor-arg name="meilisearchClient" ref="meilisearchClient"/>
-        <constructor-arg name="meilisearchConverter" ref="meilisearchConverter"/>
+        <constructor-arg ref="meilisearchClient"/>
     </bean>
 
     <meilisearch:repositories

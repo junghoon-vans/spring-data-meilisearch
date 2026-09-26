@@ -20,25 +20,22 @@ It exposes the standard Spring Data CRUD and pagination entry points without imp
 [[meilisearch.repositories.autocreation]]
 == Automatic Settings Application
 
-Repository bootstrap inspects the mapped entity type.
-If the entity is annotated with `@Document(applySettings = true)`, Spring Data Meilisearch applies annotation-driven settings through `MeilisearchOperations.applySettings(...)` when the repository is created.
+Repository bootstrap inspects the mapped entity type. If the entity is annotated with `@Document(applySettings = true)`, Spring Data Meilisearch applies its annotation-driven settings through `MeilisearchOperations.applySettings(...)` when the repository is created. Because `applySettings` defaults to `true`, this happens unless it is explicitly disabled.
 
-This behavior is store-specific.
-It means repository creation can have side effects on the target index configuration, which is convenient for local development and controlled deployments but should be understood explicitly in environments where index settings are managed separately.
+This store-specific behavior can create a missing index and change settings during repository creation. Set `applySettings = false` when index creation and settings are managed separately.
 
 [[meilisearch.repositories.lookup-methods]]
 == Built-in Repository Methods
 
-The built-in repository methods do not all use the same underlying Meilisearch API:
+The built-in repository methods do not all use the same Meilisearch API:
 
-* `findById(...)` and `existsById(...)` use direct document lookup; `findAllById(...)` uses native ID-list fetch.
-* `findAll()` lists documents in one request; sorted `findAll(Sort)` counts first, then fetches once. A paged `findAll(Pageable)` uses search APIs, while an unpaged `Pageable` uses document listing.
-* `count()` uses `SearchOperations.count(...)`.
-* `save(...)`, `saveAll(...)`, and delete methods delegate to `MeilisearchOperations` document-oriented write operations.
+* `findById(...)` and `existsById(...)` use direct document lookup; `findAllById(...)` uses native ID-list retrieval.
+* `findAll()` lists all documents in one document-list request. Sorted `findAll(Sort)` counts first, then fetches up to that count in one sorted request.
+* A paged `findAll(Pageable)` uses search APIs. An unpaged `Pageable` uses document listing, with the same sorted-listing behavior when a sort is supplied.
+* `count()` reads the index total from a document-list request with a zero-document limit; it does not run a search.
+* Writes and deletes delegate to document-oriented operations in `MeilisearchOperations`.
 
-`pagination.maxTotalHits` limits search-backed reads, not document-backed listing.
-`displayedAttributes` can still restrict fields returned by document-list requests that omit `fields`, leaving mapped entities incomplete.
-Document-backed reads require a key with `documents.get` permission.
+`pagination.maxTotalHits` limits search-backed content, not document-backed listing. `displayedAttributes` can still restrict fields returned by document-list requests that omit an explicit field list, leaving mapped entities incomplete. Document-backed reads require an API key with `documents.get` permission.
 
 [[meilisearch.repositories.lookup-methods.behavior-table]]
 === Method Behavior at a Glance
@@ -52,31 +49,36 @@ Document-backed reads require a key with `documents.get` permission.
 | Uses direct document lookup after converting the repository id through the configured converter.
 
 | `findAllById`
-| Uses native ID-list fetch, available from Meilisearch 1.14.
+| Uses native ID-list retrieval, available from Meilisearch 1.14; there is no fallback on older servers. Missing IDs are omitted, and the returned entities retain the requested ID order.
 
-| `findAll`, `findAll(Sort)`
-| Lists documents in one fetch; sorting counts first and uses the document API from Meilisearch 1.16.
+| `findAll()`
+| Lists all documents in one document-list request and materializes the result in memory. `maxTotalHits` does not cap this document-backed read.
+
+| `findAll(Sort)`
+| Counts documents, then makes one sorted document-list request limited to that count and materializes the full list in memory. Sorting requires Meilisearch 1.16 or later and attributes configured as sortable. Concurrent additions may be absent from the result.
 
 | `findAll(Pageable)`
-| A paged `Pageable` builds a search query and unwraps Meilisearch search hits back into entities; an unpaged `Pageable` lists all documents in one fetch, counting first if sorted.
+| A paged `Pageable` builds a search query and unwraps search hits into entities. An unpaged `Pageable` uses document listing and sets the page total to the number of retrieved documents; an optional sort follows the `findAll(Sort)` behavior.
 
 | `count`
-| Delegates to the operations layer count support rather than maintaining a separate repository-side count strategy.
+| Gets the document total through the operations layer; `MeilisearchTemplate` reads it from a document-list response with a zero-document limit.
 
 | `save`, `saveAll`, `delete*`
-| Delegates to `MeilisearchOperations` write and delete operations.
+| Delegates to `MeilisearchOperations` document write and delete operations.
 |===
 
 [[meilisearch.repositories.paging]]
 == Paging and Totals
 
 `findAll(Pageable)` selects its backing API based on whether the `Pageable` is paged.
-A paged `Pageable` is backed by a `BasicQuery` plus search result metadata.
-Its `Page` total is therefore derived from Meilisearch search totals, not from a separate count query.
-If the index is configured with `@Pagination(maxTotalHits = ...)`, that limit can cap the returned search content even when the reported total is larger.
 
-An unpaged `Pageable` returns the document-backed result in memory. Sorting requires a preliminary count before the fetch; concurrent additions may not appear in the sorted result.
-Its `Page` total is based on the retrieved document count and is not capped by `maxTotalHits`.
+A paged request uses `BasicQuery` plus search result metadata. Its `Page` total comes from the total reported by Meilisearch search results, not a separate count request. The default `pagination.maxTotalHits` value is 1000; a configured cap can limit search content even when the reported total is larger. For example, a search can report 11 matching documents while returning only 10 hits.
 
-The search-backed design for paged repository pagination explains why those results do not expose richer search response data such as facets or federation metadata.
-When an application needs those store-specific result structures, prefer calling `MeilisearchOperations` directly from the service layer.
+An unpaged request returns all retrieved documents in memory and sets the `Page` total to the retrieved document count. It is not capped by `maxTotalHits`. Supplying a sort makes the document-list path count first and fetch up to that count; additions between the count and fetch may be absent.
+
+The search-backed `Page` does not expose richer search response data such as facet or federation metadata. Call `MeilisearchOperations` directly from the service layer when you need those Meilisearch-specific results.
+
+[[meilisearch.repositories.empty-bulk-operations]]
+== Empty Bulk Operations
+
+An empty `saveAll(...)` returns an empty result, while empty `deleteAll(Iterable)` and `deleteAllById(...)` calls succeed without a Meilisearch request. The no-argument `deleteAll()` is different: it deletes all documents for the repository's entity type.

@@ -2,14 +2,15 @@
 = Meilisearch
 :page-section-summary-toc: 1
 
-This chapter describes the store-specific integration provided by Spring Data Meilisearch: client bootstrap, object mapping, operations, index lifecycle management, and index settings.
+This chapter describes the store-specific integration provided by Spring Data Meilisearch: client bootstrap, object mapping, document and search operations, instance health and statistics, index lifecycle management, and index settings.
 
-Where the repositories chapter focuses on the Spring Data repository abstraction, this chapter focuses on the native integration surface exposed through configuration support, mapping metadata, and `MeilisearchOperations`.
+Use `MeilisearchOperations` for document retrieval and search, `instanceOps()` for instance-level information, and `indexOps(...)` for index lifecycle and settings.
+For CRUD and paging through Spring Data repository interfaces, see the xref:repositories.adoc[Repositories] chapter.
 
 The main integration layers are:
 
 * xref:meilisearch/client-configuration.adoc[Client configuration] for JavaConfig and XML namespace bootstrap.
 * xref:meilisearch/object-mapping.adoc[Object mapping] for `@Document`, mapping metadata, and conversion.
 * xref:meilisearch/template.adoc[Operations] for document and search APIs through `MeilisearchOperations`.
-* xref:meilisearch/index-operations.adoc[Index operations] for instance and index lifecycle APIs.
+* xref:meilisearch/index-operations.adoc[Index operations] for instance health and statistics, index lifecycle, and index statistics.
 * xref:meilisearch/settings.adoc[Settings] for annotation-driven and runtime index settings.
