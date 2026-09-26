@@ -71,7 +71,9 @@ public interface DocumentOperations {
 	<T> List<T> multiGet(Class<T> clazz, List<String> documentIds);
 
 	/**
-	 * Retrieves all entities of the given type in one document request. The entire result is held in memory.
+	 * Retrieves all entities of the given type through the documents/fetch endpoint in one request. The entire result is
+	 * held in memory. The request does not select fields; {@code displayedAttributes} is not an access-control boundary
+	 * for document reads.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
@@ -83,7 +85,8 @@ public interface DocumentOperations {
 	/**
 	 * Retrieves entities of the given type in the given order. Sorted listing first counts the documents, then fetches up
 	 * to that count in one request; concurrent additions can leave the returned result short of the current total. The
-	 * entire result is held in memory. Sorting requires Meilisearch 1.16 or later.
+	 * entire result is held in memory. Both listing overloads use the documents/fetch endpoint without selecting fields.
+	 * Sorting requires Meilisearch 1.16 or later.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}

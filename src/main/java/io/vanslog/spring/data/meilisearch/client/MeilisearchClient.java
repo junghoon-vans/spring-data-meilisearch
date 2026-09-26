@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
+
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
@@ -84,17 +86,17 @@ public class MeilisearchClient extends Client {
 	}
 
 	/**
-	 * Fetch raw documents in server sort order. The SDK's {@code DocumentsQuery} does not yet expose sorting. Sorting
-	 * documents requires Meilisearch 1.16 or later.
+	 * Fetch raw documents through the documents/fetch endpoint. Sorting requires Meilisearch 1.16 or later.
 	 *
 	 * @param indexUid index containing the documents
 	 * @param offset number of documents to skip, or negative to use the server default
 	 * @param limit maximum number of documents to return, or negative to use the server default
-	 * @param sort sort expressions in {@code attribute:direction} form
+	 * @param sort sort expressions in {@code attribute:direction} form, or {@literal null} for an unsorted listing
 	 * @return the raw fetch response
 	 * @throws MeilisearchException if the request fails
 	 */
-	public String getRawDocuments(String indexUid, int offset, int limit, String[] sort) throws MeilisearchException {
+	public String getRawDocuments(String indexUid, int offset, int limit, @Nullable String[] sort)
+			throws MeilisearchException {
 		Map<String, Object> request = new HashMap<>();
 		if (offset >= 0) {
 			request.put("offset", offset);
@@ -102,7 +104,9 @@ public class MeilisearchClient extends Client {
 		if (limit >= 0) {
 			request.put("limit", limit);
 		}
-		request.put("sort", sort);
+		if (sort != null) {
+			request.put("sort", sort);
+		}
 		return httpTransport.post("/indexes/" + indexUid + "/documents/fetch", request);
 	}
 }
