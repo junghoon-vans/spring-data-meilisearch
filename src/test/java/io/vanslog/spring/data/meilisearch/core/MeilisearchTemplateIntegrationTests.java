@@ -102,6 +102,20 @@ class MeilisearchTemplateIntegrationTests {
 	}
 
 	@Test
+	void shouldSkipClientForEmptyEntitySaveAndDelete() {
+		MeilisearchClient client = new MeilisearchClient(new MeilisearchTestConfiguration().clientConfiguration()) {
+			@Override
+			public Index index(String indexUid) {
+				throw new AssertionError("Empty bulk operation must not access the client");
+			}
+		};
+		MeilisearchTemplate template = new MeilisearchTemplate(client);
+
+		assertThat(template.save(List.<Movie> of())).isEmpty();
+		assertThat(template.delete(List.<Movie> of())).isTrue();
+	}
+
+	@Test
 	void shouldGetEntity() {
 
 		meilisearchTemplate.save(movie1);
