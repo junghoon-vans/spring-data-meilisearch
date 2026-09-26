@@ -21,7 +21,6 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.util.Assert;
 import org.w3c.dom.Element;
 
 /**
@@ -41,8 +40,6 @@ public class MeilisearchClientBeanDefinitionParser extends AbstractBeanDefinitio
 	}
 
 	private void setLocalSettings(Element element, BeanDefinitionBuilder builder) {
-
-		Assert.hasText(element.getAttribute("api-key"), "The attribute 'api-key' is required.");
 
 		builder.addPropertyValue("hostUrl", element.getAttribute("host-url"));
 		builder.addPropertyValue("apiKey", element.getAttribute("api-key"));

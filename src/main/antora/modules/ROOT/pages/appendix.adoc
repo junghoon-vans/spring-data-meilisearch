@@ -28,8 +28,8 @@ Creates a `MeilisearchClient` bean.
 |The Meilisearch server URL.
 
 |`api-key`
-|
-|The API key used for authentication.
+|No authentication
+|Optional API key. Omit the attribute or set it to an empty string to send requests without authentication. Use a non-empty key for protected instances.
 
 |`client-agents`
 |
