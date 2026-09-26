@@ -646,7 +646,7 @@ When <code>@Pagination</code> is present without an explicit value, its <code>ma
 Spring Data Meilisearch carries that value into <code>SearchHits#getTotalHits()</code> and repository <code>Page#getTotalElements()</code>;
 the reported total may therefore exceed <code>maxTotalHits</code>. For example, with <code>maxTotalHits = 10</code>, a search over 11
 matching documents can return 10 hits while reporting 11 total matches. See
-<a href="template.html#meilisearch.operations.results" class="xref page">meilisearch/template.adoc#meilisearch.operations.results</a> for total-hit relation semantics.</p>
+<a href="template.html#meilisearch.operations.results" class="xref page">Search Result Types</a> for total-hit relation semantics.</p>
 </div>
 </div>
 </div>
