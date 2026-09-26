@@ -196,7 +196,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		String[] sortOptions = requestConverter.convertSortToSortOptions(sort);
 		String results = execute(
 				client -> meilisearchClient.getRawDocuments(indexUid, 0, (int) documentCount, sortOptions));
-		return readCompleteDocuments(results, clazz);
+		return readDocuments(results, clazz);
 	}
 
 	@Override
@@ -429,19 +429,6 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 			return meilisearchConverter.read(clazz, document);
 		} catch (IOException e) {
 			throw new UncategorizedMeilisearchException("Failed to read Meilisearch document.", e);
-		}
-	}
-
-	private <T> List<T> readCompleteDocuments(String source, Class<T> clazz) {
-		try {
-			JsonNode response = objectMapper.readTree(source);
-			List<T> documents = readDocumentsFromResponse(response, clazz);
-			if (documents.size() != readTotalFromResponse(response)) {
-				throw new IllegalStateException("Incomplete sorted document listing; the index may have changed.");
-			}
-			return documents;
-		} catch (IOException e) {
-			throw new UncategorizedMeilisearchException("Failed to read Meilisearch documents.", e);
 		}
 	}
 

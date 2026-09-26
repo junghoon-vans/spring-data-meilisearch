@@ -75,7 +75,7 @@ A paged `Pageable` is backed by a `BasicQuery` plus search result metadata.
 Its `Page` total is therefore derived from Meilisearch search totals, not from a separate count query.
 If the index is configured with `@Pagination(maxTotalHits = ...)`, that limit can cap the returned search content even when the reported total is larger.
 
-An unpaged `Pageable` (including `Pageable.unpaged(Sort)`) returns complete content in the requested order. Sorting requires a preliminary count before the document fetch.
+An unpaged `Pageable` returns the document-backed result in memory. Sorting requires a preliminary count before the fetch; concurrent additions may not appear in the sorted result.
 Its `Page` total is based on the retrieved document count and is not capped by `maxTotalHits`.
 
 The search-backed design for paged repository pagination explains why those results do not expose richer search response data such as facets or federation metadata.

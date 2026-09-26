@@ -121,7 +121,7 @@ class SortableMeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
-	void shouldRejectIncompleteSortedListingAfterConcurrentAddition() {
+	void shouldReturnCountLimitedSortedListingAfterConcurrentAddition() {
 		SortableMovie initial = new SortableMovie();
 		initial.setId(1);
 		initial.setTitle("First");
@@ -138,8 +138,8 @@ class SortableMeilisearchRepositoryIntegrationTests {
 			}
 		};
 
-		assertThatThrownBy(() -> new MeilisearchTemplate(client).findAll(SortableMovie.class, Sort.by("title")))
-				.isInstanceOf(IllegalStateException.class).hasMessageContaining("Incomplete sorted document listing");
+		assertThat(new MeilisearchTemplate(client).findAll(SortableMovie.class, Sort.by("title"))).containsExactly(initial);
+		assertThat(movieRepository.findAll()).containsExactlyInAnyOrder(initial, added);
 	}
 
 	@Test

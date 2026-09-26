@@ -35,14 +35,14 @@ class MovieController {
 
 * `save(T)` and `save(List<T>)`
 * `get(String, Class<T>)`
-* `findAll(Class<T>)` and `findAll(Class<T>, Sort)` for complete document listing
+* `findAll(Class<T>)` and `findAll(Class<T>, Sort)` for document listing
 * `multiGet(...)` for ID-list retrieval
 * `exists(String, Class<?>)`
 * `delete(...)`
 * `deleteAll(Class<?>)`
 
-Direct `get(...)` reads a known id. `findAll(...)` returns the complete result in memory rather than a server-default-sized page.
-Sorted listing counts documents first, then fetches them in one request; if the index grows between requests, it fails instead of returning a partial result.
+Direct `get(...)` reads a known id. Unsorted `findAll(...)` retrieves the documents in memory rather than a server-default-sized page.
+Sorted listing counts documents first, then fetches up to that count in one request; documents added between the requests may not appear in the result.
 `multiGet(...)` reads only the document ids supplied by the caller.
 
 For multiple requested ids, `multiGet(Class<T>, List<String>)` and its offset/limit overload use native ID-list
