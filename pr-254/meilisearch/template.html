@@ -484,10 +484,10 @@ class MovieController {
 <p><code>get(String, Class&lt;T&gt;)</code></p>
 </li>
 <li>
-<p><code>findAll(Class&lt;T&gt;)</code> and <code>findAll(Class&lt;T&gt;, Sort)</code> for document listing</p>
+<p><code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code> for ID-list retrieval</p>
 </li>
 <li>
-<p><code>multiGet(&#8230;&#8203;)</code> for ID-list retrieval</p>
+<p><code>findAll(Class&lt;T&gt;)</code> and <code>findAll(Class&lt;T&gt;, Sort)</code> for document listing</p>
 </li>
 <li>
 <p><code>exists(String, Class&lt;?&gt;)</code></p>
@@ -506,8 +506,8 @@ Sorted listing counts documents first, then fetches up to that count in one requ
 <code>multiGet(&#8230;&#8203;)</code> reads only the document ids supplied by the caller.</p>
 </div>
 <div class="paragraph">
-<p>For multiple requested ids, <code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code> and its offset/limit overload use native ID-list
-reads available from Meilisearch 1.14; there is no individual-lookup fallback on older servers.
+<p>For multiple requested ids, <code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code> uses native ID-list reads available from Meilisearch
+1.14; the implementation batches the ids internally, with no individual-lookup fallback on older servers.
 The returned entities retain requested id order, excluding ids that do not exist.
 Document listing through <code>findAll(Class&lt;T&gt;, Sort)</code> uses server-side sorting available from
 Meilisearch 1.16 and is not limited by <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>.</p>
