@@ -125,6 +125,15 @@ class MeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
+	void shouldSaveNoDocumentsForEmptyIterable() {
+		Movie movie = new Movie(1, "Carol", "A love story", new String[] { "Romance" });
+		movieRepository.save(movie);
+
+		assertThat(movieRepository.saveAll(List.<Movie> of())).isEmpty();
+		assertThat(movieRepository.findAll()).containsExactly(movie);
+	}
+
+	@Test
 	void shouldFindDocumentByIdBeyondFirstDocumentsPage() {
 		List<Movie> movies = new ArrayList<>();
 		for (int id = 1; id <= 25; id++) {
@@ -207,6 +216,16 @@ class MeilisearchRepositoryIntegrationTests {
 		// then
 		Iterable<Movie> saved = movieRepository.findAll();
 		assertThat(saved).hasSize(1);
+	}
+
+	@Test
+	void shouldDeleteNoDocumentsForEmptyIterable() {
+		Movie movie = new Movie(1, "Carol", "A love story", new String[] { "Romance" });
+		movieRepository.save(movie);
+
+		movieRepository.deleteAll(List.<Movie> of());
+
+		assertThat(movieRepository.findAll()).containsExactly(movie);
 	}
 
 	@Test

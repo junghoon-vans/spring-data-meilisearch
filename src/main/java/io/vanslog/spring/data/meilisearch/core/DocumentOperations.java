@@ -37,7 +37,7 @@ public interface DocumentOperations {
 	<T> T save(T entity);
 
 	/**
-	 * Saves all given entities.
+	 * Saves all given entities. An empty list is returned without a server request.
 	 *
 	 * @param entities the entities to save
 	 * @param <T> the type of the entity
@@ -136,7 +136,8 @@ public interface DocumentOperations {
 	<T> boolean delete(T entity);
 
 	/**
-	 * Deletes all entities of the given type with the given document ids.
+	 * Deletes all entities of the given type with the given document ids. An empty list succeeds without a server
+	 * request.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
@@ -146,7 +147,7 @@ public interface DocumentOperations {
 	boolean delete(Class<?> clazz, List<String> documentIds);
 
 	/**
-	 * Deletes the given entities.
+	 * Deletes the given entities. An empty list succeeds without a server request.
 	 *
 	 * @param entities the entities to delete
 	 * @param <T> the type of the entity

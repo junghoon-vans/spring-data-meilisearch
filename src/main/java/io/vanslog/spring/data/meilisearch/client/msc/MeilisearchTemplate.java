@@ -144,6 +144,10 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public <T> List<T> save(List<T> entities) {
+		if (entities.isEmpty()) {
+			return entities;
+		}
+
 		Class<?> clazz = entities.iterator().next().getClass();
 		String indexUid = getPersistentEntityFor(clazz).getIndexUid();
 		MeilisearchPersistentProperty idProperty = getPersistentEntityFor(clazz).getIdProperty();
@@ -265,6 +269,10 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public boolean delete(Class<?> clazz, List<String> documentIds) {
+		if (documentIds.isEmpty()) {
+			return true;
+		}
+
 		String indexUid = getIndexUidFor(clazz);
 		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteDocuments(documentIds));
 		return isTaskSucceeded(indexUid, taskInfo);
@@ -272,6 +280,10 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 	@Override
 	public <T> boolean delete(List<T> entities) {
+		if (entities.isEmpty()) {
+			return true;
+		}
+
 		Class<?> clazz = entities.iterator().next().getClass();
 		List<String> documentIds = entities.stream().map(this::getDocumentIdFor).toList();
 		return this.delete(clazz, documentIds);
