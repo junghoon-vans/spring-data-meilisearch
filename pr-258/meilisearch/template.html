@@ -308,7 +308,7 @@
     <a class="nav-link"  href="template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="settings.html">Settings</a>
@@ -436,11 +436,8 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Spring Data Meilisearch exposes its synchronous, template-style APIs through <code>MeilisearchOperations</code>. The interface
-combines document access and search APIs, and provides entry points to instance-level and index-level operations.
-Use the <code>MeilisearchOperations</code> interface in application code; see <a href="index-operations.html" class="xref page">Index and Instance Operations</a> for
-instance and index management, <a href="settings.html" class="xref page">Settings</a> for settings, and
-<a href="object-mapping.html" class="xref page">Object Mapping</a> for entity conversion.</p>
+<p>Spring Data Meilisearch exposes template-style APIs through <code>MeilisearchOperations</code>.
+That interface combines document operations, search operations, access to instance-level APIs, and access to index-scoped APIs.</p>
 </div>
 </div>
 </div>
@@ -448,13 +445,8 @@ instance and index management, <a href="settings.html" class="xref page">Setting
 <h2 id="meilisearch.operations.entrypoint"><a class="anchor" href="#meilisearch.operations.entrypoint"></a>Entry Point</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>MeilisearchConfiguration</code> registers one <code>MeilisearchOperations</code> bean with the names <code>meilisearchOperations</code> and
-<code>meilisearchTemplate</code>. Inject the interface when you need direct access to Meilisearch-specific operations instead
-of the repository abstraction.</p>
-</div>
-<div class="paragraph">
-<p><code>getMeilisearchConverter()</code> exposes the configured converter; see <a href="object-mapping.html" class="xref page">Object Mapping</a> for its
-mapping and conversion behavior.</p>
+<p><code>MeilisearchConfiguration</code> registers a bean named <code>meilisearchOperations</code> and <code>meilisearchTemplate</code>.
+Inject that bean when you want direct access to Meilisearch-specific operations instead of the repository abstraction. This is also the primary entry point for store-specific capabilities that are intentionally not surfaced through repositories.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -480,7 +472,7 @@ class MovieController {
 <h2 id="meilisearch.operations.documents"><a class="anchor" href="#meilisearch.operations.documents"></a>Document Operations</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>DocumentOperations</code> works with one mapped entity type:</p>
+<p><code>DocumentOperations</code> covers document access to one mapped entity type:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -488,47 +480,36 @@ class MovieController {
 <p><code>save(T)</code> and <code>save(List&lt;T&gt;)</code></p>
 </li>
 <li>
-<p><code>get(String, Class&lt;T&gt;)</code> and <code>exists(String, Class&lt;?&gt;)</code></p>
+<p><code>get(String, Class&lt;T&gt;)</code></p>
 </li>
 <li>
-<p><code>findAll(Class&lt;T&gt;)</code> and <code>findAll(Class&lt;T&gt;, Sort)</code></p>
+<p><code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code> for ID-list retrieval</p>
 </li>
 <li>
-<p><code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code></p>
+<p><code>findAll(Class&lt;T&gt;)</code> and <code>findAll(Class&lt;T&gt;, Sort)</code> for document listing</p>
 </li>
 <li>
-<p><code>delete(String, Class&lt;?&gt;)</code>, <code>delete(T)</code>, <code>delete(Class&lt;?&gt;, List&lt;String&gt;)</code>, <code>delete(List&lt;T&gt;)</code>, and
-<code>deleteAll(Class&lt;?&gt;)</code></p>
+<p><code>exists(String, Class&lt;?&gt;)</code></p>
+</li>
+<li>
+<p><code>delete(&#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>deleteAll(Class&lt;?&gt;)</code></p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p><code>save(&#8230;&#8203;)</code> writes through Meilisearch&#8217;s
-<a href="https://www.meilisearch.com/docs/reference/api/documents/add-or-replace-documents">add-or-replace documents API</a>.
-The API creates a missing index; replacing an existing document removes fields omitted from the new entity rather
-than applying a partial update. Document saves do not automatically apply <code>@Setting</code> metadata.</p>
+<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id. Unsorted <code>findAll(&#8230;&#8203;)</code> retrieves the documents in memory rather than a server-default-sized page.
+Sorted listing counts documents first, then fetches up to that count in one request; documents added between the requests may not appear in the result.
+<code>multiGet(&#8230;&#8203;)</code> reads only the document ids supplied by the caller.</p>
 </div>
 <div class="paragraph">
-<p><code>get(&#8230;&#8203;)</code> returns <code>null</code> when the document id is not present. <code>findAll(Class&lt;T&gt;)</code> retrieves all documents in one
-document request and holds the result in memory; it is not a <code>Pageable</code> search. A sorted listing also holds the full
-result in memory. It counts documents first and then fetches up to that count in one request, so concurrent additions
-between the requests may be absent. Sort properties must be configured as Meilisearch sortable attributes, and sorted
-document retrieval requires Meilisearch 1.16 or later.
-Neither document-list method is bounded by the search-only <code>maxTotalHits</code> setting.</p>
-</div>
-<div class="paragraph">
-<p>Use <code>multiGet(&#8230;&#8203;)</code> when the ids are already known rather than listing or searching an index:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;Movie&gt; requested = operations.multiGet(Movie.class, List.of("movie-3", "movie-1", "missing"));</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Missing documents are omitted; the remaining results preserve requested order and duplicate ids. The implementation
-requests document ids in internal batches; callers supply only the ids they want to retrieve. This uses Meilisearch&#8217;s
-native ID-list documents endpoint, which requires Meilisearch 1.14 or later; there is no individual-document lookup
-fallback for older servers.</p>
+<p>For multiple requested ids, <code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code> uses native ID-list reads available from Meilisearch
+1.14; the implementation batches the ids internally, with no individual-lookup fallback on older servers.
+The returned entities retain requested id order, excluding ids that do not exist.
+Document listing through <code>findAll(Class&lt;T&gt;, Sort)</code> uses server-side sorting available from
+Meilisearch 1.16 and is not limited by <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>.</p>
 </div>
 </div>
 </div>
@@ -536,44 +517,35 @@ fallback for older servers.</p>
 <h2 id="meilisearch.operations.search"><a class="anchor" href="#meilisearch.operations.search"></a>Search Operations</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>SearchOperations</code> provides:</p>
+<p><code>SearchOperations</code> covers full-text and search-oriented APIs:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>long count(Class&lt;?&gt;)</code> for the number of documents in the mapped index. This is a document count, not a
-query-filtered search count.</p>
+<p><code>search(query, entityType)</code> for single-index search.</p>
 </li>
 <li>
-<p><code>&lt;T, Q extends BaseQuery&gt; SearchHits&lt;T&gt; search(Q, Class&lt;T&gt;)</code> for a single index.</p>
+<p><code>multiSearch(queries, entityType)</code> for batched non-federated search.</p>
 </li>
 <li>
-<p><code>&lt;T, Q extends BaseQuery&gt; SearchHits&lt;T&gt; multiSearch(List&lt;Q&gt;, Class&lt;T&gt;)</code> for several requests in one non-federated
-multi-search.</p>
+<p><code>multiSearch(queries, federation, entityType)</code> for federated multi-search.</p>
 </li>
 <li>
-<p><code>&lt;T, Q extends BaseQuery&gt; SearchHits&lt;T&gt; multiSearch(List&lt;Q&gt;, MultiSearchFederation, Class&lt;T&gt;)</code> for federated
-multi-search.</p>
+<p><code>facetSearch(query, entityType)</code> for facet search results.</p>
 </li>
 <li>
-<p><code>SearchHits&lt;FacetHit&gt; facetSearch(FacetQuery, Class&lt;?&gt;)</code> for facet search.</p>
+<p><code>similarSearch(query, entityType)</code> for similar-document search.</p>
 </li>
 <li>
-<p><code>&lt;T&gt; SearchHits&lt;T&gt; similarSearch(SimilarQuery, Class&lt;T&gt;)</code> for similar-document search.</p>
+<p><code>count(entityType)</code> for search-backed counting.</p>
 </li>
 </ul>
-</div>
-<div class="paragraph">
-<p><code>BasicQuery</code> accepts Spring Data <code>Pageable</code> and <code>Sort</code>. The default query page is page 0 with 10 hits; a supplied
-<code>Pageable</code> is translated to Meilisearch&#8217;s one-based page and <code>hitsPerPage</code> values. Sort properties must be configured
-as sortable attributes. Filter expressions likewise require the referenced attributes to be filterable.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">BasicQuery query = BasicQuery.builder()
         .withQ("Wonder Woman")
-        .withFilter("genres = Action")
-        .withPageable(PageRequest.of(0, 20, Sort.by("title")))
+        .withFilter(new String[] { "genres = Action" })
         .build();
 
 SearchHits&lt;Movie&gt; result = operations.search(query, Movie.class);
@@ -582,47 +554,13 @@ List&lt;Movie&gt; movies = result.getSearchHits().stream()
         .toList();</code></pre>
 </div>
 </div>
-<div class="sect2">
-<h3 id="meilisearch.operations.multi-search"><a class="anchor" href="#meilisearch.operations.multi-search"></a>Multi-Search</h3>
-<div class="paragraph">
-<p>Use <code>IndexQuery</code> to override the mapped index uid for an individual request. All results are mapped to the entity type
-passed to <code>multiSearch</code>, so the target indexes must return documents compatible with that type.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;IndexQuery&gt; queries = List.of(
-        IndexQuery.builder().withQ("Wonder Woman").withIndexUid("movies").build(),
-        IndexQuery.builder().withQ("Wonder Woman").withIndexUid("comics").build());
-
-SearchHits&lt;Movie&gt; combined = operations.multiSearch(queries, Movie.class);</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Non-federated multi-search flattens per-query hits into one <code>SearchHits</code> list in query order; it does not return a
-separate <code>SearchHits</code> object for each query or an aggregate total.</p>
-</div>
-<div class="paragraph">
-<p>Non-federated multi-search supports each query&#8217;s <code>Pageable</code>. Federated multi-search instead takes the SDK&#8217;s
-<code>MultiSearchFederation</code> options for the combined result window. Per-query <code>Pageable</code> settings are not sent in
-federated mode; set federation <code>limit</code> and <code>offset</code> instead.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MultiSearchFederation federation = new MultiSearchFederation();
-federation.setOffset(0);
-federation.setLimit(10);
-
-SearchHits&lt;Movie&gt; federated = operations.multiSearch(queries, federation, Movie.class);</code></pre>
-</div>
-</div>
-</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="meilisearch.operations.queries"><a class="anchor" href="#meilisearch.operations.queries"></a>Query Types</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Spring Data Meilisearch provides these query value types:</p>
+<p>Spring Data Meilisearch ships several query value types:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -630,7 +568,7 @@ SearchHits&lt;Movie&gt; federated = operations.multiSearch(queries, federation, 
 <p><code>BasicQuery</code> for standard search.</p>
 </li>
 <li>
-<p><code>IndexQuery</code> for per-index multi-search requests, including federated requests.</p>
+<p><code>IndexQuery</code> for multi-index and federated multi-search scenarios.</p>
 </li>
 <li>
 <p><code>FacetQuery</code> for facet search.</p>
@@ -641,17 +579,8 @@ SearchHits&lt;Movie&gt; federated = operations.multiSearch(queries, federation, 
 </ul>
 </div>
 <div class="paragraph">
-<p><code>SimilarQuery</code> requires a source document id and the name of an embedder configured for the target index:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">SimilarQuery similarQuery = SimilarQuery.builder()
-        .withDocumentId("movie-1")
-        .withEmbedder("default")
-        .build();
-
-SearchHits&lt;Movie&gt; similar = operations.similarSearch(similarQuery, Movie.class);</code></pre>
-</div>
+<p><code>IndexQuery</code> adds <code>indexUid</code> and optional federation options.
+<code>SimilarQuery</code> requires both the source <code>documentId</code> and the configured <code>embedder</code> name.</p>
 </div>
 </div>
 </div>
@@ -659,35 +588,46 @@ SearchHits&lt;Movie&gt; similar = operations.similarSearch(similarQuery, Movie.c
 <h2 id="meilisearch.operations.results"><a class="anchor" href="#meilisearch.operations.results"></a>Search Result Types</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Search methods return <code>SearchHits&lt;T&gt;</code>, which exposes the hit list, request execution duration, and total-hit metadata
-when the response provides it. Each <code>SearchHit&lt;T&gt;</code> contains the mapped content, Meilisearch processing time and query,
-optional facet statistics/distribution, and optional federation metadata.</p>
-</div>
-<div class="paragraph">
-<p><code>SearchHits#getTotalHitsRelation()</code> identifies whether <code>getTotalHits()</code> contains a total reported by the search
-response:</p>
+<p>Search methods return <code>SearchHits&lt;T&gt;</code>.
+Each hit is a <code>SearchHit&lt;T&gt;</code> that contains:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>EQUAL_TO</code> means Meilisearch reported the total matching-hit count.</p>
+<p>the mapped entity content,</p>
 </li>
 <li>
-<p><code>OFF</code> means total-hit metadata is unavailable; <code>getTotalHits()</code> then reflects the number of loaded hits and must not
-be treated as a total for the full result set.</p>
+<p>processing time,</p>
+</li>
+<li>
+<p>query text,</p>
+</li>
+<li>
+<p>optional facet statistics and facet distribution,</p>
+</li>
+<li>
+<p>optional federation metadata.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Facet search, similar search, and multi-search results do not provide an aggregate total through this API. For a
-single-index search, use total-hit metadata only when its relation is <code>EQUAL_TO</code>.</p>
+<p><code>SearchHits#getTotalHits()</code> is accompanied by <code>getTotalHitsRelation()</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>EQUAL_TO</code> means the total hit count reflects the exact matching result set reported by Meilisearch.</p>
+</li>
+<li>
+<p><code>OFF</code> means exact total-hit metadata is unavailable.</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>The <code>maxTotalHits</code> pagination setting limits how many matching hits can be retrieved through paginated search; it
-does not necessarily cap the reported total. For example, the current implementation can return 10 hits while
-reporting 11 total matches when <code>maxTotalHits</code> is 10. Repository <code>findAll(Pageable)</code> uses search results and their
-reported total, while an unpaged repository lookup uses document retrieval. See
-<a href="settings.html#meilisearch.settings.pagination" class="xref page">Pagination Limits</a> for the pagination setting.</p>
+<p>Use the hit list size for the current page content and total-hit metadata only when the relation is <code>EQUAL_TO</code>.</p>
+</div>
+<div class="paragraph">
+<p>When you need access to raw search metadata such as facets or federation details, prefer <code>MeilisearchOperations</code> directly instead of adapting repository return types.</p>
 </div>
 </div>
 </div>
@@ -695,34 +635,40 @@ reported total, while an unpaged repository lookup uses document retrieval. See
 <h2 id="meilisearch.operations.kotlin"><a class="anchor" href="#meilisearch.operations.kotlin"></a>Kotlin Extensions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Spring Data Meilisearch provides Kotlin extension functions for blocking operations that otherwise require an entity
-<code>Class</code> argument. Reified type parameters let Kotlin callers omit explicit <code>::class.java</code> arguments.</p>
+<p>Spring Data Meilisearch provides Kotlin extension functions for the blocking operations APIs that take an entity <code>Class</code> argument.
+These extensions use reified type parameters so Kotlin callers can omit explicit <code>::class.java</code> arguments.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.core.*
-
-</span><span class="fold-block">val movie = operations.get&lt;Movie&gt;("movie-1")
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val movie = operations.get&lt;Movie&gt;("movie-1")
 val hits = operations.search&lt;Movie&gt;(query)
 val count = operations.count&lt;Movie&gt;()
 val index = operations.indexOps&lt;Movie&gt;()
 
-operations.applySettings&lt;Movie&gt;()</span></code></pre>
+operations.applySettings&lt;Movie&gt;()</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>These extensions are thin wrappers over the Java contracts. They do not change blocking execution behavior or add
-reactive or coroutine repository support.</p>
+<p>The extensions are thin wrappers over the existing Java contracts.
+They do not change blocking execution behavior and do not add reactive or coroutine repository support.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.operations.notes"><a class="anchor" href="#meilisearch.operations.notes"></a>Repository Results and Search Metadata</h2>
+<h2 id="meilisearch.operations.notes"><a class="anchor" href="#meilisearch.operations.notes"></a>Notes on Search Semantics</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Repository methods return mapped entities (or a <code>Page&lt;T&gt;</code> for paged <code>findAll</code>) rather than <code>SearchHit&lt;T&gt;</code> wrappers.
-Use <code>MeilisearchOperations</code> directly when you need per-hit metadata such as facet statistics or federation details
-from a manually issued search.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Federated multi-search does not support <code>Pageable</code> settings inside the individual queries. Use federation <code>limit</code> and <code>offset</code> instead.</p>
+</li>
+<li>
+<p>Similar-document search requires a compatible embedder already configured in the target index.</p>
+</li>
+<li>
+<p>Repository <code>findAll(Pageable)</code> uses search operations only for a paged argument; an unpaged argument uses document-backed retrieval. Search pagination limits can cap paged content.</p>
+</li>
+</ul>
 </div>
 </div>
 </div>

@@ -308,7 +308,7 @@
     <a class="nav-link"  href="template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item is-current-page" data-depth="2">
     <a class="nav-link"  href="settings.html">Settings</a>
@@ -436,21 +436,20 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Spring Data Meilisearch supports two complementary ways to configure index settings:</p>
+<p>Spring Data Meilisearch supports two complementary ways to work with Meilisearch index settings:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>annotation metadata on a mapped entity type,</p>
+<p>annotation-driven settings that live with the mapped entity type,</p>
 </li>
 <li>
-<p>runtime inspection and updates through <code>MeilisearchIndexOperations</code>.</p>
+<p>runtime settings operations exposed through <code>MeilisearchIndexOperations</code>.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Use annotations for settings that belong with an entity definition. Use runtime operations when settings must be read,
-changed, cleared, or reset independently. See <a href="index-operations.html" class="xref page">Index and Instance Operations</a> for index lifecycle methods.</p>
+<p>This split keeps stable index defaults close to the domain model while still allowing explicit runtime adjustments when operational concerns require them.</p>
 </div>
 </div>
 </div>
@@ -458,7 +457,7 @@ changed, cleared, or reset independently. See <a href="index-operations.html" cl
 <h2 id="meilisearch.settings.annotation-driven"><a class="anchor" href="#meilisearch.settings.annotation-driven"></a>Annotation-driven Settings</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Use <code>@Setting</code> for the main settings and companion annotations for pagination, typo tolerance, and faceting:</p>
+<p>Use <code>@Setting</code> for the main index settings and companion annotations for the specialized settings groups.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -490,15 +489,8 @@ class Product {
 </div>
 </div>
 <div class="paragraph">
-<p><code>@Document.applySettings</code> defaults to <code>true</code>. Repository bootstrap applies the declared settings when it creates a repository for the entity; set <code>applySettings = false</code> to disable that automatic update. Meilisearch&#8217;s settings-update API creates a missing index, so bootstrap can create the index before the first document is saved. You can also apply annotation settings explicitly with <code>MeilisearchOperations.applySettings(Entity.class)</code>.</p>
-</div>
-<div class="paragraph">
-<p>Direct document saves do not apply annotation settings, but Meilisearch&#8217;s add-documents API can also create a missing index. If you need to declare a primary key or other lifecycle options before bootstrap applies settings, create the index explicitly; see <a href="index-operations.html" class="xref page">Index and Instance Operations</a>.</p>
-</div>
-<div class="paragraph">
-<p>Annotation defaults that are empty or unset are omitted from the update. They do not clear or reset settings already
-present on the index; use runtime updates with empty collections to clear supported settings or <code>resetSettings()</code> to
-restore Meilisearch defaults.</p>
+<p>These annotations are mapping metadata.
+They are applied automatically when repository bootstrap encounters an entity with <code>@Document(applySettings = true)</code> and can also be applied explicitly through <code>MeilisearchOperations.applySettings(Entity.class)</code>.</p>
 </div>
 </div>
 </div>
@@ -506,26 +498,24 @@ restore Meilisearch defaults.</p>
 <h2 id="meilisearch.settings.categories"><a class="anchor" href="#meilisearch.settings.categories"></a>Settings Categories</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The annotations cover the settings groups exposed by this module:</p>
+<p>The supported annotation model covers the main settings groups exposed by Meilisearch:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>search and display behavior: <code>searchableAttributes</code>, <code>displayedAttributes</code>, <code>filterableAttributes</code>,
-<code>sortableAttributes</code>, <code>rankingRules</code>, and <code>distinctAttribute</code>,</p>
+<p>search and display behavior through <code>searchableAttributes</code>, <code>displayedAttributes</code>, <code>filterableAttributes</code>, <code>sortableAttributes</code>, <code>rankingRules</code>, and <code>distinctAttribute</code>,</p>
 </li>
 <li>
-<p>text processing: synonyms, dictionary, stop words, tokenization, proximity precision, search cutoff, and typo
-tolerance,</p>
+<p>text processing through synonyms, dictionary, stop words, tokenization, and typo tolerance,</p>
 </li>
 <li>
-<p>result and performance controls: pagination and faceting,</p>
+<p>result-shaping and performance controls through pagination, faceting, proximity precision, and <code>searchCutoffMs</code>,</p>
 </li>
 <li>
-<p>explicit language handling through localized attributes,</p>
+<p>localized attributes for explicit language handling,</p>
 </li>
 <li>
-<p>embedder definitions for AI-powered and similar-document search.</p>
+<p>embedder definitions for AI-powered and similar-document search scenarios.</p>
 </li>
 </ul>
 </div>
@@ -535,8 +525,8 @@ tolerance,</p>
 <h2 id="meilisearch.settings.localization"><a class="anchor" href="#meilisearch.settings.localization"></a>Localized Attributes</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>localizedAttributes</code> declares the locale rules for matching groups of fields. Use it when automatic language
-detection is not sufficient for the index.</p>
+<p><code>localizedAttributes</code> allow you to declare the locale rules for matching groups of fields.
+Use them when automatic language detection is not enough for your index.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -556,7 +546,8 @@ class Product {
 <h2 id="meilisearch.settings.embedders"><a class="anchor" href="#meilisearch.settings.embedders"></a>Embedders</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Declare non-secret embedder settings with <code>@Embedder</code> inside <code>@Setting</code>:</p>
+<p>Embedders are configured through <code>@Embedder</code> inside <code>@Setting</code>.
+That configuration is relevant for Meilisearch AI-powered features such as semantic and similar-document search.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -565,6 +556,7 @@ class Product {
         @Embedder(
                 name = "default",
                 source = Embedder.Source.OPEN_AI,
+                apiKey = "${OPENAI_API_KEY}",
                 model = "text-embedding-3-small")
 })
 class Movie {
@@ -572,33 +564,7 @@ class Movie {
 </div>
 </div>
 <div class="paragraph">
-<p>Each embedder needs a unique <code>name</code>. Similar-document queries refer to that name through
-<code>SimilarQuery.withEmbedder(&#8230;&#8203;)</code>; the embedder must also be configured on the target index.</p>
-</div>
-<div class="paragraph">
-<p><code>@Embedder.apiKey</code> is copied as a literal annotation value; a Spring-style placeholder such as
-<code>${OPENAI_API_KEY}</code> is not resolved by settings conversion. Set the variable in the process environment and build
-runtime <code>EmbedderSettings</code> when a credential must be supplied from application configuration:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexOperations;
-import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexSettings;
-import java.util.Map;
-
-</span><span class="fold-block">MeilisearchIndexOperations index = meilisearchOperations.indexOps("movies");
-
-MeilisearchIndexSettings.EmbedderSettings embedder =
-        MeilisearchIndexSettings.EmbedderSettings.builder()
-                .withSource(MeilisearchIndexSettings.EmbedderSource.OPEN_AI)
-                .withApiKey(System.getenv("OPENAI_API_KEY"))
-                .withModel("text-embedding-3-small")
-                .build();
-
-index.updateSettings(MeilisearchIndexSettings.builder()
-        .withEmbedders(Map.of("default", embedder))
-        .build());</span></code></pre>
-</div>
+<p>Each embedder definition needs a unique <code>name</code> because that value is later referenced from <code>SimilarQuery</code> through <code>withEmbedder(&#8230;&#8203;)</code>.</p>
 </div>
 </div>
 </div>
@@ -606,7 +572,7 @@ index.updateSettings(MeilisearchIndexSettings.builder()
 <h2 id="meilisearch.settings.runtime"><a class="anchor" href="#meilisearch.settings.runtime"></a>Runtime Settings Updates</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Use <code>MeilisearchIndexOperations</code> to inspect or change current settings:</p>
+<p>Use <code>MeilisearchIndexOperations</code> for runtime inspection and updates.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -626,9 +592,8 @@ MeilisearchIndexSettings defaults = index.resetSettings();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>An update sends the non-null fields present in <code>MeilisearchIndexSettings</code>; unspecified fields are left unchanged.
-Use empty collections to clear supported list or map settings. <code>resetSettings()</code> resets all settings to Meilisearch
-defaults and returns the settings read back after the reset task succeeds.</p>
+<p>Runtime settings updates send the non-null fields from <code>MeilisearchIndexSettings</code>.
+Use empty collections when you want to clear supported list or map settings, and use <code>resetSettings()</code> when you want to restore all settings to Meilisearch defaults.</p>
 </div>
 </div>
 </div>
@@ -636,17 +601,11 @@ defaults and returns the settings read back after the reset task succeeds.</p>
 <h2 id="meilisearch.settings.pagination"><a class="anchor" href="#meilisearch.settings.pagination"></a>Pagination Limits</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>@Pagination(maxTotalHits = &#8230;&#8203;)</code> and the runtime <code>PaginationSettings</code> configure the maximum number of search hits
-that can be retrieved through pagination. If a request asks for more hits than this limit, the returned hit list can
-be shorter than its requested page size.
-When <code>@Pagination</code> is present without an explicit value, its <code>maxTotalHits</code> default is 1,000.</p>
+<p>Meilisearch paginated search responses can be capped by the configured <code>maxTotalHits</code> value.
+That affects both <code>SearchHits#getTotalHits()</code> and repository <code>Page</code> totals because repository paging is implemented on top of search APIs rather than separate count queries.</p>
 </div>
 <div class="paragraph">
-<p>The limit does not necessarily cap the total-hit metadata reported by Meilisearch. When the response reports a total,
-Spring Data Meilisearch carries that value into <code>SearchHits#getTotalHits()</code> and repository <code>Page#getTotalElements()</code>;
-the reported total may therefore exceed <code>maxTotalHits</code>. For example, with <code>maxTotalHits = 10</code>, a search over 11
-matching documents can return 10 hits while reporting 11 total matches. See
-<a href="template.html#meilisearch.operations.results" class="xref page">Search Result Types</a> for total-hit relation semantics.</p>
+<p>If you expect more than the default limit, configure <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code> or the equivalent runtime settings value before relying on page totals.</p>
 </div>
 </div>
 </div>

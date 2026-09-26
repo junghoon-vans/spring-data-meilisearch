@@ -308,7 +308,7 @@
     <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../meilisearch/index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
@@ -460,10 +460,12 @@ It exposes the standard Spring Data CRUD and pagination entry points without imp
 <h2 id="meilisearch.repositories.autocreation"><a class="anchor" href="#meilisearch.repositories.autocreation"></a>Automatic Settings Application</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Repository bootstrap inspects the mapped entity type. If the entity is annotated with <code>@Document(applySettings = true)</code>, Spring Data Meilisearch applies its annotation-driven settings through <code>MeilisearchOperations.applySettings(&#8230;&#8203;)</code> when the repository is created. Because <code>applySettings</code> defaults to <code>true</code>, this happens unless it is explicitly disabled.</p>
+<p>Repository bootstrap inspects the mapped entity type.
+If the entity is annotated with <code>@Document(applySettings = true)</code>, Spring Data Meilisearch applies annotation-driven settings through <code>MeilisearchOperations.applySettings(&#8230;&#8203;)</code> when the repository is created.</p>
 </div>
 <div class="paragraph">
-<p>This store-specific behavior can create a missing index and change settings during repository creation. Set <code>applySettings = false</code> when index creation and settings are managed separately.</p>
+<p>This behavior is store-specific.
+It means repository creation can have side effects on the target index configuration, which is convenient for local development and controlled deployments but should be understood explicitly in environments where index settings are managed separately.</p>
 </div>
 </div>
 </div>
@@ -471,29 +473,28 @@ It exposes the standard Spring Data CRUD and pagination entry points without imp
 <h2 id="meilisearch.repositories.lookup-methods"><a class="anchor" href="#meilisearch.repositories.lookup-methods"></a>Built-in Repository Methods</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The built-in repository methods do not all use the same Meilisearch API:</p>
+<p>The built-in repository methods do not all use the same underlying Meilisearch API:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>findById(&#8230;&#8203;)</code> and <code>existsById(&#8230;&#8203;)</code> use direct document lookup; <code>findAllById(&#8230;&#8203;)</code> uses native ID-list retrieval.</p>
+<p><code>findById(&#8230;&#8203;)</code> and <code>existsById(&#8230;&#8203;)</code> use direct document lookup; <code>findAllById(&#8230;&#8203;)</code> uses native ID-list fetch.</p>
 </li>
 <li>
-<p><code>findAll()</code> lists all documents in one document-list request. Sorted <code>findAll(Sort)</code> counts first, then fetches up to that count in one sorted request.</p>
+<p><code>findAll()</code> lists documents in one request; sorted <code>findAll(Sort)</code> counts first, then fetches once. A paged <code>findAll(Pageable)</code> uses search APIs, while an unpaged <code>Pageable</code> uses document listing.</p>
 </li>
 <li>
-<p>A paged <code>findAll(Pageable)</code> uses search APIs. An unpaged <code>Pageable</code> uses document listing, with the same sorted-listing behavior when a sort is supplied.</p>
+<p><code>count()</code> uses <code>SearchOperations.count(&#8230;&#8203;)</code>.</p>
 </li>
 <li>
-<p><code>count()</code> reads the index total from a document-list request with a zero-document limit; it does not run a search.</p>
-</li>
-<li>
-<p>Writes and deletes delegate to document-oriented operations in <code>MeilisearchOperations</code>.</p>
+<p><code>save(&#8230;&#8203;)</code>, <code>saveAll(&#8230;&#8203;)</code>, and delete methods delegate to <code>MeilisearchOperations</code> document-oriented write operations.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p><code>pagination.maxTotalHits</code> limits search-backed content, not document-backed listing. <code>displayedAttributes</code> can still restrict fields returned by document-list requests that omit an explicit field list, leaving mapped entities incomplete. Document-backed reads require an API key with <code>documents.get</code> permission.</p>
+<p><code>pagination.maxTotalHits</code> limits search-backed reads, not document-backed listing.
+<code>displayedAttributes</code> can still restrict fields returned by document-list requests that omit <code>fields</code>, leaving mapped entities incomplete.
+Document-backed reads require a key with <code>documents.get</code> permission.</p>
 </div>
 <div class="sect2">
 <h3 id="meilisearch.repositories.lookup-methods.behavior-table"><a class="anchor" href="#meilisearch.repositories.lookup-methods.behavior-table"></a>Method Behavior at a Glance</h3>
@@ -515,27 +516,23 @@ It exposes the standard Spring Data CRUD and pagination entry points without imp
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAllById</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Uses native ID-list retrieval, available from Meilisearch 1.14; there is no fallback on older servers. Missing IDs are omitted, and the returned entities retain the requested ID order.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uses native ID-list fetch, available from Meilisearch 1.14.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll()</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Lists all documents in one document-list request and materializes the result in memory. <code>maxTotalHits</code> does not cap this document-backed read.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll(Sort)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Counts documents, then makes one sorted document-list request limited to that count and materializes the full list in memory. Sorting requires Meilisearch 1.16 or later and attributes configured as sortable. Concurrent additions may be absent from the result.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll</code>, <code>findAll(Sort)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lists documents in one fetch; sorting counts first and uses the document API from Meilisearch 1.16.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll(Pageable)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A paged <code>Pageable</code> builds a search query and unwraps search hits into entities. An unpaged <code>Pageable</code> uses document listing and sets the page total to the number of retrieved documents; an optional sort follows the <code>findAll(Sort)</code> behavior.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A paged <code>Pageable</code> builds a search query and unwraps Meilisearch search hits back into entities; an unpaged <code>Pageable</code> lists all documents in one fetch, counting first if sorted.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>count</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Gets the document total through the operations layer; <code>MeilisearchTemplate</code> reads it from a document-list response with a zero-document limit.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Delegates to the operations layer count support rather than maintaining a separate repository-side count strategy.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>save</code>, <code>saveAll</code>, <code>delete*</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Delegates to <code>MeilisearchOperations</code> document write and delete operations.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Delegates to <code>MeilisearchOperations</code> write and delete operations.</p></td>
 </tr>
 </tbody>
 </table>
@@ -546,24 +543,18 @@ It exposes the standard Spring Data CRUD and pagination entry points without imp
 <h2 id="meilisearch.repositories.paging"><a class="anchor" href="#meilisearch.repositories.paging"></a>Paging and Totals</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>findAll(Pageable)</code> selects its backing API based on whether the <code>Pageable</code> is paged.</p>
+<p><code>findAll(Pageable)</code> selects its backing API based on whether the <code>Pageable</code> is paged.
+A paged <code>Pageable</code> is backed by a <code>BasicQuery</code> plus search result metadata.
+Its <code>Page</code> total is therefore derived from Meilisearch search totals, not from a separate count query.
+If the index is configured with <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, that limit can cap the returned search content even when the reported total is larger.</p>
 </div>
 <div class="paragraph">
-<p>A paged request uses <code>BasicQuery</code> plus search result metadata. Its <code>Page</code> total comes from the total reported by Meilisearch search results, not a separate count request. The default <code>pagination.maxTotalHits</code> value is 1000; a configured cap can limit search content even when the reported total is larger. For example, a search can report 11 matching documents while returning only 10 hits.</p>
+<p>An unpaged <code>Pageable</code> returns the document-backed result in memory. Sorting requires a preliminary count before the fetch; concurrent additions may not appear in the sorted result.
+Its <code>Page</code> total is based on the retrieved document count and is not capped by <code>maxTotalHits</code>.</p>
 </div>
 <div class="paragraph">
-<p>An unpaged request returns all retrieved documents in memory and sets the <code>Page</code> total to the retrieved document count. It is not capped by <code>maxTotalHits</code>. Supplying a sort makes the document-list path count first and fetch up to that count; additions between the count and fetch may be absent.</p>
-</div>
-<div class="paragraph">
-<p>The search-backed <code>Page</code> does not expose richer search response data such as facet or federation metadata. Call <code>MeilisearchOperations</code> directly from the service layer when you need those Meilisearch-specific results.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="meilisearch.repositories.empty-bulk-operations"><a class="anchor" href="#meilisearch.repositories.empty-bulk-operations"></a>Empty Bulk Operations</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>An empty <code>saveAll(&#8230;&#8203;)</code> returns an empty result, while empty <code>deleteAll(Iterable)</code> and <code>deleteAllById(&#8230;&#8203;)</code> calls succeed without a Meilisearch request. The no-argument <code>deleteAll()</code> is different: it deletes all documents for the repository&#8217;s entity type.</p>
+<p>The search-backed design for paged repository pagination explains why those results do not expose richer search response data such as facets or federation metadata.
+When an application needs those store-specific result structures, prefer calling <code>MeilisearchOperations</code> directly from the service layer.</p>
 </div>
 </div>
 </div>

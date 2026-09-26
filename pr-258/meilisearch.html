@@ -308,7 +308,7 @@
     <a class="nav-link"  href="meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="meilisearch/index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="meilisearch/index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="meilisearch/settings.html">Settings</a>
@@ -433,11 +433,10 @@
   </nav>
 </div><h1 id="page-title" class="page">Meilisearch</h1>
 <div class="paragraph">
-<p>This chapter describes the store-specific integration provided by Spring Data Meilisearch: client bootstrap, object mapping, document and search operations, instance health and statistics, index lifecycle management, and index settings.</p>
+<p>This chapter describes the store-specific integration provided by Spring Data Meilisearch: client bootstrap, object mapping, operations, index lifecycle management, and index settings.</p>
 </div>
 <div class="paragraph">
-<p>Use <code>MeilisearchOperations</code> for document retrieval and search, <code>instanceOps()</code> for instance-level information, and <code>indexOps(&#8230;&#8203;)</code> for index lifecycle and settings.
-For CRUD and paging through Spring Data repository interfaces, see the <a href="repositories.html" class="xref page">Repositories</a> chapter.</p>
+<p>Where the repositories chapter focuses on the Spring Data repository abstraction, this chapter focuses on the native integration surface exposed through configuration support, mapping metadata, and <code>MeilisearchOperations</code>.</p>
 </div>
 <div class="paragraph">
 <p>The main integration layers are:</p>
@@ -454,7 +453,7 @@ For CRUD and paging through Spring Data repository interfaces, see the <a href="
 <p><a href="meilisearch/template.html" class="xref page">Operations</a> for document and search APIs through <code>MeilisearchOperations</code>.</p>
 </li>
 <li>
-<p><a href="meilisearch/index-operations.html" class="xref page">Index operations</a> for instance health and statistics, index lifecycle, and index statistics.</p>
+<p><a href="meilisearch/index-operations.html" class="xref page">Index operations</a> for instance and index lifecycle APIs.</p>
 </li>
 <li>
 <p><a href="meilisearch/settings.html" class="xref page">Settings</a> for annotation-driven and runtime index settings.</p>
@@ -474,7 +473,7 @@ For CRUD and paging through Spring Data repository interfaces, see the <a href="
     <a href="meilisearch/template.html">Operations</a>
   </li>
   <li>
-    <a href="meilisearch/index-operations.html">Instance and Index Operations</a>
+    <a href="meilisearch/index-operations.html">Index and Instance Operations</a>
   </li>
   <li>
     <a href="meilisearch/settings.html">Settings</a>

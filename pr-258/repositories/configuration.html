@@ -308,7 +308,7 @@
     <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../meilisearch/index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
@@ -439,7 +439,7 @@
 <p>Spring Data Meilisearch repositories are enabled through <code>@EnableMeilisearchRepositories</code> or the XML namespace.</p>
 </div>
 <div class="paragraph">
-<p>Repository bootstrap registers interfaces against a <code>MeilisearchOperations</code> bean. It does not create the client, template, or converter for you, and this module does not provide Spring Boot auto-configuration. The default operations bean name is <code>meilisearchTemplate</code>; use <code>meilisearchTemplateRef</code> to select another bean. Repository creation can apply settings declared on the mapped entity; see <a href="meilisearch-repositories.html#meilisearch.repositories.autocreation" class="xref page">Automatic Settings Application</a>.</p>
+<p>As with other Spring Data modules, repository bootstrap is intentionally lightweight. The main store-specific choice is which <code>MeilisearchOperations</code> bean should back discovered repositories.</p>
 </div>
 </div>
 </div>
@@ -507,27 +507,40 @@ bootstrap with a Meilisearch-specific message until repository query method supp
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/context
-       http://www.springframework.org/schema/context/spring-context.xsd
        http://www.vanslog.io/spring/data/meilisearch
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
 
-    &lt;context:property-placeholder/&gt;
     &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;
-    &lt;meilisearch:meilisearch-client
-            id="meilisearchClient"
-            api-key="${MEILISEARCH_API_KEY}"
-            request-timeout="5000"
-            request-interval="50"/&gt;
+
+    &lt;meilisearch:meilisearch-client id="meilisearchClient" api-key="${MEILISEARCH_API_KEY}"/&gt;
+
+    &lt;bean id="meilisearchConverter"
+          class="io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter"&gt;
+        &lt;constructor-arg name="mappingContext" ref="meilisearchMappingContext"/&gt;
+        &lt;property name="conversions" ref="meilisearchCustomConversions"/&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="meilisearchMappingContext"
+          class="io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext"/&gt;
+
+    &lt;bean id="meilisearchCustomConversions"
+          class="io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions"&gt;
+        &lt;constructor-arg&gt;
+            &lt;list/&gt;
+        &lt;/constructor-arg&gt;
+    &lt;/bean&gt;
+
+    &lt;bean id="meilisearchObjectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/&gt;
 
     &lt;bean id="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate"&gt;
-        &lt;constructor-arg ref="meilisearchClient"/&gt;
+        &lt;constructor-arg name="meilisearchClient" ref="meilisearchClient"/&gt;
+        &lt;constructor-arg name="meilisearchConverter" ref="meilisearchConverter"/&gt;
+        &lt;constructor-arg name="objectMapper" ref="meilisearchObjectMapper"/&gt;
     &lt;/bean&gt;
 
     &lt;meilisearch:repositories
@@ -539,7 +552,7 @@ bootstrap with a Meilisearch-specific message until repository query method supp
 <div class="paragraph">
 <p>The XML namespace extends the Spring Data repository namespace and adds the <code>meilisearch-template-ref</code> attribute.
 See <a href="../appendix.html#meilisearch.appendix.schema" class="xref page">XML namespace reference</a> for the full attribute list.
-The one-argument <code>MeilisearchTemplate</code> constructor provides a default mapping converter and <code>ObjectMapper</code>. Wire them explicitly only when you need to customize conversion; see <a href="../meilisearch/object-mapping.html" class="xref page">Object Mapping</a>.</p>
+The manual <code>meilisearchTemplate</code> bean must be wired with a <code>MeilisearchConverter</code> for entity mapping and the <code>meilisearchObjectMapper</code> bean for JSON document payload serialization.</p>
 </div>
 </div>
 </div>

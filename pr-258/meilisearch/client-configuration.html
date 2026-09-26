@@ -308,7 +308,7 @@
     <a class="nav-link"  href="template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="settings.html">Settings</a>
@@ -447,7 +447,7 @@
 <h2 id="meilisearch.clients.javaconfig"><a class="anchor" href="#meilisearch.clients.javaconfig"></a>JavaConfig</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In Java configuration, extend <code>MeilisearchConfiguration</code> to provide the <code>ClientConfiguration</code> bean. The base class registers the default <code>GsonJsonHandler</code>, <code>MeilisearchClient</code>, mapping context, converter, object mapper, and <code>meilisearchTemplate</code> / <code>meilisearchOperations</code> bean names.</p>
+<p>Extend <code>MeilisearchConfiguration</code> to provide the <code>ClientConfiguration</code> bean. The base class also registers the default <code>GsonJsonHandler</code>, <code>MeilisearchClient</code>, mapping context, converter, and <code>meilisearchTemplate</code> bean.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -482,24 +482,24 @@ class MyClientConfig extends MeilisearchConfiguration {
 <div class="ulist">
 <ul>
 <li>
-<p><code>connectedTo(&#8230;&#8203;)</code> or <code>connectedToLocalhost()</code> to choose the server URL. The Java builder has no default URL.</p>
+<p><code>connectedTo(&#8230;&#8203;)</code> or <code>connectedToLocalhost()</code> to choose the server endpoint.</p>
 </li>
 <li>
-<p><code>withApiKey(&#8230;&#8203;)</code> to provide the required Meilisearch API key; the Java builder has no default key.</p>
+<p><code>withApiKey(&#8230;&#8203;)</code> to provide the Meilisearch API key.</p>
 </li>
 <li>
-<p><code>withClientAgents(String[])</code> to supply client-agent values sent in the <code>User-Agent</code> header.</p>
+<p><code>withClientAgents(&#8230;&#8203;)</code> to append client agent values.</p>
 </li>
 <li>
-<p><code>withRequestTimeout(&#8230;&#8203;)</code> to set the task-completion wait timeout in milliseconds. The Java builder default is 5,000 ms.</p>
+<p><code>withRequestTimeout(&#8230;&#8203;)</code> to configure how long task-based operations wait for completion.</p>
 </li>
 <li>
-<p><code>withRequestInterval(&#8230;&#8203;)</code> to set the polling interval in milliseconds. The Java builder default is 50 ms.</p>
+<p><code>withRequestInterval(&#8230;&#8203;)</code> to configure the polling interval used while waiting for task completion.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>These timeout and interval values are passed to the SDK&#8217;s task-wait operations for asynchronous writes, index lifecycle changes, and settings updates. They are not HTTP connection or socket timeouts.</p>
+<p>These timeout and interval settings affect operations that submit asynchronous Meilisearch tasks, such as writes, index lifecycle changes, and runtime settings updates.</p>
 </div>
 </div>
 </div>
@@ -516,21 +516,11 @@ Override <code>jsonHandler()</code> when you need a different implementation.</p
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
-import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
-import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
 
 import org.springframework.context.annotation.Configuration;
 
 </span><span class="fold-block">@Configuration
 class JsonHandlerConfig extends MeilisearchConfiguration {
-
-    @Override
-    public ClientConfiguration clientConfiguration() {
-        return ClientConfiguration.builder()
-                .connectedToLocalhost()
-                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
-                .build();
-    }
 
     @Override
     public JsonHandler jsonHandler() {
@@ -562,23 +552,18 @@ class JsonHandlerConfig extends MeilisearchConfiguration {
 <div class="sectionbody">
 <div class="paragraph">
 <p>Spring Data Meilisearch also provides an XML namespace.
-Unlike Java configuration, the namespace does not create a JSON handler bean. Declare a <code>JsonHandler</code> bean named <code>jsonHandler</code> (the schema&#8217;s default reference), or set <code>json-handler-ref</code> to the id of another handler bean.
-The <code>api-key</code> attribute is required. For production deployments, prefer a scoped API key rather than the Meilisearch master key.</p>
+Register a JSON handler bean and reference it from <code>&lt;meilisearch:meilisearch-client&gt;</code> when you do not want to use the default bean name.
+For production deployments, prefer a scoped API key rather than the Meilisearch master key.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/context
-       http://www.springframework.org/schema/context/spring-context.xsd
        http://www.vanslog.io/spring/data/meilisearch
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
-
-    &lt;context:property-placeholder/&gt;
 
     &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;
 
@@ -593,7 +578,7 @@ The <code>api-key</code> attribute is required. For production deployments, pref
 </div>
 </div>
 <div class="paragraph">
-<p>When omitted, the XML factory leaves <code>request-timeout</code> and <code>request-interval</code> at <code>0</code>, unlike the Java builder defaults. See the <a href="../appendix.html#meilisearch.appendix.schema" class="xref page">XML namespace reference</a> for attribute defaults.</p>
+<p>The XML namespace attributes are documented in <a href="../appendix.html#meilisearch.appendix.schema" class="xref page">XML namespace reference</a>.</p>
 </div>
 </div>
 </div>

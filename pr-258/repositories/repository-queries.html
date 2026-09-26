@@ -308,7 +308,7 @@
     <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../meilisearch/index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
@@ -436,117 +436,122 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Spring Data Meilisearch implements the standard repository base methods and keeps custom search composition in <code>MeilisearchOperations</code>. The supported repository contract is intentionally narrower than query-enabled Spring Data stores.</p>
+<p>Spring Data Meilisearch currently focuses on the repository base interfaces and on direct use of <code>MeilisearchOperations</code> for advanced search features.</p>
+</div>
+<div class="paragraph">
+<p>This page intentionally documents the boundary of the current repository support so that the manual stays aligned with the implemented code rather than with the broader feature set available in some other Spring Data modules.</p>
+</div>
+<div class="paragraph">
+<p>That boundary is deliberate: the repository API covers the common persistence flow, while the operations API remains the explicit place for richer Meilisearch search capabilities.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.repositories.queries.scope"><a class="anchor" href="#meilisearch.repositories.queries.scope"></a>Choosing Between Repositories and Operations</h2>
+<h2 id="meilisearch.repositories.queries.scope"><a class="anchor" href="#meilisearch.repositories.queries.scope"></a>Recommended Scope</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Use <code>MeilisearchRepository</code> for the built-in CRUD, ID lookup, collection listing, sorting, and pageable methods. Use <code>MeilisearchOperations</code> for search features that need an explicit Meilisearch query or richer search result data, such as facets, similar-document search, or federated multi-search.</p>
-</div>
-<div class="paragraph">
-<p>For a mapped domain type such as <code>Movie</code>, inject <code>MeilisearchOperations</code> when you need to compose a search query directly:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
-import io.vanslog.spring.data.meilisearch.core.SearchHits;
-import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
-
-</span><span class="fold-block">class MovieSearchService {
-
-  private final MeilisearchOperations operations;
-
-  MovieSearchService(MeilisearchOperations operations) {
-    this.operations = operations;
-  }
-
-  SearchHits&lt;Movie&gt; search(String text) {
-    BasicQuery query = BasicQuery.builder().withQ(text).build();
-    return operations.search(query, Movie.class);
-  }
-}</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This service-level call returns Meilisearch search hits. A repository method such as <code>findByTitle(&#8230;&#8203;)</code> is not an equivalent shortcut.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="meilisearch.repositories.queries.unsupported"><a class="anchor" href="#meilisearch.repositories.queries.unsupported"></a>Unsupported Repository Query Methods</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The repository factory does not implement query-method resolution. Built-in methods such as <code>findById(&#8230;&#8203;)</code> are supported because they are part of the repository base contract, but methods that require query resolution are rejected during repository bootstrap. This includes:</p>
+<p>Use repositories for:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>derived finder, count, and delete methods such as <code>findByTitle(&#8230;&#8203;)</code> or <code>countByTitle(&#8230;&#8203;)</code>,</p>
+<p>CRUD-style persistence,</p>
 </li>
 <li>
-<p>methods annotated with repository <code>@Query</code>,</p>
+<p>id-based lookup,</p>
 </li>
 <li>
-<p>named-query-backed repository methods.</p>
+<p>simple <code>findAll</code>, sorting, and pageable access,</p>
+</li>
+<li>
+<p>integration with the general Spring Data repository programming model.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>For example, declaring the following method on a repository causes bootstrap to fail with an <code>IllegalStateException</code> whose message begins <code>Meilisearch repository query methods are not supported yet</code>:</p>
+<p>Use <code>MeilisearchOperations</code> when you need:</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.annotations.Document;
-import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
-import org.springframework.data.annotation.Id;
-
-</span><span class="fold-block">@Document(indexUid = "movies", applySettings = false)
-class Movie {
-  @Id String id;
-  String title;
-}
-
-interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
-
-  Movie findByTitle(String title);
-}</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Changing <code>queryLookupStrategy</code> or <code>namedQueriesLocation</code> does not add query-method support. Those attributes remain available for Spring Data configuration compatibility; see <a href="configuration.html" class="xref page">Repository Configuration</a>.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>full control over <code>BasicQuery</code>, <code>IndexQuery</code>, <code>FacetQuery</code>, or <code>SimilarQuery</code>,</p>
+</li>
+<li>
+<p>federated multi-search,</p>
+</li>
+<li>
+<p>facet search,</p>
+</li>
+<li>
+<p>similar-document search,</p>
+</li>
+<li>
+<p>index lifecycle or runtime settings updates.</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.repositories.queries.notes"><a class="anchor" href="#meilisearch.repositories.queries.notes"></a>Paging, Sorting, and Result Limits</h2>
+<h2 id="meilisearch.repositories.queries.unsupported"><a class="anchor" href="#meilisearch.repositories.queries.unsupported"></a>Features Not Documented as Repository Capabilities</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>The repository documentation intentionally does not advertise the following as supported repository features:</p>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p>A paged <code>findAll(Pageable)</code> is search-backed. Its <code>Page</code> total comes from the total reported by Meilisearch search results. <code>pagination.maxTotalHits</code> can cap returned content without capping that reported total.</p>
+<p>derived finder methods such as <code>findByTitle(&#8230;&#8203;)</code>,</p>
 </li>
 <li>
-<p>An unpaged <code>findAll(Pageable)</code> uses the document-list API, retrieves all documents into memory, and sets the <code>Page</code> total to the retrieved count. It is not limited by <code>maxTotalHits</code>.</p>
+<p>repository <code>@Query</code> methods,</p>
 </li>
 <li>
-<p><code>findAll()</code> also lists all documents through the document API. Sorted <code>findAll(Sort)</code> and sorted unpaged <code>findAll(Pageable)</code> count first, then fetch up to that count; additions between those requests may be absent.</p>
+<p>named queries,</p>
 </li>
 <li>
-<p>Sorting document listings requires a sortable index attribute and Meilisearch 1.16 or later. <code>findAllById(&#8230;&#8203;)</code> uses native ID-list retrieval, available from Meilisearch 1.14, with no fallback on older servers.</p>
-</li>
-<li>
-<p>Document-list reads do not use search settings such as <code>maxTotalHits</code>, but <code>displayedAttributes</code> can limit fields returned when the request does not specify fields.</p>
-</li>
-<li>
-<p>Empty <code>saveAll(&#8230;&#8203;)</code>, <code>deleteAll(Iterable)</code>, and <code>deleteAllById(&#8230;&#8203;)</code> operations complete without a server request. The no-argument <code>deleteAll()</code> still deletes all documents for the entity type.</p>
+<p>repository-level access to facet or federated-search metadata.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>For full method-to-API behavior, see <a href="meilisearch-repositories.html#meilisearch.repositories.lookup-methods.behavior-table" class="xref page">Method Behavior at a Glance</a>. For query composition and search result metadata, use <code>MeilisearchOperations</code> directly.</p>
+<p>Those topics are common in longer repository chapters from other Spring Data libraries because those modules implement them.
+Spring Data Meilisearch currently keeps advanced querying in the <code>MeilisearchOperations</code> layer instead.</p>
+</div>
+<div class="paragraph">
+<p>Repository interfaces that declare derived finder methods, repository <code>@Query</code> methods, or named-query-backed methods fail
+during repository bootstrap with a Meilisearch-specific message.
+This keeps unsupported query-method configuration from looking like an implemented feature.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.repositories.queries.notes"><a class="anchor" href="#meilisearch.repositories.queries.notes"></a>Practical Notes</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><code>findAll()</code> reads every document in one request through the document API; sorted <code>findAll(Sort)</code> counts first, then fetches once. Sorting requires a sortable attribute in the index settings.</p>
+</li>
+<li>
+<p><code>findAllById(&#8230;&#8203;)</code> uses native ID-list fetch, available from Meilisearch 1.14.</p>
+</li>
+<li>
+<p>Sorted <code>findAll(Sort)</code> and sorted unpaged <code>findAll(Pageable)</code> require Meilisearch 1.16.</p>
+</li>
+<li>
+<p>Paged <code>findAll(Pageable)</code> remains search-backed and inherits Meilisearch search pagination limits and search-only settings.</p>
+</li>
+<li>
+<p>An unpaged <code>Pageable</code> uses document-backed listing (with a preliminary count if sorted), so its content and total are not capped by <code>maxTotalHits</code>.</p>
+</li>
+<li>
+<p>If your use case depends on advanced query composition or store-specific search options, prefer <code>MeilisearchOperations</code> explicitly in the service layer.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For many applications, this split is a good fit: repositories cover the common persistence flow, while <code>MeilisearchOperations</code> remains the explicit entry point for Meilisearch-specific search behavior.</p>
 </div>
 </div>
 </div>

@@ -308,7 +308,7 @@
     <a class="nav-link"  href="template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="settings.html">Settings</a>
@@ -436,17 +436,18 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Spring Data Meilisearch maps domain objects to Meilisearch documents through mapping metadata, a mapping context, and
-a converter. The same mapping is used by repositories and <code>MeilisearchOperations</code>; metadata supplies the index uid,
-document id, and optional settings.</p>
+<p>Spring Data Meilisearch maps domain objects to Meilisearch documents through annotation metadata, a mapping context, and a converter.</p>
+</div>
+<div class="paragraph">
+<p>Object mapping is the basis for both repository support and template-style operations because the mapping metadata provides the index uid, document id, and optional settings metadata for each managed entity type.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.mapping.document"><a class="anchor" href="#meilisearch.mapping.document"></a><code>@Document</code></h2>
+<h2 id="meilisearch.mapping.document"><a class="anchor" href="#meilisearch.mapping.document"></a>@Document</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>A mapped type used by repository or template operations must declare its target index uid:</p>
+<p>A persistent type must declare the target index uid explicitly.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -465,10 +466,11 @@ class Movie {
 </div>
 </div>
 <div class="paragraph">
-<p><code>indexUid</code> is required. Spring Data Meilisearch resolves the index for entity-based operations from this metadata.
-<code>@Document.applySettings</code> defaults to <code>true</code>; repository bootstrap applies the entity&#8217;s declared settings unless it is
-set to <code>false</code>. Meilisearch creates a missing index when its settings-update API runs, so repository bootstrap can
-create the index. See <a href="settings.html" class="xref page">Settings</a> for annotation and runtime settings behavior.</p>
+<p><code>indexUid</code> is required. Spring Data Meilisearch resolves index-bound operations and repositories from that mapping metadata.</p>
+</div>
+<div class="paragraph">
+<p><code>@Document</code> also exposes <code>applySettings</code>, which defaults to <code>true</code>.
+When repository infrastructure creates a repository for the entity type, Spring Data Meilisearch applies annotation-driven index settings automatically if <code>applySettings</code> remains enabled.</p>
 </div>
 </div>
 </div>
@@ -476,16 +478,8 @@ create the index. See <a href="settings.html" class="xref page">Settings</a> for
 <h2 id="meilisearch.mapping.id"><a class="anchor" href="#meilisearch.mapping.id"></a>Document Id</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The document id is resolved from a Spring Data <code>@Id</code> property. A property named <code>id</code> is also recognized by convention,
-even without <code>@Id</code>. The default mapping uses the property&#8217;s Java field name as the document key; the same property
-name is used as the Meilisearch primary key when saving the entity.</p>
-</div>
-<div class="paragraph">
-<p>When repository methods or entity-based delete operations need a string id, <code>MeilisearchConverter.convertId</code> uses a
-registered conversion to <code>String</code> when available; otherwise it uses the value&#8217;s <code>toString()</code> representation. This
-conversion is separate from serializing the entity&#8217;s primary-key field. A <code>Converter&lt;MyId, String&gt;</code> alone does not
-make the default document writer serialize a custom <code>MyId</code> property as a scalar JSON value; ensure the persisted
-primary-key field is a scalar supported by Meilisearch.</p>
+<p>Document identity is resolved from the Spring Data <code>@Id</code> property.
+Repository and template operations convert ids through the configured <code>MeilisearchConverter</code>, so custom id value types can participate as long as the converter can turn them into the document id representation expected by Meilisearch.</p>
 </div>
 </div>
 </div>
@@ -493,11 +487,34 @@ primary-key field is a scalar supported by Meilisearch.</p>
 <h2 id="meilisearch.mapping.settings"><a class="anchor" href="#meilisearch.mapping.settings"></a>Annotation-driven Settings Metadata</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Use <code>@Setting</code> and companion annotations such as <code>@TypoTolerance</code>, <code>@Faceting</code>, and <code>@Pagination</code> to declare
-entity-owned index settings. These annotations are metadata; repository bootstrap applies them by default when
-<code>@Document.applySettings</code> is enabled. Direct template use does not automatically apply them; call
-<code>MeilisearchOperations.applySettings(Entity.class)</code> or use <code>MeilisearchIndexOperations.updateSettings(&#8230;&#8203;)</code> when
-needed. For setting groups and clearing/resetting behavior, see <a href="settings.html" class="xref page">Settings</a>.</p>
+<p>Use <code>@Setting</code> and companion annotations such as <code>@TypoTolerance</code>, <code>@Faceting</code>, and <code>@Pagination</code> to define index settings next to the domain type.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.annotations.Faceting;
+import io.vanslog.spring.data.meilisearch.annotations.Pagination;
+import io.vanslog.spring.data.meilisearch.annotations.Setting;
+import io.vanslog.spring.data.meilisearch.annotations.Synonym;
+import io.vanslog.spring.data.meilisearch.annotations.TypoTolerance;
+
+</span><span class="fold-block">@Document(indexUid = "products")
+@Setting(
+        searchableAttributes = { "title", "description" },
+        filterableAttributes = { "brand", "category" },
+        synonyms = {
+                @Synonym(word = "tv", synonyms = { "television" })
+        })
+@TypoTolerance(enabled = true)
+@Faceting(maxValuesPerFacet = 100)
+@Pagination(maxTotalHits = 2000)
+class Product {
+}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Use annotation-driven settings for stable, entity-owned index defaults that should travel with the mapped type.
+Use <a href="settings.html" class="xref page">runtime settings operations</a> when settings must be inspected or adjusted dynamically.</p>
 </div>
 </div>
 </div>
@@ -505,7 +522,7 @@ needed. For setting groups and clearing/resetting behavior, see <a href="setting
 <h2 id="meilisearch.mapping.converter"><a class="anchor" href="#meilisearch.mapping.converter"></a>Mapping Context and Converter</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>MeilisearchConfigurationSupport</code> registers the mapping infrastructure beans:</p>
+<p><code>MeilisearchConfigurationSupport</code> registers the following infrastructure beans:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -521,14 +538,8 @@ needed. For setting groups and clearing/resetting behavior, see <a href="setting
 </ul>
 </div>
 <div class="paragraph">
-<p>The default converter is <code>MappingMeilisearchConverter</code>. It uses the mapping context for entity metadata and applies
-custom conversions registered through <code>MeilisearchCustomConversions</code>.</p>
-</div>
-<div class="paragraph">
-<p>For properties traversed by the default writer, non-null values are mapped using their Java field names. Collections
-and arrays become JSON arrays, maps become JSON objects, and nested objects are mapped recursively. The mapping
-context does not implement entity-reference/association loading; related data must be represented in the document
-model rather than relying on automatic reference resolution.</p>
+<p>The default converter is <code>MappingMeilisearchConverter</code>.
+It uses the mapping context for entity metadata and applies any converters declared through <code>MeilisearchCustomConversions</code>.</p>
 </div>
 </div>
 </div>
@@ -536,46 +547,30 @@ model rather than relying on automatic reference resolution.</p>
 <h2 id="meilisearch.mapping.payloads"><a class="anchor" href="#meilisearch.mapping.payloads"></a>Document Mapping and JSON Payloads</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>MappingMeilisearchConverter</code> reads and writes map-shaped <code>Document</code> values before they reach the Meilisearch Java
-SDK. The Spring-managed <code>ObjectMapper</code> bean named <code>meilisearchObjectMapper</code> then serializes those document payloads.
-The SDK <code>JsonHandler</code> remains responsible for SDK transport concerns; it is not the entity mapping layer.</p>
+<p>Spring Data Meilisearch maps entity instances through <code>MeilisearchConverter</code> before they reach the Meilisearch Java SDK.
+The default <code>MappingMeilisearchConverter</code> reads and writes a map-shaped <code>Document</code>, applying the mapping metadata and custom conversions registered with <code>MeilisearchCustomConversions</code>.</p>
+</div>
+<div class="paragraph">
+<p>Document payloads are then serialized with the Spring-managed <code>ObjectMapper</code> bean named <code>meilisearchObjectMapper</code>.
+This keeps entity conversion in Spring Data Meilisearch and sends document requests through the SDK raw JSON APIs where the SDK exposes them.
+The SDK <code>JsonHandler</code> is still used for SDK transport concerns, but it is not the entity mapping layer.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 1. Customizing the document <code>ObjectMapper</code></div>
+<div class="title">Example 1. Customizing the document ObjectMapper</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import com.fasterxml.jackson.databind.ObjectMapper;
-import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
-import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class MyClientConfig extends MeilisearchConfiguration {
 
-</span><span class="fold-block">@Configuration
-class MyClientConfig extends MeilisearchConfiguration {
-
-    @Bean
-    @Override
-    public ClientConfiguration clientConfiguration() {
-        return ClientConfiguration.builder()
-                .connectedToLocalhost()
-                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
-                .build();
-    }
-
-    @Bean(name = "meilisearchObjectMapper")
-    @Override
-    public ObjectMapper meilisearchObjectMapper() {
-        return new ObjectMapper();
-    }
-}</span></code></pre>
+	@Bean(name = "meilisearchObjectMapper")
+	public ObjectMapper meilisearchObjectMapper() {
+		return new ObjectMapper();
+	}
+}</code></pre>
 </div>
 </div>
 </div>
-</div>
-<div class="paragraph">
-<p><code>MeilisearchConfiguration</code> is abstract, so a configuration subclass must also provide <code>clientConfiguration()</code>.
-Provide a scoped API key through <code>MEILISEARCH_API_KEY</code> rather than committing credentials.</p>
 </div>
 </div>
 </div>
@@ -583,63 +578,50 @@ Provide a scoped API key through <code>MEILISEARCH_API_KEY</code> rather than co
 <h2 id="meilisearch.mapping.custom-conversions"><a class="anchor" href="#meilisearch.mapping.custom-conversions"></a>Custom Conversions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Override the <code>meilisearchCustomConversions()</code> bean when document values need a custom representation. The default
-writer consults custom write conversions that target <code>Document</code>; the reader consults conversions from a document value
-to the target property type. Register a writing and reading converter for a round trip:</p>
+<p>Override <code>meilisearchCustomConversions()</code> when you need custom Spring converters.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.core.document.Document;
-import java.math.BigDecimal;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
+import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions;
+
 import java.util.List;
+
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.data.convert.ReadingConverter;
-import org.springframework.data.convert.WritingConverter;
 
-</span><span class="fold-block">record Price(BigDecimal amount, String currency) {}
-
-@WritingConverter
-class PriceToDocumentConverter implements Converter&lt;Price, Document&gt; {
+</span><span class="fold-block">class ConversionConfig extends MeilisearchConfiguration {
 
     @Override
-    public Document convert(Price price) {
-        return Document.create()
-                .append("amount", price.amount().toPlainString())
-                .append("currency", price.currency());
+    public MeilisearchCustomConversions meilisearchCustomConversions() {
+        Converter&lt;MovieId, String&gt; writingConverter = MovieId::value;
+        return new MeilisearchCustomConversions(List.of(writingConverter));
     }
-}
-
-@ReadingConverter
-class DocumentToPriceConverter implements Converter&lt;Document, Price&gt; {
 
     @Override
-    public Price convert(Document document) {
-        return new Price(new BigDecimal((String) document.get("amount")),
-                (String) document.get("currency"));
+    public io.vanslog.spring.data.meilisearch.client.ClientConfiguration clientConfiguration() {
+        return io.vanslog.spring.data.meilisearch.client.ClientConfiguration.builder()
+                .connectedToLocalhost()
+                .withApiKey("masterKey")
+                .build();
     }
 }</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Register the converters through <code>MeilisearchCustomConversions</code>:</p>
+<p>Custom conversions are especially useful when:</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions;
-import java.util.List;
-
-</span><span class="fold-block">@Bean
-@Override
-public MeilisearchCustomConversions meilisearchCustomConversions() {
-    return new MeilisearchCustomConversions(
-            List.of(new PriceToDocumentConverter(), new DocumentToPriceConverter()));
-}</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Use this pattern when a document property needs a structure different from its Java type. ID conversion to <code>String</code>
-is handled separately by <code>MeilisearchConverter.convertId</code>; see
-<a href="#meilisearch.mapping.id">Document Id</a> for the primary-key serialization limitation.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Your ids are richer value objects.</p>
+</li>
+<li>
+<p>Meilisearch document fields need custom serialization.</p>
+</li>
+<li>
+<p>Repository/template code should stay unaware of low-level value transformations.</p>
+</li>
+</ul>
 </div>
 </div>
 </div>

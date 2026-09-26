@@ -308,7 +308,7 @@
     <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../meilisearch/index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
@@ -436,7 +436,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Repository interfaces are registered by Java configuration or the Meilisearch XML namespace. Repository bootstrap requires a configured <code>MeilisearchOperations</code> bean; see <a href="configuration.html" class="xref page">Repository Configuration</a> for the complete client and template setup.</p>
+<p>This section covers how to create instances and bean definitions for the defined repository interfaces.</p>
 </div>
 </div>
 </div>
@@ -444,24 +444,37 @@
 <h2 id="repositories.create-instances.java-config"><a class="anchor" href="#repositories.create-instances.java-config"></a>Java Configuration</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Enable repository scanning with <code>@EnableMeilisearchRepositories</code>:</p>
+<p>Use the store-specific <code>@EnableMeilisearchRepositories</code> annotation on a Java configuration class to define a configuration for repository activation.
+For an introduction to Java-based configuration of the Spring container, see <a href="https://docs.spring.io/spring-framework/reference/6.1/core/beans/java.html">JavaConfig in the Spring reference documentation</a>.</p>
+</div>
+<div class="paragraph">
+<p>A sample configuration to enable Spring Data repositories resembles the following:</p>
 </div>
 <div class="listingblock">
+<div class="title">Sample annotation-based repository configuration</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
-import org.springframework.context.annotation.Configuration;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+@EnableJpaRepositories("com.acme.repositories")
+class ApplicationConfiguration {
 
-</span><span class="fold-block">@Configuration
-@EnableMeilisearchRepositories(basePackages = "com.example.movies")
-class RepositoryConfiguration {
-}</span></code></pre>
+  @Bean
+  EntityManagerFactory entityManagerFactory() {
+    // …
+  }
+}</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>If no base package is specified, Spring scans the package of the annotated configuration class. The annotation uses a bean named <code>meilisearchTemplate</code> by default; set <code>meilisearchTemplateRef</code> to select a differently named <code>MeilisearchOperations</code> bean.</p>
-</div>
-<div class="paragraph">
-<p>Repository scanning does not configure the Meilisearch client or create the operations bean. This module does not provide Spring Boot auto-configuration. See <a href="configuration.html" class="xref page">Repository Configuration</a> for an example that wires the required beans.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The preceding example uses the JPA-specific annotation, which you would change according to the store module you actually use. The same applies to the definition of the <code>EntityManagerFactory</code> bean. See the sections covering the store-specific configuration.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -469,73 +482,106 @@ class RepositoryConfiguration {
 <h2 id="repositories.create-instances.xml"><a class="anchor" href="#repositories.create-instances.xml"></a>XML Configuration</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Use the Meilisearch namespace&#8217;s <code>repositories</code> element to scan a base package:</p>
+<p>Each Spring Data module includes a <code>repositories</code> element that lets you define a base package that Spring scans for you, as shown in the following example:</p>
 </div>
 <div class="listingblock">
+<div class="title">Enabling Spring Data repositories via XML</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-         http://www.springframework.org/schema/beans/spring-beans.xsd
-         http://www.vanslog.io/spring/data/meilisearch
-         http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.springframework.org/schema/data/jpa"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+    https://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/data/jpa
+    https://www.springframework.org/schema/data/jpa/spring-jpa.xsd"&gt;
 
-  &lt;meilisearch:repositories
-      base-package="com.example.movies"
-      meilisearch-template-ref="meilisearchTemplate" /&gt;
+  &lt;jpa:repositories base-package="com.acme.repositories" /&gt;
 
-&lt;/beans&gt;</code></pre>
+&lt;/beans:beans&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The namespace element extends Spring Data&#8217;s repository attributes and adds <code>meilisearch-template-ref</code>. The template bean must be declared separately. See <a href="configuration.html#meilisearch.repositories.configuration.namespace" class="xref page">XML Namespace</a> for the complete configuration.</p>
+<p>In the preceding example, Spring is instructed to scan <code>com.acme.repositories</code> and all its sub-packages for interfaces extending <code>Repository</code> or one of its sub-interfaces.
+For each interface found, the infrastructure registers the persistence technology-specific <code>FactoryBean</code> to create the appropriate proxies that handle invocations of the query methods.
+Each bean is registered under a bean name that is derived from the interface name, so an interface of <code>UserRepository</code> would be registered under <code>userRepository</code>.
+Bean names for nested repository interfaces are prefixed with their enclosing type name.
+The base package attribute allows wildcards so that you can define a pattern of scanned packages.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="repositories.using-filters"><a class="anchor" href="#repositories.using-filters"></a>Restricting Repository Scanning</h2>
+<h2 id="repositories.using-filters"><a class="anchor" href="#repositories.using-filters"></a>Using Filters</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Use <code>includeFilters</code> and <code>excludeFilters</code> to control which candidate interfaces are considered during annotation-based scanning:</p>
+<p>By default, the infrastructure picks up every interface that extends the persistence technology-specific <code>Repository</code> sub-interface located under the configured base package and creates a bean instance for it.
+However, you might want more fine-grained control over which interfaces have bean instances created for them.
+To do so, use filter elements inside the repository declaration.
+The semantics are exactly equivalent to the elements in Spring&#8217;s component filters.
+For details, see the <a href="https://docs.spring.io/spring-framework/reference/6.1/core/beans/classpath-scanning.html">Spring reference documentation</a> for these elements.</p>
 </div>
-<div class="listingblock">
+<div class="paragraph">
+<p>For example, to exclude certain interfaces from instantiation as repository beans, you could use the following configuration:</p>
+</div>
+<div id="_tabs_1" class="openblock tabs is-sync is-loading">
+<div class="title">Using filters</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
-import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
+<div class="ulist tablist">
+<ul>
+<li id="_tabs_1_java" class="tab">
+<p>Java</p>
+</li>
+<li id="_tabs_1_xml" class="tab">
+<p>XML</p>
+</li>
+</ul>
+</div>
+<div id="_tabs_1_java--panel" class="tabpanel" aria-labelledby="_tabs_1_java">
+<div class="listingblock primary">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+@EnableMeilisearchRepositories(basePackages = "com.acme.repositories",
+    includeFilters = { @Filter(type = FilterType.REGEX, pattern = ".*SomeRepository") },
+    excludeFilters = { @Filter(type = FilterType.REGEX, pattern = ".*SomeOtherRepository") })
+class ApplicationConfiguration {
 
-</span><span class="fold-block">@Configuration
-@EnableMeilisearchRepositories(
-        basePackages = "com.example.movies",
-        includeFilters = @Filter(type = FilterType.REGEX, pattern = ".*Repository"),
-        excludeFilters = @Filter(type = FilterType.REGEX, pattern = ".*LegacyRepository"))
-class RepositoryConfiguration {
-}</span></code></pre>
+  @Bean
+  EntityManagerFactory entityManagerFactory() {
+    // …
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+<div id="_tabs_1_xml--panel" class="tabpanel" aria-labelledby="_tabs_1_xml">
+<div class="listingblock secondary">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;repositories base-package="com.acme.repositories"&gt;
+  &lt;context:include-filter type="regex" expression=".*SomeRepository" /&gt;
+  &lt;context:exclude-filter type="regex" expression=".*SomeOtherRepository" /&gt;
+&lt;/repositories&gt;</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph">
-<p><code>@EnableMeilisearchRepositories</code> also supports type-safe package selection, nested repository selection, and repository factory configuration. See <a href="configuration.html" class="xref page">Repository Configuration</a> for the available attributes.</p>
+<p>The preceding example includes all interfaces ending with <code>SomeRepository</code> and excludes those ending with <code>SomeOtherRepository</code> from being instantiated.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="repositories.create-instances.standalone"><a class="anchor" href="#repositories.create-instances.standalone"></a>Programmatic Repository Factory</h2>
+<h2 id="repositories.create-instances.standalone"><a class="anchor" href="#repositories.create-instances.standalone"></a>Standalone Usage</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>For programmatic setup without repository scanning, use the public Meilisearch repository factory with an already configured <code>MeilisearchOperations</code> instance:</p>
+<p>You can also use the repository infrastructure outside of a Spring container&#8201;&#8212;&#8201;for example, in CDI environments.You still need some Spring libraries in your classpath, but, generally, you can set up repositories programmatically as well.The Spring Data modules that provide repository support ship with a persistence technology-specific <code>RepositoryFactory</code> that you can use, as follows:</p>
 </div>
 <div class="listingblock">
+<div class="title">Standalone usage of the repository factory</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.support.MeilisearchRepositoryFactory;
-
-</span><span class="fold-block">MeilisearchRepositoryFactory factory = new MeilisearchRepositoryFactory(meilisearchOperations);
-MovieRepository repository = factory.getRepository(MovieRepository.class);</span></code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">RepositoryFactorySupport factory = … // Instantiate factory here
+UserRepository repository = factory.getRepository(UserRepository.class);</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>This is a repository factory API, not a CDI integration. The repository interface must use supported base methods; custom repository query methods remain unsupported.</p>
 </div>
 </div>
 </div>

@@ -308,7 +308,7 @@
     <a class="nav-link"  href="meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="meilisearch/index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="meilisearch/index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="meilisearch/settings.html">Settings</a>
@@ -439,8 +439,7 @@
 <p>Spring Data Meilisearch is a single-module Spring Data integration for applications that want to access Meilisearch through familiar Spring configuration, mapping, operations, and repository abstractions.</p>
 </div>
 <div class="paragraph">
-<p>Applications configure the integration explicitly through Spring Java configuration or its XML namespace; the project does not provide Spring Boot auto-configuration.
-The quickest way to get started is to declare the dependency, extend <code>MeilisearchConfiguration</code>, annotate your domain type with <code>@Document</code>, and create a <code>MeilisearchRepository</code> for the aggregate root.</p>
+<p>The quickest way to get started is to declare the dependency, extend <code>MeilisearchConfiguration</code>, annotate your domain type with <code>@Document</code>, and create a <code>MeilisearchRepository</code> for the aggregate root.</p>
 </div>
 </div>
 </div>
@@ -460,9 +459,6 @@ The quickest way to get started is to declare the dependency, extend <code>Meili
 </li>
 </ul>
 </div>
-<div class="paragraph">
-<p>The module does not claim one minimum Meilisearch version for every operation. ID-list document retrieval requires Meilisearch 1.14 or later, and sorted document listing requires 1.16 or later; use a server version that supports the APIs your application calls.</p>
-</div>
 </div>
 </div>
 <div class="sect1">
@@ -470,33 +466,29 @@ The quickest way to get started is to declare the dependency, extend <code>Meili
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependencies&gt;
-  &lt;dependency&gt;
-    &lt;groupId&gt;io.vanslog&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-data-meilisearch&lt;/artifactId&gt;
-    &lt;version&gt;${spring-data-meilisearch.version}&lt;/version&gt;
-  &lt;/dependency&gt;
-&lt;/dependencies&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+  &lt;groupId&gt;io.vanslog&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-data-meilisearch&lt;/artifactId&gt;
+  &lt;version&gt;{version}&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Define <code>spring-data-meilisearch.version</code> in your POM as the exact version you intend to use. Choose a released version from the <a href="https://central.sonatype.com/artifact/io.vanslog/spring-data-meilisearch">Maven Central artifact page</a>.</p>
-</div>
-<div class="paragraph">
-<p>For a development snapshot, set the same property to the exact <code>-SNAPSHOT</code> version published for the development branch, including the suffix, and add the Central snapshots repository to your POM:</p>
+<p>If you want to try the next snapshot build, add the Sonatype snapshot repository and use a <code>-SNAPSHOT</code> version.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;repositories&gt;
-  &lt;repository&gt;
-    &lt;id&gt;central-snapshots&lt;/id&gt;
-    &lt;name&gt;Central Snapshots&lt;/name&gt;
-    &lt;url&gt;https://central.sonatype.com/repository/maven-snapshots/&lt;/url&gt;
-    &lt;snapshots&gt;
-      &lt;enabled&gt;true&lt;/enabled&gt;
-    &lt;/snapshots&gt;
-  &lt;/repository&gt;
-&lt;/repositories&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+  &lt;groupId&gt;io.vanslog&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-data-meilisearch&lt;/artifactId&gt;
+  &lt;version&gt;{version}-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;repository&gt;
+  &lt;id&gt;sonatype-snapshots&lt;/id&gt;
+  &lt;name&gt;Sonatype Snapshot Repository&lt;/name&gt;
+  &lt;url&gt;https://s01.oss.sonatype.org/content/repositories/snapshots/&lt;/url&gt;
+&lt;/repository&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -509,16 +501,12 @@ The quickest way to get started is to declare the dependency, extend <code>Meili
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block">package com.example.movies;
-
-</span><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 </span><span class="fold-block">@Configuration
-@ComponentScan("com.example.movies")
 @EnableMeilisearchRepositories(basePackages = "com.example.movies")
 class MeilisearchConfig extends MeilisearchConfiguration {
 
@@ -535,7 +523,7 @@ class MeilisearchConfig extends MeilisearchConfiguration {
 <div class="paragraph">
 <p><code>MeilisearchConfiguration</code> registers the standard Spring Data Meilisearch beans, including the client, mapping context, converter, and the <code>meilisearchTemplate</code> / <code>meilisearchOperations</code> bean.
 <code>MeilisearchRepository</code> is the recommended repository base interface for this module&#8217;s current repository feature set.
-For local development, expose a scoped API key through <code>MEILISEARCH_API_KEY</code> instead of placing the Meilisearch master key in application code.</p>
+For local development, prefer a scoped API key exposed through <code>MEILISEARCH_API_KEY</code> instead of using the Meilisearch master key in application code.</p>
 </div>
 </div>
 </div>
@@ -545,19 +533,19 @@ For local development, expose a scoped API key through <code>MEILISEARCH_API_KEY
 <div class="paragraph">
 <p>Annotate persistent types with <code>@Document</code> and choose the target index uid explicitly.</p>
 </div>
-<div class="paragraph">
-<p><code>@Document</code> maps the type to the <code>movies</code> index but does not itself create it. Repository bootstrap applies settings by default, and Meilisearch can create a missing index during that settings update. If the index is still absent, the first <code>save</code> submits documents through an API that creates it with <code>id</code> as the primary key. To control index creation and its primary key explicitly, see <a href="meilisearch/index-operations.html" class="xref page">index operations</a> and <a href="meilisearch/settings.html" class="xref page">settings</a>.</p>
-</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block">package com.example.movies;
-
-</span><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.annotations.Document;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.annotations.Document;
 
 import org.springframework.data.annotation.Id;
 
 </span><span class="fold-block">@Document(indexUid = "movies")
-public record Movie(@Id String id, String title, String description) {
+class Movie {
+
+    @Id
+    private String id;
+    private String title;
+    private String description;
 }</span></code></pre>
 </div>
 </div>
@@ -568,9 +556,7 @@ public record Movie(@Id String id, String title, String description) {
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block">package com.example.movies;
-
-</span><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
 </span><span class="fold-block">public interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
 }</span></code></pre>
@@ -578,11 +564,7 @@ public record Movie(@Id String id, String title, String description) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block">package com.example.movies;
-
-</span><span class="fold-block is-hidden-folded">import org.springframework.stereotype.Service;
-
-</span><span class="fold-block">@Service
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Service
 class MovieService {
 
     private final MovieRepository repository;
@@ -591,10 +573,10 @@ class MovieService {
         this.repository = repository;
     }
 
-    public Movie save(String id, String title, String description) {
-        return repository.save(new Movie(id, title, description));
+    public Movie save(Movie movie) {
+        return repository.save(movie);
     }
-}</span></code></pre>
+}</code></pre>
 </div>
 </div>
 </div>

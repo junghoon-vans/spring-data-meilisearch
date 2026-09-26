@@ -308,7 +308,7 @@
     <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../meilisearch/index-operations.html">Instance and Index Operations</a>
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
@@ -458,7 +458,7 @@
 </ul>
 </div>
 <div class="paragraph">
-<p>Derived finder methods, repository <code>@Query</code> methods, and named-query-backed methods are unsupported and fail during repository bootstrap. Use <code>MeilisearchOperations</code> for custom searches.</p>
+<p>It does <strong>not</strong> currently document or promise full Spring Data query derivation support, custom <code>@Query</code> methods, or named-query execution.</p>
 </div>
 </div>
 </div>
@@ -471,14 +471,9 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.PagingAndSortingRepository;
-
-</span><span class="fold-block">@NoRepositoryBean
-public interface MeilisearchRepository&lt;T, ID&gt;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface MeilisearchRepository&lt;T, ID&gt;
         extends CrudRepository&lt;T, ID&gt;, PagingAndSortingRepository&lt;T, ID&gt; {
-}</span></code></pre>
+}</code></pre>
 </div>
 </div>
 </div>
@@ -487,26 +482,26 @@ public interface MeilisearchRepository&lt;T, ID&gt;
 <h2 id="repositories.core-concepts.execution-model"><a class="anchor" href="#repositories.core-concepts.execution-model"></a>Execution Model</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The default repository implementation delegates to <code>MeilisearchOperations</code>, but repository methods use different Meilisearch APIs:</p>
+<p>The default repository implementation delegates to <code>MeilisearchOperations</code>, but not every repository method uses the same underlying Meilisearch API:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>findById(&#8230;&#8203;)</code> and <code>existsById(&#8230;&#8203;)</code> use direct document lookup; <code>findAllById(&#8230;&#8203;)</code> uses native ID-list retrieval.</p>
+<p><code>findById(&#8230;&#8203;)</code> uses direct document lookup; <code>findAllById(&#8230;&#8203;)</code> uses native ID-list fetch.</p>
 </li>
 <li>
-<p><code>findAll()</code> lists all documents in one document-list request. Sorted <code>findAll(Sort)</code> counts first, then fetches up to that count in one sorted request; additions between those requests can be absent.</p>
+<p><code>findAll()</code> retrieves all documents in one request; sorted <code>findAll(Sort)</code> counts first, then fetches once.</p>
 </li>
 <li>
-<p>Paged <code>findAll(Pageable)</code> uses search APIs. An unpaged <code>Pageable</code> uses document listing and bases its total on the retrieved documents.</p>
+<p>Paged <code>findAll(Pageable)</code> uses search APIs; an unpaged <code>Pageable</code> uses document listing and counts first if sorted.</p>
 </li>
 <li>
-<p><code>count()</code> reads the total from a document-list request with a zero-document limit; it does not run a search.</p>
+<p><code>count()</code> uses search APIs.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Search-backed repository methods are subject to search settings such as <code>pagination.maxTotalHits</code>. Document-list reads are not capped by that setting, although <code>displayedAttributes</code> can restrict fields returned when a request does not specify fields.</p>
+<p>That difference matters because Meilisearch search settings can affect search-backed repository methods without affecting document lookups.</p>
 </div>
 </div>
 </div>
