@@ -506,9 +506,9 @@ documents in one request and holds them in memory. Sorted listing counts documen
 count in one request; documents added between the requests may not appear in the result.</p>
 </div>
 <div class="paragraph">
-<p>With the default <code>displayedAttributes</code> setting, all document fields are returned. Do not rely on a restricted
-<code>displayedAttributes</code> setting to hide fields in document listings: document fetch can return attributes excluded from
-search results. Use appropriate document access permissions and avoid storing sensitive fields in retrievable documents.</p>
+<p>Meilisearch ignores <code>displayedAttributes</code> for document reads (see its
+<a href="https://github.com/meilisearch/meilisearch/blob/1380adaacebad8a019d88549a06bae2dd90de249/crates/meilisearch/tests/documents/get_documents.rs#L592-L613">regression test</a>).
+Document listings can therefore return fields excluded from search results; grant <code>documents.get</code> only to callers allowed to read them.</p>
 </div>
 <div class="paragraph">
 <p><code>multiGet(&#8230;&#8203;)</code> reads only the document ids supplied by the caller.</p>

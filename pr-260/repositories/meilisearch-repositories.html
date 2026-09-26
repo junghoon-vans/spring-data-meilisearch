@@ -495,10 +495,8 @@ It means repository creation can have side effects on the target index configura
 <p><code>pagination.maxTotalHits</code> limits search-backed reads, not document-backed listing.</p>
 </div>
 <div class="paragraph">
-<p>Both unsorted and sorted document listings use <code>POST /documents/fetch</code> without an explicit <code>fields</code> list. The
-default <code>displayedAttributes</code> setting returns all fields; restricting search display is not a document-access
-boundary, so document fetch can still return non-displayed fields.
-Document-backed reads require a key with <code>documents.get</code> permission.</p>
+<p>Both unsorted and sorted document listings use <code>POST /documents/fetch</code> without an explicit <code>fields</code> list.
+Document reads ignore <code>displayedAttributes</code> and require <code>documents.get</code> permission.</p>
 </div>
 <div class="sect2">
 <h3 id="meilisearch.repositories.lookup-methods.behavior-table"><a class="anchor" href="#meilisearch.repositories.lookup-methods.behavior-table"></a>Method Behavior at a Glance</h3>
