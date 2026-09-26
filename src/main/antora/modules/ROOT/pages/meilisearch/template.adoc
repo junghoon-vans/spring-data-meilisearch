@@ -177,7 +177,7 @@ The `maxTotalHits` pagination setting limits how many matching hits can be retri
 does not necessarily cap the reported total. For example, the current implementation can return 10 hits while
 reporting 11 total matches when `maxTotalHits` is 10. Repository `findAll(Pageable)` uses search results and their
 reported total, while an unpaged repository lookup uses document retrieval. See
-xref:meilisearch/settings.adoc#meilisearch.settings.pagination[] for the pagination setting.
+xref:meilisearch/settings.adoc#meilisearch.settings.pagination[Pagination Limits] for the pagination setting.
 
 [[meilisearch.operations.kotlin]]
 == Kotlin Extensions

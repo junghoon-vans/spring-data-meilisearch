@@ -102,7 +102,7 @@ MeilisearchIndexSettings defaults = index.resetSettings();
 
 `updateSettings` applies only the non-null fields supplied in the settings value; an empty collection clears a
 supported list or map setting. `resetSettings()` restores all Meilisearch index settings to defaults. Both methods
-return settings read after their task succeeds. See xref:meilisearch/settings.adoc#meilisearch.settings.runtime[].
+return settings read after their task succeeds. See xref:meilisearch/settings.adoc#meilisearch.settings.runtime[Runtime Settings Updates].
 
 The public API uses Spring Data Meilisearch value types such as `MeilisearchIndexSettings`,
 `MeilisearchIndexCreateRequest`, `MeilisearchIndexUpdateRequest`, and `MeilisearchIndexList` rather than exposing

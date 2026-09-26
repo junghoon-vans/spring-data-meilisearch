@@ -165,4 +165,4 @@ The limit does not necessarily cap the total-hit metadata reported by Meilisearc
 Spring Data Meilisearch carries that value into `SearchHits#getTotalHits()` and repository `Page#getTotalElements()`;
 the reported total may therefore exceed `maxTotalHits`. For example, with `maxTotalHits = 10`, a search over 11
 matching documents can return 10 hits while reporting 11 total matches. See
-xref:meilisearch/template.adoc#meilisearch.operations.results[] for total-hit relation semantics.
+xref:meilisearch/template.adoc#meilisearch.operations.results[Search Result Types] for total-hit relation semantics.

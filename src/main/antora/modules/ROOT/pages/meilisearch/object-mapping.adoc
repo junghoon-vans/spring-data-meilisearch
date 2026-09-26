@@ -168,4 +168,4 @@ public MeilisearchCustomConversions meilisearchCustomConversions() {
 
 Use this pattern when a document property needs a structure different from its Java type. ID conversion to `String`
 is handled separately by `MeilisearchConverter.convertId`; see
-xref:meilisearch/object-mapping.adoc#meilisearch.mapping.id[] for the primary-key serialization limitation.
+xref:meilisearch/object-mapping.adoc#meilisearch.mapping.id[Document Id] for the primary-key serialization limitation.
