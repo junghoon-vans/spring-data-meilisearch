@@ -66,9 +66,10 @@ Use `multiGet(...)` when the ids are already known rather than listing or search
 List<Movie> requested = operations.multiGet(Movie.class, List.of("movie-3", "movie-1", "missing"));
 ----
 
-The implementation batches requested ids internally. Missing documents are omitted; the remaining results preserve
-requested order and duplicate ids. This uses Meilisearch's native ID-list documents endpoint, which requires
-Meilisearch 1.14 or later; there is no individual-document lookup fallback for older servers.
+Missing documents are omitted; the remaining results preserve requested order and duplicate ids. The implementation
+requests document ids in internal batches; callers supply only the ids they want to retrieve. This uses Meilisearch's
+native ID-list documents endpoint, which requires Meilisearch 1.14 or later; there is no individual-document lookup
+fallback for older servers.
 
 [[meilisearch.operations.search]]
 == Search Operations
