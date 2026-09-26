@@ -41,8 +41,15 @@ class MovieController {
 * `delete(...)`
 * `deleteAll(Class<?>)`
 
-Direct `get(...)` reads a known id. Unsorted `findAll(...)` retrieves the documents in memory rather than a server-default-sized page.
-Sorted listing counts documents first, then fetches up to that count in one request; documents added between the requests may not appear in the result.
+Direct `get(...)` reads a known id. Both unsorted and sorted `findAll(...)` use
+`POST /documents/fetch` without requesting specific fields. Unsorted listing retrieves the
+documents in one request and holds them in memory. Sorted listing counts documents first, then fetches up to that
+count in one request; documents added between the requests may not appear in the result.
+
+Meilisearch ignores `displayedAttributes` for document reads (see its
+https://github.com/meilisearch/meilisearch/blob/1380adaacebad8a019d88549a06bae2dd90de249/crates/meilisearch/tests/documents/get_documents.rs#L592-L613[regression test]).
+Document listings can therefore return fields excluded from search results; grant `documents.get` only to callers allowed to read them.
+
 `multiGet(...)` reads only the document ids supplied by the caller.
 
 For multiple requested ids, `multiGet(Class<T>, List<String>)` uses native ID-list reads available from Meilisearch
