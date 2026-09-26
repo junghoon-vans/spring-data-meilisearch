@@ -31,7 +31,7 @@ When omitted, the XML factory leaves the optional task-wait timeout attributes a
 
 |`api-key`
 |Required
-|API key used for authentication. The XML parser rejects a missing or blank value.
+|API key used for authentication. The XML parser rejects a missing or literally blank attribute, but does not revalidate after placeholder resolution; ensure the resolved key is non-empty.
 
 |`client-agents`
 |
