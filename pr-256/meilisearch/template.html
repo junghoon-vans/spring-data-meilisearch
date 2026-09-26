@@ -509,6 +509,12 @@ The API creates a missing index; replacing an existing document removes fields o
 than applying a partial update. Document saves do not automatically apply <code>@Setting</code> metadata.</p>
 </div>
 <div class="paragraph">
+<p>Both unsorted and sorted <code>findAll(&#8230;&#8203;)</code> use <code>POST /documents/fetch</code> without requesting specific fields.
+Meilisearch ignores <code>displayedAttributes</code> for document reads (see its
+<a href="https://github.com/meilisearch/meilisearch/blob/1380adaacebad8a019d88549a06bae2dd90de249/crates/meilisearch/tests/documents/get_documents.rs#L592-L613">regression test</a>).
+Document listings can therefore return fields excluded from search results; grant <code>documents.get</code> only to callers allowed to read them.</p>
+</div>
+<div class="paragraph">
 <p><code>get(&#8230;&#8203;)</code> returns <code>null</code> when the document id is not present. <code>findAll(Class&lt;T&gt;)</code> retrieves all documents in one
 document request and holds the result in memory; it is not a <code>Pageable</code> search. A sorted listing also holds the full
 result in memory. It counts documents first and then fetches up to that count in one request, so concurrent additions

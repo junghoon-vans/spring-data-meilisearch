@@ -506,7 +506,7 @@ public interface MeilisearchRepository&lt;T, ID&gt;
 </ul>
 </div>
 <div class="paragraph">
-<p>Search-backed repository methods are subject to search settings such as <code>pagination.maxTotalHits</code>. Document-list reads are not capped by that setting, although <code>displayedAttributes</code> can restrict fields returned when a request does not specify fields.</p>
+<p>Search-backed repository methods are subject to search settings such as <code>pagination.maxTotalHits</code>. Document-list reads are not capped by that setting and ignore <code>displayedAttributes</code>.</p>
 </div>
 </div>
 </div>

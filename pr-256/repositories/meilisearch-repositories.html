@@ -493,7 +493,11 @@ It exposes the standard Spring Data CRUD and pagination entry points without imp
 </ul>
 </div>
 <div class="paragraph">
-<p><code>pagination.maxTotalHits</code> limits search-backed content, not document-backed listing. <code>displayedAttributes</code> can still restrict fields returned by document-list requests that omit an explicit field list, leaving mapped entities incomplete. Document-backed reads require an API key with <code>documents.get</code> permission.</p>
+<p><code>pagination.maxTotalHits</code> limits search-backed reads, not document-backed listing.</p>
+</div>
+<div class="paragraph">
+<p>Both unsorted and sorted document listings use <code>POST /documents/fetch</code> without an explicit <code>fields</code> list.
+Document reads ignore <code>displayedAttributes</code> and require <code>documents.get</code> permission.</p>
 </div>
 <div class="sect2">
 <h3 id="meilisearch.repositories.lookup-methods.behavior-table"><a class="anchor" href="#meilisearch.repositories.lookup-methods.behavior-table"></a>Method Behavior at a Glance</h3>

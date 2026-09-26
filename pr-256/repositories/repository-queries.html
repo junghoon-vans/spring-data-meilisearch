@@ -538,7 +538,7 @@ interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
 <p>Sorting document listings requires a sortable index attribute and Meilisearch 1.16 or later. <code>findAllById(&#8230;&#8203;)</code> uses native ID-list retrieval, available from Meilisearch 1.14, with no fallback on older servers.</p>
 </li>
 <li>
-<p>Document-list reads do not use search settings such as <code>maxTotalHits</code>, but <code>displayedAttributes</code> can limit fields returned when the request does not specify fields.</p>
+<p>Document-list reads are not capped by search <code>maxTotalHits</code> and ignore <code>displayedAttributes</code>.</p>
 </li>
 <li>
 <p>Empty <code>saveAll(&#8230;&#8203;)</code>, <code>deleteAll(Iterable)</code>, and <code>deleteAllById(&#8230;&#8203;)</code> operations complete without a server request. The no-argument <code>deleteAll()</code> still deletes all documents for the entity type.</p>
