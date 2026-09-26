@@ -59,9 +59,8 @@ public interface DocumentOperations {
 
 	/**
 	 * Retrieves all entities of the given type with the given document ids. Native ID-list retrieval requires Meilisearch
-	 * 1.14 or later.
-	 * Results preserve the requested id order, including duplicate ids; missing documents are omitted. The ids are
-	 * fetched in internal batches.
+	 * 1.14 or later. Results preserve the requested id order, including duplicate ids; missing documents are omitted. The
+	 * ids are fetched in internal batches.
 	 *
 	 * @param documentIds the document ids of the entities
 	 * @param clazz the entity class, must be annotated with
