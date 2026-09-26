@@ -215,9 +215,8 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		Assert.notNull(sort, "Sort must not be null");
 		String indexUid = getIndexUidFor(clazz);
 		if (sort.isUnsorted()) {
-			DocumentsQuery query = new DocumentsQuery();
-			query.setLimit(Integer.MAX_VALUE);
-			return readDocuments(execute(client -> client.index(indexUid).getRawDocuments(query)), clazz);
+			return readDocuments(execute(client -> meilisearchClient.getRawDocuments(indexUid, 0, Integer.MAX_VALUE, null)),
+					clazz);
 		}
 
 		long documentCount = count(clazz);

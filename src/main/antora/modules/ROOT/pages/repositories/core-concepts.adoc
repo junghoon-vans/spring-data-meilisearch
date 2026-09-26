@@ -40,7 +40,7 @@ The default repository implementation delegates to `MeilisearchOperations`, but 
 * Paged `findAll(Pageable)` uses search APIs. An unpaged `Pageable` uses document listing and bases its total on the retrieved documents.
 * `count()` reads the total from a document-list request with a zero-document limit; it does not run a search.
 
-Search-backed repository methods are subject to search settings such as `pagination.maxTotalHits`. Document-list reads are not capped by that setting, although `displayedAttributes` can restrict fields returned when a request does not specify fields.
+Search-backed repository methods are subject to search settings such as `pagination.maxTotalHits`. Document-list reads are not capped by that setting and ignore `displayedAttributes`.
 
 [[repositories.core-concepts-when-to-use]]
 == When to Use Repositories vs. Operations

@@ -71,7 +71,7 @@ Changing `queryLookupStrategy` or `namedQueriesLocation` does not add query-meth
 * An unpaged `findAll(Pageable)` uses the document-list API, retrieves all documents into memory, and sets the `Page` total to the retrieved count. It is not limited by `maxTotalHits`.
 * `findAll()` also lists all documents through the document API. Sorted `findAll(Sort)` and sorted unpaged `findAll(Pageable)` count first, then fetch up to that count; additions between those requests may be absent.
 * Sorting document listings requires a sortable index attribute and Meilisearch 1.16 or later. `findAllById(...)` uses native ID-list retrieval, available from Meilisearch 1.14, with no fallback on older servers.
-* Document-list reads do not use search settings such as `maxTotalHits`, but `displayedAttributes` can limit fields returned when the request does not specify fields.
+* Document-list reads are not capped by search `maxTotalHits` and ignore `displayedAttributes`.
 * Empty `saveAll(...)`, `deleteAll(Iterable)`, and `deleteAllById(...)` operations complete without a server request. The no-argument `deleteAll()` still deletes all documents for the entity type.
 
 For full method-to-API behavior, see xref:repositories/meilisearch-repositories.adoc#meilisearch.repositories.lookup-methods.behavior-table[Method Behavior at a Glance]. For query composition and search result metadata, use `MeilisearchOperations` directly.

@@ -35,7 +35,10 @@ The built-in repository methods do not all use the same Meilisearch API:
 * `count()` reads the index total from a document-list request with a zero-document limit; it does not run a search.
 * Writes and deletes delegate to document-oriented operations in `MeilisearchOperations`.
 
-`pagination.maxTotalHits` limits search-backed content, not document-backed listing. `displayedAttributes` can still restrict fields returned by document-list requests that omit an explicit field list, leaving mapped entities incomplete. Document-backed reads require an API key with `documents.get` permission.
+`pagination.maxTotalHits` limits search-backed reads, not document-backed listing.
+
+Both unsorted and sorted document listings use `POST /documents/fetch` without an explicit `fields` list.
+Document reads ignore `displayedAttributes` and require `documents.get` permission.
 
 [[meilisearch.repositories.lookup-methods.behavior-table]]
 === Method Behavior at a Glance

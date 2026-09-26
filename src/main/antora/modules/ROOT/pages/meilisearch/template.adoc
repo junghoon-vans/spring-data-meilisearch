@@ -52,6 +52,11 @@ https://www.meilisearch.com/docs/reference/api/documents/add-or-replace-document
 The API creates a missing index; replacing an existing document removes fields omitted from the new entity rather
 than applying a partial update. Document saves do not automatically apply `@Setting` metadata.
 
+Both unsorted and sorted `findAll(...)` use `POST /documents/fetch` without requesting specific fields.
+Meilisearch ignores `displayedAttributes` for document reads (see its
+https://github.com/meilisearch/meilisearch/blob/1380adaacebad8a019d88549a06bae2dd90de249/crates/meilisearch/tests/documents/get_documents.rs#L592-L613[regression test]).
+Document listings can therefore return fields excluded from search results; grant `documents.get` only to callers allowed to read them.
+
 `get(...)` returns `null` when the document id is not present. `findAll(Class<T>)` retrieves all documents in one
 document request and holds the result in memory; it is not a `Pageable` search. A sorted listing also holds the full
 result in memory. It counts documents first and then fetches up to that count in one request, so concurrent additions
