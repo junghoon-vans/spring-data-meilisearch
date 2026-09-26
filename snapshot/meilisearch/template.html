@@ -480,7 +480,7 @@ class MovieController {
 <p><code>get(String, Class&lt;T&gt;)</code></p>
 </li>
 <li>
-<p><code>findAll(Class&lt;T&gt;)</code> and <code>findAll(Class&lt;T&gt;, Sort)</code> for complete document listing</p>
+<p><code>findAll(Class&lt;T&gt;)</code> and <code>findAll(Class&lt;T&gt;, Sort)</code> for document listing</p>
 </li>
 <li>
 <p><code>multiGet(&#8230;&#8203;)</code> for ID-list retrieval</p>
@@ -497,8 +497,8 @@ class MovieController {
 </ul>
 </div>
 <div class="paragraph">
-<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id. <code>findAll(&#8230;&#8203;)</code> returns the complete result in memory rather than a server-default-sized page.
-Sorted listing counts documents first, then fetches them in one request; if the index grows between requests, it fails instead of returning a partial result.
+<p>Direct <code>get(&#8230;&#8203;)</code> reads a known id. Unsorted <code>findAll(&#8230;&#8203;)</code> retrieves the documents in memory rather than a server-default-sized page.
+Sorted listing counts documents first, then fetches up to that count in one request; documents added between the requests may not appear in the result.
 <code>multiGet(&#8230;&#8203;)</code> reads only the document ids supplied by the caller.</p>
 </div>
 <div class="paragraph">

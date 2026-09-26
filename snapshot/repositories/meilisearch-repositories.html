@@ -546,7 +546,7 @@ Its <code>Page</code> total is therefore derived from Meilisearch search totals,
 If the index is configured with <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, that limit can cap the returned search content even when the reported total is larger.</p>
 </div>
 <div class="paragraph">
-<p>An unpaged <code>Pageable</code> (including <code>Pageable.unpaged(Sort)</code>) returns complete content in the requested order. Sorting requires a preliminary count before the document fetch.
+<p>An unpaged <code>Pageable</code> returns the document-backed result in memory. Sorting requires a preliminary count before the fetch; concurrent additions may not appear in the sorted result.
 Its <code>Page</code> total is based on the retrieved document count and is not capped by <code>maxTotalHits</code>.</p>
 </div>
 <div class="paragraph">
