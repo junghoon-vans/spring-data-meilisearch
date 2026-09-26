@@ -179,6 +179,33 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	}
 
 	@Override
+	public <T> List<T> multiGet(Class<T> clazz, List<String> documentIds) {
+		Assert.notNull(documentIds, "Document ids must not be null");
+
+		List<T> entities = new ArrayList<>(documentIds.size());
+		if (documentIds.isEmpty()) {
+			return entities;
+		}
+
+		String indexUid = getIndexUidFor(clazz);
+		for (int start = 0; start < documentIds.size(); start += DOCUMENT_IDS_BATCH_SIZE) {
+			List<String> ids = documentIds.subList(start, Math.min(start + DOCUMENT_IDS_BATCH_SIZE, documentIds.size()));
+			String results = execute(client -> meilisearchClient.getRawDocumentsByIds(indexUid, ids));
+			Map<String, T> documentsById = new HashMap<>();
+			for (T entity : readDocuments(results, clazz)) {
+				documentsById.put(getDocumentIdFor(entity), entity);
+			}
+			for (String id : ids) {
+				T entity = documentsById.get(id);
+				if (entity != null) {
+					entities.add(entity);
+				}
+			}
+		}
+		return entities;
+	}
+
+	@Override
 	public <T> List<T> findAll(Class<T> clazz) {
 		return findAll(clazz, Sort.unsorted());
 	}
@@ -201,40 +228,6 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		String results = execute(
 				client -> meilisearchClient.getRawDocuments(indexUid, 0, (int) documentCount, sortOptions));
 		return readDocuments(results, clazz);
-	}
-
-	@Override
-	public <T> List<T> multiGet(Class<T> clazz, List<String> documentIds) {
-		return multiGet(clazz, documentIds, -1, -1);
-	}
-
-	@Override
-	public <T> List<T> multiGet(Class<T> clazz, List<String> documentIds, int offset, int limit) {
-		Assert.notNull(documentIds, "Document ids must not be null");
-
-		int from = Math.min(Math.max(offset, 0), documentIds.size());
-		int to = limit < 0 ? documentIds.size() : from + Math.min(limit, documentIds.size() - from);
-		List<T> entities = new ArrayList<>(to - from);
-		if (from == to) {
-			return entities;
-		}
-
-		String indexUid = getIndexUidFor(clazz);
-		for (int start = from; start < to; start += DOCUMENT_IDS_BATCH_SIZE) {
-			List<String> ids = documentIds.subList(start, Math.min(start + DOCUMENT_IDS_BATCH_SIZE, to));
-			String results = execute(client -> meilisearchClient.getRawDocumentsByIds(indexUid, ids));
-			Map<String, T> documentsById = new HashMap<>();
-			for (T entity : readDocuments(results, clazz)) {
-				documentsById.put(getDocumentIdFor(entity), entity);
-			}
-			for (String id : ids) {
-				T entity = documentsById.get(id);
-				if (entity != null) {
-					entities.add(entity);
-				}
-			}
-		}
-		return entities;
 	}
 
 	@Override

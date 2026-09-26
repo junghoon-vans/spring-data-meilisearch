@@ -151,18 +151,6 @@ class MeilisearchTemplateIntegrationTests {
 	}
 
 	@Test
-	void shouldGetCertainEntitiesWithPagination() {
-
-		List<Movie> movies = List.of(movie1, movie2, movie3);
-		meilisearchTemplate.save(movies);
-
-		List<Movie> savedMovies = meilisearchTemplate.multiGet(Movie.class, List.of("1", "3"), 0, 1);
-
-		assertThat(savedMovies).containsExactlyInAnyOrder(movie1);
-		assertThat(meilisearchTemplate.multiGet(Movie.class, List.of("1", "3"), 1, 1)).containsExactly(movie3);
-	}
-
-	@Test
 	void returnTrueWhenDocumentExists() {
 
 		meilisearchTemplate.save(movie1);

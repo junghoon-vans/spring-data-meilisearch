@@ -58,6 +58,19 @@ public interface DocumentOperations {
 	<T> T get(String documentId, Class<T> clazz);
 
 	/**
+	 * Retrieves all entities of the given type with the given document ids. Native ID-list retrieval requires Meilisearch
+	 * 1.14 or later. Results preserve the requested id order, including duplicate ids; missing documents are omitted. The
+	 * ids are fetched in internal batches.
+	 *
+	 * @param documentIds the document ids of the entities
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @param <T> the type of the entity
+	 * @return all entities with the given document ids
+	 */
+	<T> List<T> multiGet(Class<T> clazz, List<String> documentIds);
+
+	/**
 	 * Retrieves all entities of the given type in one document request. The entire result is held in memory.
 	 *
 	 * @param clazz the entity class, must be annotated with
@@ -79,32 +92,6 @@ public interface DocumentOperations {
 	 * @return entities in sorted order, up to the count obtained before fetching
 	 */
 	<T> List<T> findAll(Class<T> clazz, Sort sort);
-
-	/**
-	 * Retrieves all entities of the given type with the given document ids. Native ID-list retrieval requires Meilisearch
-	 * 1.14 or later.
-	 *
-	 * @param documentIds the document ids of the entities
-	 * @param clazz the entity class, must be annotated with
-	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
-	 * @param <T> the type of the entity
-	 * @return all entities with the given document ids
-	 */
-	<T> List<T> multiGet(Class<T> clazz, List<String> documentIds);
-
-	/**
-	 * Retrieves entities by the given document ids, applying offset and limit to the requested ids in their given order.
-	 * Missing documents are omitted from the result. Negative offset or limit values leave that bound unrestricted.
-	 * Native ID-list retrieval requires Meilisearch 1.14 or later.
-	 *
-	 * @param clazz the entity class
-	 * @param documentIds the document ids of the entities
-	 * @param offset the number of requested ids to skip
-	 * @param limit the maximum number of requested ids to look up
-	 * @return entities in the order of the requested ids
-	 * @param <T> entity type
-	 */
-	<T> List<T> multiGet(Class<T> clazz, List<String> documentIds, int offset, int limit);
 
 	/**
 	 * Checks whether an entity with the given document id exists.
