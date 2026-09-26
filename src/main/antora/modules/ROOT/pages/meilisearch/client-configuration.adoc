@@ -8,7 +8,7 @@ In most applications, the entry point is a Java configuration class that extends
 [[meilisearch.clients.javaconfig]]
 == JavaConfig
 
-Extend `MeilisearchConfiguration` to provide the `ClientConfiguration` bean. The base class also registers the default `GsonJsonHandler`, `MeilisearchClient`, mapping context, converter, and `meilisearchTemplate` bean.
+In Java configuration, extend `MeilisearchConfiguration` to provide the `ClientConfiguration` bean. The base class registers the default `GsonJsonHandler`, `MeilisearchClient`, mapping context, converter, object mapper, and `meilisearchTemplate` / `meilisearchOperations` bean names.
 
 [source,java]
 ----
@@ -37,13 +37,13 @@ class MyClientConfig extends MeilisearchConfiguration {
 
 `ClientConfiguration` exposes the following core options through its builder:
 
-* `connectedTo(...)` or `connectedToLocalhost()` to choose the server endpoint.
-* `withApiKey(...)` to provide the Meilisearch API key.
-* `withClientAgents(...)` to append client agent values.
-* `withRequestTimeout(...)` to configure how long task-based operations wait for completion.
-* `withRequestInterval(...)` to configure the polling interval used while waiting for task completion.
+* `connectedTo(...)` or `connectedToLocalhost()` to choose the server URL. The Java builder has no default URL.
+* `withApiKey(...)` to provide the required Meilisearch API key; the Java builder has no default key.
+* `withClientAgents(String[])` to supply client-agent values sent in the `User-Agent` header.
+* `withRequestTimeout(...)` to set the task-completion wait timeout in milliseconds. The Java builder default is 5,000 ms.
+* `withRequestInterval(...)` to set the polling interval in milliseconds. The Java builder default is 50 ms.
 
-These timeout and interval settings affect operations that submit asynchronous Meilisearch tasks, such as writes, index lifecycle changes, and runtime settings updates.
+These timeout and interval values are passed to the SDK's task-wait operations for asynchronous writes, index lifecycle changes, and settings updates. They are not HTTP connection or socket timeouts.
 
 [[meilisearch.clients.json-handler]]
 == JSON Handler
@@ -57,11 +57,21 @@ Override `jsonHandler()` when you need a different implementation.
 ----
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
+import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
 
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 class JsonHandlerConfig extends MeilisearchConfiguration {
+
+    @Override
+    public ClientConfiguration clientConfiguration() {
+        return ClientConfiguration.builder()
+                .connectedToLocalhost()
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
+                .build();
+    }
 
     @Override
     public JsonHandler jsonHandler() {
@@ -80,18 +90,23 @@ The supported integration styles are:
 == XML Namespace
 
 Spring Data Meilisearch also provides an XML namespace.
-Register a JSON handler bean and reference it from `<meilisearch:meilisearch-client>` when you do not want to use the default bean name.
-For production deployments, prefer a scoped API key rather than the Meilisearch master key.
+Unlike Java configuration, the namespace does not create a JSON handler bean. Declare a `JsonHandler` bean named `jsonHandler` (the schema's default reference), or set `json-handler-ref` to the id of another handler bean.
+The `api-key` attribute is required. For production deployments, prefer a scoped API key rather than the Meilisearch master key.
 
 [source,xml]
 ----
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
        http://www.vanslog.io/spring/data/meilisearch
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
+
+    <context:property-placeholder/>
 
     <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
 
@@ -103,6 +118,7 @@ For production deployments, prefer a scoped API key rather than the Meilisearch 
             request-interval="20"
             json-handler-ref="jsonHandler"/>
 </beans>
+
 ----
 
-The XML namespace attributes are documented in xref:appendix.adoc#meilisearch.appendix.schema[XML namespace reference].
+When omitted, the XML factory leaves `request-timeout` and `request-interval` at `0`, unlike the Java builder defaults. See the xref:appendix.adoc#meilisearch.appendix.schema[XML namespace reference] for attribute defaults.

@@ -3,6 +3,7 @@
 
 Spring Data Meilisearch is a single-module Spring Data integration for applications that want to access Meilisearch through familiar Spring configuration, mapping, operations, and repository abstractions.
 
+Applications configure the integration explicitly through Spring Java configuration or its XML namespace; the project does not provide Spring Boot auto-configuration.
 The quickest way to get started is to declare the dependency, extend `MeilisearchConfiguration`, annotate your domain type with `@Document`, and create a `MeilisearchRepository` for the aggregate root.
 
 [[meilisearch.getting-started.requirements]]
@@ -12,33 +13,38 @@ The quickest way to get started is to declare the dependency, extend `Meilisearc
 * A reachable Meilisearch instance.
 * A Meilisearch API key with the permissions required for your application.
 
+The module does not claim one minimum Meilisearch version for every operation. ID-list document retrieval requires Meilisearch 1.14 or later, and sorted document listing requires 1.16 or later; use a server version that supports the APIs your application calls.
+
 [[meilisearch.getting-started.maven]]
 == Maven Coordinates
 
 [source,xml]
 ----
-<dependency>
-  <groupId>io.vanslog</groupId>
-  <artifactId>spring-data-meilisearch</artifactId>
-  <version>{version}</version>
-</dependency>
+<dependencies>
+  <dependency>
+    <groupId>io.vanslog</groupId>
+    <artifactId>spring-data-meilisearch</artifactId>
+    <version>${spring-data-meilisearch.version}</version>
+  </dependency>
+</dependencies>
 ----
 
-If you want to try the next snapshot build, add the Sonatype snapshot repository and use a `-SNAPSHOT` version.
+Define `spring-data-meilisearch.version` in your POM as the exact version you intend to use. Choose a released version from the link:https://central.sonatype.com/artifact/io.vanslog/spring-data-meilisearch[Maven Central artifact page].
+
+For a development snapshot, set the same property to the exact `-SNAPSHOT` version published for the development branch, including the suffix, and add the Central snapshots repository to your POM:
 
 [source,xml]
 ----
-<dependency>
-  <groupId>io.vanslog</groupId>
-  <artifactId>spring-data-meilisearch</artifactId>
-  <version>{version}-SNAPSHOT</version>
-</dependency>
-
-<repository>
-  <id>sonatype-snapshots</id>
-  <name>Sonatype Snapshot Repository</name>
-  <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-</repository>
+<repositories>
+  <repository>
+    <id>central-snapshots</id>
+    <name>Central Snapshots</name>
+    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+  </repository>
+</repositories>
 ----
 
 [[meilisearch.getting-started.java-config]]
@@ -48,12 +54,16 @@ The usual starting point is a configuration class that extends `MeilisearchConfi
 
 [source,java]
 ----
+package com.example.movies;
+
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
 import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ComponentScan("com.example.movies")
 @EnableMeilisearchRepositories(basePackages = "com.example.movies")
 class MeilisearchConfig extends MeilisearchConfiguration {
 
@@ -69,26 +79,25 @@ class MeilisearchConfig extends MeilisearchConfiguration {
 
 `MeilisearchConfiguration` registers the standard Spring Data Meilisearch beans, including the client, mapping context, converter, and the `meilisearchTemplate` / `meilisearchOperations` bean.
 `MeilisearchRepository` is the recommended repository base interface for this module's current repository feature set.
-For local development, prefer a scoped API key exposed through `MEILISEARCH_API_KEY` instead of using the Meilisearch master key in application code.
+For local development, expose a scoped API key through `MEILISEARCH_API_KEY` instead of placing the Meilisearch master key in application code.
 
 [[meilisearch.getting-started.domain]]
 == Domain Type
 
 Annotate persistent types with `@Document` and choose the target index uid explicitly.
 
+`@Document` maps the type to the `movies` index but does not itself create it. Repository bootstrap applies settings by default, and Meilisearch can create a missing index during that settings update. If the index is still absent, the first `save` submits documents through an API that creates it with `id` as the primary key. To control index creation and its primary key explicitly, see xref:meilisearch/index-operations.adoc[index operations] and xref:meilisearch/settings.adoc[settings].
+
 [source,java]
 ----
+package com.example.movies;
+
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 
 import org.springframework.data.annotation.Id;
 
 @Document(indexUid = "movies")
-class Movie {
-
-    @Id
-    private String id;
-    private String title;
-    private String description;
+public record Movie(@Id String id, String title, String description) {
 }
 ----
 
@@ -97,6 +106,8 @@ class Movie {
 
 [source,java]
 ----
+package com.example.movies;
+
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
 public interface MovieRepository extends MeilisearchRepository<Movie, String> {
@@ -105,6 +116,10 @@ public interface MovieRepository extends MeilisearchRepository<Movie, String> {
 
 [source,java]
 ----
+package com.example.movies;
+
+import org.springframework.stereotype.Service;
+
 @Service
 class MovieService {
 
@@ -114,8 +129,8 @@ class MovieService {
         this.repository = repository;
     }
 
-    public Movie save(Movie movie) {
-        return repository.save(movie);
+    public Movie save(String id, String title, String description) {
+        return repository.save(new Movie(id, title, description));
     }
 }
 ----

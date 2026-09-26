@@ -1,74 +1,90 @@
 [[meilisearch.index-operations]]
 = Index and Instance Operations
 
-`MeilisearchOperations` exposes two store-specific entry points beyond document and search APIs:
+`MeilisearchOperations` exposes two Meilisearch-specific entry points:
 
-* `instanceOps()` for Meilisearch instance-level information.
-* `indexOps(...)` for APIs bound to one index.
+* `instanceOps()` for instance-level information.
+* `indexOps(...)` for APIs bound to an index uid.
 
-These APIs are useful when an application needs to manage index lifecycle or inspect runtime state without dropping down to the raw Meilisearch Java SDK.
+These synchronous APIs cover instance inspection and index lifecycle/settings operations without requiring direct use
+of the Meilisearch Java SDK. See xref:meilisearch/settings.adoc[] for settings annotation and update details.
 
 [[meilisearch.index-operations.instance]]
 == Instance Operations
 
-`MeilisearchInstanceOperations` provides lightweight administrative read operations:
+`MeilisearchInstanceOperations` provides these read operations:
 
-* `health()`
-* `isHealthy()`
-* `version()`
-* `stats()`
+* `MeilisearchHealth health()`
+* `boolean isHealthy()`
+* `MeilisearchVersion version()`
+* `MeilisearchStats stats()`
 
 [source,java]
 ----
-MeilisearchHealth health = meilisearchOperations.instanceOps().health();
-boolean healthy = meilisearchOperations.instanceOps().isHealthy();
-MeilisearchVersion version = meilisearchOperations.instanceOps().version();
-MeilisearchStats stats = meilisearchOperations.instanceOps().stats();
+MeilisearchInstanceOperations instance = meilisearchOperations.instanceOps();
+
+MeilisearchHealth health = instance.health();
+boolean healthy = instance.isHealthy();
+MeilisearchVersion version = instance.version();
+MeilisearchStats stats = instance.stats();
 ----
+
+`instanceOps().stats()` reports instance-level statistics. For statistics for one index, use
+`indexOps(...).stats()`.
 
 [[meilisearch.index-operations.index]]
 == Index-bound Operations
 
-Resolve index operations either by mapped entity type or by index uid.
+Resolve index operations either from entity mapping metadata or from an explicit uid:
 
 [source,java]
 ----
-MeilisearchIndexStats byEntity = meilisearchOperations.indexOps(Movie.class).stats();
-MeilisearchIndexStats byIndexUid = meilisearchOperations.indexOps("movies").stats();
+MeilisearchIndexOperations byEntity = meilisearchOperations.indexOps(Movie.class);
+MeilisearchIndexOperations byIndexUid = meilisearchOperations.indexOps("movies");
 ----
 
-`indexOps(Class<?>)` uses the `@Document(indexUid = ...)` mapping metadata.
-`indexOps(String)` is useful when no mapped entity type exists for the target index.
+`indexOps(Class<?>)` requires an entity annotated with `@Document` and uses its `indexUid`. `indexOps(String)` is
+useful for index administration when no mapped entity type is involved. Document and search operations still require
+a mapped entity class.
 
 [[meilisearch.index-operations.lifecycle]]
 == Index Lifecycle
 
-`MeilisearchIndexOperations` supports:
+`MeilisearchIndexOperations` exposes:
 
-* `create()` and `create(request)`
-* `get()`
-* `list()` and `list(query)`
-* `update(request)`
-* `delete()`
-* `stats()`
-* `getSettings()`
-* `updateSettings(settings)`
-* `resetSettings()`
+* `MeilisearchIndex create()` and `MeilisearchIndex create(MeilisearchIndexCreateRequest)`
+* `MeilisearchIndex get()`
+* `MeilisearchIndexList list()` and `MeilisearchIndexList list(MeilisearchIndexQuery)`
+* `MeilisearchIndex update(MeilisearchIndexUpdateRequest)`
+* `boolean delete()`
+* `MeilisearchIndexStats stats()`
+* `MeilisearchIndexSettings getSettings()`
+* `MeilisearchIndexSettings updateSettings(MeilisearchIndexSettings)`
+* `MeilisearchIndexSettings resetSettings()`
+
+`create()` creates the bound index without an explicit primary key. Pass a create request to specify one:
 
 [source,java]
 ----
 MeilisearchIndexOperations index = meilisearchOperations.indexOps("catalog");
 
-MeilisearchIndex created = index.create();
-MeilisearchIndex updated = index.update(new MeilisearchIndexUpdateRequest("id"));
-MeilisearchIndexList indexes = index.list(new MeilisearchIndexQuery(0, 100));
+MeilisearchIndex created = index.create(new MeilisearchIndexCreateRequest("productId"));
+MeilisearchIndex current = index.get();
+
+MeilisearchIndexList firstHundred = index.list(new MeilisearchIndexQuery(0, 100));
+MeilisearchIndex updated = index.update(new MeilisearchIndexUpdateRequest("productId"));
 boolean deleted = index.delete();
 ----
+
+The index list methods return a page of indexes for the Meilisearch instance; they are not restricted to the uid bound
+to the `MeilisearchIndexOperations` object. `MeilisearchIndexQuery` supplies a non-negative offset and positive limit.
+`update(request)` sets the bound index's primary key from the request. `delete()` returns whether its delete task
+succeeded.
 
 [[meilisearch.index-operations.runtime-settings]]
 == Runtime Settings
 
-Runtime settings operations are exposed from the same index-scoped API.
+Inspect, update, or reset settings on the bound index:
 
 [source,java]
 ----
@@ -84,12 +100,24 @@ MeilisearchIndexSettings updatedSettings = index.updateSettings(
 MeilisearchIndexSettings defaults = index.resetSettings();
 ----
 
-The public API uses Spring Data Meilisearch value types such as `MeilisearchIndexSettings`, `MeilisearchIndexCreateRequest`, `MeilisearchIndexUpdateRequest`, and `MeilisearchIndexList` rather than exposing Meilisearch Java SDK request/response models directly.
+`updateSettings` applies only the non-null fields supplied in the settings value; an empty collection clears a
+supported list or map setting. `resetSettings()` restores all Meilisearch index settings to defaults. Both methods
+return settings read after their task succeeds. See xref:meilisearch/settings.adoc#meilisearch.settings.runtime[].
+
+The public API uses Spring Data Meilisearch value types such as `MeilisearchIndexSettings`,
+`MeilisearchIndexCreateRequest`, `MeilisearchIndexUpdateRequest`, and `MeilisearchIndexList` rather than exposing
+Meilisearch Java SDK request/response models directly.
 
 [[meilisearch.index-operations.tasks]]
 == Asynchronous Task Behavior
 
-Meilisearch executes many lifecycle and settings updates asynchronously.
-Spring Data Meilisearch waits for task completion using the configured request timeout and request interval before returning from create, update, delete, and settings mutation methods.
+Meilisearch enqueues document writes/deletes, settings changes, and index lifecycle mutations as tasks. The public
+operations wait for those tasks using the configured request timeout and polling interval before returning; they do
+not expose task ids or return immediately after enqueueing. This applies to document methods such as `save(...)`,
+`delete(...)`, and `applySettings(...)` as well as index methods such as `create()`, `update(...)`, `delete()`, and
+settings mutations.
 
-Use client timeout settings that fit the latency and index size of your environment.
+`ClientConfigurationBuilder.withRequestTimeout(...)` and `withRequestInterval(...)` configure these values in
+milliseconds. A non-succeeded task raises `TaskStatusException` from `save(...)`, `applySettings(...)`, index
+`create(...)` and `update(...)`, and settings mutations. Boolean deletion operations return `false` when their task
+does not succeed.

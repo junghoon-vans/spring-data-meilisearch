@@ -10,7 +10,7 @@ The important distinction is that this module currently provides:
 * CRUD and paging/sorting methods implemented by `SimpleMeilisearchRepository`,
 * direct access to advanced search features through `MeilisearchOperations`.
 
-It does *not* currently document or promise full Spring Data query derivation support, custom `@Query` methods, or named-query execution.
+Derived finder methods, repository `@Query` methods, and named-query-backed methods are unsupported and fail during repository bootstrap. Use `MeilisearchOperations` for custom searches.
 
 [[repositories.core-concepts.repository-interface]]
 == Repository Interface
@@ -20,6 +20,11 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
 
 [source,java]
 ----
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.PagingAndSortingRepository;
+
+@NoRepositoryBean
 public interface MeilisearchRepository<T, ID>
         extends CrudRepository<T, ID>, PagingAndSortingRepository<T, ID> {
 }
@@ -28,14 +33,14 @@ public interface MeilisearchRepository<T, ID>
 [[repositories.core-concepts.execution-model]]
 == Execution Model
 
-The default repository implementation delegates to `MeilisearchOperations`, but not every repository method uses the same underlying Meilisearch API:
+The default repository implementation delegates to `MeilisearchOperations`, but repository methods use different Meilisearch APIs:
 
-* `findById(...)` uses direct document lookup; `findAllById(...)` uses native ID-list fetch.
-* `findAll()` retrieves all documents in one request; sorted `findAll(Sort)` counts first, then fetches once.
-* Paged `findAll(Pageable)` uses search APIs; an unpaged `Pageable` uses document listing and counts first if sorted.
-* `count()` uses search APIs.
+* `findById(...)` and `existsById(...)` use direct document lookup; `findAllById(...)` uses native ID-list retrieval.
+* `findAll()` lists all documents in one document-list request. Sorted `findAll(Sort)` counts first, then fetches up to that count in one sorted request; additions between those requests can be absent.
+* Paged `findAll(Pageable)` uses search APIs. An unpaged `Pageable` uses document listing and bases its total on the retrieved documents.
+* `count()` reads the total from a document-list request with a zero-document limit; it does not run a search.
 
-That difference matters because Meilisearch search settings can affect search-backed repository methods without affecting document lookups.
+Search-backed repository methods are subject to search settings such as `pagination.maxTotalHits`. Document-list reads are not capped by that setting, although `displayedAttributes` can restrict fields returned when a request does not specify fields.
 
 [[repositories.core-concepts-when-to-use]]
 == When to Use Repositories vs. Operations

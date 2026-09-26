@@ -1,14 +1,14 @@
 [[meilisearch.mapping]]
 = Object Mapping
 
-Spring Data Meilisearch maps domain objects to Meilisearch documents through annotation metadata, a mapping context, and a converter.
-
-Object mapping is the basis for both repository support and template-style operations because the mapping metadata provides the index uid, document id, and optional settings metadata for each managed entity type.
+Spring Data Meilisearch maps domain objects to Meilisearch documents through mapping metadata, a mapping context, and
+a converter. The same mapping is used by repositories and `MeilisearchOperations`; metadata supplies the index uid,
+document id, and optional settings.
 
 [[meilisearch.mapping.document]]
-== @Document
+== `@Document`
 
-A persistent type must declare the target index uid explicitly.
+A mapped type used by repository or template operations must declare its target index uid:
 
 [source,java]
 ----
@@ -26,119 +26,146 @@ class Movie {
 }
 ----
 
-`indexUid` is required. Spring Data Meilisearch resolves index-bound operations and repositories from that mapping metadata.
-
-`@Document` also exposes `applySettings`, which defaults to `true`.
-When repository infrastructure creates a repository for the entity type, Spring Data Meilisearch applies annotation-driven index settings automatically if `applySettings` remains enabled.
+`indexUid` is required. Spring Data Meilisearch resolves the index for entity-based operations from this metadata.
+`@Document.applySettings` defaults to `true`; repository bootstrap applies the entity's declared settings unless it is
+set to `false`. Meilisearch creates a missing index when its settings-update API runs, so repository bootstrap can
+create the index. See xref:meilisearch/settings.adoc[] for annotation and runtime settings behavior.
 
 [[meilisearch.mapping.id]]
 == Document Id
 
-Document identity is resolved from the Spring Data `@Id` property.
-Repository and template operations convert ids through the configured `MeilisearchConverter`, so custom id value types can participate as long as the converter can turn them into the document id representation expected by Meilisearch.
+The document id is resolved from a Spring Data `@Id` property. A property named `id` is also recognized by convention,
+even without `@Id`. The default mapping uses the property's Java field name as the document key; the same property
+name is used as the Meilisearch primary key when saving the entity.
+
+When repository methods or entity-based delete operations need a string id, `MeilisearchConverter.convertId` uses a
+registered conversion to `String` when available; otherwise it uses the value's `toString()` representation. This
+conversion is separate from serializing the entity's primary-key field. A `Converter<MyId, String>` alone does not
+make the default document writer serialize a custom `MyId` property as a scalar JSON value; ensure the persisted
+primary-key field is a scalar supported by Meilisearch.
 
 [[meilisearch.mapping.settings]]
 == Annotation-driven Settings Metadata
 
-Use `@Setting` and companion annotations such as `@TypoTolerance`, `@Faceting`, and `@Pagination` to define index settings next to the domain type.
-
-[source,java]
-----
-import io.vanslog.spring.data.meilisearch.annotations.Document;
-import io.vanslog.spring.data.meilisearch.annotations.Faceting;
-import io.vanslog.spring.data.meilisearch.annotations.Pagination;
-import io.vanslog.spring.data.meilisearch.annotations.Setting;
-import io.vanslog.spring.data.meilisearch.annotations.Synonym;
-import io.vanslog.spring.data.meilisearch.annotations.TypoTolerance;
-
-@Document(indexUid = "products")
-@Setting(
-        searchableAttributes = { "title", "description" },
-        filterableAttributes = { "brand", "category" },
-        synonyms = {
-                @Synonym(word = "tv", synonyms = { "television" })
-        })
-@TypoTolerance(enabled = true)
-@Faceting(maxValuesPerFacet = 100)
-@Pagination(maxTotalHits = 2000)
-class Product {
-}
-----
-
-Use annotation-driven settings for stable, entity-owned index defaults that should travel with the mapped type.
-Use xref:meilisearch/settings.adoc[runtime settings operations] when settings must be inspected or adjusted dynamically.
+Use `@Setting` and companion annotations such as `@TypoTolerance`, `@Faceting`, and `@Pagination` to declare
+entity-owned index settings. These annotations are metadata; repository bootstrap applies them by default when
+`@Document.applySettings` is enabled. Direct template use does not automatically apply them; call
+`MeilisearchOperations.applySettings(Entity.class)` or use `MeilisearchIndexOperations.updateSettings(...)` when
+needed. For setting groups and clearing/resetting behavior, see xref:meilisearch/settings.adoc[].
 
 [[meilisearch.mapping.converter]]
 == Mapping Context and Converter
 
-`MeilisearchConfigurationSupport` registers the following infrastructure beans:
+`MeilisearchConfigurationSupport` registers the mapping infrastructure beans:
 
 * `meilisearchMappingContext`
 * `meilisearchCustomConversions`
 * `meilisearchConverter`
 
-The default converter is `MappingMeilisearchConverter`.
-It uses the mapping context for entity metadata and applies any converters declared through `MeilisearchCustomConversions`.
+The default converter is `MappingMeilisearchConverter`. It uses the mapping context for entity metadata and applies
+custom conversions registered through `MeilisearchCustomConversions`.
+
+For properties traversed by the default writer, non-null values are mapped using their Java field names. Collections
+and arrays become JSON arrays, maps become JSON objects, and nested objects are mapped recursively. The mapping
+context does not implement entity-reference/association loading; related data must be represented in the document
+model rather than relying on automatic reference resolution.
 
 [[meilisearch.mapping.payloads]]
 == Document Mapping and JSON Payloads
 
-Spring Data Meilisearch maps entity instances through `MeilisearchConverter` before they reach the Meilisearch Java SDK.
-The default `MappingMeilisearchConverter` reads and writes a map-shaped `Document`, applying the mapping metadata and custom conversions registered with `MeilisearchCustomConversions`.
+`MappingMeilisearchConverter` reads and writes map-shaped `Document` values before they reach the Meilisearch Java
+SDK. The Spring-managed `ObjectMapper` bean named `meilisearchObjectMapper` then serializes those document payloads.
+The SDK `JsonHandler` remains responsible for SDK transport concerns; it is not the entity mapping layer.
 
-Document payloads are then serialized with the Spring-managed `ObjectMapper` bean named `meilisearchObjectMapper`.
-This keeps entity conversion in Spring Data Meilisearch and sends document requests through the SDK raw JSON APIs where the SDK exposes them.
-The SDK `JsonHandler` is still used for SDK transport concerns, but it is not the entity mapping layer.
-
-.Customizing the document ObjectMapper
+.Customizing the document `ObjectMapper`
 ====
 [source,java]
 ----
-@Configuration
-public class MyClientConfig extends MeilisearchConfiguration {
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-	@Bean(name = "meilisearchObjectMapper")
-	public ObjectMapper meilisearchObjectMapper() {
-		return new ObjectMapper();
-	}
+@Configuration
+class MyClientConfig extends MeilisearchConfiguration {
+
+    @Bean
+    @Override
+    public ClientConfiguration clientConfiguration() {
+        return ClientConfiguration.builder()
+                .connectedToLocalhost()
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
+                .build();
+    }
+
+    @Bean(name = "meilisearchObjectMapper")
+    @Override
+    public ObjectMapper meilisearchObjectMapper() {
+        return new ObjectMapper();
+    }
 }
 ----
 ====
+
+`MeilisearchConfiguration` is abstract, so a configuration subclass must also provide `clientConfiguration()`.
+Provide a scoped API key through `MEILISEARCH_API_KEY` rather than committing credentials.
 
 [[meilisearch.mapping.custom-conversions]]
 == Custom Conversions
 
-Override `meilisearchCustomConversions()` when you need custom Spring converters.
+Override the `meilisearchCustomConversions()` bean when document values need a custom representation. The default
+writer consults custom write conversions that target `Document`; the reader consults conversions from a document value
+to the target property type. Register a writing and reading converter for a round trip:
 
 [source,java]
 ----
-import io.vanslog.spring.data.meilisearch.config.MeilisearchConfiguration;
-import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions;
-
+import io.vanslog.spring.data.meilisearch.core.document.Document;
+import java.math.BigDecimal;
 import java.util.List;
-
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.convert.ReadingConverter;
+import org.springframework.data.convert.WritingConverter;
 
-class ConversionConfig extends MeilisearchConfiguration {
+record Price(BigDecimal amount, String currency) {}
+
+@WritingConverter
+class PriceToDocumentConverter implements Converter<Price, Document> {
 
     @Override
-    public MeilisearchCustomConversions meilisearchCustomConversions() {
-        Converter<MovieId, String> writingConverter = MovieId::value;
-        return new MeilisearchCustomConversions(List.of(writingConverter));
+    public Document convert(Price price) {
+        return Document.create()
+                .append("amount", price.amount().toPlainString())
+                .append("currency", price.currency());
     }
+}
+
+@ReadingConverter
+class DocumentToPriceConverter implements Converter<Document, Price> {
 
     @Override
-    public io.vanslog.spring.data.meilisearch.client.ClientConfiguration clientConfiguration() {
-        return io.vanslog.spring.data.meilisearch.client.ClientConfiguration.builder()
-                .connectedToLocalhost()
-                .withApiKey("masterKey")
-                .build();
+    public Price convert(Document document) {
+        return new Price(new BigDecimal((String) document.get("amount")),
+                (String) document.get("currency"));
     }
 }
 ----
 
-Custom conversions are especially useful when:
+Register the converters through `MeilisearchCustomConversions`:
 
-* Your ids are richer value objects.
-* Meilisearch document fields need custom serialization.
-* Repository/template code should stay unaware of low-level value transformations.
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions;
+import java.util.List;
+
+@Bean
+@Override
+public MeilisearchCustomConversions meilisearchCustomConversions() {
+    return new MeilisearchCustomConversions(
+            List.of(new PriceToDocumentConverter(), new DocumentToPriceConverter()));
+}
+----
+
+Use this pattern when a document property needs a structure different from its Java type. ID conversion to `String`
+is handled separately by `MeilisearchConverter.convertId`; see
+xref:meilisearch/object-mapping.adoc#meilisearch.mapping.id[] for the primary-key serialization limitation.

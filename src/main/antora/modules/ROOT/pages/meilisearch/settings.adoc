@@ -1,17 +1,18 @@
 [[meilisearch.settings]]
 = Settings
 
-Spring Data Meilisearch supports two complementary ways to work with Meilisearch index settings:
+Spring Data Meilisearch supports two complementary ways to configure index settings:
 
-* annotation-driven settings that live with the mapped entity type,
-* runtime settings operations exposed through `MeilisearchIndexOperations`.
+* annotation metadata on a mapped entity type,
+* runtime inspection and updates through `MeilisearchIndexOperations`.
 
-This split keeps stable index defaults close to the domain model while still allowing explicit runtime adjustments when operational concerns require them.
+Use annotations for settings that belong with an entity definition. Use runtime operations when settings must be read,
+changed, cleared, or reset independently. See xref:meilisearch/index-operations.adoc[] for index lifecycle methods.
 
 [[meilisearch.settings.annotation-driven]]
 == Annotation-driven Settings
 
-Use `@Setting` for the main index settings and companion annotations for the specialized settings groups.
+Use `@Setting` for the main settings and companion annotations for pagination, typo tolerance, and faceting:
 
 [source,java]
 ----
@@ -42,25 +43,32 @@ class Product {
 }
 ----
 
-These annotations are mapping metadata.
-They are applied automatically when repository bootstrap encounters an entity with `@Document(applySettings = true)` and can also be applied explicitly through `MeilisearchOperations.applySettings(Entity.class)`.
+`@Document.applySettings` defaults to `true`. Repository bootstrap applies the declared settings when it creates a repository for the entity; set `applySettings = false` to disable that automatic update. Meilisearch's settings-update API creates a missing index, so bootstrap can create the index before the first document is saved. You can also apply annotation settings explicitly with `MeilisearchOperations.applySettings(Entity.class)`.
+
+Direct document saves do not apply annotation settings, but Meilisearch's add-documents API can also create a missing index. If you need to declare a primary key or other lifecycle options before bootstrap applies settings, create the index explicitly; see xref:meilisearch/index-operations.adoc[].
+
+Annotation defaults that are empty or unset are omitted from the update. They do not clear or reset settings already
+present on the index; use runtime updates with empty collections to clear supported settings or `resetSettings()` to
+restore Meilisearch defaults.
 
 [[meilisearch.settings.categories]]
 == Settings Categories
 
-The supported annotation model covers the main settings groups exposed by Meilisearch:
+The annotations cover the settings groups exposed by this module:
 
-* search and display behavior through `searchableAttributes`, `displayedAttributes`, `filterableAttributes`, `sortableAttributes`, `rankingRules`, and `distinctAttribute`,
-* text processing through synonyms, dictionary, stop words, tokenization, and typo tolerance,
-* result-shaping and performance controls through pagination, faceting, proximity precision, and `searchCutoffMs`,
-* localized attributes for explicit language handling,
-* embedder definitions for AI-powered and similar-document search scenarios.
+* search and display behavior: `searchableAttributes`, `displayedAttributes`, `filterableAttributes`,
+  `sortableAttributes`, `rankingRules`, and `distinctAttribute`,
+* text processing: synonyms, dictionary, stop words, tokenization, proximity precision, search cutoff, and typo
+  tolerance,
+* result and performance controls: pagination and faceting,
+* explicit language handling through localized attributes,
+* embedder definitions for AI-powered and similar-document search.
 
 [[meilisearch.settings.localization]]
 == Localized Attributes
 
-`localizedAttributes` allow you to declare the locale rules for matching groups of fields.
-Use them when automatic language detection is not enough for your index.
+`localizedAttributes` declares the locale rules for matching groups of fields. Use it when automatic language
+detection is not sufficient for the index.
 
 [source,java]
 ----
@@ -77,8 +85,7 @@ class Product {
 [[meilisearch.settings.embedders]]
 == Embedders
 
-Embedders are configured through `@Embedder` inside `@Setting`.
-That configuration is relevant for Meilisearch AI-powered features such as semantic and similar-document search.
+Declare non-secret embedder settings with `@Embedder` inside `@Setting`:
 
 [source,java]
 ----
@@ -87,19 +94,43 @@ That configuration is relevant for Meilisearch AI-powered features such as seman
         @Embedder(
                 name = "default",
                 source = Embedder.Source.OPEN_AI,
-                apiKey = "${OPENAI_API_KEY}",
                 model = "text-embedding-3-small")
 })
 class Movie {
 }
 ----
 
-Each embedder definition needs a unique `name` because that value is later referenced from `SimilarQuery` through `withEmbedder(...)`.
+Each embedder needs a unique `name`. Similar-document queries refer to that name through
+`SimilarQuery.withEmbedder(...)`; the embedder must also be configured on the target index.
+
+`@Embedder.apiKey` is copied as a literal annotation value; a Spring-style placeholder such as
+`${OPENAI_API_KEY}` is not resolved by settings conversion. Set the variable in the process environment and build
+runtime `EmbedderSettings` when a credential must be supplied from application configuration:
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexOperations;
+import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexSettings;
+import java.util.Map;
+
+MeilisearchIndexOperations index = meilisearchOperations.indexOps("movies");
+
+MeilisearchIndexSettings.EmbedderSettings embedder =
+        MeilisearchIndexSettings.EmbedderSettings.builder()
+                .withSource(MeilisearchIndexSettings.EmbedderSource.OPEN_AI)
+                .withApiKey(System.getenv("OPENAI_API_KEY"))
+                .withModel("text-embedding-3-small")
+                .build();
+
+index.updateSettings(MeilisearchIndexSettings.builder()
+        .withEmbedders(Map.of("default", embedder))
+        .build());
+----
 
 [[meilisearch.settings.runtime]]
 == Runtime Settings Updates
 
-Use `MeilisearchIndexOperations` for runtime inspection and updates.
+Use `MeilisearchIndexOperations` to inspect or change current settings:
 
 [source,java]
 ----
@@ -118,13 +149,20 @@ MeilisearchIndexSettings updated = index.updateSettings(
 MeilisearchIndexSettings defaults = index.resetSettings();
 ----
 
-Runtime settings updates send the non-null fields from `MeilisearchIndexSettings`.
-Use empty collections when you want to clear supported list or map settings, and use `resetSettings()` when you want to restore all settings to Meilisearch defaults.
+An update sends the non-null fields present in `MeilisearchIndexSettings`; unspecified fields are left unchanged.
+Use empty collections to clear supported list or map settings. `resetSettings()` resets all settings to Meilisearch
+defaults and returns the settings read back after the reset task succeeds.
 
 [[meilisearch.settings.pagination]]
 == Pagination Limits
 
-Meilisearch paginated search responses can be capped by the configured `maxTotalHits` value.
-That affects both `SearchHits#getTotalHits()` and repository `Page` totals because repository paging is implemented on top of search APIs rather than separate count queries.
+`@Pagination(maxTotalHits = ...)` and the runtime `PaginationSettings` configure the maximum number of search hits
+that can be retrieved through pagination. If a request asks for more hits than this limit, the returned hit list can
+be shorter than its requested page size.
+When `@Pagination` is present without an explicit value, its `maxTotalHits` default is 1,000.
 
-If you expect more than the default limit, configure `@Pagination(maxTotalHits = ...)` or the equivalent runtime settings value before relying on page totals.
+The limit does not necessarily cap the total-hit metadata reported by Meilisearch. When the response reports a total,
+Spring Data Meilisearch carries that value into `SearchHits#getTotalHits()` and repository `Page#getTotalElements()`;
+the reported total may therefore exceed `maxTotalHits`. For example, with `maxTotalHits = 10`, a search over 11
+matching documents can return 10 hits while reporting 11 total matches. See
+xref:meilisearch/template.adoc#meilisearch.operations.results[] for total-hit relation semantics.

@@ -1,14 +1,21 @@
 [[meilisearch.operations]]
 = Operations
 
-Spring Data Meilisearch exposes template-style APIs through `MeilisearchOperations`.
-That interface combines document operations, search operations, access to instance-level APIs, and access to index-scoped APIs.
+Spring Data Meilisearch exposes its synchronous, template-style APIs through `MeilisearchOperations`. The interface
+combines document access and search APIs, and provides entry points to instance-level and index-level operations.
+Use the `MeilisearchOperations` interface in application code; see xref:meilisearch/index-operations.adoc[] for
+instance and index management, xref:meilisearch/settings.adoc[] for settings, and
+xref:meilisearch/object-mapping.adoc[] for entity conversion.
 
 [[meilisearch.operations.entrypoint]]
 == Entry Point
 
-`MeilisearchConfiguration` registers a bean named `meilisearchOperations` and `meilisearchTemplate`.
-Inject that bean when you want direct access to Meilisearch-specific operations instead of the repository abstraction. This is also the primary entry point for store-specific capabilities that are intentionally not surfaced through repositories.
+`MeilisearchConfiguration` registers one `MeilisearchOperations` bean with the names `meilisearchOperations` and
+`meilisearchTemplate`. Inject the interface when you need direct access to Meilisearch-specific operations instead
+of the repository abstraction.
+
+`getMeilisearchConverter()` exposes the configured converter; see xref:meilisearch/object-mapping.adoc[] for its
+mapping and conversion behavior.
 
 [source,java]
 ----
@@ -31,43 +38,63 @@ class MovieController {
 [[meilisearch.operations.documents]]
 == Document Operations
 
-`DocumentOperations` covers document access to one mapped entity type:
+`DocumentOperations` works with one mapped entity type:
 
 * `save(T)` and `save(List<T>)`
-* `get(String, Class<T>)`
+* `get(String, Class<T>)` and `exists(String, Class<?>)`
 * `multiGet(Class<T>, List<String>)` for ID-list retrieval
 * `findAll(Class<T>)` and `findAll(Class<T>, Sort)` for document listing
-* `exists(String, Class<?>)`
-* `delete(...)`
-* `deleteAll(Class<?>)`
+* `delete(String, Class<?>)`, `delete(T)`, `delete(Class<?>, List<String>)`, `delete(List<T>)`, and
+  `deleteAll(Class<?>)`
 
-Direct `get(...)` reads a known id. Unsorted `findAll(...)` retrieves the documents in memory rather than a server-default-sized page.
-Sorted listing counts documents first, then fetches up to that count in one request; documents added between the requests may not appear in the result.
-`multiGet(...)` reads only the document ids supplied by the caller.
+`save(...)` writes through Meilisearch's
+https://www.meilisearch.com/docs/reference/api/documents/add-or-replace-documents[add-or-replace documents API].
+The API creates a missing index; replacing an existing document removes fields omitted from the new entity rather
+than applying a partial update. Document saves do not automatically apply `@Setting` metadata.
 
-For multiple requested ids, `multiGet(Class<T>, List<String>)` uses native ID-list reads available from Meilisearch
-1.14; the implementation batches the ids internally, with no individual-lookup fallback on older servers.
-The returned entities retain requested id order, excluding ids that do not exist.
-Document listing through `findAll(Class<T>, Sort)` uses server-side sorting available from
-Meilisearch 1.16 and is not limited by `@Pagination(maxTotalHits = ...)`.
+`get(...)` returns `null` when the document id is not present. `findAll(Class<T>)` retrieves all documents in one
+document request and holds the result in memory; it is not a `Pageable` search. A sorted listing also holds the full
+result in memory. It counts documents first and then fetches up to that count in one request, so concurrent additions
+between the requests may be absent. Sort properties must be configured as Meilisearch sortable attributes, and sorted
+document retrieval requires Meilisearch 1.16 or later.
+Neither document-list method is bounded by the search-only `maxTotalHits` setting.
+
+Use `multiGet(...)` when the ids are already known rather than listing or searching an index:
+
+[source,java]
+----
+List<Movie> requested = operations.multiGet(Movie.class, List.of("movie-3", "movie-1", "missing"));
+----
+
+The implementation batches requested ids internally. Missing documents are omitted; the remaining results preserve
+requested order and duplicate ids. This uses Meilisearch's native ID-list documents endpoint, which requires
+Meilisearch 1.14 or later; there is no individual-document lookup fallback for older servers.
 
 [[meilisearch.operations.search]]
 == Search Operations
 
-`SearchOperations` covers full-text and search-oriented APIs:
+`SearchOperations` provides:
 
-* `search(query, entityType)` for single-index search.
-* `multiSearch(queries, entityType)` for batched non-federated search.
-* `multiSearch(queries, federation, entityType)` for federated multi-search.
-* `facetSearch(query, entityType)` for facet search results.
-* `similarSearch(query, entityType)` for similar-document search.
-* `count(entityType)` for search-backed counting.
+* `long count(Class<?>)` for the number of documents in the mapped index. This is a document count, not a
+  query-filtered search count.
+* `<T, Q extends BaseQuery> SearchHits<T> search(Q, Class<T>)` for a single index.
+* `<T, Q extends BaseQuery> SearchHits<T> multiSearch(List<Q>, Class<T>)` for several requests in one non-federated
+  multi-search.
+* `<T, Q extends BaseQuery> SearchHits<T> multiSearch(List<Q>, MultiSearchFederation, Class<T>)` for federated
+  multi-search.
+* `SearchHits<FacetHit> facetSearch(FacetQuery, Class<?>)` for facet search.
+* `<T> SearchHits<T> similarSearch(SimilarQuery, Class<T>)` for similar-document search.
+
+`BasicQuery` accepts Spring Data `Pageable` and `Sort`. The default query page is page 0 with 10 hits; a supplied
+`Pageable` is translated to Meilisearch's one-based page and `hitsPerPage` values. Sort properties must be configured
+as sortable attributes. Filter expressions likewise require the referenced attributes to be filterable.
 
 [source,java]
 ----
 BasicQuery query = BasicQuery.builder()
         .withQ("Wonder Woman")
-        .withFilter(new String[] { "genres = Action" })
+        .withFilter("genres = Action")
+        .withPageable(PageRequest.of(0, 20, Sort.by("title")))
         .build();
 
 SearchHits<Movie> result = operations.search(query, Movie.class);
@@ -76,48 +103,92 @@ List<Movie> movies = result.getSearchHits().stream()
         .toList();
 ----
 
+[[meilisearch.operations.multi-search]]
+=== Multi-Search
+
+Use `IndexQuery` to override the mapped index uid for an individual request. All results are mapped to the entity type
+passed to `multiSearch`, so the target indexes must return documents compatible with that type.
+
+[source,java]
+----
+List<IndexQuery> queries = List.of(
+        IndexQuery.builder().withQ("Wonder Woman").withIndexUid("movies").build(),
+        IndexQuery.builder().withQ("Wonder Woman").withIndexUid("comics").build());
+
+SearchHits<Movie> combined = operations.multiSearch(queries, Movie.class);
+----
+
+Non-federated multi-search flattens per-query hits into one `SearchHits` list in query order; it does not return a
+separate `SearchHits` object for each query or an aggregate total.
+
+Non-federated multi-search supports each query's `Pageable`. Federated multi-search instead takes the SDK's
+`MultiSearchFederation` options for the combined result window. Per-query `Pageable` settings are not sent in
+federated mode; set federation `limit` and `offset` instead.
+
+[source,java]
+----
+MultiSearchFederation federation = new MultiSearchFederation();
+federation.setOffset(0);
+federation.setLimit(10);
+
+SearchHits<Movie> federated = operations.multiSearch(queries, federation, Movie.class);
+----
+
 [[meilisearch.operations.queries]]
 == Query Types
 
-Spring Data Meilisearch ships several query value types:
+Spring Data Meilisearch provides these query value types:
 
 * `BasicQuery` for standard search.
-* `IndexQuery` for multi-index and federated multi-search scenarios.
+* `IndexQuery` for per-index multi-search requests, including federated requests.
 * `FacetQuery` for facet search.
 * `SimilarQuery` for similar-document search.
 
-`IndexQuery` adds `indexUid` and optional federation options.
-`SimilarQuery` requires both the source `documentId` and the configured `embedder` name.
+`SimilarQuery` requires a source document id and the name of an embedder configured for the target index:
+
+[source,java]
+----
+SimilarQuery similarQuery = SimilarQuery.builder()
+        .withDocumentId("movie-1")
+        .withEmbedder("default")
+        .build();
+
+SearchHits<Movie> similar = operations.similarSearch(similarQuery, Movie.class);
+----
 
 [[meilisearch.operations.results]]
 == Search Result Types
 
-Search methods return `SearchHits<T>`.
-Each hit is a `SearchHit<T>` that contains:
+Search methods return `SearchHits<T>`, which exposes the hit list, request execution duration, and total-hit metadata
+when the response provides it. Each `SearchHit<T>` contains the mapped content, Meilisearch processing time and query,
+optional facet statistics/distribution, and optional federation metadata.
 
-* the mapped entity content,
-* processing time,
-* query text,
-* optional facet statistics and facet distribution,
-* optional federation metadata.
+`SearchHits#getTotalHitsRelation()` identifies whether `getTotalHits()` contains a total reported by the search
+response:
 
-`SearchHits#getTotalHits()` is accompanied by `getTotalHitsRelation()`:
+* `EQUAL_TO` means Meilisearch reported the total matching-hit count.
+* `OFF` means total-hit metadata is unavailable; `getTotalHits()` then reflects the number of loaded hits and must not
+  be treated as a total for the full result set.
 
-* `EQUAL_TO` means the total hit count reflects the exact matching result set reported by Meilisearch.
-* `OFF` means exact total-hit metadata is unavailable.
+Facet search, similar search, and multi-search results do not provide an aggregate total through this API. For a
+single-index search, use total-hit metadata only when its relation is `EQUAL_TO`.
 
-Use the hit list size for the current page content and total-hit metadata only when the relation is `EQUAL_TO`.
-
-When you need access to raw search metadata such as facets or federation details, prefer `MeilisearchOperations` directly instead of adapting repository return types.
+The `maxTotalHits` pagination setting limits how many matching hits can be retrieved through paginated search; it
+does not necessarily cap the reported total. For example, the current implementation can return 10 hits while
+reporting 11 total matches when `maxTotalHits` is 10. Repository `findAll(Pageable)` uses search results and their
+reported total, while an unpaged repository lookup uses document retrieval. See
+xref:meilisearch/settings.adoc#meilisearch.settings.pagination[] for the pagination setting.
 
 [[meilisearch.operations.kotlin]]
 == Kotlin Extensions
 
-Spring Data Meilisearch provides Kotlin extension functions for the blocking operations APIs that take an entity `Class` argument.
-These extensions use reified type parameters so Kotlin callers can omit explicit `::class.java` arguments.
+Spring Data Meilisearch provides Kotlin extension functions for blocking operations that otherwise require an entity
+`Class` argument. Reified type parameters let Kotlin callers omit explicit `::class.java` arguments.
 
 [source,kotlin]
 ----
+import io.vanslog.spring.data.meilisearch.core.*
+
 val movie = operations.get<Movie>("movie-1")
 val hits = operations.search<Movie>(query)
 val count = operations.count<Movie>()
@@ -126,12 +197,12 @@ val index = operations.indexOps<Movie>()
 operations.applySettings<Movie>()
 ----
 
-The extensions are thin wrappers over the existing Java contracts.
-They do not change blocking execution behavior and do not add reactive or coroutine repository support.
+These extensions are thin wrappers over the Java contracts. They do not change blocking execution behavior or add
+reactive or coroutine repository support.
 
 [[meilisearch.operations.notes]]
-== Notes on Search Semantics
+== Repository Results and Search Metadata
 
-* Federated multi-search does not support `Pageable` settings inside the individual queries. Use federation `limit` and `offset` instead.
-* Similar-document search requires a compatible embedder already configured in the target index.
-* Repository `findAll(Pageable)` uses search operations only for a paged argument; an unpaged argument uses document-backed retrieval. Search pagination limits can cap paged content.
+Repository methods return mapped entities (or a `Page<T>` for paged `findAll`) rather than `SearchHit<T>` wrappers.
+Use `MeilisearchOperations` directly when you need per-hit metadata such as facet statistics or federation details
+from a manually issued search.

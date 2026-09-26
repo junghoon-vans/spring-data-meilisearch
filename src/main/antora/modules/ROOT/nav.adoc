@@ -5,7 +5,7 @@
 ** xref:meilisearch/client-configuration.adoc[]
 ** xref:meilisearch/object-mapping.adoc[]
 ** xref:meilisearch/template.adoc[]
-** xref:meilisearch/index-operations.adoc[]
+** xref:meilisearch/index-operations.adoc[Instance and Index Operations]
 ** xref:meilisearch/settings.adoc[]
 
 * xref:repositories.adoc[]
