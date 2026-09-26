@@ -72,8 +72,7 @@ public interface DocumentOperations {
 
 	/**
 	 * Retrieves all entities of the given type through the documents/fetch endpoint in one request. The entire result is
-	 * held in memory. The request does not select fields; {@code displayedAttributes} is not an access-control boundary
-	 * for document reads.
+	 * held in memory. Document retrieval ignores {@code displayedAttributes}.
 	 *
 	 * @param clazz the entity class, must be annotated with
 	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
