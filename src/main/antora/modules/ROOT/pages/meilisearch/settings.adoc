@@ -104,7 +104,7 @@ Each embedder needs a unique `name`. Similar-document queries refer to that name
 `SimilarQuery.withEmbedder(...)`; the embedder must also be configured on the target index.
 
 `@Embedder.apiKey` is copied as a literal annotation value; a Spring-style placeholder such as
-`${OPENAI_API_KEY}` is not resolved by settings conversion. Set the variable in the process environment and build
+`$\{OPENAI_API_KEY}` is not resolved by settings conversion. Set the variable in the process environment and build
 runtime `EmbedderSettings` when a credential must be supplied from application configuration:
 
 [source,java]
