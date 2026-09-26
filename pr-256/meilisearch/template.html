@@ -488,13 +488,16 @@ class MovieController {
 <p><code>save(T)</code> and <code>save(List&lt;T&gt;)</code></p>
 </li>
 <li>
-<p><code>get(String, Class&lt;T&gt;)</code> and <code>exists(String, Class&lt;?&gt;)</code></p>
+<p><code>get(String, Class&lt;T&gt;)</code></p>
+</li>
+<li>
+<p><code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code></p>
 </li>
 <li>
 <p><code>findAll(Class&lt;T&gt;)</code> and <code>findAll(Class&lt;T&gt;, Sort)</code></p>
 </li>
 <li>
-<p><code>multiGet(Class&lt;T&gt;, List&lt;String&gt;)</code> and <code>multiGet(Class&lt;T&gt;, List&lt;String&gt;, int offset, int limit)</code></p>
+<p><code>exists(String, Class&lt;?&gt;)</code></p>
 </li>
 <li>
 <p><code>delete(String, Class&lt;?&gt;)</code>, <code>delete(T)</code>, <code>delete(Class&lt;?&gt;, List&lt;String&gt;)</code>, <code>delete(List&lt;T&gt;)</code>, and
@@ -521,14 +524,14 @@ Neither document-list method is bounded by the search-only <code>maxTotalHits</c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;Movie&gt; requested = operations.multiGet(Movie.class, List.of("movie-3", "movie-1", "missing"), 0, 2);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;Movie&gt; requested = operations.multiGet(Movie.class, List.of("movie-3", "movie-1", "missing"));</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The offset and limit apply to positions in the requested id list. Negative offsets are treated as zero and a negative
-limit leaves the result unbounded. Missing documents are omitted; the remaining results preserve requested order and
-duplicate ids. This uses Meilisearch&#8217;s native ID-list documents endpoint, which requires Meilisearch 1.14 or later;
-there is no individual-document lookup fallback for older servers.</p>
+<p>Missing documents are omitted; the remaining results preserve requested order and duplicate ids. The implementation
+requests document ids in internal batches; callers supply only the ids they want to retrieve. This uses Meilisearch&#8217;s
+native ID-list documents endpoint, which requires Meilisearch 1.14 or later; there is no individual-document lookup
+fallback for older servers.</p>
 </div>
 </div>
 </div>
