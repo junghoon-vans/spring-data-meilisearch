@@ -109,8 +109,8 @@ class MeilisearchNamespaceHandlerUnitTests {
 
 		try (GenericXmlApplicationContext xmlContext = new GenericXmlApplicationContext()) {
 			String host = "http://127.0.0.1:" + server.getAddress().getPort();
-			xmlContext.getEnvironment().getPropertySources().addFirst(
-					new MapPropertySource("test", Map.of("MEILISEARCH_API_KEY", "", "MEILISEARCH_HOST_URL", host)));
+			xmlContext.getEnvironment().getPropertySources()
+					.addFirst(new MapPropertySource("test", Map.of("MEILISEARCH_API_KEY", "", "MEILISEARCH_HOST_URL", host)));
 
 			xmlContext.load("classpath:io/vanslog/spring/data/meilisearch/config/unauthenticated/namespace.xml");
 			xmlContext.refresh();
