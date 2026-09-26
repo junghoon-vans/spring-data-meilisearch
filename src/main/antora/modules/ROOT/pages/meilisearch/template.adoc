@@ -41,8 +41,15 @@ class MovieController {
 * `delete(...)`
 * `deleteAll(Class<?>)`
 
-Direct `get(...)` reads a known id. Unsorted `findAll(...)` retrieves the documents in memory rather than a server-default-sized page.
-Sorted listing counts documents first, then fetches up to that count in one request; documents added between the requests may not appear in the result.
+Direct `get(...)` reads a known id. Both unsorted and sorted `findAll(...)` use
+`POST /documents/fetch` without requesting specific fields. Unsorted listing retrieves the
+documents in one request and holds them in memory. Sorted listing counts documents first, then fetches up to that
+count in one request; documents added between the requests may not appear in the result.
+
+With the default `displayedAttributes` setting, all document fields are returned. Do not rely on a restricted
+`displayedAttributes` setting to hide fields in document listings: document fetch can return attributes excluded from
+search results. Use appropriate document access permissions and avoid storing sensitive fields in retrievable documents.
+
 `multiGet(...)` reads only the document ids supplied by the caller.
 
 For multiple requested ids, `multiGet(Class<T>, List<String>)` uses native ID-list reads available from Meilisearch

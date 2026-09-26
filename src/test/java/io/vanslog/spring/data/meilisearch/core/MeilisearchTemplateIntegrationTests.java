@@ -39,6 +39,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -70,7 +71,7 @@ class MeilisearchTemplateIntegrationTests {
 
 	private static final List<String> LIFECYCLE_INDEX_UIDS = List.of("lifecycle-create-index", "lifecycle-get-list-index",
 			"lifecycle-update-index", "lifecycle-delete-index", "runtime-settings-index", "runtime-settings-reset-index",
-			"nested-movies");
+			"nested-movies", "listing-projection-movies");
 
 	@BeforeEach
 	void setUp() throws MeilisearchException {
@@ -136,6 +137,30 @@ class MeilisearchTemplateIntegrationTests {
 		meilisearchTemplate.save(movies);
 
 		assertThat(meilisearchTemplate.findAll(Movie.class)).containsExactlyInAnyOrderElementsOf(movies);
+	}
+
+	@Test // GH-259
+	void shouldUseFetchForUnsortedDocumentListing() {
+		ProjectionMovie movie = new ProjectionMovie();
+		movie.setId(1);
+		movie.setTitle("Visible");
+		movie.setDescription("Hidden");
+		meilisearchTemplate.save(movie);
+
+		assertThat(meilisearchTemplate.findAll(ProjectionMovie.class)).singleElement().extracting(Movie::getDescription)
+				.isEqualTo("Hidden");
+
+		meilisearchTemplate.indexOps(ProjectionMovie.class).updateSettings(MeilisearchIndexSettings.builder()
+				.withDisplayedAttributes(List.of("id", "title")).withSortableAttributes(List.of("title")).build());
+
+		MeilisearchClient client = new MeilisearchClient(new MeilisearchTestConfiguration().clientConfiguration()) {
+			@Override
+			public Index index(String indexUid) {
+				throw new AssertionError("Unsorted document listing must use the fetch endpoint");
+			}
+		};
+		assertThat(new MeilisearchTemplate(client).findAll(ProjectionMovie.class)).containsExactly(movie);
+		assertThat(meilisearchTemplate.findAll(ProjectionMovie.class, Sort.by("title"))).containsExactly(movie);
 	}
 
 	@Test
@@ -545,6 +570,9 @@ class MeilisearchTemplateIntegrationTests {
 		assertThat(saved.getDetails().getYear()).isEqualTo(2026);
 		assertThat(searchHits.getSearchHit(0).getContent().getDetails().getDirector()).isEqualTo("Director");
 	}
+
+	@Document(indexUid = "listing-projection-movies")
+	static class ProjectionMovie extends Movie {}
 
 	@Document(indexUid = "annotatedIdField")
 	static class AnnotatedIdField {

@@ -37,7 +37,10 @@ The built-in repository methods do not all use the same underlying Meilisearch A
 * `save(...)`, `saveAll(...)`, and delete methods delegate to `MeilisearchOperations` document-oriented write operations.
 
 `pagination.maxTotalHits` limits search-backed reads, not document-backed listing.
-`displayedAttributes` can still restrict fields returned by document-list requests that omit `fields`, leaving mapped entities incomplete.
+
+Both unsorted and sorted document listings use `POST /documents/fetch` without an explicit `fields` list. The
+default `displayedAttributes` setting returns all fields; restricting search display is not a document-access
+boundary, so document fetch can still return non-displayed fields.
 Document-backed reads require a key with `documents.get` permission.
 
 [[meilisearch.repositories.lookup-methods.behavior-table]]
