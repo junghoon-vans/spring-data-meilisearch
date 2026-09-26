@@ -47,16 +47,16 @@ class MeilisearchBulkRetrievalIntegrationTests {
 	}
 
 	@Test // GH-229
-	void retrievesBeyondDefaultPageInRequestOrderAndOmitsMissingIds() {
-		List<Movie> movies = IntStream.range(0, 30)
+	void retrievesBeyondInternalBatchInRequestOrderAndOmitsMissingIds() {
+		List<Movie> movies = IntStream.range(0, 501)
 				.mapToObj(id -> new Movie(id, "Movie " + id, "Description", new String[] { "Drama" })).toList();
 		operations.save(movies);
 
-		List<String> ids = IntStream.range(0, 30).mapToObj(String::valueOf).toList();
+		List<String> ids = IntStream.range(0, 501).mapToObj(String::valueOf).toList();
 		assertThat(operations.multiGet(Movie.class, ids)).extracting(Movie::getId)
-				.containsExactlyElementsOf(IntStream.range(0, 30).boxed().toList());
-		assertThat(operations.multiGet(Movie.class, List.of("29", "9999", "0", "21", "29"))).extracting(Movie::getId)
-				.containsExactly(29, 0, 21, 29);
+				.containsExactlyElementsOf(IntStream.range(0, 501).boxed().toList());
+		assertThat(operations.multiGet(Movie.class, List.of("500", "9999", "0", "21", "500"))).extracting(Movie::getId)
+				.containsExactly(500, 0, 21, 500);
 	}
 
 	@Configuration

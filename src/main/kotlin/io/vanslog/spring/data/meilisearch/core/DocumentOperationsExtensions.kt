@@ -19,18 +19,12 @@ import org.springframework.data.domain.Sort
 
 inline fun <reified T : Any> DocumentOperations.get(documentId: String): T? = get(documentId, T::class.java)
 
-inline fun <reified T : Any> DocumentOperations.findAll(): List<T> = findAll(T::class.java)
-
-inline fun <reified T : Any> DocumentOperations.findAll(sort: Sort): List<T> = findAll(T::class.java, sort)
-
 inline fun <reified T : Any> DocumentOperations.multiGet(documentIds: List<String>): List<T> =
     multiGet(T::class.java, documentIds)
 
-inline fun <reified T : Any> DocumentOperations.multiGet(
-    documentIds: List<String>,
-    offset: Int,
-    limit: Int,
-): List<T> = multiGet(T::class.java, documentIds, offset, limit)
+inline fun <reified T : Any> DocumentOperations.findAll(): List<T> = findAll(T::class.java)
+
+inline fun <reified T : Any> DocumentOperations.findAll(sort: Sort): List<T> = findAll(T::class.java, sort)
 
 inline fun <reified T : Any> DocumentOperations.exists(documentId: String): Boolean = exists(documentId, T::class.java)
 

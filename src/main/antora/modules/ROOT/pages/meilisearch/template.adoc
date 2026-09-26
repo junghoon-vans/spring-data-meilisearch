@@ -35,8 +35,8 @@ class MovieController {
 
 * `save(T)` and `save(List<T>)`
 * `get(String, Class<T>)`
+* `multiGet(Class<T>, List<String>)` for ID-list retrieval
 * `findAll(Class<T>)` and `findAll(Class<T>, Sort)` for document listing
-* `multiGet(...)` for ID-list retrieval
 * `exists(String, Class<?>)`
 * `delete(...)`
 * `deleteAll(Class<?>)`
@@ -45,8 +45,8 @@ Direct `get(...)` reads a known id. Unsorted `findAll(...)` retrieves the docume
 Sorted listing counts documents first, then fetches up to that count in one request; documents added between the requests may not appear in the result.
 `multiGet(...)` reads only the document ids supplied by the caller.
 
-For multiple requested ids, `multiGet(Class<T>, List<String>)` and its offset/limit overload use native ID-list
-reads available from Meilisearch 1.14; there is no individual-lookup fallback on older servers.
+For multiple requested ids, `multiGet(Class<T>, List<String>)` uses native ID-list reads available from Meilisearch
+1.14; the implementation batches the ids internally, with no individual-lookup fallback on older servers.
 The returned entities retain requested id order, excluding ids that do not exist.
 Document listing through `findAll(Class<T>, Sort)` uses server-side sorting available from
 Meilisearch 1.16 and is not limited by `@Pagination(maxTotalHits = ...)`.
