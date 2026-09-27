@@ -20,9 +20,9 @@
     <link rel="stylesheet" href="./_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.10.0">
-    <meta name="generation" content="0.10.0">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.10.0/appendix.html">
+    <meta name="version" content="0.11.0">
+    <meta name="generation" content="0.11.0">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.11.0/appendix.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="true">
     <link rel="icon" href="./_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -249,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.10.0">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.11.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.10.0</span>
+  <span class="version">0.11.0</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -300,7 +300,7 @@
     <a class="nav-link"  href="meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="meilisearch/index-operations.html">Index and Instance Operations</a>
+    <a class="nav-link"  href="meilisearch/index-operations.html">Instance and Index Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="meilisearch/settings.html">Settings</a>
@@ -376,7 +376,7 @@
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/blob/v0.10.0/src/main/antora/modules/ROOT/pages/appendix.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/appendix.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -436,6 +436,9 @@
 <div class="paragraph">
 <p>Creates a <code>MeilisearchClient</code> bean.</p>
 </div>
+<div class="paragraph">
+<p>When omitted, the XML factory leaves the optional task-wait timeout attributes at <code>0</code>, unlike the Java builder defaults of 5,000 ms and 50 ms. Set both attributes for applications that save documents or run other task-based operations.</p>
+</div>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -462,28 +465,28 @@
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>api-key</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The API key used for authentication.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No authentication</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Optional API key. Omit the attribute or set it to an empty string to send requests without authentication. Use a non-empty key for protected instances.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>client-agents</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Comma-delimited client agent values sent with requests.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Comma-delimited client-agent values sent in the <code>User-Agent</code> header.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>request-timeout</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">How long to wait, in milliseconds, for task-based operations to complete.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>0</code> ms when omitted</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Task-completion wait timeout in milliseconds. This is not an HTTP connection timeout.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>request-interval</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Polling interval, in milliseconds, used while waiting for task completion.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>0</code> ms when omitted</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Polling interval in milliseconds while waiting for task completion.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>json-handler-ref</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>jsonHandler</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Reference to a bean implementing <code>com.meilisearch.sdk.json.JsonHandler</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reference to a bean implementing <code>com.meilisearch.sdk.json.JsonHandler</code>. The XML namespace does not create this bean; declare it yourself.</p></td>
 </tr>
 </tbody>
 </table>
@@ -523,15 +526,23 @@ It extends the generic Spring Data repository namespace and therefore also suppo
 </div>
 <div class="sect2">
 <h3 id="meilisearch.appendix.xml-namespace.example"><a class="anchor" href="#meilisearch.appendix.xml-namespace.example"></a>Example</h3>
+<div class="paragraph">
+<p>The example uses <code>MeilisearchTemplate&#8217;s one-argument constructor, which creates the default mapping converter and Jackson `ObjectMapper</code>. Wire the converter and mapper explicitly if you need custom conversions.</p>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
        http://www.vanslog.io/spring/data/meilisearch
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
+
+    &lt;context:property-placeholder/&gt;
 
     &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;
 
@@ -539,12 +550,13 @@ It extends the generic Spring Data repository namespace and therefore also suppo
             id="meilisearchClient"
             host-url="http://localhost:7700"
             api-key="${MEILISEARCH_API_KEY}"
+            request-timeout="5000"
+            request-interval="50"
             json-handler-ref="jsonHandler"/&gt;
 
     &lt;bean id="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate"&gt;
-        &lt;constructor-arg name="meilisearchClient" ref="meilisearchClient"/&gt;
-        &lt;constructor-arg name="meilisearchConverter" ref="meilisearchConverter"/&gt;
+        &lt;constructor-arg ref="meilisearchClient"/&gt;
     &lt;/bean&gt;
 
     &lt;meilisearch:repositories
@@ -601,6 +613,11 @@ It extends the generic Spring Data repository namespace and therefore also suppo
                           <ul class="versions">
   <li class="version">
     <a href="appendix.html">
+      0.11.0
+    </a>
+  </li>
+  <li class="version">
+    <a href="0.10.0/appendix.html">
       0.10.0
     </a>
   </li>
@@ -617,20 +634,6 @@ It extends the generic Spring Data repository namespace and therefore also suppo
   <li class="version">
     <a href="0.8.0/index.html">
       0.8.0
-    </a>
-  </li>
-</ul>                        </div>
-                        <div class="version-item">
-                          <div>
-                            <button class="version-toggle" type="button">
-                              <span></span>
-                              Snapshot
-                            </button>
-                          </div>
-                          <ul class="versions">
-  <li class="version">
-    <a href="snapshot/appendix.html">
-      0.10.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

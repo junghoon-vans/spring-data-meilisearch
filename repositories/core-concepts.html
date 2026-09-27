@@ -20,9 +20,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.10.0">
-    <meta name="generation" content="0.10.0">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.10.0/repositories/core-concepts.html">
+    <meta name="version" content="0.11.0">
+    <meta name="generation" content="0.11.0">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.11.0/repositories/core-concepts.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="true">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -249,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.10.0">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.11.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.10.0</span>
+  <span class="version">0.11.0</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -300,7 +300,7 @@
     <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Instance and Index Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
@@ -376,7 +376,7 @@
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/blob/v0.10.0/src/main/antora/modules/ROOT/pages/repositories/core-concepts.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/repositories/core-concepts.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -441,7 +441,7 @@
 </ul>
 </div>
 <div class="paragraph">
-<p>It does <strong>not</strong> currently document or promise full Spring Data query derivation support, custom <code>@Query</code> methods, or named-query execution.</p>
+<p>Derived finder methods, repository <code>@Query</code> methods, and named-query-backed methods are unsupported and fail during repository bootstrap. Use <code>MeilisearchOperations</code> for custom searches.</p>
 </div>
 </div>
 </div>
@@ -454,9 +454,14 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface MeilisearchRepository&lt;T, ID&gt;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.PagingAndSortingRepository;
+
+</span><span class="fold-block">@NoRepositoryBean
+public interface MeilisearchRepository&lt;T, ID&gt;
         extends CrudRepository&lt;T, ID&gt;, PagingAndSortingRepository&lt;T, ID&gt; {
-}</code></pre>
+}</span></code></pre>
 </div>
 </div>
 </div>
@@ -465,23 +470,26 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
 <h2 id="repositories.core-concepts.execution-model"><a class="anchor" href="#repositories.core-concepts.execution-model"></a>Execution Model</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The default repository implementation delegates to <code>MeilisearchOperations</code>, but not every repository method uses the same underlying Meilisearch API:</p>
+<p>The default repository implementation delegates to <code>MeilisearchOperations</code>, but repository methods use different Meilisearch APIs:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>findById(&#8230;&#8203;)</code> and <code>findAllById(&#8230;&#8203;)</code> use document APIs.</p>
+<p><code>findById(&#8230;&#8203;)</code> and <code>existsById(&#8230;&#8203;)</code> use direct document lookup; <code>findAllById(&#8230;&#8203;)</code> uses native ID-list retrieval.</p>
 </li>
 <li>
-<p><code>findAll()</code>, <code>findAll(Sort)</code>, and <code>findAll(Pageable)</code> use search APIs.</p>
+<p><code>findAll()</code> lists all documents in one document-list request. Sorted <code>findAll(Sort)</code> counts first, then fetches up to that count in one sorted request; additions between those requests can be absent.</p>
 </li>
 <li>
-<p><code>count()</code> is derived from the search-oriented operations layer.</p>
+<p>Paged <code>findAll(Pageable)</code> uses search APIs. An unpaged <code>Pageable</code> uses document listing and bases its total on the retrieved documents.</p>
+</li>
+<li>
+<p><code>count()</code> reads the total from a document-list request with a zero-document limit; it does not run a search.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>That difference matters because Meilisearch search settings can affect search-backed repository methods without affecting document lookups.</p>
+<p>Search-backed repository methods are subject to search settings such as <code>pagination.maxTotalHits</code>. Document-list reads are not capped by that setting and ignore <code>displayedAttributes</code>.</p>
 </div>
 </div>
 </div>
@@ -579,6 +587,11 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
                           <ul class="versions">
   <li class="version">
     <a href="core-concepts.html">
+      0.11.0
+    </a>
+  </li>
+  <li class="version">
+    <a href="../0.10.0/repositories/core-concepts.html">
       0.10.0
     </a>
   </li>
@@ -595,20 +608,6 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
   <li class="version">
     <a href="../0.8.0/index.html">
       0.8.0
-    </a>
-  </li>
-</ul>                        </div>
-                        <div class="version-item">
-                          <div>
-                            <button class="version-toggle" type="button">
-                              <span></span>
-                              Snapshot
-                            </button>
-                          </div>
-                          <ul class="versions">
-  <li class="version">
-    <a href="../snapshot/repositories/core-concepts.html">
-      0.10.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

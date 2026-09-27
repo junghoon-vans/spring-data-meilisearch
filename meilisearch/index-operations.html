@@ -20,9 +20,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.10.0">
-    <meta name="generation" content="0.10.0">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.10.0/meilisearch/index-operations.html">
+    <meta name="version" content="0.11.0">
+    <meta name="generation" content="0.11.0">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.11.0/meilisearch/index-operations.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="true">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -249,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.10.0">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.11.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.10.0</span>
+  <span class="version">0.11.0</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -300,7 +300,7 @@
     <a class="nav-link"  href="template.html">Operations</a>
   </li>
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link"  href="index-operations.html">Index and Instance Operations</a>
+    <a class="nav-link"  href="index-operations.html">Instance and Index Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="settings.html">Settings</a>
@@ -376,7 +376,7 @@
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/blob/v0.10.0/src/main/antora/modules/ROOT/pages/meilisearch/index-operations.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/meilisearch/index-operations.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -412,27 +412,28 @@
       <li id="copy-url" title="Copy versioned URL"></li>
       <li><a href="../index.html">Spring Data Meilisearch</a></li>
       <li><a href="../meilisearch.html">Meilisearch</a></li>
-      <li><a href="index-operations.html">Index and Instance Operations</a></li>
+      <li><a href="index-operations.html">Instance and Index Operations</a></li>
     </ul>
   </nav>
 </div><h1 id="page-title" class="page">Index and Instance Operations</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>MeilisearchOperations</code> exposes two store-specific entry points beyond document and search APIs:</p>
+<p><code>MeilisearchOperations</code> exposes two Meilisearch-specific entry points:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>instanceOps()</code> for Meilisearch instance-level information.</p>
+<p><code>instanceOps()</code> for instance-level information.</p>
 </li>
 <li>
-<p><code>indexOps(&#8230;&#8203;)</code> for APIs bound to one index.</p>
+<p><code>indexOps(&#8230;&#8203;)</code> for APIs bound to an index uid.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>These APIs are useful when an application needs to manage index lifecycle or inspect runtime state without dropping down to the raw Meilisearch Java SDK.</p>
+<p>These synchronous APIs cover instance inspection and index lifecycle/settings operations without requiring direct use
+of the Meilisearch Java SDK. See <a href="settings.html" class="xref page">Settings</a> for settings annotation and update details.</p>
 </div>
 </div>
 </div>
@@ -440,31 +441,37 @@
 <h2 id="meilisearch.index-operations.instance"><a class="anchor" href="#meilisearch.index-operations.instance"></a>Instance Operations</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>MeilisearchInstanceOperations</code> provides lightweight administrative read operations:</p>
+<p><code>MeilisearchInstanceOperations</code> provides these read operations:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>health()</code></p>
+<p><code>MeilisearchHealth health()</code></p>
 </li>
 <li>
-<p><code>isHealthy()</code></p>
+<p><code>boolean isHealthy()</code></p>
 </li>
 <li>
-<p><code>version()</code></p>
+<p><code>MeilisearchVersion version()</code></p>
 </li>
 <li>
-<p><code>stats()</code></p>
+<p><code>MeilisearchStats stats()</code></p>
 </li>
 </ul>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MeilisearchHealth health = meilisearchOperations.instanceOps().health();
-boolean healthy = meilisearchOperations.instanceOps().isHealthy();
-MeilisearchVersion version = meilisearchOperations.instanceOps().version();
-MeilisearchStats stats = meilisearchOperations.instanceOps().stats();</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MeilisearchInstanceOperations instance = meilisearchOperations.instanceOps();
+
+MeilisearchHealth health = instance.health();
+boolean healthy = instance.isHealthy();
+MeilisearchVersion version = instance.version();
+MeilisearchStats stats = instance.stats();</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p><code>instanceOps().stats()</code> reports instance-level statistics. For statistics for one index, use
+<code>indexOps(&#8230;&#8203;).stats()</code>.</p>
 </div>
 </div>
 </div>
@@ -472,17 +479,18 @@ MeilisearchStats stats = meilisearchOperations.instanceOps().stats();</code></pr
 <h2 id="meilisearch.index-operations.index"><a class="anchor" href="#meilisearch.index-operations.index"></a>Index-bound Operations</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Resolve index operations either by mapped entity type or by index uid.</p>
+<p>Resolve index operations either from entity mapping metadata or from an explicit uid:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MeilisearchIndexStats byEntity = meilisearchOperations.indexOps(Movie.class).stats();
-MeilisearchIndexStats byIndexUid = meilisearchOperations.indexOps("movies").stats();</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MeilisearchIndexOperations byEntity = meilisearchOperations.indexOps(Movie.class);
+MeilisearchIndexOperations byIndexUid = meilisearchOperations.indexOps("movies");</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>indexOps(Class&lt;?&gt;)</code> uses the <code>@Document(indexUid = &#8230;&#8203;)</code> mapping metadata.
-<code>indexOps(String)</code> is useful when no mapped entity type exists for the target index.</p>
+<p><code>indexOps(Class&lt;?&gt;)</code> requires an entity annotated with <code>@Document</code> and uses its <code>indexUid</code>. <code>indexOps(String)</code> is
+useful for index administration when no mapped entity type is involved. Document and search operations still require
+a mapped entity class.</p>
 </div>
 </div>
 </div>
@@ -490,48 +498,59 @@ MeilisearchIndexStats byIndexUid = meilisearchOperations.indexOps("movies").stat
 <h2 id="meilisearch.index-operations.lifecycle"><a class="anchor" href="#meilisearch.index-operations.lifecycle"></a>Index Lifecycle</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>MeilisearchIndexOperations</code> supports:</p>
+<p><code>MeilisearchIndexOperations</code> exposes:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>create()</code> and <code>create(request)</code></p>
+<p><code>MeilisearchIndex create()</code> and <code>MeilisearchIndex create(MeilisearchIndexCreateRequest)</code></p>
 </li>
 <li>
-<p><code>get()</code></p>
+<p><code>MeilisearchIndex get()</code></p>
 </li>
 <li>
-<p><code>list()</code> and <code>list(query)</code></p>
+<p><code>MeilisearchIndexList list()</code> and <code>MeilisearchIndexList list(MeilisearchIndexQuery)</code></p>
 </li>
 <li>
-<p><code>update(request)</code></p>
+<p><code>MeilisearchIndex update(MeilisearchIndexUpdateRequest)</code></p>
 </li>
 <li>
-<p><code>delete()</code></p>
+<p><code>boolean delete()</code></p>
 </li>
 <li>
-<p><code>stats()</code></p>
+<p><code>MeilisearchIndexStats stats()</code></p>
 </li>
 <li>
-<p><code>getSettings()</code></p>
+<p><code>MeilisearchIndexSettings getSettings()</code></p>
 </li>
 <li>
-<p><code>updateSettings(settings)</code></p>
+<p><code>MeilisearchIndexSettings updateSettings(MeilisearchIndexSettings)</code></p>
 </li>
 <li>
-<p><code>resetSettings()</code></p>
+<p><code>MeilisearchIndexSettings resetSettings()</code></p>
 </li>
 </ul>
+</div>
+<div class="paragraph">
+<p><code>create()</code> creates the bound index without an explicit primary key. Pass a create request to specify one:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MeilisearchIndexOperations index = meilisearchOperations.indexOps("catalog");
 
-MeilisearchIndex created = index.create();
-MeilisearchIndex updated = index.update(new MeilisearchIndexUpdateRequest("id"));
-MeilisearchIndexList indexes = index.list(new MeilisearchIndexQuery(0, 100));
+MeilisearchIndex created = index.create(new MeilisearchIndexCreateRequest("productId"));
+MeilisearchIndex current = index.get();
+
+MeilisearchIndexList firstHundred = index.list(new MeilisearchIndexQuery(0, 100));
+MeilisearchIndex updated = index.update(new MeilisearchIndexUpdateRequest("productId"));
 boolean deleted = index.delete();</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The index list methods return a page of indexes for the Meilisearch instance; they are not restricted to the uid bound
+to the <code>MeilisearchIndexOperations</code> object. <code>MeilisearchIndexQuery</code> supplies a non-negative offset and positive limit.
+<code>update(request)</code> sets the bound index&#8217;s primary key from the request. <code>delete()</code> returns whether its delete task
+succeeded.</p>
 </div>
 </div>
 </div>
@@ -539,7 +558,7 @@ boolean deleted = index.delete();</code></pre>
 <h2 id="meilisearch.index-operations.runtime-settings"><a class="anchor" href="#meilisearch.index-operations.runtime-settings"></a>Runtime Settings</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Runtime settings operations are exposed from the same index-scoped API.</p>
+<p>Inspect, update, or reset settings on the bound index:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -556,7 +575,14 @@ MeilisearchIndexSettings defaults = index.resetSettings();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The public API uses Spring Data Meilisearch value types such as <code>MeilisearchIndexSettings</code>, <code>MeilisearchIndexCreateRequest</code>, <code>MeilisearchIndexUpdateRequest</code>, and <code>MeilisearchIndexList</code> rather than exposing Meilisearch Java SDK request/response models directly.</p>
+<p><code>updateSettings</code> applies only the non-null fields supplied in the settings value; an empty collection clears a
+supported list or map setting. <code>resetSettings()</code> restores all Meilisearch index settings to defaults. Both methods
+return settings read after their task succeeds. See <a href="settings.html#meilisearch.settings.runtime" class="xref page">Runtime Settings Updates</a>.</p>
+</div>
+<div class="paragraph">
+<p>The public API uses Spring Data Meilisearch value types such as <code>MeilisearchIndexSettings</code>,
+<code>MeilisearchIndexCreateRequest</code>, <code>MeilisearchIndexUpdateRequest</code>, and <code>MeilisearchIndexList</code> rather than exposing
+Meilisearch Java SDK request/response models directly.</p>
 </div>
 </div>
 </div>
@@ -564,11 +590,17 @@ MeilisearchIndexSettings defaults = index.resetSettings();</code></pre>
 <h2 id="meilisearch.index-operations.tasks"><a class="anchor" href="#meilisearch.index-operations.tasks"></a>Asynchronous Task Behavior</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Meilisearch executes many lifecycle and settings updates asynchronously.
-Spring Data Meilisearch waits for task completion using the configured request timeout and request interval before returning from create, update, delete, and settings mutation methods.</p>
+<p>Meilisearch enqueues document writes/deletes, settings changes, and index lifecycle mutations as tasks. The public
+operations wait for those tasks using the configured request timeout and polling interval before returning; they do
+not expose task ids or return immediately after enqueueing. This applies to document methods such as <code>save(&#8230;&#8203;)</code>,
+<code>delete(&#8230;&#8203;)</code>, and <code>applySettings(&#8230;&#8203;)</code> as well as index methods such as <code>create()</code>, <code>update(&#8230;&#8203;)</code>, <code>delete()</code>, and
+settings mutations.</p>
 </div>
 <div class="paragraph">
-<p>Use client timeout settings that fit the latency and index size of your environment.</p>
+<p><code>ClientConfigurationBuilder.withRequestTimeout(&#8230;&#8203;)</code> and <code>withRequestInterval(&#8230;&#8203;)</code> configure these values in
+milliseconds. A non-succeeded task raises <code>TaskStatusException</code> from <code>save(&#8230;&#8203;)</code>, <code>applySettings(&#8230;&#8203;)</code>, index
+<code>create(&#8230;&#8203;)</code> and <code>update(&#8230;&#8203;)</code>, and settings mutations. Boolean deletion operations return <code>false</code> when their task
+does not succeed.</p>
 </div>
 </div>
 </div>
@@ -617,6 +649,11 @@ Spring Data Meilisearch waits for task completion using the configured request t
                           <ul class="versions">
   <li class="version">
     <a href="index-operations.html">
+      0.11.0
+    </a>
+  </li>
+  <li class="version">
+    <a href="../0.10.0/meilisearch/index-operations.html">
       0.10.0
     </a>
   </li>
@@ -633,20 +670,6 @@ Spring Data Meilisearch waits for task completion using the configured request t
   <li class="version">
     <a href="../0.8.0/index.html">
       0.8.0
-    </a>
-  </li>
-</ul>                        </div>
-                        <div class="version-item">
-                          <div>
-                            <button class="version-toggle" type="button">
-                              <span></span>
-                              Snapshot
-                            </button>
-                          </div>
-                          <ul class="versions">
-  <li class="version">
-    <a href="../snapshot/meilisearch/index-operations.html">
-      0.10.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
