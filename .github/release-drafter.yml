@@ -10,11 +10,18 @@ categories:
   - title: '🔨 Dependency Upgrades'
     label: 'type: dependency-upgrade'
 
+exclude-labels:
+  - 'type: release'
+
 exclude-contributors:
   - 'junghoon-vans'
   - 'github-actions[bot]'
 
 change-template: '* $TITLE #$NUMBER'
+replacers:
+  - search: '/\n+## ❤️ Contributors\nWe''d like to thank all the contributors who worked on this release!\n\nNo contributors\s*$/'
+    replace: ''
+
 template: |
   ## 📗 Links
   * [Spring Data Meilisearch $RESOLVED_VERSION Reference documentation](https://junghoon-vans.github.io/spring-data-meilisearch/$RESOLVED_VERSION/)
