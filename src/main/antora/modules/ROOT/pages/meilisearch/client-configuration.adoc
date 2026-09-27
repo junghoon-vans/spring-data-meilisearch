@@ -43,6 +43,8 @@ class MyClientConfig extends MeilisearchConfiguration {
 * `withRequestTimeout(...)` to configure how long task-based operations wait for completion.
 * `withRequestInterval(...)` to configure the polling interval used while waiting for task completion.
 
+The Java builder requires a non-null argument to `withApiKey(...)`. Pass `withApiKey("")` for a development instance without authentication.
+
 These timeout and interval settings affect operations that submit asynchronous Meilisearch tasks, such as writes, index lifecycle changes, and runtime settings updates.
 
 [[meilisearch.clients.json-handler]]
@@ -82,6 +84,7 @@ The supported integration styles are:
 Spring Data Meilisearch also provides an XML namespace.
 Register a JSON handler bean and reference it from `<meilisearch:meilisearch-client>` when you do not want to use the default bean name.
 For production deployments, prefer a scoped API key rather than the Meilisearch master key.
+The XML `api-key` attribute is optional. Omit it or set `api-key=""` for an instance without authentication; neither form sends an `Authorization` header. A placeholder resolving to an empty value behaves the same way, while an unresolved placeholder fails Spring's property resolution by default. Use a valid key for protected instances.
 
 [source,xml]
 ----
@@ -103,6 +106,13 @@ For production deployments, prefer a scoped API key rather than the Meilisearch 
             request-interval="20"
             json-handler-ref="jsonHandler"/>
 </beans>
+----
+
+For a local instance without authentication, omit the key:
+
+[source,xml]
+----
+<meilisearch:meilisearch-client id="meilisearchClient" json-handler-ref="jsonHandler"/>
 ----
 
 The XML namespace attributes are documented in xref:appendix.adoc#meilisearch.appendix.schema[XML namespace reference].
