@@ -9,30 +9,27 @@
 
 == Create integration test
 
-To create an integration test, you need to add the following annotation to your test class:
+For an integration test, use the test harness annotation and a configuration bound to its container:
 
 [source,java]
 ----
 @MeilisearchTest
 @ContextConfiguration(classes = {MeilisearchTestConfiguration.class})
-class MeilisearchTest {
+class MovieIntegrationTests {
 
     @Autowired
-    Client client;
+    MeilisearchOperations operations;
 
     @Test
-    void test() {
-        // ...
+    void instanceIsHealthy() {
+        assertThat(operations.instanceOps().isHealthy()).isTrue();
     }
 }
 ----
 
-The `MeilisearchTest` annotation means that the test is run in integration with Meilisearch.
-This code makes it easy to run the container.
-`MeilisearchTestConfiguration` is a configuration class for providing a `Client` associated with a container run by MeilisearchTest.
-
-The default container image is pinned to the latest stable Meilisearch release, `v1.54.0`.
-The minimum supported Meilisearch release is `v1.16.0`.
-`SortableMeilisearchRepositoryIntegrationTests` uses `v1.16.0` to exercise sorted listing on the minimum supported release.
+`@MeilisearchTest` starts a Meilisearch container for the class.
+`MeilisearchTestConfiguration` registers a `MeilisearchClient` and `MeilisearchOperations` connected to that container.
+The default container image is pinned to `v1.54.0` by `@MeilisearchTest`.
+`SortableMeilisearchRepositoryIntegrationTests` runs against `v1.16.0`, the earliest server version exercised by the sorted-listing compatibility test; other operations have their own server-version requirements.
 Give tests for different server versions distinct `@ContextConfiguration` configuration types
 so Spring does not reuse a context bound to another container.
