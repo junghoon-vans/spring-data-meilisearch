@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Meilisearch Repositories :: Spring Data Meilisearch</title>
+    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/repositories/meilisearch-repositories.html">
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -19,9 +20,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.10.1">
-    <meta name="generation" content="0.10-SNAPSHOT">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.10-SNAPSHOT/repositories/meilisearch-repositories.html">
+    <meta name="version" content="0.11.0">
+    <meta name="generation" content="0.11">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.11/repositories/meilisearch-repositories.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -248,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.10.1">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.11.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.10.1-SNAPSHOT</span>
+  <span class="version">0.11.0</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -308,7 +309,7 @@
     <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Instance and Index Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
@@ -460,12 +461,10 @@ It exposes the standard Spring Data CRUD and pagination entry points without imp
 <h2 id="meilisearch.repositories.autocreation"><a class="anchor" href="#meilisearch.repositories.autocreation"></a>Automatic Settings Application</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Repository bootstrap inspects the mapped entity type.
-If the entity is annotated with <code>@Document(applySettings = true)</code>, Spring Data Meilisearch applies annotation-driven settings through <code>MeilisearchOperations.applySettings(&#8230;&#8203;)</code> when the repository is created.</p>
+<p>Repository bootstrap inspects the mapped entity type. If the entity is annotated with <code>@Document(applySettings = true)</code>, Spring Data Meilisearch applies its annotation-driven settings through <code>MeilisearchOperations.applySettings(&#8230;&#8203;)</code> when the repository is created. Because <code>applySettings</code> defaults to <code>true</code>, this happens unless it is explicitly disabled.</p>
 </div>
 <div class="paragraph">
-<p>This behavior is store-specific.
-It means repository creation can have side effects on the target index configuration, which is convenient for local development and controlled deployments but should be understood explicitly in environments where index settings are managed separately.</p>
+<p>This store-specific behavior can create a missing index and change settings during repository creation. Set <code>applySettings = false</code> when index creation and settings are managed separately.</p>
 </div>
 </div>
 </div>
@@ -473,27 +472,33 @@ It means repository creation can have side effects on the target index configura
 <h2 id="meilisearch.repositories.lookup-methods"><a class="anchor" href="#meilisearch.repositories.lookup-methods"></a>Built-in Repository Methods</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The built-in repository methods do not all use the same underlying Meilisearch API:</p>
+<p>The built-in repository methods do not all use the same Meilisearch API:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>findById(&#8230;&#8203;)</code> and <code>findAllById(&#8230;&#8203;)</code> use document APIs.</p>
+<p><code>findById(&#8230;&#8203;)</code> and <code>existsById(&#8230;&#8203;)</code> use direct document lookup; <code>findAllById(&#8230;&#8203;)</code> uses native ID-list retrieval.</p>
 </li>
 <li>
-<p><code>findAll()</code>, <code>findAll(Sort)</code>, and <code>findAll(Pageable)</code> use search APIs.</p>
+<p><code>findAll()</code> lists all documents in one document-list request. Sorted <code>findAll(Sort)</code> counts first, then fetches up to that count in one sorted request.</p>
 </li>
 <li>
-<p><code>count()</code> uses <code>SearchOperations.count(&#8230;&#8203;)</code>.</p>
+<p>A paged <code>findAll(Pageable)</code> uses search APIs. An unpaged <code>Pageable</code> uses document listing, with the same sorted-listing behavior when a sort is supplied.</p>
 </li>
 <li>
-<p><code>save(&#8230;&#8203;)</code>, <code>saveAll(&#8230;&#8203;)</code>, and delete methods delegate to <code>MeilisearchOperations</code> document-oriented write operations.</p>
+<p><code>count()</code> reads the index total from a document-list request with a zero-document limit; it does not run a search.</p>
+</li>
+<li>
+<p>Writes and deletes delegate to document-oriented operations in <code>MeilisearchOperations</code>.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>That distinction matters because some Meilisearch settings only influence search APIs.
-For example, <code>displayedAttributes</code> affect search results but not the document APIs used by <code>findById(&#8230;&#8203;)</code> and <code>findAllById(&#8230;&#8203;)</code>.</p>
+<p><code>pagination.maxTotalHits</code> limits search-backed reads, not document-backed listing.</p>
+</div>
+<div class="paragraph">
+<p>Both unsorted and sorted document listings use <code>POST /documents/fetch</code> without an explicit <code>fields</code> list.
+Document reads ignore <code>displayedAttributes</code> and require <code>documents.get</code> permission.</p>
 </div>
 <div class="sect2">
 <h3 id="meilisearch.repositories.lookup-methods.behavior-table"><a class="anchor" href="#meilisearch.repositories.lookup-methods.behavior-table"></a>Method Behavior at a Glance</h3>
@@ -510,20 +515,32 @@ For example, <code>displayedAttributes</code> affect search results but not the 
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findById</code>, <code>findAllById</code>, <code>existsById</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Uses direct document lookup APIs after converting the repository id through the configured converter.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findById</code>, <code>existsById</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uses direct document lookup after converting the repository id through the configured converter.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll</code>, <code>findAll(Sort)</code>, <code>findAll(Pageable)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Builds a search query and unwraps Meilisearch search hits back into entities.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAllById</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uses native ID-list retrieval, available from Meilisearch 1.14; there is no fallback on older servers. Missing IDs are omitted, and the returned entities retain the requested ID order.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lists all documents in one document-list request and materializes the result in memory. <code>maxTotalHits</code> does not cap this document-backed read.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll(Sort)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Counts documents, then makes one sorted document-list request limited to that count and materializes the full list in memory. Sorting requires Meilisearch 1.16 or later and attributes configured as sortable. Concurrent additions may be absent from the result.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findAll(Pageable)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A paged <code>Pageable</code> builds a search query and unwraps search hits into entities. An unpaged <code>Pageable</code> uses document listing and sets the page total to the number of retrieved documents; an optional sort follows the <code>findAll(Sort)</code> behavior.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>count</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Delegates to the operations layer count support rather than maintaining a separate repository-side count strategy.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gets the document total through the operations layer; <code>MeilisearchTemplate</code> reads it from a document-list response with a zero-document limit.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>save</code>, <code>saveAll</code>, <code>delete*</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Delegates to <code>MeilisearchOperations</code> write and delete operations.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Delegates to <code>MeilisearchOperations</code> document write and delete operations.</p></td>
 </tr>
 </tbody>
 </table>
@@ -534,13 +551,24 @@ For example, <code>displayedAttributes</code> affect search results but not the 
 <h2 id="meilisearch.repositories.paging"><a class="anchor" href="#meilisearch.repositories.paging"></a>Paging and Totals</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>findAll(Pageable)</code> is backed by a <code>BasicQuery</code> plus search result metadata.
-The repository <code>Page</code> total is therefore derived from Meilisearch search totals, not from a separate count query.
-If the index is configured with <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code>, that limit can cap the reported page total.</p>
+<p><code>findAll(Pageable)</code> selects its backing API based on whether the <code>Pageable</code> is paged.</p>
 </div>
 <div class="paragraph">
-<p>The same search-backed design also explains why repository pagination does not expose richer search response data such as facets or federation metadata.
-When an application needs those store-specific result structures, prefer calling <code>MeilisearchOperations</code> directly from the service layer.</p>
+<p>A paged request uses <code>BasicQuery</code> plus search result metadata. Its <code>Page</code> total comes from the total reported by Meilisearch search results, not a separate count request. The default <code>pagination.maxTotalHits</code> value is 1000; a configured cap can limit search content even when the reported total is larger. For example, a search can report 11 matching documents while returning only 10 hits.</p>
+</div>
+<div class="paragraph">
+<p>An unpaged request returns all retrieved documents in memory and sets the <code>Page</code> total to the retrieved document count. It is not capped by <code>maxTotalHits</code>. Supplying a sort makes the document-list path count first and fetch up to that count; additions between the count and fetch may be absent.</p>
+</div>
+<div class="paragraph">
+<p>The search-backed <code>Page</code> does not expose richer search response data such as facet or federation metadata. Call <code>MeilisearchOperations</code> directly from the service layer when you need those Meilisearch-specific results.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.repositories.empty-bulk-operations"><a class="anchor" href="#meilisearch.repositories.empty-bulk-operations"></a>Empty Bulk Operations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>An empty <code>saveAll(&#8230;&#8203;)</code> returns an empty result, while empty <code>deleteAll(Iterable)</code> and <code>deleteAllById(&#8230;&#8203;)</code> calls succeed without a Meilisearch request. The no-argument <code>deleteAll()</code> is different: it deletes all documents for the repository&#8217;s entity type.</p>
 </div>
 </div>
 </div>
@@ -560,17 +588,17 @@ When an application needs those store-specific result structures, prefer calling
                       <li class="component">
                         <div>
                           <a class="title" href="../index.html">Spring Data Meilisearch</a>
-                        </div>                        <div class="version-item">
+                        </div>                        <div class="version-item is-active">
                           <div>
                             <button class="version-toggle" type="button">
                               <span></span>
-                              Snapshot
+                              Stable
                             </button>
                           </div>
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      0.10.1-SNAPSHOT
+      0.11.0
     </a>
   </li>
 </ul>                        </div>
@@ -882,6 +910,6 @@ When an application needs those store-specific result structures, prefer calling
 <script src="../_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.10.1" data-page-generation="0.10-SNAPSHOT" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.11.0" data-page-generation="0.11" data-page-component="data-meilisearch"></script>
   </body>
 </html>

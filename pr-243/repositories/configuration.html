@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Repository Configuration :: Spring Data Meilisearch</title>
+    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/repositories/configuration.html">
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -19,9 +20,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.10.1">
-    <meta name="generation" content="0.10-SNAPSHOT">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.10-SNAPSHOT/repositories/configuration.html">
+    <meta name="version" content="0.11.0">
+    <meta name="generation" content="0.11">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.11/repositories/configuration.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -248,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.10.1">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.11.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.10.1-SNAPSHOT</span>
+  <span class="version">0.11.0</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -308,7 +309,7 @@
     <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Instance and Index Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
@@ -439,7 +440,7 @@
 <p>Spring Data Meilisearch repositories are enabled through <code>@EnableMeilisearchRepositories</code> or the XML namespace.</p>
 </div>
 <div class="paragraph">
-<p>As with other Spring Data modules, repository bootstrap is intentionally lightweight. The main store-specific choice is which <code>MeilisearchOperations</code> bean should back discovered repositories.</p>
+<p>Repository bootstrap registers interfaces against a <code>MeilisearchOperations</code> bean. It does not create the client, template, or converter for you, and this module does not provide Spring Boot auto-configuration. The default operations bean name is <code>meilisearchTemplate</code>; use <code>meilisearchTemplateRef</code> to select another bean. Repository creation can apply settings declared on the mapped entity; see <a href="meilisearch-repositories.html#meilisearch.repositories.autocreation" class="xref page">Automatic Settings Application</a>.</p>
 </div>
 </div>
 </div>
@@ -507,40 +508,27 @@ bootstrap with a Meilisearch-specific message until repository query method supp
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
        http://www.vanslog.io/spring/data/meilisearch
        http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd"&gt;
 
+    &lt;context:property-placeholder/&gt;
     &lt;bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/&gt;
-
-    &lt;meilisearch:meilisearch-client id="meilisearchClient" api-key="${MEILISEARCH_API_KEY}"/&gt;
-
-    &lt;bean id="meilisearchConverter"
-          class="io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter"&gt;
-        &lt;constructor-arg name="mappingContext" ref="meilisearchMappingContext"/&gt;
-        &lt;property name="conversions" ref="meilisearchCustomConversions"/&gt;
-    &lt;/bean&gt;
-
-    &lt;bean id="meilisearchMappingContext"
-          class="io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext"/&gt;
-
-    &lt;bean id="meilisearchCustomConversions"
-          class="io.vanslog.spring.data.meilisearch.core.convert.MeilisearchCustomConversions"&gt;
-        &lt;constructor-arg&gt;
-            &lt;list/&gt;
-        &lt;/constructor-arg&gt;
-    &lt;/bean&gt;
-
-    &lt;bean id="meilisearchObjectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/&gt;
+    &lt;meilisearch:meilisearch-client
+            id="meilisearchClient"
+            api-key="${MEILISEARCH_API_KEY}"
+            request-timeout="5000"
+            request-interval="50"/&gt;
 
     &lt;bean id="meilisearchTemplate"
           class="io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate"&gt;
-        &lt;constructor-arg name="meilisearchClient" ref="meilisearchClient"/&gt;
-        &lt;constructor-arg name="meilisearchConverter" ref="meilisearchConverter"/&gt;
-        &lt;constructor-arg name="objectMapper" ref="meilisearchObjectMapper"/&gt;
+        &lt;constructor-arg ref="meilisearchClient"/&gt;
     &lt;/bean&gt;
 
     &lt;meilisearch:repositories
@@ -552,7 +540,7 @@ bootstrap with a Meilisearch-specific message until repository query method supp
 <div class="paragraph">
 <p>The XML namespace extends the Spring Data repository namespace and adds the <code>meilisearch-template-ref</code> attribute.
 See <a href="../appendix.html#meilisearch.appendix.schema" class="xref page">XML namespace reference</a> for the full attribute list.
-The manual <code>meilisearchTemplate</code> bean must be wired with a <code>MeilisearchConverter</code> for entity mapping and the <code>meilisearchObjectMapper</code> bean for JSON document payload serialization.</p>
+The one-argument <code>MeilisearchTemplate</code> constructor provides a default mapping converter and <code>ObjectMapper</code>. Wire them explicitly only when you need to customize conversion; see <a href="../meilisearch/object-mapping.html" class="xref page">Object Mapping</a>.</p>
 </div>
 </div>
 </div>
@@ -572,17 +560,17 @@ The manual <code>meilisearchTemplate</code> bean must be wired with a <code>Meil
                       <li class="component">
                         <div>
                           <a class="title" href="../index.html">Spring Data Meilisearch</a>
-                        </div>                        <div class="version-item">
+                        </div>                        <div class="version-item is-active">
                           <div>
                             <button class="version-toggle" type="button">
                               <span></span>
-                              Snapshot
+                              Stable
                             </button>
                           </div>
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      0.10.1-SNAPSHOT
+      0.11.0
     </a>
   </li>
 </ul>                        </div>
@@ -894,6 +882,6 @@ The manual <code>meilisearchTemplate</code> bean must be wired with a <code>Meil
 <script src="../_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.10.1" data-page-generation="0.10-SNAPSHOT" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.11.0" data-page-generation="0.11" data-page-component="data-meilisearch"></script>
   </body>
 </html>
