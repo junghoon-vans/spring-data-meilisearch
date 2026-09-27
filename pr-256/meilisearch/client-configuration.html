@@ -485,7 +485,7 @@ class MyClientConfig extends MeilisearchConfiguration {
 <p><code>connectedTo(&#8230;&#8203;)</code> or <code>connectedToLocalhost()</code> to choose the server URL. The Java builder has no default URL.</p>
 </li>
 <li>
-<p><code>withApiKey(&#8230;&#8203;)</code> to provide the required Meilisearch API key; the Java builder has no default key.</p>
+<p><code>withApiKey(&#8230;&#8203;)</code> to supply a key when authentication is enabled; the Java builder has no default key.</p>
 </li>
 <li>
 <p><code>withClientAgents(String[])</code> to supply client-agent values sent in the <code>User-Agent</code> header.</p>
@@ -497,6 +497,9 @@ class MyClientConfig extends MeilisearchConfiguration {
 <p><code>withRequestInterval(&#8230;&#8203;)</code> to set the polling interval in milliseconds. The Java builder default is 50 ms.</p>
 </li>
 </ul>
+</div>
+<div class="paragraph">
+<p>The Java builder requires a non-null argument to <code>withApiKey(&#8230;&#8203;)</code>. Pass <code>withApiKey("")</code> for a development instance without authentication.</p>
 </div>
 <div class="paragraph">
 <p>These timeout and interval values are passed to the SDK&#8217;s task-wait operations for asynchronous writes, index lifecycle changes, and settings updates. They are not HTTP connection or socket timeouts.</p>
@@ -563,7 +566,7 @@ class JsonHandlerConfig extends MeilisearchConfiguration {
 <div class="paragraph">
 <p>Spring Data Meilisearch also provides an XML namespace.
 Unlike Java configuration, the namespace does not create a JSON handler bean. Declare a <code>JsonHandler</code> bean named <code>jsonHandler</code> (the schema&#8217;s default reference), or set <code>json-handler-ref</code> to the id of another handler bean.
-The <code>api-key</code> attribute is required. For production deployments, prefer a scoped API key rather than the Meilisearch master key.</p>
+The XML <code>api-key</code> attribute is optional. Omit it or set <code>api-key=""</code> for an instance without authentication; neither form sends an <code>Authorization</code> header. A placeholder resolving to an empty value behaves the same way, while an unresolved placeholder fails Spring&#8217;s property resolution by default. For protected instances, prefer a scoped API key rather than the Meilisearch master key.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -590,6 +593,14 @@ The <code>api-key</code> attribute is required. For production deployments, pref
             request-interval="20"
             json-handler-ref="jsonHandler"/&gt;
 &lt;/beans&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For a local instance without authentication, omit the key:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;meilisearch:meilisearch-client id="meilisearchClient" json-handler-ref="jsonHandler"/&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">

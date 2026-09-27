@@ -456,7 +456,7 @@ The quickest way to get started is to declare the dependency, extend <code>Meili
 <p>A reachable Meilisearch instance.</p>
 </li>
 <li>
-<p>A Meilisearch API key with the permissions required for your application.</p>
+<p>An API key with the permissions required for your application if the Meilisearch instance has authentication enabled.</p>
 </li>
 </ul>
 </div>
@@ -535,7 +535,7 @@ class MeilisearchConfig extends MeilisearchConfiguration {
 <div class="paragraph">
 <p><code>MeilisearchConfiguration</code> registers the standard Spring Data Meilisearch beans, including the client, mapping context, converter, and the <code>meilisearchTemplate</code> / <code>meilisearchOperations</code> bean.
 <code>MeilisearchRepository</code> is the recommended repository base interface for this module&#8217;s current repository feature set.
-For local development, expose a scoped API key through <code>MEILISEARCH_API_KEY</code> instead of placing the Meilisearch master key in application code.</p>
+For local development with authentication, prefer a scoped API key exposed through <code>MEILISEARCH_API_KEY</code> instead of using the Meilisearch master key in application code. For a development instance without authentication, pass <code>withApiKey("")</code> explicitly (see <a href="meilisearch/client-configuration.html#meilisearch.clients.builder" class="xref page">ClientConfiguration Builder</a>).</p>
 </div>
 </div>
 </div>
