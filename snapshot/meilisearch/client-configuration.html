@@ -496,6 +496,9 @@ class MyClientConfig extends MeilisearchConfiguration {
 </ul>
 </div>
 <div class="paragraph">
+<p>The Java builder requires a non-null argument to <code>withApiKey(&#8230;&#8203;)</code>. Pass <code>withApiKey("")</code> for a development instance without authentication.</p>
+</div>
+<div class="paragraph">
 <p>These timeout and interval settings affect operations that submit asynchronous Meilisearch tasks, such as writes, index lifecycle changes, and runtime settings updates.</p>
 </div>
 </div>
@@ -550,7 +553,8 @@ class JsonHandlerConfig extends MeilisearchConfiguration {
 <div class="paragraph">
 <p>Spring Data Meilisearch also provides an XML namespace.
 Register a JSON handler bean and reference it from <code>&lt;meilisearch:meilisearch-client&gt;</code> when you do not want to use the default bean name.
-For production deployments, prefer a scoped API key rather than the Meilisearch master key.</p>
+For production deployments, prefer a scoped API key rather than the Meilisearch master key.
+The XML <code>api-key</code> attribute is optional. Omit it or set <code>api-key=""</code> for an instance without authentication; neither form sends an <code>Authorization</code> header. A placeholder resolving to an empty value behaves the same way, while an unresolved placeholder fails Spring&#8217;s property resolution by default. Use a valid key for protected instances.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -572,6 +576,14 @@ For production deployments, prefer a scoped API key rather than the Meilisearch 
             request-interval="20"
             json-handler-ref="jsonHandler"/&gt;
 &lt;/beans&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For a local instance without authentication, omit the key:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;meilisearch:meilisearch-client id="meilisearchClient" json-handler-ref="jsonHandler"/&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
