@@ -1,165 +1,99 @@
 [[repositories.definition]]
 = Defining Repository Interfaces
 
-To define a repository interface, you first need to define a domain class-specific repository interface.
-The interface must extend `Repository` and be typed to the domain class and an ID type.
-If you want to expose CRUD methods for that domain type, you may extend `CrudRepository`, or one of its variants instead of `Repository`.
+Spring Data repository interfaces are typed to the domain class and its identifier type. For Spring Data Meilisearch, the clearest way to declare a repository is to extend `MeilisearchRepository<T, ID>`.
 
 [[repositories.definition-tuning]]
-== Fine-tuning Repository Definition
+== Selecting Repository Methods
 
-There are a few variants how you can get started with your repository interface.
+`MeilisearchRepository<T, ID>` combines the blocking Spring Data `CrudRepository` and `PagingAndSortingRepository` contracts. Its built-in CRUD, sorting, and paging methods are implemented by `SimpleMeilisearchRepository`.
 
-The typical Meilisearch approach is to extend `MeilisearchRepository`, which combines Spring Data's blocking `CrudRepository` and `PagingAndSortingRepository` contracts for the mapped domain type.
-`CrudRepository` gives you methods for CRUD functionality.
-CRUD stands for Create, Read, Update, Delete.
-`PagingAndSortingRepository` adds methods that accept a `Sort` or `Pageable` abstraction.
-
-Spring Data Meilisearch currently supports the blocking repository model only.
-Reactive, RxJava 3, and Kotlin coroutine repository variants such as `ReactiveCrudRepository`, `RxJava3CrudRepository`, `ReactiveSortingRepository`, `RxJava3SortingRepository`, `CoroutineCrudRepository`, and `CoroutineSortingRepository` are not supported by this module.
-
-If you do not want to extend Spring Data interfaces, you can also annotate your repository interface with `@RepositoryDefinition`.
-Extending one of the CRUD repository interfaces exposes a complete set of methods to manipulate your entities.
-If you prefer to be selective about the methods being exposed, copy the methods you want to expose from the CRUD repository into your domain repository.
-When doing so, you may change the return type of methods.
-Spring Data will honor the return type if possible.
-For example, for methods returning multiple entities you may choose `Iterable<T>`, `List<T>`, `Collection<T>` or a VAVR list.
-
-If many repositories in your application should have the same set of methods you can define your own base interface to inherit from.
-Such an interface must be annotated with `@NoRepositoryBean`.
-This prevents Spring Data to try to create an instance of it directly and failing because it can't determine the entity for that repository, since it still contains a generic type variable.
-
-The following example shows how to selectively expose CRUD methods (`findById` and `save`, in this case):
-
-.Selectively exposing CRUD methods
 [source,java]
 ----
+import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+import org.springframework.data.annotation.Id;
+
+@Document(indexUid = "movies")
+class Movie {
+  @Id String id;
+}
+
+interface MovieRepository extends MeilisearchRepository<Movie, String> {
+}
+----
+
+The module supports blocking repository interfaces only. Reactive, RxJava, and Kotlin coroutine repository interfaces are not supported.
+
+You can expose a smaller subset of the standard methods by extending the generic Spring Data `Repository` marker or by using `@RepositoryDefinition`. Declare only method signatures implemented by the repository base class:
+
+[source,java]
+----
+import java.util.Optional;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.Repository;
+
 @NoRepositoryBean
-interface MyBaseRepository<T, ID> extends Repository<T, ID> {
+interface IdentifiedRepository<T, ID> extends Repository<T, ID> {
 
   Optional<T> findById(ID id);
 
   <S extends T> S save(S entity);
 }
 
-interface UserRepository extends MyBaseRepository<User, Long> {
-  User findByEmailAddress(EmailAddress emailAddress);
+interface MovieRepository extends IdentifiedRepository<Movie, String> {
 }
 ----
 
-In the prior example, you defined a common base interface for all your domain repositories and exposed `findById(…)` as well as `save(…)`.These methods are routed into the base repository implementation of the store of your choice provided by Spring Data (for example, if you use JPA, the implementation is `SimpleJpaRepository`), because they match the method signatures in `CrudRepository`.
-So the `UserRepository` can now save users, find individual users by ID, and trigger a query to find `Users` by email address.
+In a multi-module application, annotate the domain type with Meilisearch's `@Document` when the repository does not extend `MeilisearchRepository`, so strict repository configuration can identify it. In a single-module application, the generic repository may be discovered in the configured package, but extending `MeilisearchRepository` makes the store binding explicit. Mark generic intermediate interfaces with `@NoRepositoryBean` so Spring does not try to instantiate them directly.
 
-NOTE: The intermediate repository interface is annotated with `@NoRepositoryBean`.
-Make sure you add that annotation to all repository interfaces for which Spring Data should not create instances at runtime.
+The method declarations above match built-in CRUD methods. Adding a derived finder such as `findByTitle(...)`, a repository `@Query` method, or a named-query method is not supported and causes repository bootstrap to fail. Use `MeilisearchOperations` for application-specific searches; see xref:repositories/repository-queries.adoc[Repository Methods and Limitations].
 
 [[repositories.multiple-modules]]
 == Using Repositories with Multiple Spring Data Modules
 
-Using a unique Spring Data module in your application makes things simple, because all repository interfaces in the defined scope are bound to the Spring Data module.
-Sometimes, applications require using more than one Spring Data module.
-In such cases, a repository definition must distinguish between persistence technologies.
-When it detects multiple repository factories on the class path, Spring Data enters strict repository configuration mode.
-Strict configuration uses details on the repository or the domain class to decide about Spring Data module binding for a repository definition:
-
-. If the repository definition <<repositories.multiple-modules.types,extends the module-specific repository>>, it is a valid candidate for the particular Spring Data module.
-. If the domain class is <<repositories.multiple-modules.annotations,annotated with the module-specific type annotation>>, it is a valid candidate for the particular Spring Data module.
-Spring Data modules accept either third-party annotations (such as JPA's `@Entity`) or provide their own annotations (such as `@Document` for Spring Data MongoDB and Spring Data Elasticsearch).
-
-The following example shows a repository that uses module-specific interfaces (JPA in this case):
+When more than one Spring Data module is on the classpath, Spring Data uses strict repository configuration to decide which module should create each repository. Meilisearch identifies candidates through either the `MeilisearchRepository` interface or the Meilisearch `@Document` annotation on the domain type.
 
 [[repositories.multiple-modules.types]]
-.Repository definitions using module-specific interfaces
+.Repository identified by its Meilisearch-specific interface
 ====
 [source,java]
 ----
-interface MyRepository extends JpaRepository<User, Long> { }
+import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+import org.springframework.data.annotation.Id;
 
-@NoRepositoryBean
-interface MyBaseRepository<T, ID> extends JpaRepository<T, ID> { … }
+@Document(indexUid = "movies")
+class Movie {
+  @Id String id;
+}
 
-interface UserRepository extends MyBaseRepository<User, Long> { … }
+interface MovieRepository extends MeilisearchRepository<Movie, String> {
+}
 ----
 
-`MyRepository` and `UserRepository` extend `JpaRepository` in their type hierarchy.
-They are valid candidates for the Spring Data JPA module.
+Extending `MeilisearchRepository` identifies this interface as a Meilisearch repository.
 ====
-
-The following example shows a repository that uses generic interfaces:
-
-.Repository definitions using generic interfaces
-====
-[source,java]
-----
-interface AmbiguousRepository extends Repository<User, Long> { … }
-
-@NoRepositoryBean
-interface MyBaseRepository<T, ID> extends CrudRepository<T, ID> { … }
-
-interface AmbiguousUserRepository extends MyBaseRepository<User, Long> { … }
-----
-
-`AmbiguousRepository` and `AmbiguousUserRepository` extend only `Repository` and `CrudRepository` in their type hierarchy.
-While this is fine when using a unique Spring Data module, multiple modules cannot distinguish to which particular Spring Data these repositories should be bound.
-====
-
-The following example shows a repository that uses domain classes with annotations:
 
 [[repositories.multiple-modules.annotations]]
-.Repository definitions using domain classes with annotations
+.Repository identified by its domain annotation
 ====
 [source,java]
 ----
-interface PersonRepository extends Repository<Person, Long> { … }
+import io.vanslog.spring.data.meilisearch.annotations.Document;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.repository.Repository;
 
-@Entity
-class Person { … }
+@Document(indexUid = "movies")
+class Movie {
+  @Id String id;
+}
 
-interface UserRepository extends Repository<User, Long> { … }
-
-@Document
-class User { … }
+interface MovieRepository extends Repository<Movie, String> {
+}
 ----
 
-`PersonRepository` references `Person`, which is annotated with the JPA `@Entity` annotation, so this repository clearly belongs to Spring Data JPA. `UserRepository` references `User`, which is annotated with Spring Data MongoDB's `@Document` annotation.
+The Meilisearch `@Document` annotation identifies the domain type when the repository interface uses only the generic `Repository` marker. Use `io.vanslog.spring.data.meilisearch.annotations.Document`; other Spring Data modules may define a different annotation with the same simple name.
 ====
 
-The following bad example shows a repository that uses domain classes with mixed annotations:
-
-.Repository definitions using domain classes with mixed annotations
-====
-[source,java]
-----
-interface JpaPersonRepository extends Repository<Person, Long> { … }
-
-interface MongoDBPersonRepository extends Repository<Person, Long> { … }
-
-@Entity
-@Document
-class Person { … }
-----
-
-This example shows a domain class using both JPA and Spring Data MongoDB annotations.
-It defines two repositories, `JpaPersonRepository` and `MongoDBPersonRepository`.
-One is intended for JPA and the other for MongoDB usage.
-Spring Data is no longer able to tell the repositories apart, which leads to undefined behavior.
-====
-
-<<repositories.multiple-modules.types,Repository type details>> and <<repositories.multiple-modules.annotations,distinguishing domain class annotations>> are used for strict repository configuration to identify repository candidates for a particular Spring Data module.
-Using multiple persistence technology-specific annotations on the same domain type is possible and enables reuse of domain types across multiple persistence technologies.
-However, Spring Data can then no longer determine a unique module with which to bind the repository.
-
-The last way to distinguish repositories is by scoping repository base packages.
-Base packages define the starting points for scanning for repository interface definitions, which implies having repository definitions located in the appropriate packages.
-By default, annotation-driven configuration uses the package of the configuration class.
-The xref:repositories/create-instances.adoc#repositories.create-instances.xml[base package in XML-based configuration] is mandatory.
-
-The following example shows annotation-driven configuration of base packages:
-
-.Annotation-driven configuration of base packages
-[source,java]
-----
-@EnableJpaRepositories(basePackages = "com.acme.repositories.jpa")
-@EnableMongoRepositories(basePackages = "com.acme.repositories.mongo")
-class Configuration { … }
-----
+A generic repository interface without a Meilisearch-specific parent or a Meilisearch `@Document` domain type cannot be identified as a Meilisearch repository in strict configuration. Avoid relying on a domain type carrying multiple modules' identifying annotations to select a unique store. You can also use separate scan packages to keep repository candidates distinct; see xref:repositories/create-instances.adoc[Creating Repository Instances].

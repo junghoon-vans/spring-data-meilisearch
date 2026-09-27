@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:meilisearch="http://www.vanslog.io/spring/data/meilisearch"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.vanslog.io/spring/data/meilisearch
+       http://www.vanslog.io/spring/data/meilisearch/spring-meilisearch-1.0.xsd">
+
+    <context:property-placeholder/>
+    <bean id="jsonHandler" class="com.meilisearch.sdk.json.GsonJsonHandler"/>
+    <meilisearch:meilisearch-client id="omitted" host-url="${MEILISEARCH_HOST_URL}" json-handler-ref="jsonHandler"/>
+    <meilisearch:meilisearch-client id="empty" host-url="${MEILISEARCH_HOST_URL}" api-key="" json-handler-ref="jsonHandler"/>
+    <meilisearch:meilisearch-client id="resolved" host-url="${MEILISEARCH_HOST_URL}"
+            api-key="${MEILISEARCH_API_KEY}" json-handler-ref="jsonHandler"/>
+    <meilisearch:meilisearch-client id="authenticated" host-url="${MEILISEARCH_HOST_URL}"
+            api-key="test-key" json-handler-ref="jsonHandler"/>
+</beans>
