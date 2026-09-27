@@ -44,7 +44,7 @@ class Config extends MeilisearchConfiguration {
 ----
 
 Inject `MovieRepository` into a Spring bean and call `repository.save(movie)`.
-Use an API key with the required permissions; do not embed the Meilisearch master key in application code.
+For an authenticated instance, use a scoped API key with the required permissions; do not embed the Meilisearch master key in application code. For an unauthenticated local instance, replace the example's `withApiKey(...)` argument with `""` explicitly.
 See the link:https://junghoon-vans.github.io/spring-data-meilisearch/getting-started.html[getting-started guide] for more setup and repository usage.
 
 === Maven configuration

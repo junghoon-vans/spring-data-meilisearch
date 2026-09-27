@@ -11,7 +11,7 @@ The quickest way to get started is to declare the dependency, extend `Meilisearc
 
 * JDK 17 or newer.
 * A reachable Meilisearch instance.
-* A Meilisearch API key with the permissions required for your application.
+* An API key with the permissions required for your application if the Meilisearch instance has authentication enabled.
 
 The module does not claim one minimum Meilisearch version for every operation. ID-list document retrieval requires Meilisearch 1.14 or later, and sorted document listing requires 1.16 or later; use a server version that supports the APIs your application calls.
 
@@ -79,7 +79,7 @@ class MeilisearchConfig extends MeilisearchConfiguration {
 
 `MeilisearchConfiguration` registers the standard Spring Data Meilisearch beans, including the client, mapping context, converter, and the `meilisearchTemplate` / `meilisearchOperations` bean.
 `MeilisearchRepository` is the recommended repository base interface for this module's current repository feature set.
-For local development, expose a scoped API key through `MEILISEARCH_API_KEY` instead of placing the Meilisearch master key in application code.
+For local development with authentication, prefer a scoped API key exposed through `MEILISEARCH_API_KEY` instead of using the Meilisearch master key in application code. For a development instance without authentication, pass `withApiKey("")` explicitly (see xref:meilisearch/client-configuration.adoc#meilisearch.clients.builder[ClientConfiguration Builder]).
 
 [[meilisearch.getting-started.domain]]
 == Domain Type

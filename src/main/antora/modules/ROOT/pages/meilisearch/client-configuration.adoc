@@ -38,10 +38,12 @@ class MyClientConfig extends MeilisearchConfiguration {
 `ClientConfiguration` exposes the following core options through its builder:
 
 * `connectedTo(...)` or `connectedToLocalhost()` to choose the server URL. The Java builder has no default URL.
-* `withApiKey(...)` to provide the required Meilisearch API key; the Java builder has no default key.
+* `withApiKey(...)` to supply a key when authentication is enabled; the Java builder has no default key.
 * `withClientAgents(String[])` to supply client-agent values sent in the `User-Agent` header.
 * `withRequestTimeout(...)` to set the task-completion wait timeout in milliseconds. The Java builder default is 5,000 ms.
 * `withRequestInterval(...)` to set the polling interval in milliseconds. The Java builder default is 50 ms.
+
+The Java builder requires a non-null argument to `withApiKey(...)`. Pass `withApiKey("")` for a development instance without authentication.
 
 These timeout and interval values are passed to the SDK's task-wait operations for asynchronous writes, index lifecycle changes, and settings updates. They are not HTTP connection or socket timeouts.
 
@@ -91,7 +93,7 @@ The supported integration styles are:
 
 Spring Data Meilisearch also provides an XML namespace.
 Unlike Java configuration, the namespace does not create a JSON handler bean. Declare a `JsonHandler` bean named `jsonHandler` (the schema's default reference), or set `json-handler-ref` to the id of another handler bean.
-The `api-key` attribute is required. For production deployments, prefer a scoped API key rather than the Meilisearch master key.
+The XML `api-key` attribute is optional. Omit it or set `api-key=""` for an instance without authentication; neither form sends an `Authorization` header. A placeholder resolving to an empty value behaves the same way, while an unresolved placeholder fails Spring's property resolution by default. For protected instances, prefer a scoped API key rather than the Meilisearch master key.
 
 [source,xml]
 ----
@@ -119,6 +121,13 @@ The `api-key` attribute is required. For production deployments, prefer a scoped
             json-handler-ref="jsonHandler"/>
 </beans>
 
+----
+
+For a local instance without authentication, omit the key:
+
+[source,xml]
+----
+<meilisearch:meilisearch-client id="meilisearchClient" json-handler-ref="jsonHandler"/>
 ----
 
 When omitted, the XML factory leaves `request-timeout` and `request-interval` at `0`, unlike the Java builder defaults. See the xref:appendix.adoc#meilisearch.appendix.schema[XML namespace reference] for attribute defaults.

@@ -30,8 +30,8 @@ When omitted, the XML factory leaves the optional task-wait timeout attributes a
 |The Meilisearch server URL.
 
 |`api-key`
-|Required
-|API key used for authentication. The XML parser rejects a missing or literally blank attribute, but does not revalidate after placeholder resolution; ensure the resolved key is non-empty.
+|No authentication
+|Optional API key. Omit the attribute or set it to an empty string to send requests without authentication. Use a non-empty key for protected instances.
 
 |`client-agents`
 |

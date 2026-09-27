@@ -25,17 +25,26 @@ import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.data.annotation.Id;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.net.httpserver.HttpServer;
 
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 
@@ -82,6 +91,37 @@ class MeilisearchNamespaceHandlerUnitTests {
 	@Test
 	void shouldCreateMeilisearchRepository() {
 		assertThat(context.getBean(ApplySettingsFalseRepository.class)).isInstanceOf(ApplySettingsFalseRepository.class);
+	}
+
+	@Test // GH-261
+	void supportsUnauthenticatedXmlClientsWithOmittedAndEmptyApiKeys() throws Exception {
+		List<String> authorizationHeaders = Collections.synchronizedList(new ArrayList<>());
+		HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+		server.createContext("/indexes/movies/documents/fetch", exchange -> {
+			try (exchange) {
+				authorizationHeaders.add(exchange.getRequestHeaders().getFirst("Authorization"));
+				byte[] response = "{\"results\":[]}".getBytes(StandardCharsets.UTF_8);
+				exchange.sendResponseHeaders(200, response.length);
+				exchange.getResponseBody().write(response);
+			}
+		});
+		server.start();
+
+		try (GenericXmlApplicationContext xmlContext = new GenericXmlApplicationContext()) {
+			String host = "http://127.0.0.1:" + server.getAddress().getPort();
+			xmlContext.getEnvironment().getPropertySources()
+					.addFirst(new MapPropertySource("test", Map.of("MEILISEARCH_API_KEY", "", "MEILISEARCH_HOST_URL", host)));
+
+			xmlContext.load("classpath:io/vanslog/spring/data/meilisearch/config/unauthenticated/namespace.xml");
+			xmlContext.refresh();
+
+			for (String id : List.of("omitted", "empty", "resolved", "authenticated")) {
+				xmlContext.getBean(id, MeilisearchClient.class).getRawDocuments("movies", 0, 1, null);
+			}
+			assertThat(authorizationHeaders).containsExactly(null, null, null, "Bearer test-key");
+		} finally {
+			server.stop(0);
+		}
 	}
 
 	interface ApplySettingsFalseRepository extends MeilisearchRepository<ApplySettingsFalseEntity, String> {}
