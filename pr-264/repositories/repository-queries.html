@@ -541,6 +541,9 @@ import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
 <p>An empty collection passed to an <code>In</code> predicate is rejected at invocation with an <code>IllegalArgumentException</code> that identifies the method and operator. An empty collection passed to <code>NotIn</code> contributes no filter.</p>
 </div>
 <div class="paragraph">
+<p>For an equality predicate with an <code>@Nullable</code> argument, passing <code>null</code> matches both an explicitly null field and a missing field. The mapping converter omits null-valued properties when saving documents.</p>
+</div>
+<div class="paragraph">
 <p>The query method may return one entity, <code>Optional&lt;Entity&gt;</code>, <code>List&lt;Entity&gt;</code>, <code>Iterable&lt;Entity&gt;</code>, or <code>Page&lt;Entity&gt;</code>. Entity and <code>Optional</code> methods require at most one match: an entity method returns the sole hit or, when annotated <code>@Nullable</code>, <code>null</code>; an unannotated entity method throws <code>EmptyResultDataAccessException</code> when no hit matches. <code>Optional</code> returns the sole hit or <code>Optional.empty()</code>. Either single-result form throws <code>IncorrectResultSizeDataAccessException</code> if multiple hits match. <code>List</code> and <code>Iterable</code> contain matching entity content.</p>
 </div>
 <div class="paragraph">
