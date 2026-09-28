@@ -77,6 +77,8 @@ Derived query methods are parsed when the repository is created. The MVP support
 
 An empty collection passed to an `In` predicate is rejected at invocation with an `IllegalArgumentException` that identifies the method and operator. An empty collection passed to `NotIn` contributes no filter.
 
+For an equality predicate with an `@Nullable` argument, passing `null` matches both an explicitly null field and a missing field. The mapping converter omits null-valued properties when saving documents.
+
 The query method may return one entity, `Optional<Entity>`, `List<Entity>`, `Iterable<Entity>`, or `Page<Entity>`. Entity and `Optional` methods require at most one match: an entity method returns the sole hit or, when annotated `@Nullable`, `null`; an unannotated entity method throws `EmptyResultDataAccessException` when no hit matches. `Optional` returns the sole hit or `Optional.empty()`. Either single-result form throws `IncorrectResultSizeDataAccessException` if multiple hits match. `List` and `Iterable` contain matching entity content.
 
 Static ordering uses an `OrderBy` suffix, for example `findByGenreOrderByRatingDesc(String genre)`. A `Sort` parameter provides runtime ordering, and a `Pageable` parameter provides an offset, limit, and optional sort. A `Page` contains the requested window and exposes the total reported by Meilisearch. Without a `Pageable`, `List` and `Iterable` methods fetch all matching hits in chunks and require an exact total; they fail rather than return a partial collection if the index's `pagination.maxTotalHits` cap (1,000 by default) prevents complete retrieval. Configure `@Pagination(maxTotalHits = ...)` when the application needs a different search limit.

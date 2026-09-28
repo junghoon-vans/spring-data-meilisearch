@@ -40,6 +40,7 @@ import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
@@ -109,7 +110,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		return queryMethod;
 	}
 
-	private Object executeSingle(List<String> filters, Sort sort) {
+	private @Nullable Object executeSingle(List<String> filters, Sort sort) {
 
 		SearchHits<?> hits = operations.search(createQuery(filters, sort, PageRequest.of(0, 2)), domainType);
 		long totalHits = hits.getTotalHits();
@@ -255,14 +256,15 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		return filters;
 	}
 
-	private String createFilter(Part part, PropertyReference property, ParametersParameterAccessor accessor,
+	private @Nullable String createFilter(Part part, PropertyReference property, ParametersParameterAccessor accessor,
 			int parameterIndex) {
 
 		String field = property.fieldName();
 		return switch (part.getType()) {
 			case SIMPLE_PROPERTY -> {
 				Object value = accessor.getBindableValue(parameterIndex);
-				yield value == null ? field + " IS NULL" : field + " = " + toLiteral(value, property, part);
+				yield value == null ? "(" + field + " IS NULL OR " + field + " NOT EXISTS)"
+						: field + " = " + toLiteral(value, property, part);
 			}
 			case IN -> createInFilter(field, property, part, accessor.getBindableValue(parameterIndex), false);
 			case NOT_IN -> createInFilter(field, property, part, accessor.getBindableValue(parameterIndex), true);
@@ -278,7 +280,8 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		};
 	}
 
-	private String createInFilter(String field, PropertyReference property, Part part, Object value, boolean negated) {
+	private @Nullable String createInFilter(String field, PropertyReference property, Part part, @Nullable Object value,
+			boolean negated) {
 
 		if (value == null) {
 			throw invalidParameter(part, "IN/NotIn requires a non-null collection or array");
@@ -314,7 +317,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		return field + (negated ? " NOT IN [" : " IN [") + String.join(", ", literals) + "]";
 	}
 
-	private String toLiteral(Object value, PropertyReference property, Part part) {
+	private String toLiteral(@Nullable Object value, PropertyReference property, Part part) {
 
 		if (value == null) {
 			throw invalidParameter(part, "null is not a supported filter value");

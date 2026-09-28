@@ -40,6 +40,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.lang.Nullable;
 
 /**
  * Integration tests for {@link MeilisearchRepository}.
@@ -413,9 +414,19 @@ class MeilisearchRepositoryIntegrationTests {
 		assertThat(page.getTotalPages()).isEqualTo(2);
 	}
 
+	@Test
+	void shouldFindDocumentWithMissingFieldByNullArgument() {
+		Movie withoutGenres = new Movie(1, "Untyped", "No genres", null);
+		Movie withGenres = new Movie(2, "Typed", "Has genres", new String[] { "Drama" });
+		movieRepository.saveAll(List.of(withoutGenres, withGenres));
+
+		assertThat(movieRepository.findByGenres(null)).containsExactly(withoutGenres);
+		assertThat(movieRepository.findByGenres("Drama")).containsExactly(withGenres);
+	}
+
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {
 
-		List<Movie> findByGenres(String genre);
+		List<Movie> findByGenres(@Nullable String genre);
 
 		List<Movie> findByGenresIn(List<String> genres);
 
