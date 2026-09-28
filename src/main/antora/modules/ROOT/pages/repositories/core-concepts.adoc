@@ -11,7 +11,7 @@ The important distinction is that this module currently provides:
 * filter-backed derived finder methods for a documented subset,
 * direct access to advanced search features through `MeilisearchOperations`.
 
-Declared `@Query` methods, named queries, and unsupported derived operators fail during repository bootstrap. Use `MeilisearchOperations` for custom searches; see xref:repositories/repository-queries.adoc[Repository Methods and Limitations].
+Declared `@Query` methods, named queries, and unsupported derived operators fail during repository bootstrap. Use `MeilisearchOperations` for custom searches; see xref:repositories/repository-queries.adoc[Query Methods].
 
 [[repositories.core-concepts.repository-interface]]
 == Repository Interface
@@ -61,4 +61,4 @@ Use `MeilisearchOperations` when you need store-specific behavior such as:
 * index lifecycle management,
 * runtime settings updates.
 
-For the concrete store-specific rules and current limitations, see xref:repositories/meilisearch-repositories.adoc[Meilisearch Repositories] and xref:repositories/repository-queries.adoc[Repository Methods and Limitations].
+For the concrete store-specific rules and current limitations, see xref:repositories/meilisearch-repositories.adoc[Meilisearch Repositories] and xref:repositories/repository-queries.adoc[Query Methods].

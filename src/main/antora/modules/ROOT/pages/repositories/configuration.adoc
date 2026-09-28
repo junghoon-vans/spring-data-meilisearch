@@ -36,7 +36,7 @@ repository factory selection, including:
 If no base packages are configured, Spring Data scans the package of the annotated configuration class.
 
 `queryLookupStrategy` defaults to `CREATE_IF_NOT_FOUND` and supports the derived finder subset documented in
-xref:repositories/repository-queries.adoc[Repository Methods and Limitations]. `USE_DECLARED_QUERY` cannot resolve
+xref:repositories/repository-queries.adoc[Query Methods]. `USE_DECLARED_QUERY` cannot resolve
 derived methods. `namedQueriesLocation` remains available for Spring Data configuration compatibility, but named
 queries and declared `@Query` methods are rejected at repository bootstrap.
 

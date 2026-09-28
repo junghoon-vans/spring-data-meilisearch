@@ -15,6 +15,6 @@ In particular, Spring Data Meilisearch currently documents:
 * a limited set of filter-backed derived finder methods,
 * store-specific behavior such as automatic settings application and the difference between document-backed and search-backed methods.
 
-Declared queries, named queries, and advanced derived operators remain unsupported. See xref:repositories/repository-queries.adoc[Repository Methods and Limitations] for the supported subset.
+Declared queries, named queries, and advanced derived operators remain unsupported. See xref:repositories/repository-queries.adoc[Query Methods] for the supported subset.
 
 Read the common repository fundamentals first, then continue with the store-specific pages in this chapter to understand the exact repository surface exposed by Spring Data Meilisearch.
