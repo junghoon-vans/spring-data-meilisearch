@@ -47,7 +47,7 @@ interface MovieRepository extends IdentifiedRepository<Movie, String> {
 
 In a multi-module application, annotate the domain type with Meilisearch's `@Document` when the repository does not extend `MeilisearchRepository`, so strict repository configuration can identify it. In a single-module application, the generic repository may be discovered in the configured package, but extending `MeilisearchRepository` makes the store binding explicit. Mark generic intermediate interfaces with `@NoRepositoryBean` so Spring does not try to instantiate them directly.
 
-The method declarations above match built-in CRUD methods. Adding a derived finder such as `findByTitle(...)`, a repository `@Query` method, or a named-query method is not supported and causes repository bootstrap to fail. Use `MeilisearchOperations` for application-specific searches; see xref:repositories/repository-queries.adoc[Repository Methods and Limitations].
+The method declarations above match built-in CRUD methods. Repositories can also declare the filter-backed derived finders documented in xref:repositories/repository-queries.adoc[Repository Methods and Limitations]. Declared `@Query` and named-query methods are not supported; use `MeilisearchOperations` for custom searches.
 
 [[repositories.multiple-modules]]
 == Using Repositories with Multiple Spring Data Modules

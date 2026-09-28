@@ -8,9 +8,10 @@ The important distinction is that this module currently provides:
 * repository bootstrap through `@EnableMeilisearchRepositories` and the XML namespace,
 * a store-specific `MeilisearchRepository<T, ID>` base interface,
 * CRUD and paging/sorting methods implemented by `SimpleMeilisearchRepository`,
+* filter-backed derived finder methods for a documented subset,
 * direct access to advanced search features through `MeilisearchOperations`.
 
-Derived finder methods, repository `@Query` methods, and named-query-backed methods are unsupported and fail during repository bootstrap. Use `MeilisearchOperations` for custom searches.
+Declared `@Query` methods, named queries, and unsupported derived operators fail during repository bootstrap. Use `MeilisearchOperations` for custom searches; see xref:repositories/repository-queries.adoc[Repository Methods and Limitations].
 
 [[repositories.core-concepts.repository-interface]]
 == Repository Interface
