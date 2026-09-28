@@ -31,7 +31,7 @@ Spring Data parses derived query method names when the repository is created. Fo
 
 |`LessThan`, `LessThanEqual`
 |`findByRatingLessThan(int rating)` / `findByRatingLessThanEqual(int rating)`
-|`rating < 7` / `rating <= 7`
+|`rating < 7` / `rating \<= 7`
 
 |`Between`
 |`findByRatingBetween(int minimum, int maximum)`
@@ -52,7 +52,7 @@ For an equality predicate with an `@Nullable` argument, passing `null` matches b
 
 === Method Return Types
 
-The query method may return one entity, `Optional<Entity>`, `List<Entity>`, `Iterable<Entity>`, or `Page<Entity>`. Entity and `Optional` methods require at most one match: an entity method returns the sole hit or, when annotated `@Nullable`, `null`; an unannotated entity method throws `EmptyResultDataAccessException` when no hit matches. `Optional` returns the sole hit or `Optional.empty()`. Either single-result form throws `IncorrectResultSizeDataAccessException` if multiple hits match. `List` and `Iterable` contain matching entity content.
+The query method may return one entity, `Optional<Entity>`, `List<Entity>`, `Iterable<Entity>`, or `Page<Entity>`. Entity and `Optional` methods require at most one match. When no hit matches, an entity method returns `null` by default; if its repository package uses Spring's `@NonNullApi`, an unannotated entity method instead throws `EmptyResultDataAccessException`, while an explicitly `@Nullable` method may return `null`. `Optional` returns the sole hit or `Optional.empty()`. Either single-result form throws `IncorrectResultSizeDataAccessException` if multiple hits match. `List` and `Iterable` contain matching entity content.
 
 === Sorting and Paging
 

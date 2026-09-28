@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
+import io.vanslog.spring.data.meilisearch.consumer.UnannotatedMovieRepository;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
@@ -155,6 +156,17 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@Test
+	void shouldApplyEachSortOnceForPagedCollections() {
+		SupportedRepository repository = repositoryFactory.getRepository(SupportedRepository.class);
+		Pageable pageable = PageRequest.of(0, 10, Sort.by("title"));
+		willReturn(0);
+
+		BaseQuery query = captureQuery(() -> repository.findByGenreOrderByPriceDesc("drama", pageable));
+
+		assertThat(query.getSort()).isEqualTo(Sort.by(Sort.Order.desc("price"), Sort.Order.asc("title")));
+	}
+
+	@Test
 	void shouldRejectMultipleMatchesForSingleEntityAndOptionalResults() {
 		SupportedRepository repository = repositoryFactory.getRepository(SupportedRepository.class);
 		QueryDocument first = new QueryDocument("1", "Arrival", "science fiction", 8, true);
@@ -190,6 +202,14 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@Test
+	void shouldReturnNullForUnannotatedConsumerRepositoryWithoutNonNullDefault() {
+		UnannotatedMovieRepository repository = repositoryFactory.getRepository(UnannotatedMovieRepository.class);
+		willReturn(0);
+
+		assertThat(repository.findByTitle("missing")).isNull();
+	}
+
+	@Test
 	void shouldRejectOrPredicatesDuringRepositoryBootstrap() {
 		assertThatThrownBy(() -> repositoryFactory.getRepository(OrQueryRepository.class))
 				.hasMessageContaining("findByTitleOrGenre").hasMessageContaining("Or");
@@ -202,11 +222,13 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@Test
-	void shouldRejectDerivedCountAndDeleteMethodsDuringRepositoryBootstrap() {
+	void shouldRejectDerivedCountExistsAndDeleteMethodsDuringRepositoryBootstrap() {
 		assertThatThrownBy(() -> repositoryFactory.getRepository(CountQueryRepository.class))
-				.hasMessageContaining("countByTitle");
+				.hasMessageContaining("Unsupported derived query operator 'Count'");
+		assertThatThrownBy(() -> repositoryFactory.getRepository(ExistsQueryRepository.class))
+				.hasMessageContaining("Unsupported derived query operator 'Exists'");
 		assertThatThrownBy(() -> repositoryFactory.getRepository(DeleteQueryRepository.class))
-				.hasMessageContaining("deleteByTitle");
+				.hasMessageContaining("Unsupported derived query operator 'Delete'");
 	}
 
 	@Test
@@ -322,6 +344,8 @@ class MeilisearchRepositoryFactoryUnitTests {
 
 		List<QueryDocument> findByTitleOrderByPriceDesc(String title);
 
+		List<QueryDocument> findByGenreOrderByPriceDesc(String genre, Pageable pageable);
+
 		Page<QueryDocument> findByPriceBetween(int minimum, int maximum, Pageable pageable);
 
 		List<QueryDocument> findByGenreIn(Collection<String> genres);
@@ -359,6 +383,12 @@ class MeilisearchRepositoryFactoryUnitTests {
 	interface CountQueryRepository extends MeilisearchRepository<QueryDocument, String> {
 
 		long countByTitle(String title);
+	}
+
+	@NoRepositoryBean
+	interface ExistsQueryRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		boolean existsByTitle(String title);
 	}
 
 	@NoRepositoryBean

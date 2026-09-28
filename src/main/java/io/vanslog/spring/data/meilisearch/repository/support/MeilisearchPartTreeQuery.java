@@ -81,9 +81,10 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		this.operations = operations;
 		this.mappingContext = operations.getMeilisearchConverter().getMappingContext();
 		this.conversionService = operations.getMeilisearchConverter().getConversionService();
-		this.returnShape = resolveReturnShape();
 		this.tree = createPartTree();
 		this.parts = validateTreeAndGetParts();
+		this.returnShape = resolveReturnShape();
+		validateSpecialParameters();
 		this.staticSort = mapSort(tree.getSort());
 	}
 
@@ -517,7 +518,6 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 					"parameter count (expected " + expectedParameters + ", found " + actualParameters + ")");
 		}
 		validateInParameters(parsedParts);
-		validateSpecialParameters();
 
 		return List.copyOf(parsedParts);
 	}
