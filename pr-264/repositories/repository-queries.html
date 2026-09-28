@@ -484,7 +484,7 @@
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>LessThan</code>, <code>LessThanEqual</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByRatingLessThan(int rating)</code> / <code>findByRatingLessThanEqual(int rating)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>rating &lt; 7</code> / <code>rating &#8656; 7</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>rating &lt; 7</code> / <code>rating &lt;= 7</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Between</code></p></td>
@@ -512,7 +512,7 @@
 <div class="sect2">
 <h3 id="_method_return_types"><a class="anchor" href="#_method_return_types"></a>Method Return Types</h3>
 <div class="paragraph">
-<p>The query method may return one entity, <code>Optional&lt;Entity&gt;</code>, <code>List&lt;Entity&gt;</code>, <code>Iterable&lt;Entity&gt;</code>, or <code>Page&lt;Entity&gt;</code>. Entity and <code>Optional</code> methods require at most one match: an entity method returns the sole hit or, when annotated <code>@Nullable</code>, <code>null</code>; an unannotated entity method throws <code>EmptyResultDataAccessException</code> when no hit matches. <code>Optional</code> returns the sole hit or <code>Optional.empty()</code>. Either single-result form throws <code>IncorrectResultSizeDataAccessException</code> if multiple hits match. <code>List</code> and <code>Iterable</code> contain matching entity content.</p>
+<p>The query method may return one entity, <code>Optional&lt;Entity&gt;</code>, <code>List&lt;Entity&gt;</code>, <code>Iterable&lt;Entity&gt;</code>, or <code>Page&lt;Entity&gt;</code>. Entity and <code>Optional</code> methods require at most one match. When no hit matches, an entity method returns <code>null</code> by default; if its repository package uses Spring&#8217;s <code>@NonNullApi</code>, an unannotated entity method instead throws <code>EmptyResultDataAccessException</code>, while an explicitly <code>@Nullable</code> method may return <code>null</code>. <code>Optional</code> returns the sole hit or <code>Optional.empty()</code>. Either single-result form throws <code>IncorrectResultSizeDataAccessException</code> if multiple hits match. <code>List</code> and <code>Iterable</code> contain matching entity content.</p>
 </div>
 </div>
 <div class="sect2">
