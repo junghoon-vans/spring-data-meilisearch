@@ -93,6 +93,23 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 
 		ParametersParameterAccessor accessor = new ParametersParameterAccessor(queryMethod.getParameters(), values);
 		List<String> filters = createFilters(accessor);
+		switch (returnShape) {
+			case COUNT:
+				return filters.isEmpty() ? operations.count(domainType)
+						: operations.count(domainType, String.join(" AND ", filters));
+			case EXISTS:
+				return !operations.search(createQuery(filters, Sort.unsorted(), PageRequest.of(0, 1)), domainType)
+						.getSearchHits().isEmpty();
+			case DELETE_COUNT, DELETE_VOID:
+				if (filters.isEmpty()) {
+					throw new IllegalArgumentException(
+							"Cannot delete without an effective filter for derived query " + method.toGenericString());
+				}
+				long deleted = operations.deleteByFilter(domainType, String.join(" AND ", filters));
+				return returnShape == ReturnShape.DELETE_VOID ? null : deleted;
+			default:
+				break;
+		}
 		boolean hasPageable = queryMethod.getParameters().hasPageableParameter();
 		Pageable pageable = hasPageable ? accessor.getPageable() : null;
 		Sort dynamicSort = hasPageable ? pageable.getSort() : accessor.getSort();
@@ -103,6 +120,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			case ENTITY, OPTIONAL -> executeSingle(filters, completeSort);
 			case PAGE -> executePage(filters, pageable, mappedDynamicSort);
 			case LIST, ITERABLE -> executeCollection(filters, pageable, completeSort);
+			case COUNT, EXISTS, DELETE_COUNT, DELETE_VOID -> throw new IllegalStateException("Projection already handled");
 		};
 	}
 
@@ -468,16 +486,6 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 	}
 
 	private List<Part> validateTreeAndGetParts() {
-
-		if (tree.isCountProjection()) {
-			throw unsupportedOperator("Count");
-		}
-		if (tree.isExistsProjection()) {
-			throw unsupportedOperator("Exists");
-		}
-		if (tree.isDelete()) {
-			throw unsupportedOperator("Delete");
-		}
 		if (tree.isDistinct()) {
 			throw unsupportedOperator("Distinct");
 		}
@@ -548,6 +556,11 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		if (parameters.hasLimitParameter()) {
 			throw unsupportedOperator("Limit");
 		}
+		if ((returnShape == ReturnShape.COUNT || returnShape == ReturnShape.EXISTS
+				|| returnShape == ReturnShape.DELETE_COUNT || returnShape == ReturnShape.DELETE_VOID)
+				&& (tree.getSort().isSorted() || parameters.hasSortParameter() || parameters.hasPageableParameter())) {
+			throw unsupportedOperator("Sort/Pageable for a count, exists, or delete method");
+		}
 		if ((returnShape == ReturnShape.ENTITY || returnShape == ReturnShape.OPTIONAL)
 				&& parameters.hasPageableParameter()) {
 			throw unsupportedOperator("Pageable for a single-result method");
@@ -557,6 +570,27 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 	private ReturnShape resolveReturnShape() {
 
 		Class<?> returnType = method.getReturnType();
+		if (tree.isCountProjection()) {
+			if (returnType == long.class || returnType == Long.class) {
+				return ReturnShape.COUNT;
+			}
+			throw unsupportedReturnType(returnType);
+		}
+		if (tree.isExistsProjection()) {
+			if (returnType == boolean.class || returnType == Boolean.class) {
+				return ReturnShape.EXISTS;
+			}
+			throw unsupportedReturnType(returnType);
+		}
+		if (tree.isDelete()) {
+			if (returnType == void.class) {
+				return ReturnShape.DELETE_VOID;
+			}
+			if (returnType == long.class || returnType == Long.class) {
+				return ReturnShape.DELETE_COUNT;
+			}
+			throw unsupportedReturnType(returnType);
+		}
 		if (returnType == Page.class) {
 			if (!queryMethod.isQueryForEntity()) {
 				throw unsupportedReturnType(returnType);
@@ -619,6 +653,6 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 	}
 
 	private enum ReturnShape {
-		ENTITY, OPTIONAL, LIST, ITERABLE, PAGE
+		ENTITY, OPTIONAL, LIST, ITERABLE, PAGE, COUNT, EXISTS, DELETE_COUNT, DELETE_VOID
 	}
 }

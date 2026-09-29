@@ -1,7 +1,7 @@
 [[meilisearch.repositories.queries]]
 = Query Methods
 
-Repository query methods can derive a Meilisearch filter from a method name. This module supports a limited, search-backed finder subset; use `MeilisearchOperations` for queries that need explicit search composition.
+Repository query methods can derive Meilisearch filters from method names. The module supports a limited, search-backed finder subset and filter-based count, existence, and delete methods; use `MeilisearchOperations` for queries that need explicit search composition.
 
 [[meilisearch.repositories.queries.derived]]
 == Query Creation
@@ -50,17 +50,41 @@ An empty collection passed to an `In` predicate is rejected at invocation with a
 
 For an equality predicate with an `@Nullable` argument, passing `null` matches both an explicitly null field and a missing field. The mapping converter omits null-valued properties when saving documents.
 
+=== Count, Existence, and Delete Methods
+
+Derived predicates can also be used with the following methods:
+
+.Supported filter-based projection methods
+[cols="1,1,3", options="header"]
+|===
+|Method pattern |Return type |Behavior
+
+|`countBy<Property>(...)`
+|`long`, `Long`
+|Returns the exact number of matching documents using Meilisearch's `documents/fetch` API. This count is not capped by the search `pagination.maxTotalHits` limit. If the predicates produce no effective filter, `countBy` returns the unfiltered document count.
+
+|`existsBy<Property>(...)`
+|`boolean`, `Boolean`
+|Checks for a matching document using search with a limit of one.
+
+|`deleteBy<Property>(...)`, `removeBy<Property>(...)`
+|`long`, `Long`, `void`
+|Deletes matching documents with Meilisearch's native filter-delete API and waits for the task to succeed. Numeric return types report the deleted-document count; a failed task or unavailable deletion details fails the invocation instead of returning a count.
+|===
+
+These methods use the same supported predicates listed above. Every property used in a predicate must be configured as filterable. Count, existence, and delete methods do not accept a static `OrderBy` suffix or runtime `Sort` or `Pageable` parameters. A delete or remove method must produce a non-empty effective filter; an unfiltered method or predicates that produce no filter are rejected rather than deleting every document.
+
 === Method Return Types
 
-The query method may return one entity, `Optional<Entity>`, `List<Entity>`, `Iterable<Entity>`, or `Page<Entity>`. Entity and `Optional` methods require at most one match. When no hit matches, an entity method returns `null` by default; if its repository package uses Spring's `@NonNullApi`, an unannotated entity method instead throws `EmptyResultDataAccessException`, while an explicitly `@Nullable` method may return `null`. `Optional` returns the sole hit or `Optional.empty()`. Either single-result form throws `IncorrectResultSizeDataAccessException` if multiple hits match. `List` and `Iterable` contain matching entity content.
+A finder method may return one entity, `Optional<Entity>`, `List<Entity>`, `Iterable<Entity>`, or `Page<Entity>`. Entity and `Optional` methods require at most one match. When no hit matches, an entity method returns `null` by default; if its repository package uses Spring's `@NonNullApi`, an unannotated entity method instead throws `EmptyResultDataAccessException`, while an explicitly `@Nullable` method may return `null`. `Optional` returns the sole hit or `Optional.empty()`. Either single-result form throws `IncorrectResultSizeDataAccessException` if multiple hits match. `List` and `Iterable` contain matching entity content.
 
 === Sorting and Paging
 
-Static ordering uses an `OrderBy` suffix, for example `findByGenreOrderByRatingDesc(String genre)`. A `Sort` parameter provides runtime ordering, and a `Pageable` parameter provides an offset, limit, and optional sort. A `Page` contains the requested window and exposes the total reported by Meilisearch. Without a `Pageable`, `List` and `Iterable` methods fetch all matching hits in chunks and require an exact total; they fail rather than return a partial collection if the index's `pagination.maxTotalHits` cap (1,000 by default) prevents complete retrieval. Configure `@Pagination(maxTotalHits = ...)` when the application needs a different search limit.
+For finder methods, static ordering uses an `OrderBy` suffix, for example `findByGenreOrderByRatingDesc(String genre)`. A `Sort` parameter provides runtime ordering, and a `Pageable` parameter provides an offset, limit, and optional sort. A `Page` contains the requested window and exposes the total reported by Meilisearch. Without a `Pageable`, `List` and `Iterable` methods fetch all matching hits in chunks and require an exact total; they fail rather than return a partial collection if the index's `pagination.maxTotalHits` cap (1,000 by default) prevents complete retrieval. Configure `@Pagination(maxTotalHits = ...)` when the application needs a different search limit.
 
 === Index Settings
 
-String arguments are values, not filter expressions. They are emitted as quoted and escaped Meilisearch filter literals; do not add quotes or filter syntax to the argument. Numeric and boolean values are emitted as literals. Every field used in a predicate must be configured as filterable, and every field used for sorting must be configured as sortable. For example:
+String arguments are values, not filter expressions. They are emitted as quoted and escaped Meilisearch filter literals; do not add quotes or filter syntax to the argument. Numeric and boolean values are emitted as literals. Every field used in a predicate—including predicates for count, existence, and delete methods—must be configured as filterable, and every field used for sorting must be configured as sortable. For example:
 
 [source,java]
 ----
@@ -96,16 +120,16 @@ The supported predicate and return-type matrix is intentionally narrow. The repo
 
 * `Or` predicates are not supported; only conjunctions (`And`) are supported.
 * Free-text predicates such as `Containing`, `StartingWith`, and `Like` are not derived filters. Use `MeilisearchOperations` with a `BasicQuery` when you need full-text search.
-* Derived count and delete methods such as `countByTitle(...)` and `deleteByTitle(...)` are not supported. This limitation does not affect the standard repository `count()` or delete methods.
+* Filter-based count, existence, and delete methods are supported only through the patterns and return types listed above; they do not accept sorting or paging. The standard repository `count()` and delete methods are separate operations and are unchanged.
 * Methods annotated with repository `@Query` and named-query-backed methods are not supported.
-* Projections, `Slice`, streams, scalar values, and other return types outside the supported matrix are not supported.
+* Interface or class projections, `Slice`, streams, scalar-valued finder results, and return types outside the supported method matrix are not supported.
 
 For search modes outside this subset, use `MeilisearchOperations` directly; it exposes explicit Meilisearch query construction without bypassing the operations abstraction.
 
 [[meilisearch.repositories.queries.scope]]
 == Using MeilisearchOperations for Custom Queries
 
-Use `MeilisearchRepository` for the built-in CRUD, ID lookup, collection listing, sorting, and pageable methods. Use `MeilisearchOperations` for search features that need an explicit Meilisearch query or richer search result data, such as facets, similar-document search, or federated multi-search.
+Use `MeilisearchRepository` for the built-in CRUD, ID lookup, collection listing, sorting, pageable methods, and the supported derived finder, count, existence, and filter-delete methods. Use `MeilisearchOperations` for search features that need an explicit Meilisearch query or richer search result data, such as facets, similar-document search, or federated multi-search.
 
 For a mapped domain type such as `Movie`, inject `MeilisearchOperations` when you need to compose a search query directly:
 
@@ -135,7 +159,7 @@ This service-level call returns Meilisearch search hits. Repository derived quer
 [[meilisearch.repositories.queries.notes]]
 == Base Repository Paging, Sorting, and Result Limits
 
-The derived-query behavior above is search-backed. The standard repository methods have separate behavior:
+Derived finder and existence methods use search. Derived count methods use `documents/fetch`, and derived filter-delete methods use the native index filter-delete API. The standard repository methods have separate behavior:
 
 * A paged `findAll(Pageable)` is search-backed. Its `Page` total comes from the total reported by Meilisearch search results. `pagination.maxTotalHits` can cap returned content without capping that reported total.
 * An unpaged `findAll(Pageable)` uses the document-list API, retrieves all documents into memory, and sets the `Page` total to the retrieved count. It is not limited by `maxTotalHits`.

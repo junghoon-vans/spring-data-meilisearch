@@ -424,6 +424,45 @@ class MeilisearchRepositoryIntegrationTests {
 		assertThat(movieRepository.findByGenres("Drama")).containsExactly(withGenres);
 	}
 
+	@Test
+	void shouldCountAndCheckExistenceWithDerivedFilters() {
+		Movie first = new Movie(1, "Carol", "A love story", new String[] { "Drama" });
+		Movie second = new Movie(2, "Life of Pi", "A survival film", new String[] { "Drama", "Adventure" });
+		Movie other = new Movie(3, "Wonder Woman", "A superhero film", new String[] { "Action" });
+		movieRepository.saveAll(List.of(first, second, other));
+
+		assertThat(movieRepository.countByGenres("Drama")).isEqualTo(2);
+		assertThat(movieRepository.countByGenres("Comedy")).isZero();
+		assertThat(movieRepository.existsByGenres("Drama")).isTrue();
+		assertThat(movieRepository.existsByGenres("Comedy")).isFalse();
+	}
+
+	@Test
+	void shouldDeleteByDerivedFilterAndPreserveUnmatchedDocuments() {
+		Movie first = new Movie(1, "Carol", "A love story", new String[] { "Drama" });
+		Movie second = new Movie(2, "Life of Pi", "A survival film", new String[] { "Drama", "Adventure" });
+		Movie other = new Movie(3, "Wonder Woman", "A superhero film", new String[] { "Action" });
+		movieRepository.saveAll(List.of(first, second, other));
+
+		assertThat(movieRepository.deleteByGenres("Drama")).isEqualTo(2);
+		assertThat(movieRepository.deleteByGenres("Comedy")).isZero();
+		assertThat(movieRepository.findByGenres("Drama")).isEmpty();
+		assertThat(movieRepository.findById(other.getId())).contains(other);
+	}
+
+	@Test
+	void shouldRemoveByDerivedFilterAndPreserveUnmatchedDocuments() {
+		Movie first = new Movie(1, "Carol", "A love story", new String[] { "Drama" });
+		Movie second = new Movie(2, "Life of Pi", "A survival film", new String[] { "Drama", "Adventure" });
+		Movie other = new Movie(3, "Wonder Woman", "A superhero film", new String[] { "Action" });
+		movieRepository.saveAll(List.of(first, second, other));
+
+		assertThat(movieRepository.removeByGenres("Drama")).isEqualTo(2);
+		assertThat(movieRepository.removeByGenres("Comedy")).isZero();
+		assertThat(movieRepository.findByGenres("Drama")).isEmpty();
+		assertThat(movieRepository.findById(other.getId())).contains(other);
+	}
+
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {
 
 		List<Movie> findByGenres(@Nullable String genre);
@@ -433,6 +472,14 @@ class MeilisearchRepositoryIntegrationTests {
 		List<Movie> findByGenresNotIn(List<String> genres);
 
 		Page<Movie> findByGenres(String genre, Pageable pageable);
+
+		long countByGenres(String genre);
+
+		boolean existsByGenres(String genre);
+
+		long deleteByGenres(String genre);
+
+		long removeByGenres(String genre);
 	}
 
 	interface TotalHitsLimitedRepository extends MeilisearchRepository<TotalHitsLimited, String> {}

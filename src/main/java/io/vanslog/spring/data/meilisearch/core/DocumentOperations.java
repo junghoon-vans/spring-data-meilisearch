@@ -106,6 +106,16 @@ public interface DocumentOperations {
 	boolean exists(String documentId, Class<?> clazz);
 
 	/**
+	 * Counts documents of the given type that match the supplied Meilisearch filter.
+	 *
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @param filter the non-empty Meilisearch filter expression
+	 * @return the number of matching documents
+	 */
+	long count(Class<?> clazz, String filter);
+
+	/**
 	 * Deletes the entity with the given document id.
 	 *
 	 * @param documentId the document id of the entity
@@ -152,4 +162,15 @@ public interface DocumentOperations {
 	 * @return {@literal true} if all entities were deleted
 	 */
 	boolean deleteAll(Class<?> clazz);
+
+	/**
+	 * Deletes documents of the given type that match the supplied Meilisearch filter and waits for the deletion task to
+	 * complete.
+	 *
+	 * @param clazz the entity class, must be annotated with
+	 *          {@link io.vanslog.spring.data.meilisearch.annotations.Document}
+	 * @param filter the non-empty Meilisearch filter expression
+	 * @return the number of documents actually deleted
+	 */
+	long deleteByFilter(Class<?> clazz, String filter);
 }

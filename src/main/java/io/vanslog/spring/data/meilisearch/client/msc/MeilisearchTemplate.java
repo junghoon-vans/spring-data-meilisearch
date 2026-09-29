@@ -33,6 +33,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.FacetSearchRequest;
+import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.MultiSearchFederation;
 import com.meilisearch.sdk.MultiSearchRequest;
 import com.meilisearch.sdk.SearchRequest;
@@ -46,6 +47,8 @@ import com.meilisearch.sdk.model.Results;
 import com.meilisearch.sdk.model.Searchable;
 import com.meilisearch.sdk.model.SimilarDocumentsResults;
 import com.meilisearch.sdk.model.Settings;
+import com.meilisearch.sdk.model.Task;
+import com.meilisearch.sdk.model.TaskDetails;
 import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
 
@@ -246,6 +249,19 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	}
 
 	@Override
+	public long count(Class<?> clazz, String filter) {
+		Assert.hasText(filter, "Filter must not be empty.");
+
+		String indexUid = getIndexUidFor(clazz);
+		DocumentsQuery query = new DocumentsQuery();
+		query.setOffset(0);
+		query.setLimit(0);
+		query.setFilter(new String[] { filter });
+
+		return readTotal(execute(client -> client.index(indexUid).getRawDocuments(query)));
+	}
+
+	@Override
 	public boolean delete(String documentId, Class<?> clazz) {
 		String indexUid = getIndexUidFor(clazz);
 		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteDocument(documentId));
@@ -286,6 +302,34 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		String indexUid = getIndexUidFor(clazz);
 		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteAllDocuments());
 		return isTaskSucceeded(indexUid, taskInfo);
+	}
+
+	@Override
+	public long deleteByFilter(Class<?> clazz, String filter) {
+		Assert.hasText(filter, "Filter must not be empty.");
+
+		String indexUid = getIndexUidFor(clazz);
+		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteDocumentsByFilter(filter));
+		int taskUid = taskInfo.getTaskUid();
+
+		Task task = execute(client -> {
+			Index index = client.index(indexUid);
+			index.waitForTask(taskUid, meilisearchClient.getRequestTimeout(), meilisearchClient.getRequestInterval());
+			return index.getTask(taskUid);
+		});
+		if (task == null) {
+			throw new UncategorizedMeilisearchException("Failed to retrieve completed delete task.");
+		}
+		TaskStatus taskStatus = task.getStatus();
+		if (taskStatus != TaskStatus.SUCCEEDED) {
+			throw new TaskStatusException(taskStatus, "Failed to delete documents by filter.");
+		}
+		TaskDetails taskDetails = task.getDetails();
+		if (taskDetails == null) {
+			throw new UncategorizedMeilisearchException("Failed to read deleted document count from completed delete task.");
+		}
+
+		return taskDetails.getDeletedDocuments();
 	}
 
 	@Override
