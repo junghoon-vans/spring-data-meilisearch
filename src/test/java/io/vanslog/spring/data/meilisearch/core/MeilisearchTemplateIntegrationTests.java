@@ -17,6 +17,8 @@ package io.vanslog.spring.data.meilisearch.core;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.vanslog.spring.data.meilisearch.TaskStatusException;
+import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate;
@@ -48,7 +50,10 @@ import com.meilisearch.sdk.MergeFacets;
 import com.meilisearch.sdk.MultiSearchFederation;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
+import com.meilisearch.sdk.model.Task;
+import com.meilisearch.sdk.model.TaskDetails;
 import com.meilisearch.sdk.model.TaskInfo;
+import com.meilisearch.sdk.model.TaskStatus;
 
 /**
  * Integration tests for {@link MeilisearchOperations}.
@@ -207,6 +212,14 @@ class MeilisearchTemplateIntegrationTests {
 	}
 
 	@Test
+	void shouldCountDocumentsMatchingFilter() {
+		meilisearchTemplate.applySettings(Movie.class);
+		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
+
+		assertThat(meilisearchTemplate.count(Movie.class, "genres = Drama")).isEqualTo(2);
+	}
+
+	@Test
 	void shouldDeleteDocument() {
 
 		meilisearchTemplate.save(movie1);
@@ -224,6 +237,84 @@ class MeilisearchTemplateIntegrationTests {
 		boolean result = meilisearchTemplate.delete(Movie.class, List.of("1", "2"));
 
 		assertThat(result).isTrue();
+	}
+
+	@Test
+	void shouldDeleteDocumentsByFilterAndReturnDeletedCount() {
+		meilisearchTemplate.applySettings(Movie.class);
+		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
+
+		assertThat(meilisearchTemplate.deleteByFilter(Movie.class, "genres = Adventure")).isEqualTo(2);
+		assertThat(meilisearchTemplate.count(Movie.class)).isEqualTo(1);
+	}
+
+	@Test
+	void shouldRejectFailedFilteredDeleteTask() {
+		MeilisearchTemplate template = templateWithDeleteTask(TaskStatus.FAILED, null);
+
+		assertThatThrownBy(() -> template.deleteByFilter(Movie.class, "genres = Drama"))
+				.isInstanceOf(TaskStatusException.class).satisfies(
+						exception -> assertThat(((TaskStatusException) exception).getTaskStatus()).isEqualTo(TaskStatus.FAILED));
+	}
+
+	@Test
+	void shouldRejectFilteredDeleteTaskWithoutDetails() {
+		MeilisearchTemplate template = templateWithDeleteTask(TaskStatus.SUCCEEDED, null);
+
+		assertThatThrownBy(() -> template.deleteByFilter(Movie.class, "genres = Drama"))
+				.isInstanceOf(UncategorizedMeilisearchException.class);
+	}
+
+	@Test
+	void shouldRejectEmptyFilteredDeleteBeforeClientAccess() {
+		MeilisearchClient client = new MeilisearchClient(new MeilisearchTestConfiguration().clientConfiguration()) {
+			@Override
+			public Index index(String indexUid) {
+				throw new AssertionError("An empty filter must not access the client");
+			}
+		};
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new MeilisearchTemplate(client).deleteByFilter(Movie.class, " "));
+	}
+
+	private MeilisearchTemplate templateWithDeleteTask(TaskStatus taskStatus, TaskDetails taskDetails) {
+		Index index = new Index() {
+			@Override
+			public TaskInfo deleteDocumentsByFilter(String filter) {
+				return new TaskInfo() {
+					@Override
+					public int getTaskUid() {
+						return 1;
+					}
+				};
+			}
+
+			@Override
+			public void waitForTask(int taskUid, int timeout, int interval) {}
+
+			@Override
+			public Task getTask(int taskUid) {
+				return new Task() {
+					@Override
+					public TaskStatus getStatus() {
+						return taskStatus;
+					}
+
+					@Override
+					public TaskDetails getDetails() {
+						return taskDetails;
+					}
+				};
+			}
+		};
+		MeilisearchClient client = new MeilisearchClient(new MeilisearchTestConfiguration().clientConfiguration()) {
+			@Override
+			public Index index(String indexUid) {
+				return index;
+			}
+		};
+		return new MeilisearchTemplate(client);
 	}
 
 	@Test
