@@ -60,6 +60,7 @@ import io.vanslog.spring.data.meilisearch.core.query.BasicQueryBuilder;
 class MeilisearchPartTreeQuery implements RepositoryQuery {
 
 	private static final int FETCH_PAGE_SIZE = 1000;
+	private static final String AND = " AND ";
 
 	private final Method method;
 	private final QueryMethod queryMethod;
@@ -105,7 +106,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		if (filters.isEmpty()) {
 			return operations.count(domainType);
 		}
-		return operations.count(domainType, String.join(" AND ", filters));
+		return operations.count(domainType, String.join(AND, filters));
 	}
 
 	private @Nullable Object executeDelete(List<String> filters) {
@@ -113,7 +114,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			throw new IllegalArgumentException(
 					"Cannot delete without an effective filter for derived query " + method.toGenericString());
 		}
-		long deleted = operations.deleteByFilter(domainType, String.join(" AND ", filters));
+		long deleted = operations.deleteByFilter(domainType, String.join(AND, filters));
 		if (returnShape == ReturnShape.DELETE_VOID) {
 			return null;
 		}
@@ -279,7 +280,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		for (PartTree.OrPart orPart : tree) {
 			List<String> filters = new ArrayList<>();
 			for (Part part : orPart) {
-				PropertyReference property = resolveProperty(part.getProperty().toDotPath(), operatorName(part));
+				PropertyReference property = resolveProperty(part.getProperty().toDotPath(), FilterSyntax.operatorName(part));
 				String filter = createFilter(part, property, accessor, parameterIndex);
 				if (filter != null) {
 					filters.add(filter);
@@ -289,7 +290,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			groupCount++;
 			singleGroup = filters;
 			if (!filters.isEmpty()) {
-				groups.add("(" + String.join(" AND ", filters) + ")");
+				groups.add("(" + String.join(AND, filters) + ")");
 			}
 		}
 
@@ -318,6 +319,17 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			case EXISTS -> field + " EXISTS";
 			case IN -> createInFilter(field, property, part, accessor.getBindableValue(parameterIndex), false);
 			case NOT_IN -> createInFilter(field, property, part, accessor.getBindableValue(parameterIndex), true);
+			case GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL, BETWEEN, TRUE, FALSE ->
+				createComparisonFilter(part, property, accessor, parameterIndex);
+			default -> throw unsupportedOperator(FilterSyntax.operatorName(part));
+		};
+	}
+
+	private String createComparisonFilter(Part part, PropertyReference property, ParametersParameterAccessor accessor,
+			int parameterIndex) {
+
+		String field = property.fieldName();
+		return switch (part.getType()) {
 			case GREATER_THAN -> field + " > " + toLiteral(accessor.getBindableValue(parameterIndex), property, part);
 			case GREATER_THAN_EQUAL -> field + " >= " + toLiteral(accessor.getBindableValue(parameterIndex), property, part);
 			case LESS_THAN -> field + " < " + toLiteral(accessor.getBindableValue(parameterIndex), property, part);
@@ -326,7 +338,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 					+ toLiteral(accessor.getBindableValue(parameterIndex + 1), property, part);
 			case TRUE -> field + " = true";
 			case FALSE -> field + " = false";
-			default -> throw unsupportedOperator(operatorName(part));
+			default -> throw unsupportedOperator(FilterSyntax.operatorName(part));
 		};
 	}
 
@@ -404,42 +416,14 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			return Long.toString(date.getTime());
 		}
 		if (converted instanceof Enum<?> enumValue) {
-			return quote(enumValue.name());
+			return FilterSyntax.quote(enumValue.name());
 		}
 		if (converted instanceof CharSequence || converted instanceof Character || converted instanceof TemporalAccessor
 				|| converted instanceof UUID) {
-			return quote(converted.toString());
+			return FilterSyntax.quote(converted.toString());
 		}
 
 		throw invalidParameter(part, "unsupported filter value type " + converted.getClass().getName());
-	}
-
-	private static String quote(String value) {
-
-		StringBuilder literal = new StringBuilder(value.length() + 2);
-		literal.append('"');
-		for (int i = 0; i < value.length(); i++) {
-			char character = value.charAt(i);
-			switch (character) {
-				case '\\', '"' -> literal.append('\\').append(character);
-				case '\n' -> literal.append("\\n");
-				case '\r' -> literal.append("\\r");
-				case '\t' -> literal.append("\\t");
-				case '\b' -> literal.append("\\b");
-				case '\f' -> literal.append("\\f");
-				default -> {
-					if (character < 0x20) {
-						literal.append("\\u00");
-						literal.append(Character.forDigit((character >> 4) & 0xf, 16));
-						literal.append(Character.forDigit(character & 0xf, 16));
-					} else {
-						literal.append(character);
-					}
-				}
-			}
-		}
-		literal.append('"');
-		return literal.toString();
 	}
 
 	private PropertyReference resolveProperty(String pathName, String operator) {
@@ -453,7 +437,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 					throw unsupportedOperator(operator + " on transient property " + pathName);
 				}
 				String mappedName = property.getFieldName();
-				if (!isFilterFieldName(mappedName)) {
+				if (!FilterSyntax.isFilterFieldName(mappedName)) {
 					throw unsupportedOperator(operator + " on mapped field " + mappedName);
 				}
 				if (fieldName.length() > 0) {
@@ -493,19 +477,6 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		return Sort.by(mappedOrders);
 	}
 
-	private boolean isFilterFieldName(String fieldName) {
-		if (fieldName.isEmpty()) {
-			return false;
-		}
-		for (int i = 0; i < fieldName.length(); i++) {
-			char character = fieldName.charAt(i);
-			if (!(Character.isLetterOrDigit(character) || character == '_' || character == '-' || character == '.')) {
-				return false;
-			}
-		}
-		return fieldName.charAt(0) != '.' && fieldName.charAt(fieldName.length() - 1) != '.' && !fieldName.contains("..");
-	}
-
 	private PartTree createPartTree() {
 
 		try {
@@ -530,18 +501,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		List<Part> parsedParts = new ArrayList<>();
 		for (PartTree.OrPart orPart : tree) {
 			for (Part part : orPart) {
-				if (!isSupported(part.getType())) {
-					throw unsupportedOperator(operatorName(part));
-				}
-				if (part.shouldIgnoreCase() != Part.IgnoreCaseType.NEVER) {
-					throw unsupportedOperator("IgnoreCase");
-				}
-
-				PropertyReference property = resolveProperty(part.getProperty().toDotPath(), operatorName(part));
-				if ((part.getType() == Part.Type.TRUE || part.getType() == Part.Type.FALSE)
-						&& ClassUtils.resolvePrimitiveIfNecessary(property.valueType()) != Boolean.class) {
-					throw unsupportedOperator(operatorName(part) + " on non-boolean property " + part.getProperty().toDotPath());
-				}
+				validatePart(part);
 				parsedParts.add(part);
 			}
 		}
@@ -555,6 +515,22 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		validateInParameters(parsedParts);
 	}
 
+	private void validatePart(Part part) {
+		if (!FilterSyntax.isSupported(part.getType())) {
+			throw unsupportedOperator(FilterSyntax.operatorName(part));
+		}
+		if (part.shouldIgnoreCase() != Part.IgnoreCaseType.NEVER) {
+			throw unsupportedOperator("IgnoreCase");
+		}
+
+		PropertyReference property = resolveProperty(part.getProperty().toDotPath(), FilterSyntax.operatorName(part));
+		if ((part.getType() == Part.Type.TRUE || part.getType() == Part.Type.FALSE)
+				&& ClassUtils.resolvePrimitiveIfNecessary(property.valueType()) != Boolean.class) {
+			throw unsupportedOperator(
+					FilterSyntax.operatorName(part) + " on non-boolean property " + part.getProperty().toDotPath());
+		}
+	}
+
 	private void validateInParameters(List<Part> parsedParts) {
 
 		int parameterIndex = 0;
@@ -562,7 +538,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			if (part.getType() == Part.Type.IN || part.getType() == Part.Type.NOT_IN) {
 				Class<?> parameterType = queryMethod.getParameters().getBindableParameter(parameterIndex).getType();
 				if (!Iterable.class.isAssignableFrom(parameterType) && !parameterType.isArray()) {
-					throw unsupportedOperator(operatorName(part) + " requires a collection or array parameter");
+					throw unsupportedOperator(FilterSyntax.operatorName(part) + " requires a collection or array parameter");
 				}
 			}
 			parameterIndex += part.getNumberOfArguments();
@@ -664,27 +640,72 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 				"Unsupported derived query return type " + returnType.getName() + " in method " + method.toGenericString());
 	}
 
-	private static boolean isSupported(Part.Type type) {
-		return switch (type) {
-			case SIMPLE_PROPERTY, IN, NOT_IN, GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL, BETWEEN, TRUE,
-					FALSE, IS_NULL, IS_NOT_NULL, EXISTS ->
-				true;
-			default -> false;
-		};
-	}
-
-	private static String operatorName(Part part) {
-		return part.getType().getKeywords().stream().findFirst().orElse(part.getType().name());
-	}
-
 	private IllegalArgumentException unsupportedOperator(String operator) {
 		return new IllegalArgumentException(
 				"Unsupported derived query operator '" + operator + "' in method " + method.toGenericString());
 	}
 
 	private IllegalArgumentException invalidParameter(Part part, String reason) {
-		return new IllegalArgumentException("Invalid value for derived query operator '" + operatorName(part)
+		return new IllegalArgumentException("Invalid value for derived query operator '" + FilterSyntax.operatorName(part)
 				+ "' in method " + method.toGenericString() + ": " + reason);
+	}
+
+	private static final class FilterSyntax {
+
+		private FilterSyntax() {}
+
+		private static boolean isSupported(Part.Type type) {
+			return switch (type) {
+				case SIMPLE_PROPERTY, IN, NOT_IN, GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL, BETWEEN, TRUE,
+						FALSE, IS_NULL, IS_NOT_NULL, EXISTS ->
+					true;
+				default -> false;
+			};
+		}
+
+		private static String operatorName(Part part) {
+			return part.getType().getKeywords().stream().findFirst().orElse(part.getType().name());
+		}
+
+		private static boolean isFilterFieldName(String fieldName) {
+			if (fieldName.isEmpty()) {
+				return false;
+			}
+			for (int i = 0; i < fieldName.length(); i++) {
+				char character = fieldName.charAt(i);
+				if (!(Character.isLetterOrDigit(character) || character == '_' || character == '-' || character == '.')) {
+					return false;
+				}
+			}
+			return fieldName.charAt(0) != '.' && fieldName.charAt(fieldName.length() - 1) != '.' && !fieldName.contains("..");
+		}
+
+		private static String quote(String value) {
+			StringBuilder literal = new StringBuilder(value.length() + 2);
+			literal.append('"');
+			for (int i = 0; i < value.length(); i++) {
+				char character = value.charAt(i);
+				switch (character) {
+					case '\\', '"' -> literal.append('\\').append(character);
+					case '\n' -> literal.append("\\n");
+					case '\r' -> literal.append("\\r");
+					case '\t' -> literal.append("\\t");
+					case '\b' -> literal.append("\\b");
+					case '\f' -> literal.append("\\f");
+					default -> {
+						if (character < 0x20) {
+							literal.append("\\u00");
+							literal.append(Character.forDigit((character >> 4) & 0xf, 16));
+							literal.append(Character.forDigit(character & 0xf, 16));
+						} else {
+							literal.append(character);
+						}
+					}
+				}
+			}
+			literal.append('"');
+			return literal.toString();
+		}
 	}
 
 	private record PropertyReference(String fieldName, Class<?> valueType) {
