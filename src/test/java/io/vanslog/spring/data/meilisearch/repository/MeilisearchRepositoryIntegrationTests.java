@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
+import io.vanslog.spring.data.meilisearch.annotations.Setting;
 import io.vanslog.spring.data.meilisearch.entities.TotalHitsLimited;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
@@ -425,6 +426,40 @@ class MeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
+	void shouldDistinguishMissingAndPresentFilterableFields() {
+		Movie missing = new Movie(1, "Untyped", "No genres", null);
+		Movie present = new Movie(2, "Typed", "Has genres", new String[] { "Drama" });
+		movieRepository.saveAll(List.of(missing, present));
+
+		assertThat(movieRepository.findByGenresIsNull()).containsExactly(missing);
+		assertThat(movieRepository.findByGenresIsNotNull()).containsExactly(present);
+		assertThat(movieRepository.findByGenresExists()).containsExactly(present);
+	}
+
+	@Test
+	void shouldGroupBooleanPredicatesOnNestedMappedFields() {
+		NestedMovie first = new NestedMovie("nested-1", "First", new MovieDetails("Director", 2026));
+		NestedMovie second = new NestedMovie("nested-2", "Second", new MovieDetails("Other", 2025));
+		NestedMovie absent = new NestedMovie("nested-3", "Missing", null);
+		nestedMovieRepository.saveAll(List.of(first, second, absent));
+
+		assertThat(nestedMovieRepository.findByDetailsDirector("Director")).extracting(NestedMovie::getId)
+				.containsExactly("nested-1");
+		assertThat(nestedMovieRepository.findByDetailsDirectorIsNull()).extracting(NestedMovie::getId)
+				.containsExactly("nested-3");
+		assertThat(nestedMovieRepository.findByDetailsDirectorIsNotNull()).extracting(NestedMovie::getId)
+				.containsExactlyInAnyOrder("nested-1", "nested-2");
+		assertThat(nestedMovieRepository.findByDetailsDirectorExists()).extracting(NestedMovie::getId)
+				.containsExactlyInAnyOrder("nested-1", "nested-2");
+		assertThat(nestedMovieRepository.findByDetailsDirectorAndTitleOrDetailsDirector("Director", "First", "Other"))
+				.extracting(NestedMovie::getId).containsExactlyInAnyOrder("nested-1", "nested-2");
+		assertThat(nestedMovieRepository.countByDetailsDirectorOrTitle("Director", "Second")).isEqualTo(2);
+		assertThat(nestedMovieRepository.existsByDetailsDirectorOrTitle("Director", "No match")).isTrue();
+		assertThat(nestedMovieRepository.deleteByDetailsDirectorOrTitle("Director", "Missing")).isEqualTo(2);
+		assertThat(nestedMovieRepository.findAll()).extracting(NestedMovie::getId).containsExactly("nested-2");
+	}
+
+	@Test
 	void shouldCountAndCheckExistenceWithDerivedFilters() {
 		Movie first = new Movie(1, "Carol", "A love story", new String[] { "Drama" });
 		Movie second = new Movie(2, "Life of Pi", "A survival film", new String[] { "Drama", "Adventure" });
@@ -467,6 +502,12 @@ class MeilisearchRepositoryIntegrationTests {
 
 		List<Movie> findByGenres(@Nullable String genre);
 
+		List<Movie> findByGenresIsNull();
+
+		List<Movie> findByGenresIsNotNull();
+
+		List<Movie> findByGenresExists();
+
 		List<Movie> findByGenresIn(List<String> genres);
 
 		List<Movie> findByGenresNotIn(List<String> genres);
@@ -484,8 +525,27 @@ class MeilisearchRepositoryIntegrationTests {
 
 	interface TotalHitsLimitedRepository extends MeilisearchRepository<TotalHitsLimited, String> {}
 
-	interface NestedMovieRepository extends MeilisearchRepository<NestedMovie, String> {}
+	interface NestedMovieRepository extends MeilisearchRepository<NestedMovie, String> {
 
+		List<NestedMovie> findByDetailsDirector(String director);
+
+		List<NestedMovie> findByDetailsDirectorIsNull();
+
+		List<NestedMovie> findByDetailsDirectorIsNotNull();
+
+		List<NestedMovie> findByDetailsDirectorExists();
+
+		List<NestedMovie> findByDetailsDirectorAndTitleOrDetailsDirector(String director, String title,
+				String otherDirector);
+
+		long countByDetailsDirectorOrTitle(String director, String title);
+
+		boolean existsByDetailsDirectorOrTitle(String director, String title);
+
+		long deleteByDetailsDirectorOrTitle(String director, String title);
+	}
+
+	@Setting(filterableAttributes = { "title", "details.director" })
 	@Document(indexUid = "nested-movies")
 	static class NestedMovie {
 
