@@ -17,6 +17,14 @@ Spring Data parses derived query method names when the repository is created. Fo
 |`findByTitle(String title)`
 |`title = "Arrival"`
 
+|`IsNull`, `IsNotNull`
+|`findByGenreIsNull()` / `findByGenreIsNotNull()`
+|`(genre IS NULL OR genre NOT EXISTS)` / `(genre EXISTS AND genre IS NOT NULL)`
+
+|`Exists`
+|`findByGenreExists()`
+|`genre EXISTS`
+
 |`In`
 |`findByGenreIn(Collection<String> genres)`
 |`genre IN ["drama", "science fiction"]`
@@ -44,11 +52,15 @@ Spring Data parses derived query method names when the repository is created. Fo
 |`And`
 |`findByGenreAndRatingGreaterThan(String genre, int rating)`
 |Both predicates must match (`AND`)
+
+|`Or`
+|`findByGenreAndRatingGreaterThanOrAvailableTrue(String genre, int rating)`
+|`(genre = "drama" AND rating > 7) OR (available = true)`
 |===
 
-An empty collection passed to an `In` predicate is rejected at invocation with an `IllegalArgumentException` that identifies the method and operator. An empty collection passed to `NotIn` contributes no filter.
+An empty collection passed to an `In` predicate is rejected at invocation with an `IllegalArgumentException` that identifies the method and operator. An empty collection passed to `NotIn` contributes no filter. With `Or`, each branch must retain at least one effective predicate; a branch consisting only of an empty `NotIn` is rejected rather than turning the whole query into an unfiltered search or delete.
 
-For an equality predicate with an `@Nullable` argument, passing `null` matches both an explicitly null field and a missing field. The mapping converter omits null-valued properties when saving documents.
+For an equality predicate with an `@Nullable` argument, passing `null` matches both an explicitly null field and a missing field. `IsNull` matches those same two states. `IsNotNull` requires a present, non-null field, while `Exists` also matches an explicitly null field. The mapping converter omits null-valued properties when saving documents, so a missing field is the usual result of saving a null property.
 
 === Count, Existence, and Delete Methods
 
@@ -72,7 +84,7 @@ Derived predicates can also be used with the following methods:
 |Deletes matching documents with Meilisearch's native filter-delete API and waits for the task to succeed. Numeric return types report the deleted-document count; a failed task or unavailable deletion details fails the invocation instead of returning a count.
 |===
 
-These methods use the same supported predicates listed above. Every property used in a predicate must be configured as filterable. Count, existence, and delete methods do not accept a static `OrderBy` suffix or runtime `Sort` or `Pageable` parameters. A delete or remove method must produce a non-empty effective filter; an unfiltered method or predicates that produce no filter are rejected rather than deleting every document.
+These methods use the same supported predicates listed above, including grouped `Or` branches. Every property used in a predicate must be configured as filterable. Count, existence, and delete methods do not accept a static `OrderBy` suffix or runtime `Sort` or `Pageable` parameters. A delete or remove method must produce a non-empty effective filter; an unfiltered method or predicates that produce no filter are rejected rather than deleting every document.
 
 === Method Return Types
 
@@ -85,6 +97,8 @@ For finder methods, static ordering uses an `OrderBy` suffix, for example `findB
 === Index Settings
 
 String arguments are values, not filter expressions. They are emitted as quoted and escaped Meilisearch filter literals; do not add quotes or filter syntax to the argument. Numeric and boolean values are emitted as literals. Every field used in a predicate—including predicates for count, existence, and delete methods—must be configured as filterable, and every field used for sorting must be configured as sortable. For example:
+
+Nested property paths use dotted Meilisearch field names: for example, `findByDetailsDirector(String director)` filters `details.director = "Director"` for an entity with a `details.director` property. Configure `details.director` as a filterable attribute; a filter on the top-level `details` attribute does not substitute for that nested path.
 
 [source,java]
 ----
@@ -118,8 +132,7 @@ Repository configuration continues to expose `queryLookupStrategy` and `namedQue
 
 The supported predicate and return-type matrix is intentionally narrow. The repository rejects unsupported derived methods during bootstrap, with the method and unsupported operator or return type in the error. In particular:
 
-* `Or` predicates are not supported; only conjunctions (`And`) are supported.
-* Free-text predicates such as `Containing`, `StartingWith`, and `Like` are not derived filters. Use `MeilisearchOperations` with a `BasicQuery` when you need full-text search.
+* Free-text predicates such as `Containing`, `StartingWith`, and `Like` are not derived filters. Use `MeilisearchOperations` with a `BasicQuery` when you need full-text search. `EndingWith` and `Regex` are also unsupported.
 * Filter-based count, existence, and delete methods are supported only through the patterns and return types listed above; they do not accept sorting or paging. The standard repository `count()` and delete methods are separate operations and are unchanged.
 * Methods annotated with repository `@Query` and named-query-backed methods are not supported.
 * Interface or class projections, `Slice`, streams, scalar-valued finder results, and return types outside the supported method matrix are not supported.

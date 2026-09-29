@@ -64,7 +64,6 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 	private final Method method;
 	private final QueryMethod queryMethod;
 	private final PartTree tree;
-	private final List<Part> parts;
 	private final Class<?> domainType;
 	private final MeilisearchOperations operations;
 	private final MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext;
@@ -82,7 +81,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		this.mappingContext = operations.getMeilisearchConverter().getMappingContext();
 		this.conversionService = operations.getMeilisearchConverter().getConversionService();
 		this.tree = createPartTree();
-		this.parts = validateTreeAndGetParts();
+		validateTree();
 		this.returnShape = MeilisearchQueryReturnShape.resolve(tree, method, queryMethod, domainType);
 		validateSpecialParameters();
 		this.staticSort = mapSort(tree.getSort());
@@ -269,19 +268,36 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 
 	private List<String> createFilters(ParametersParameterAccessor accessor) {
 
-		List<String> filters = new ArrayList<>(parts.size());
+		List<String> groups = new ArrayList<>();
+		List<String> singleGroup = List.of();
+		int groupCount = 0;
 		int parameterIndex = 0;
 
-		for (Part part : parts) {
-			PropertyReference property = resolveProperty(part.getProperty().toDotPath(), operatorName(part));
-			String filter = createFilter(part, property, accessor, parameterIndex);
-			if (filter != null) {
-				filters.add(filter);
+		for (PartTree.OrPart orPart : tree) {
+			List<String> filters = new ArrayList<>();
+			for (Part part : orPart) {
+				PropertyReference property = resolveProperty(part.getProperty().toDotPath(), operatorName(part));
+				String filter = createFilter(part, property, accessor, parameterIndex);
+				if (filter != null) {
+					filters.add(filter);
+				}
+				parameterIndex += part.getNumberOfArguments();
 			}
-			parameterIndex += part.getNumberOfArguments();
+			groupCount++;
+			singleGroup = filters;
+			if (!filters.isEmpty()) {
+				groups.add("(" + String.join(" AND ", filters) + ")");
+			}
 		}
 
-		return filters;
+		if (groupCount == 1) {
+			return singleGroup;
+		}
+		if (groups.size() != groupCount) {
+			throw new IllegalArgumentException(
+					"Cannot evaluate an Or branch without an effective filter for derived query " + method.toGenericString());
+		}
+		return List.of(String.join(" OR ", groups));
 	}
 
 	private @Nullable String createFilter(Part part, PropertyReference property, ParametersParameterAccessor accessor,
@@ -294,6 +310,9 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 				yield value == null ? "(" + field + " IS NULL OR " + field + " NOT EXISTS)"
 						: field + " = " + toLiteral(value, property, part);
 			}
+			case IS_NULL -> "(" + field + " IS NULL OR " + field + " NOT EXISTS)";
+			case IS_NOT_NULL -> "(" + field + " EXISTS AND " + field + " IS NOT NULL)";
+			case EXISTS -> field + " EXISTS";
 			case IN -> createInFilter(field, property, part, accessor.getBindableValue(parameterIndex), false);
 			case NOT_IN -> createInFilter(field, property, part, accessor.getBindableValue(parameterIndex), true);
 			case GREATER_THAN -> field + " > " + toLiteral(accessor.getBindableValue(parameterIndex), property, part);
@@ -494,7 +513,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		}
 	}
 
-	private List<Part> validateTreeAndGetParts() {
+	private void validateTree() {
 		if (tree.isDistinct()) {
 			throw unsupportedOperator("Distinct");
 		}
@@ -506,11 +525,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		}
 
 		List<Part> parsedParts = new ArrayList<>();
-		int disjunctions = 0;
 		for (PartTree.OrPart orPart : tree) {
-			if (++disjunctions > 1) {
-				throw unsupportedOperator("Or");
-			}
 			for (Part part : orPart) {
 				if (!isSupported(part.getType())) {
 					throw unsupportedOperator(operatorName(part));
@@ -535,8 +550,6 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 					"parameter count (expected " + expectedParameters + ", found " + actualParameters + ")");
 		}
 		validateInParameters(parsedParts);
-
-		return List.copyOf(parsedParts);
 	}
 
 	private void validateInParameters(List<Part> parsedParts) {
@@ -589,7 +602,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 	private static boolean isSupported(Part.Type type) {
 		return switch (type) {
 			case SIMPLE_PROPERTY, IN, NOT_IN, GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL, BETWEEN, TRUE,
-					FALSE ->
+					FALSE, IS_NULL, IS_NOT_NULL, EXISTS ->
 				true;
 			default -> false;
 		};
