@@ -266,6 +266,14 @@ class MeilisearchTemplateIntegrationTests {
 	}
 
 	@Test
+	void shouldRejectMissingFilteredDeleteTask() {
+		MeilisearchTemplate template = templateWithDeleteTask(null, null);
+
+		assertThatThrownBy(() -> template.deleteByFilter(Movie.class, "genres = Drama"))
+				.isInstanceOf(UncategorizedMeilisearchException.class);
+	}
+
+	@Test
 	void shouldRejectEmptyFilteredDeleteBeforeClientAccess() {
 		MeilisearchClient client = new MeilisearchClient(new MeilisearchTestConfiguration().clientConfiguration()) {
 			@Override
@@ -291,10 +299,15 @@ class MeilisearchTemplateIntegrationTests {
 			}
 
 			@Override
-			public void waitForTask(int taskUid, int timeout, int interval) {}
+			public void waitForTask(int taskUid, int timeout, int interval) {
+				// The task is already in the requested terminal state.
+			}
 
 			@Override
 			public Task getTask(int taskUid) {
+				if (taskStatus == null) {
+					return null;
+				}
 				return new Task() {
 					@Override
 					public TaskStatus getStatus() {

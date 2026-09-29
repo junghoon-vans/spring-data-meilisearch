@@ -33,6 +33,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.FacetSearchRequest;
+import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.MultiSearchFederation;
 import com.meilisearch.sdk.MultiSearchRequest;
@@ -312,7 +313,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteDocumentsByFilter(filter));
 		int taskUid = taskInfo.getTaskUid();
 
-		Task task = execute(client -> {
+		Task task = execute((Client client) -> {
 			Index index = client.index(indexUid);
 			index.waitForTask(taskUid, meilisearchClient.getRequestTimeout(), meilisearchClient.getRequestInterval());
 			return index.getTask(taskUid);
@@ -393,6 +394,7 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	 * @return a result object returned by the action or {@literal null}.
 	 * @param <T> the type of the result object
 	 */
+	@Nullable
 	public <T> T execute(MeilisearchCallback<T> callback) {
 
 		Assert.notNull(callback, "callback must not be null");

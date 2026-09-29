@@ -93,23 +93,35 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 
 		ParametersParameterAccessor accessor = new ParametersParameterAccessor(queryMethod.getParameters(), values);
 		List<String> filters = createFilters(accessor);
-		switch (returnShape) {
-			case COUNT:
-				return filters.isEmpty() ? operations.count(domainType)
-						: operations.count(domainType, String.join(" AND ", filters));
-			case EXISTS:
-				return !operations.search(createQuery(filters, Sort.unsorted(), PageRequest.of(0, 1)), domainType)
-						.getSearchHits().isEmpty();
-			case DELETE_COUNT, DELETE_VOID:
-				if (filters.isEmpty()) {
-					throw new IllegalArgumentException(
-							"Cannot delete without an effective filter for derived query " + method.toGenericString());
-				}
-				long deleted = operations.deleteByFilter(domainType, String.join(" AND ", filters));
-				return returnShape == ReturnShape.DELETE_VOID ? null : deleted;
-			default:
-				break;
+		return switch (returnShape) {
+			case COUNT -> executeCount(filters);
+			case EXISTS -> !operations.search(createQuery(filters, Sort.unsorted(), PageRequest.of(0, 1)), domainType)
+					.getSearchHits().isEmpty();
+			case DELETE_COUNT, DELETE_VOID -> executeDelete(filters);
+			case ENTITY, OPTIONAL, PAGE, LIST, ITERABLE -> executeFinder(filters, accessor);
+		};
+	}
+
+	private long executeCount(List<String> filters) {
+		if (filters.isEmpty()) {
+			return operations.count(domainType);
 		}
+		return operations.count(domainType, String.join(" AND ", filters));
+	}
+
+	private @Nullable Object executeDelete(List<String> filters) {
+		if (filters.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Cannot delete without an effective filter for derived query " + method.toGenericString());
+		}
+		long deleted = operations.deleteByFilter(domainType, String.join(" AND ", filters));
+		if (returnShape == ReturnShape.DELETE_VOID) {
+			return null;
+		}
+		return deleted;
+	}
+
+	private Object executeFinder(List<String> filters, ParametersParameterAccessor accessor) {
 		boolean hasPageable = queryMethod.getParameters().hasPageableParameter();
 		Pageable pageable = hasPageable ? accessor.getPageable() : null;
 		Sort dynamicSort = hasPageable ? pageable.getSort() : accessor.getSort();
@@ -556,8 +568,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		if (parameters.hasLimitParameter()) {
 			throw unsupportedOperator("Limit");
 		}
-		if ((returnShape == ReturnShape.COUNT || returnShape == ReturnShape.EXISTS
-				|| returnShape == ReturnShape.DELETE_COUNT || returnShape == ReturnShape.DELETE_VOID)
+		if (isProjection()
 				&& (tree.getSort().isSorted() || parameters.hasSortParameter() || parameters.hasPageableParameter())) {
 			throw unsupportedOperator("Sort/Pageable for a count, exists, or delete method");
 		}
@@ -567,55 +578,69 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		}
 	}
 
+	private boolean isProjection() {
+		return switch (returnShape) {
+			case COUNT, EXISTS, DELETE_COUNT, DELETE_VOID -> true;
+			default -> false;
+		};
+	}
+
 	private ReturnShape resolveReturnShape() {
 
 		Class<?> returnType = method.getReturnType();
 		if (tree.isCountProjection()) {
-			if (returnType == long.class || returnType == Long.class) {
-				return ReturnShape.COUNT;
-			}
-			throw unsupportedReturnType(returnType);
+			return resolveCountReturnShape(returnType);
 		}
 		if (tree.isExistsProjection()) {
-			if (returnType == boolean.class || returnType == Boolean.class) {
-				return ReturnShape.EXISTS;
-			}
-			throw unsupportedReturnType(returnType);
+			return resolveExistsReturnShape(returnType);
 		}
 		if (tree.isDelete()) {
-			if (returnType == void.class) {
-				return ReturnShape.DELETE_VOID;
-			}
-			if (returnType == long.class || returnType == Long.class) {
-				return ReturnShape.DELETE_COUNT;
-			}
+			return resolveDeleteReturnShape(returnType);
+		}
+		return resolveFinderReturnShape(returnType);
+	}
+
+	private ReturnShape resolveCountReturnShape(Class<?> returnType) {
+		if (returnType != long.class && returnType != Long.class) {
+			throw unsupportedReturnType(returnType);
+		}
+		return ReturnShape.COUNT;
+	}
+
+	private ReturnShape resolveExistsReturnShape(Class<?> returnType) {
+		if (returnType != boolean.class && returnType != Boolean.class) {
+			throw unsupportedReturnType(returnType);
+		}
+		return ReturnShape.EXISTS;
+	}
+
+	private ReturnShape resolveDeleteReturnShape(Class<?> returnType) {
+		if (returnType == void.class) {
+			return ReturnShape.DELETE_VOID;
+		}
+		if (returnType == long.class || returnType == Long.class) {
+			return ReturnShape.DELETE_COUNT;
+		}
+		throw unsupportedReturnType(returnType);
+	}
+
+	private ReturnShape resolveFinderReturnShape(Class<?> returnType) {
+		if (!queryMethod.isQueryForEntity()) {
 			throw unsupportedReturnType(returnType);
 		}
 		if (returnType == Page.class) {
-			if (!queryMethod.isQueryForEntity()) {
-				throw unsupportedReturnType(returnType);
-			}
 			return ReturnShape.PAGE;
 		}
 		if (returnType == Optional.class) {
-			if (!queryMethod.isQueryForEntity()) {
-				throw unsupportedReturnType(returnType);
-			}
 			return ReturnShape.OPTIONAL;
 		}
 		if (returnType == List.class) {
-			if (!queryMethod.isQueryForEntity()) {
-				throw unsupportedReturnType(returnType);
-			}
 			return ReturnShape.LIST;
 		}
 		if (returnType == Iterable.class) {
-			if (!queryMethod.isQueryForEntity()) {
-				throw unsupportedReturnType(returnType);
-			}
 			return ReturnShape.ITERABLE;
 		}
-		if (queryMethod.isQueryForEntity() && returnType.isAssignableFrom(domainType)) {
+		if (returnType.isAssignableFrom(domainType)) {
 			return ReturnShape.ENTITY;
 		}
 		throw unsupportedReturnType(returnType);
