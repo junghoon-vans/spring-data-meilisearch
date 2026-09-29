@@ -166,6 +166,19 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <links combine.self="override">
+                        <link>https://docs.spring.io/spring-framework/docs/${spring}/javadoc-api/</link>
+                        <link>https://docs.spring.io/spring-data/commons/docs/current/api/</link>
+                        <link>https://docs.spring.io/spring-data/keyvalue/docs/current/api/</link>
+                        <link>https://docs.spring.io/spring-hateoas/docs/current/api/</link>
+                        <link>https://docs.oracle.com/en/java/javase/17/docs/api/</link>
+                    </links>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.asciidoctor</groupId>
                 <artifactId>asciidoctor-maven-plugin</artifactId>
                 <version>3.2.0</version>
