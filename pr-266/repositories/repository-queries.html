@@ -583,7 +583,10 @@
 <p>String arguments are values, not filter expressions. They are emitted as quoted and escaped Meilisearch filter literals; do not add quotes or filter syntax to the argument. Numeric and boolean values are emitted as literals. Every field used in a predicate—including predicates for count, existence, and delete methods—must be configured as filterable, and every field used for sorting must be configured as sortable. For example:</p>
 </div>
 <div class="paragraph">
-<p>Nested property paths use dotted Meilisearch field names: for example, <code>findByDetailsDirector(String director)</code> filters <code>details.director = "Director"</code> for an entity with a <code>details.director</code> property. Configure <code>details.director</code> as a filterable attribute; a filter on the top-level <code>details</code> attribute does not substitute for that nested path.</p>
+<p>Nested property paths use dotted Meilisearch field names. For example, <code>findByDetailsDirector(String director)</code> filters <code>details.director = "Director"</code> for an entity with a <code>details.director</code> property. The segments are the mapped Java field names; custom aliases for these fields are not supported. Configure <code>details.director</code> as a filterable attribute; a filter on the top-level <code>details</code> attribute does not substitute for that nested path.</p>
+</div>
+<div class="paragraph">
+<p>A collection of nested objects can also be filtered by a nested field. For example, <code>findByCreditsDirector("Director")</code> filters <code>credits.director</code> and matches a document with at least one matching object in its <code>credits</code> array. Configure <code>credits.director</code> as filterable. If the path is missing, <code>IsNull</code> matches it under the same missing-field semantics described above. Predicates on different nested fields are combined as document-level filters; they do not require values to come from the same array element.</p>
 </div>
 <div class="listingblock">
 <div class="content">
