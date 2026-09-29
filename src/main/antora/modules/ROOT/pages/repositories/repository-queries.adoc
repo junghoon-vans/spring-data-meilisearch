@@ -98,7 +98,9 @@ For finder methods, static ordering uses an `OrderBy` suffix, for example `findB
 
 String arguments are values, not filter expressions. They are emitted as quoted and escaped Meilisearch filter literals; do not add quotes or filter syntax to the argument. Numeric and boolean values are emitted as literals. Every field used in a predicate—including predicates for count, existence, and delete methods—must be configured as filterable, and every field used for sorting must be configured as sortable. For example:
 
-Nested property paths use dotted Meilisearch field names: for example, `findByDetailsDirector(String director)` filters `details.director = "Director"` for an entity with a `details.director` property. Configure `details.director` as a filterable attribute; a filter on the top-level `details` attribute does not substitute for that nested path.
+Nested property paths use dotted Meilisearch field names. For example, `findByDetailsDirector(String director)` filters `details.director = "Director"` for an entity with a `details.director` property. The segments are the mapped Java field names; custom aliases for these fields are not supported. Configure `details.director` as a filterable attribute; a filter on the top-level `details` attribute does not substitute for that nested path.
+
+A collection of nested objects can also be filtered by a nested field. For example, `findByCreditsDirector("Director")` filters `credits.director` and matches a document with at least one matching object in its `credits` array. Configure `credits.director` as filterable. If the path is missing, `IsNull` matches it under the same missing-field semantics described above. Predicates on different nested fields are combined as document-level filters; they do not require values to come from the same array element.
 
 [source,java]
 ----
