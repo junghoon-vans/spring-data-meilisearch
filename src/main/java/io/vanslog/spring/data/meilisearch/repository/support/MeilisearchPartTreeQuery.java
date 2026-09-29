@@ -88,7 +88,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 	}
 
 	@Override
-	public Object execute(Object[] values) {
+	public @Nullable Object execute(Object[] values) {
 
 		ParametersParameterAccessor accessor = new ParametersParameterAccessor(queryMethod.getParameters(), values);
 		List<String> filters = createFilters(accessor);
@@ -120,7 +120,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		return deleted;
 	}
 
-	private Object executeFinder(List<String> filters, ParametersParameterAccessor accessor) {
+	private @Nullable Object executeFinder(List<String> filters, ParametersParameterAccessor accessor) {
 		boolean hasPageable = queryMethod.getParameters().hasPageableParameter();
 		Pageable pageable = hasPageable ? accessor.getPageable() : null;
 		Sort dynamicSort = hasPageable ? pageable.getSort() : accessor.getSort();
