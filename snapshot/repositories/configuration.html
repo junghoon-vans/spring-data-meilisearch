@@ -327,7 +327,7 @@
     <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="repository-queries.html">Repository Methods and Limitations</a>
+    <a class="nav-link"  href="repository-queries.html">Query Methods</a>
   </li>
 </ul>
   </li>
@@ -490,11 +490,10 @@ repository factory selection, including:</p>
 <p>If no base packages are configured, Spring Data scans the package of the annotated configuration class.</p>
 </div>
 <div class="paragraph">
-<p><code>namedQueriesLocation</code> and <code>queryLookupStrategy</code> are retained on the annotation because they are part of the standard
-Spring Data repository configuration contract.
-Changing those attributes does not enable repository query methods in Spring Data Meilisearch.
-Derived finder methods, declared <code>@Query</code> methods, and named-query-backed methods are rejected during repository
-bootstrap with a Meilisearch-specific message until repository query method support is implemented.</p>
+<p><code>queryLookupStrategy</code> defaults to <code>CREATE_IF_NOT_FOUND</code> and supports the derived finder subset documented in
+<a href="repository-queries.html" class="xref page">Query Methods</a>. <code>USE_DECLARED_QUERY</code> cannot resolve
+derived methods. <code>namedQueriesLocation</code> remains available for Spring Data configuration compatibility, but named
+queries and declared <code>@Query</code> methods are rejected at repository bootstrap.</p>
 </div>
 </div>
 </div>

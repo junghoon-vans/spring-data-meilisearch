@@ -327,7 +327,7 @@
     <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="repository-queries.html">Repository Methods and Limitations</a>
+    <a class="nav-link"  href="repository-queries.html">Query Methods</a>
   </li>
 </ul>
   </li>
@@ -450,12 +450,15 @@
 <p>CRUD and paging/sorting methods implemented by <code>SimpleMeilisearchRepository</code>,</p>
 </li>
 <li>
+<p>filter-backed derived finder methods for a documented subset,</p>
+</li>
+<li>
 <p>direct access to advanced search features through <code>MeilisearchOperations</code>.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Derived finder methods, repository <code>@Query</code> methods, and named-query-backed methods are unsupported and fail during repository bootstrap. Use <code>MeilisearchOperations</code> for custom searches.</p>
+<p>Declared <code>@Query</code> methods, named queries, and unsupported derived operators fail during repository bootstrap. Use <code>MeilisearchOperations</code> for custom searches; see <a href="repository-queries.html" class="xref page">Query Methods</a>.</p>
 </div>
 </div>
 </div>
@@ -552,7 +555,7 @@ public interface MeilisearchRepository&lt;T, ID&gt;
 </ul>
 </div>
 <div class="paragraph">
-<p>For the concrete store-specific rules and current limitations, see <a href="meilisearch-repositories.html" class="xref page">Meilisearch Repositories</a> and <a href="repository-queries.html" class="xref page">Repository Methods and Limitations</a>.</p>
+<p>For the concrete store-specific rules and current limitations, see <a href="meilisearch-repositories.html" class="xref page">Meilisearch Repositories</a> and <a href="repository-queries.html" class="xref page">Query Methods</a>.</p>
 </div>
 </div>
 </div>

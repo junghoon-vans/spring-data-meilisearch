@@ -327,7 +327,7 @@
     <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="repository-queries.html">Repository Methods and Limitations</a>
+    <a class="nav-link"  href="repository-queries.html">Query Methods</a>
   </li>
 </ul>
   </li>
@@ -486,7 +486,7 @@ interface MovieRepository extends IdentifiedRepository&lt;Movie, String&gt; {
 <p>In a multi-module application, annotate the domain type with Meilisearch&#8217;s <code>@Document</code> when the repository does not extend <code>MeilisearchRepository</code>, so strict repository configuration can identify it. In a single-module application, the generic repository may be discovered in the configured package, but extending <code>MeilisearchRepository</code> makes the store binding explicit. Mark generic intermediate interfaces with <code>@NoRepositoryBean</code> so Spring does not try to instantiate them directly.</p>
 </div>
 <div class="paragraph">
-<p>The method declarations above match built-in CRUD methods. Adding a derived finder such as <code>findByTitle(&#8230;&#8203;)</code>, a repository <code>@Query</code> method, or a named-query method is not supported and causes repository bootstrap to fail. Use <code>MeilisearchOperations</code> for application-specific searches; see <a href="repository-queries.html" class="xref page">Repository Methods and Limitations</a>.</p>
+<p>The method declarations above match built-in CRUD methods. Repositories can also declare the filter-backed derived finders documented in <a href="repository-queries.html" class="xref page">Query Methods</a>. Declared <code>@Query</code> and named-query methods are not supported; use <code>MeilisearchOperations</code> for custom searches.</p>
 </div>
 </div>
 </div>
