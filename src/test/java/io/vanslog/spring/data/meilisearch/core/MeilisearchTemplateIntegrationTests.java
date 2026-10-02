@@ -246,6 +246,7 @@ class MeilisearchTemplateIntegrationTests {
 
 		assertThat(meilisearchTemplate.deleteByFilter(Movie.class, "genres = Adventure")).isEqualTo(2);
 		assertThat(meilisearchTemplate.count(Movie.class)).isEqualTo(1);
+		assertThat(meilisearchTemplate.get("1", Movie.class)).isEqualTo(movie1);
 	}
 
 	@Test

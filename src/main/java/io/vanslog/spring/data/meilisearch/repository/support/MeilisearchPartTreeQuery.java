@@ -83,7 +83,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		this.conversionService = operations.getMeilisearchConverter().getConversionService();
 		this.tree = createPartTree();
 		this.parts = validateTreeAndGetParts();
-		this.returnShape = resolveReturnShape();
+		this.returnShape = ReturnShape.resolve(tree, method, queryMethod, domainType);
 		validateSpecialParameters();
 		this.staticSort = mapSort(tree.getSort());
 	}
@@ -585,72 +585,6 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		};
 	}
 
-	private ReturnShape resolveReturnShape() {
-
-		Class<?> returnType = method.getReturnType();
-		if (tree.isCountProjection()) {
-			return resolveCountReturnShape(returnType);
-		}
-		if (tree.isExistsProjection()) {
-			return resolveExistsReturnShape(returnType);
-		}
-		if (tree.isDelete()) {
-			return resolveDeleteReturnShape(returnType);
-		}
-		return resolveFinderReturnShape(returnType);
-	}
-
-	private ReturnShape resolveCountReturnShape(Class<?> returnType) {
-		if (returnType != long.class && returnType != Long.class) {
-			throw unsupportedReturnType(returnType);
-		}
-		return ReturnShape.COUNT;
-	}
-
-	private ReturnShape resolveExistsReturnShape(Class<?> returnType) {
-		if (returnType != boolean.class && returnType != Boolean.class) {
-			throw unsupportedReturnType(returnType);
-		}
-		return ReturnShape.EXISTS;
-	}
-
-	private ReturnShape resolveDeleteReturnShape(Class<?> returnType) {
-		if (returnType == void.class) {
-			return ReturnShape.DELETE_VOID;
-		}
-		if (returnType == long.class || returnType == Long.class) {
-			return ReturnShape.DELETE_COUNT;
-		}
-		throw unsupportedReturnType(returnType);
-	}
-
-	private ReturnShape resolveFinderReturnShape(Class<?> returnType) {
-		if (!queryMethod.isQueryForEntity()) {
-			throw unsupportedReturnType(returnType);
-		}
-		if (returnType == Page.class) {
-			return ReturnShape.PAGE;
-		}
-		if (returnType == Optional.class) {
-			return ReturnShape.OPTIONAL;
-		}
-		if (returnType == List.class) {
-			return ReturnShape.LIST;
-		}
-		if (returnType == Iterable.class) {
-			return ReturnShape.ITERABLE;
-		}
-		if (returnType.isAssignableFrom(domainType)) {
-			return ReturnShape.ENTITY;
-		}
-		throw unsupportedReturnType(returnType);
-	}
-
-	private IllegalArgumentException unsupportedReturnType(Class<?> returnType) {
-		return new IllegalArgumentException(
-				"Unsupported derived query return type " + returnType.getName() + " in method " + method.toGenericString());
-	}
-
 	private static boolean isSupported(Part.Type type) {
 		return switch (type) {
 			case SIMPLE_PROPERTY, IN, NOT_IN, GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL, BETWEEN, TRUE,
@@ -678,6 +612,72 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 	}
 
 	private enum ReturnShape {
-		ENTITY, OPTIONAL, LIST, ITERABLE, PAGE, COUNT, EXISTS, DELETE_COUNT, DELETE_VOID
+		ENTITY, OPTIONAL, LIST, ITERABLE, PAGE, COUNT, EXISTS, DELETE_COUNT, DELETE_VOID;
+
+		private static ReturnShape resolve(PartTree tree, Method method, QueryMethod queryMethod, Class<?> domainType) {
+			Class<?> returnType = method.getReturnType();
+			if (tree.isCountProjection()) {
+				return resolveCount(returnType, method);
+			}
+			if (tree.isExistsProjection()) {
+				return resolveExists(returnType, method);
+			}
+			if (tree.isDelete()) {
+				return resolveDelete(returnType, method);
+			}
+			return resolveFinder(returnType, method, queryMethod, domainType);
+		}
+
+		private static ReturnShape resolveCount(Class<?> returnType, Method method) {
+			if (returnType != long.class && returnType != Long.class) {
+				throw unsupportedReturnType(returnType, method);
+			}
+			return COUNT;
+		}
+
+		private static ReturnShape resolveExists(Class<?> returnType, Method method) {
+			if (returnType != boolean.class && returnType != Boolean.class) {
+				throw unsupportedReturnType(returnType, method);
+			}
+			return EXISTS;
+		}
+
+		private static ReturnShape resolveDelete(Class<?> returnType, Method method) {
+			if (returnType == void.class) {
+				return DELETE_VOID;
+			}
+			if (returnType == long.class || returnType == Long.class) {
+				return DELETE_COUNT;
+			}
+			throw unsupportedReturnType(returnType, method);
+		}
+
+		private static ReturnShape resolveFinder(Class<?> returnType, Method method, QueryMethod queryMethod,
+				Class<?> domainType) {
+			if (!queryMethod.isQueryForEntity()) {
+				throw unsupportedReturnType(returnType, method);
+			}
+			if (returnType == Page.class) {
+				return PAGE;
+			}
+			if (returnType == Optional.class) {
+				return OPTIONAL;
+			}
+			if (returnType == List.class) {
+				return LIST;
+			}
+			if (returnType == Iterable.class) {
+				return ITERABLE;
+			}
+			if (returnType.isAssignableFrom(domainType)) {
+				return ENTITY;
+			}
+			throw unsupportedReturnType(returnType, method);
+		}
+
+		private static IllegalArgumentException unsupportedReturnType(Class<?> returnType, Method method) {
+			return new IllegalArgumentException(
+					"Unsupported derived query return type " + returnType.getName() + " in method " + method.toGenericString());
+		}
 	}
 }
