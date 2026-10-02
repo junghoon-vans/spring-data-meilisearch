@@ -69,7 +69,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 	private final MeilisearchOperations operations;
 	private final MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext;
 	private final ConversionService conversionService;
-	private final ReturnShape returnShape;
+	private final MeilisearchQueryReturnShape returnShape;
 	private final Sort staticSort;
 
 	MeilisearchPartTreeQuery(Method method, RepositoryMetadata metadata, ProjectionFactory projectionFactory,
@@ -83,7 +83,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		this.conversionService = operations.getMeilisearchConverter().getConversionService();
 		this.tree = createPartTree();
 		this.parts = validateTreeAndGetParts();
-		this.returnShape = ReturnShape.resolve(tree, method, queryMethod, domainType);
+		this.returnShape = MeilisearchQueryReturnShape.resolve(tree, method, queryMethod, domainType);
 		validateSpecialParameters();
 		this.staticSort = mapSort(tree.getSort());
 	}
@@ -115,7 +115,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 					"Cannot delete without an effective filter for derived query " + method.toGenericString());
 		}
 		long deleted = operations.deleteByFilter(domainType, String.join(" AND ", filters));
-		if (returnShape == ReturnShape.DELETE_VOID) {
+		if (returnShape == MeilisearchQueryReturnShape.DELETE_VOID) {
 			return null;
 		}
 		return deleted;
@@ -158,7 +158,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		}
 
 		Object result = loadedHits == 0 ? null : hits.getSearchHit(0).getContent();
-		return returnShape == ReturnShape.OPTIONAL ? Optional.ofNullable(result) : result;
+		return returnShape == MeilisearchQueryReturnShape.OPTIONAL ? Optional.ofNullable(result) : result;
 	}
 
 	private Object executePage(List<String> filters, Pageable pageable, Sort dynamicSort) {
@@ -184,7 +184,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			content = contentsOf(hits);
 		}
 
-		return returnShape == ReturnShape.LIST ? content : (Iterable<?>) content;
+		return returnShape == MeilisearchQueryReturnShape.LIST ? content : (Iterable<?>) content;
 	}
 
 	private List<Object> fetchAll(List<String> filters, Sort sort) {
@@ -572,7 +572,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 				&& (tree.getSort().isSorted() || parameters.hasSortParameter() || parameters.hasPageableParameter())) {
 			throw unsupportedOperator("Sort/Pageable for a count, exists, or delete method");
 		}
-		if ((returnShape == ReturnShape.ENTITY || returnShape == ReturnShape.OPTIONAL)
+		if ((returnShape == MeilisearchQueryReturnShape.ENTITY || returnShape == MeilisearchQueryReturnShape.OPTIONAL)
 				&& parameters.hasPageableParameter()) {
 			throw unsupportedOperator("Pageable for a single-result method");
 		}
@@ -611,73 +611,4 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 	private record PropertyReference(String fieldName, Class<?> valueType) {
 	}
 
-	private enum ReturnShape {
-		ENTITY, OPTIONAL, LIST, ITERABLE, PAGE, COUNT, EXISTS, DELETE_COUNT, DELETE_VOID;
-
-		private static ReturnShape resolve(PartTree tree, Method method, QueryMethod queryMethod, Class<?> domainType) {
-			Class<?> returnType = method.getReturnType();
-			if (tree.isCountProjection()) {
-				return resolveCount(returnType, method);
-			}
-			if (tree.isExistsProjection()) {
-				return resolveExists(returnType, method);
-			}
-			if (tree.isDelete()) {
-				return resolveDelete(returnType, method);
-			}
-			return resolveFinder(returnType, method, queryMethod, domainType);
-		}
-
-		private static ReturnShape resolveCount(Class<?> returnType, Method method) {
-			if (returnType != long.class && returnType != Long.class) {
-				throw unsupportedReturnType(returnType, method);
-			}
-			return COUNT;
-		}
-
-		private static ReturnShape resolveExists(Class<?> returnType, Method method) {
-			if (returnType != boolean.class && returnType != Boolean.class) {
-				throw unsupportedReturnType(returnType, method);
-			}
-			return EXISTS;
-		}
-
-		private static ReturnShape resolveDelete(Class<?> returnType, Method method) {
-			if (returnType == void.class) {
-				return DELETE_VOID;
-			}
-			if (returnType == long.class || returnType == Long.class) {
-				return DELETE_COUNT;
-			}
-			throw unsupportedReturnType(returnType, method);
-		}
-
-		private static ReturnShape resolveFinder(Class<?> returnType, Method method, QueryMethod queryMethod,
-				Class<?> domainType) {
-			if (!queryMethod.isQueryForEntity()) {
-				throw unsupportedReturnType(returnType, method);
-			}
-			if (returnType == Page.class) {
-				return PAGE;
-			}
-			if (returnType == Optional.class) {
-				return OPTIONAL;
-			}
-			if (returnType == List.class) {
-				return LIST;
-			}
-			if (returnType == Iterable.class) {
-				return ITERABLE;
-			}
-			if (returnType.isAssignableFrom(domainType)) {
-				return ENTITY;
-			}
-			throw unsupportedReturnType(returnType, method);
-		}
-
-		private static IllegalArgumentException unsupportedReturnType(Class<?> returnType, Method method) {
-			return new IllegalArgumentException(
-					"Unsupported derived query return type " + returnType.getName() + " in method " + method.toGenericString());
-		}
-	}
 }
