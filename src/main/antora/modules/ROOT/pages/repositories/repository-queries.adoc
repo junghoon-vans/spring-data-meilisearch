@@ -1,10 +1,109 @@
 [[meilisearch.repositories.queries]]
-= Repository Methods and Limitations
+= Query Methods
 
-Spring Data Meilisearch implements the standard repository base methods and keeps custom search composition in `MeilisearchOperations`. The supported repository contract is intentionally narrower than query-enabled Spring Data stores.
+Repository query methods can derive a Meilisearch filter from a method name. This module supports a limited, search-backed finder subset; use `MeilisearchOperations` for queries that need explicit search composition.
+
+[[meilisearch.repositories.queries.derived]]
+== Query Creation
+
+Spring Data parses derived query method names when the repository is created. For example, `findByGenreAndRatingGreaterThan(String genre, int rating)` requires both predicates to match. The following table lists the supported keywords and the filters they produce.
+
+.Supported keywords for query methods
+[cols="1,2,2", options="header"]
+|===
+|Keyword |Sample |Meilisearch filter
+
+|`Is`, `Equals` (or no keyword)
+|`findByTitle(String title)`
+|`title = "Arrival"`
+
+|`In`
+|`findByGenreIn(Collection<String> genres)`
+|`genre IN ["drama", "science fiction"]`
+
+|`NotIn`
+|`findByGenreNotIn(Collection<String> genres)`
+|`genre NOT IN ["drama", "science fiction"]`
+
+|`GreaterThan`, `GreaterThanEqual`
+|`findByRatingGreaterThan(int rating)` / `findByRatingGreaterThanEqual(int rating)`
+|`rating > 7` / `rating >= 7`
+
+|`LessThan`, `LessThanEqual`
+|`findByRatingLessThan(int rating)` / `findByRatingLessThanEqual(int rating)`
+|`rating < 7` / `rating \<= 7`
+
+|`Between`
+|`findByRatingBetween(int minimum, int maximum)`
+|`rating 5 TO 9`
+
+|`True`, `False`
+|`findByAvailableTrue()` / `findByAvailableFalse()`
+|`available = true` / `available = false`
+
+|`And`
+|`findByGenreAndRatingGreaterThan(String genre, int rating)`
+|Both predicates must match (`AND`)
+|===
+
+An empty collection passed to an `In` predicate is rejected at invocation with an `IllegalArgumentException` that identifies the method and operator. An empty collection passed to `NotIn` contributes no filter.
+
+For an equality predicate with an `@Nullable` argument, passing `null` matches both an explicitly null field and a missing field. The mapping converter omits null-valued properties when saving documents.
+
+=== Method Return Types
+
+The query method may return one entity, `Optional<Entity>`, `List<Entity>`, `Iterable<Entity>`, or `Page<Entity>`. Entity and `Optional` methods require at most one match. When no hit matches, an entity method returns `null` by default; if its repository package uses Spring's `@NonNullApi`, an unannotated entity method instead throws `EmptyResultDataAccessException`, while an explicitly `@Nullable` method may return `null`. `Optional` returns the sole hit or `Optional.empty()`. Either single-result form throws `IncorrectResultSizeDataAccessException` if multiple hits match. `List` and `Iterable` contain matching entity content.
+
+=== Sorting and Paging
+
+Static ordering uses an `OrderBy` suffix, for example `findByGenreOrderByRatingDesc(String genre)`. A `Sort` parameter provides runtime ordering, and a `Pageable` parameter provides an offset, limit, and optional sort. A `Page` contains the requested window and exposes the total reported by Meilisearch. Without a `Pageable`, `List` and `Iterable` methods fetch all matching hits in chunks and require an exact total; they fail rather than return a partial collection if the index's `pagination.maxTotalHits` cap (1,000 by default) prevents complete retrieval. Configure `@Pagination(maxTotalHits = ...)` when the application needs a different search limit.
+
+=== Index Settings
+
+String arguments are values, not filter expressions. They are emitted as quoted and escaped Meilisearch filter literals; do not add quotes or filter syntax to the argument. Numeric and boolean values are emitted as literals. Every field used in a predicate must be configured as filterable, and every field used for sorting must be configured as sortable. For example:
+
+[source,java]
+----
+@Setting(
+    filterableAttributes = { "genre", "rating", "available" },
+    sortableAttributes = { "rating" }
+)
+@Document(indexUid = "movies")
+class Movie {
+  @Id String id;
+  String genre;
+  int rating;
+  boolean available;
+}
+
+interface MovieRepository extends MeilisearchRepository<Movie, String> {
+
+  Page<Movie> findByGenreInAndRatingGreaterThanEqual(
+      Collection<String> genres, int rating, Pageable pageable);
+}
+----
+
+Those index settings must be applied to Meilisearch before the search runs. See xref:meilisearch/settings.adoc[Settings] for annotation and programmatic configuration.
+
+== Query Lookup Strategies
+
+Repository configuration continues to expose `queryLookupStrategy` and `namedQueriesLocation` for Spring Data compatibility. Use `CREATE` or `CREATE_IF_NOT_FOUND` for derived methods; `USE_DECLARED_QUERY` cannot resolve them, and declared or named queries are rejected in all lookup modes. See xref:repositories/configuration.adoc[Repository Configuration].
+
+[[meilisearch.repositories.queries.unsupported]]
+== Unsupported Query Methods
+
+The supported predicate and return-type matrix is intentionally narrow. The repository rejects unsupported derived methods during bootstrap, with the method and unsupported operator or return type in the error. In particular:
+
+* `Or` predicates are not supported; only conjunctions (`And`) are supported.
+* Free-text predicates such as `Containing`, `StartingWith`, and `Like` are not derived filters. Use `MeilisearchOperations` with a `BasicQuery` when you need full-text search.
+* Derived count and delete methods such as `countByTitle(...)` and `deleteByTitle(...)` are not supported. This limitation does not affect the standard repository `count()` or delete methods.
+* Methods annotated with repository `@Query` and named-query-backed methods are not supported.
+* Projections, `Slice`, streams, scalar values, and other return types outside the supported matrix are not supported.
+
+For search modes outside this subset, use `MeilisearchOperations` directly; it exposes explicit Meilisearch query construction without bypassing the operations abstraction.
 
 [[meilisearch.repositories.queries.scope]]
-== Choosing Between Repositories and Operations
+== Using MeilisearchOperations for Custom Queries
 
 Use `MeilisearchRepository` for the built-in CRUD, ID lookup, collection listing, sorting, and pageable methods. Use `MeilisearchOperations` for search features that need an explicit Meilisearch query or richer search result data, such as facets, similar-document search, or federated multi-search.
 
@@ -31,41 +130,12 @@ class MovieSearchService {
 }
 ----
 
-This service-level call returns Meilisearch search hits. A repository method such as `findByTitle(...)` is not an equivalent shortcut.
-
-[[meilisearch.repositories.queries.unsupported]]
-== Unsupported Repository Query Methods
-
-The repository factory does not implement query-method resolution. Built-in methods such as `findById(...)` are supported because they are part of the repository base contract, but methods that require query resolution are rejected during repository bootstrap. This includes:
-
-* derived finder, count, and delete methods such as `findByTitle(...)` or `countByTitle(...)`,
-* methods annotated with repository `@Query`,
-* named-query-backed repository methods.
-
-For example, declaring the following method on a repository causes bootstrap to fail with an `IllegalStateException` whose message begins `Meilisearch repository query methods are not supported yet`:
-
-[source,java]
-----
-import io.vanslog.spring.data.meilisearch.annotations.Document;
-import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
-import org.springframework.data.annotation.Id;
-
-@Document(indexUid = "movies", applySettings = false)
-class Movie {
-  @Id String id;
-  String title;
-}
-
-interface MovieRepository extends MeilisearchRepository<Movie, String> {
-
-  Movie findByTitle(String title);
-}
-----
-
-Changing `queryLookupStrategy` or `namedQueriesLocation` does not add query-method support. Those attributes remain available for Spring Data configuration compatibility; see xref:repositories/configuration.adoc[Repository Configuration].
+This service-level call returns Meilisearch search hits. Repository derived queries provide a small, filter-oriented subset for common lookups; use `MeilisearchOperations` when search needs free-text ranking, facets, similar-document search, or federated multi-search.
 
 [[meilisearch.repositories.queries.notes]]
-== Paging, Sorting, and Result Limits
+== Base Repository Paging, Sorting, and Result Limits
+
+The derived-query behavior above is search-backed. The standard repository methods have separate behavior:
 
 * A paged `findAll(Pageable)` is search-backed. Its `Page` total comes from the total reported by Meilisearch search results. `pagination.maxTotalHits` can cap returned content without capping that reported total.
 * An unpaged `findAll(Pageable)` uses the document-list API, retrieves all documents into memory, and sets the `Page` total to the retrieved count. It is not limited by `maxTotalHits`.
@@ -74,4 +144,4 @@ Changing `queryLookupStrategy` or `namedQueriesLocation` does not add query-meth
 * Document-list reads are not capped by search `maxTotalHits` and ignore `displayedAttributes`.
 * Empty `saveAll(...)`, `deleteAll(Iterable)`, and `deleteAllById(...)` operations complete without a server request. The no-argument `deleteAll()` still deletes all documents for the entity type.
 
-For full method-to-API behavior, see xref:repositories/meilisearch-repositories.adoc#meilisearch.repositories.lookup-methods.behavior-table[Method Behavior at a Glance]. For query composition and search result metadata, use `MeilisearchOperations` directly.
+For full method-to-API behavior, see xref:repositories/meilisearch-repositories.adoc#meilisearch.repositories.lookup-methods.behavior-table[Method Behavior at a Glance].

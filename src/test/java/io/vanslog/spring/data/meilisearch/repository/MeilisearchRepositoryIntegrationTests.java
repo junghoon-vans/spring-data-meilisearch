@@ -40,6 +40,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.lang.Nullable;
 
 /**
  * Integration tests for {@link MeilisearchRepository}.
@@ -396,7 +397,43 @@ class MeilisearchRepositoryIntegrationTests {
 		assertThat(movieRepository.findAll()).containsExactlyInAnyOrderElementsOf(movies);
 	}
 
-	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {}
+	@Test
+	void shouldFindFilterBackedDerivedQueriesWithPageTotals() {
+		Movie first = new Movie(1, "Carol", "A love story", new String[] { "Drama" });
+		Movie second = new Movie(2, "Life of Pi", "A survival film", new String[] { "Drama", "Adventure" });
+		Movie other = new Movie(3, "Wonder Woman", "A superhero film", new String[] { "Action" });
+		movieRepository.saveAll(List.of(first, second, other));
+
+		assertThat(movieRepository.findByGenres("Drama")).containsExactlyInAnyOrder(first, second);
+		assertThat(movieRepository.findByGenresIn(List.of("Drama", "Action"))).containsExactlyInAnyOrder(first, second,
+				other);
+		assertThat(movieRepository.findByGenresNotIn(List.of("Drama"))).containsExactly(other);
+		Page<Movie> page = movieRepository.findByGenres("Drama", PageRequest.of(0, 1));
+		assertThat(page.getContent()).hasSize(1);
+		assertThat(page.getTotalElements()).isEqualTo(2);
+		assertThat(page.getTotalPages()).isEqualTo(2);
+	}
+
+	@Test
+	void shouldFindDocumentWithMissingFieldByNullArgument() {
+		Movie withoutGenres = new Movie(1, "Untyped", "No genres", null);
+		Movie withGenres = new Movie(2, "Typed", "Has genres", new String[] { "Drama" });
+		movieRepository.saveAll(List.of(withoutGenres, withGenres));
+
+		assertThat(movieRepository.findByGenres(null)).containsExactly(withoutGenres);
+		assertThat(movieRepository.findByGenres("Drama")).containsExactly(withGenres);
+	}
+
+	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {
+
+		List<Movie> findByGenres(@Nullable String genre);
+
+		List<Movie> findByGenresIn(List<String> genres);
+
+		List<Movie> findByGenresNotIn(List<String> genres);
+
+		Page<Movie> findByGenres(String genre, Pageable pageable);
+	}
 
 	interface TotalHitsLimitedRepository extends MeilisearchRepository<TotalHitsLimited, String> {}
 
