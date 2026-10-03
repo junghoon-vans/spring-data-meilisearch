@@ -311,6 +311,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 		String indexUid = getIndexUidFor(clazz);
 		TaskInfo taskInfo = execute(client -> client.index(indexUid).deleteDocumentsByFilter(filter));
+		if (taskInfo == null) {
+			throw new UncategorizedMeilisearchException("Failed to retrieve filtered delete task.");
+		}
 		int taskUid = taskInfo.getTaskUid();
 
 		Task task = execute((Client client) -> {

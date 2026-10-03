@@ -251,7 +251,7 @@ class MeilisearchTemplateIntegrationTests {
 
 	@Test
 	void shouldRejectFailedFilteredDeleteTask() {
-		MeilisearchTemplate template = templateWithDeleteTask(TaskStatus.FAILED, null);
+		MeilisearchTemplate template = templateWithDeleteTask(true, TaskStatus.FAILED, null);
 
 		assertThatThrownBy(() -> template.deleteByFilter(Movie.class, "genres = Drama"))
 				.isInstanceOf(TaskStatusException.class).satisfies(
@@ -260,7 +260,7 @@ class MeilisearchTemplateIntegrationTests {
 
 	@Test
 	void shouldRejectFilteredDeleteTaskWithoutDetails() {
-		MeilisearchTemplate template = templateWithDeleteTask(TaskStatus.SUCCEEDED, null);
+		MeilisearchTemplate template = templateWithDeleteTask(true, TaskStatus.SUCCEEDED, null);
 
 		assertThatThrownBy(() -> template.deleteByFilter(Movie.class, "genres = Drama"))
 				.isInstanceOf(UncategorizedMeilisearchException.class);
@@ -268,10 +268,19 @@ class MeilisearchTemplateIntegrationTests {
 
 	@Test
 	void shouldRejectMissingFilteredDeleteTask() {
-		MeilisearchTemplate template = templateWithDeleteTask(null, null);
+		MeilisearchTemplate template = templateWithDeleteTask(true, null, null);
 
 		assertThatThrownBy(() -> template.deleteByFilter(Movie.class, "genres = Drama"))
 				.isInstanceOf(UncategorizedMeilisearchException.class);
+	}
+
+	@Test
+	void shouldRejectMissingFilteredDeleteTaskInfo() {
+		MeilisearchTemplate template = templateWithDeleteTask(false, null, null);
+
+		assertThatThrownBy(() -> template.deleteByFilter(Movie.class, "genres = Drama"))
+				.isInstanceOf(UncategorizedMeilisearchException.class)
+				.hasMessageContaining("Failed to retrieve filtered delete task");
 	}
 
 	@Test
@@ -287,10 +296,14 @@ class MeilisearchTemplateIntegrationTests {
 				.isThrownBy(() -> new MeilisearchTemplate(client).deleteByFilter(Movie.class, " "));
 	}
 
-	private MeilisearchTemplate templateWithDeleteTask(TaskStatus taskStatus, TaskDetails taskDetails) {
+	private MeilisearchTemplate templateWithDeleteTask(boolean returnTaskInfo, TaskStatus taskStatus,
+			TaskDetails taskDetails) {
 		Index index = new Index() {
 			@Override
 			public TaskInfo deleteDocumentsByFilter(String filter) {
+				if (!returnTaskInfo) {
+					return null;
+				}
 				return new TaskInfo() {
 					@Override
 					public int getTaskUid() {
