@@ -115,10 +115,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 					"Cannot delete without an effective filter for derived query " + method.toGenericString());
 		}
 		long deleted = operations.deleteByFilter(domainType, String.join(" AND ", filters));
-		if (returnShape == MeilisearchQueryReturnShape.DELETE_VOID) {
-			return null;
-		}
-		return deleted;
+		return returnShape == MeilisearchQueryReturnShape.DELETE_VOID ? null : deleted;
 	}
 
 	private @Nullable Object executeFinder(List<String> filters, ParametersParameterAccessor accessor) {
@@ -568,14 +565,18 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		if (parameters.hasLimitParameter()) {
 			throw unsupportedOperator("Limit");
 		}
-		if (isProjection()
-				&& (tree.getSort().isSorted() || parameters.hasSortParameter() || parameters.hasPageableParameter())) {
+		if (isProjection() && hasProjectionSortOrPageable()) {
 			throw unsupportedOperator("Sort/Pageable for a count, exists, or delete method");
 		}
 		if ((returnShape == MeilisearchQueryReturnShape.ENTITY || returnShape == MeilisearchQueryReturnShape.OPTIONAL)
 				&& parameters.hasPageableParameter()) {
 			throw unsupportedOperator("Pageable for a single-result method");
 		}
+	}
+
+	private boolean hasProjectionSortOrPageable() {
+		var parameters = queryMethod.getParameters();
+		return tree.getSort().isSorted() || parameters.hasSortParameter() || parameters.hasPageableParameter();
 	}
 
 	private boolean isProjection() {

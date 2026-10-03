@@ -35,16 +35,17 @@ enum MeilisearchQueryReturnShape {
 	static MeilisearchQueryReturnShape resolve(PartTree tree, Method method, QueryMethod queryMethod,
 			Class<?> domainType) {
 		Class<?> returnType = method.getReturnType();
+		MeilisearchQueryReturnShape shape;
 		if (tree.isCountProjection()) {
-			return resolveCount(returnType, method);
+			shape = resolveCount(returnType, method);
+		} else if (tree.isExistsProjection()) {
+			shape = resolveExists(returnType, method);
+		} else if (tree.isDelete()) {
+			shape = resolveDelete(returnType, method);
+		} else {
+			shape = resolveFinder(returnType, method, queryMethod, domainType);
 		}
-		if (tree.isExistsProjection()) {
-			return resolveExists(returnType, method);
-		}
-		if (tree.isDelete()) {
-			return resolveDelete(returnType, method);
-		}
-		return resolveFinder(returnType, method, queryMethod, domainType);
+		return shape;
 	}
 
 	private static MeilisearchQueryReturnShape resolveCount(Class<?> returnType, Method method) {
@@ -76,22 +77,21 @@ enum MeilisearchQueryReturnShape {
 		if (!queryMethod.isQueryForEntity()) {
 			throw unsupportedReturnType(returnType, method);
 		}
+		MeilisearchQueryReturnShape shape;
 		if (returnType == Page.class) {
-			return PAGE;
+			shape = PAGE;
+		} else if (returnType == Optional.class) {
+			shape = OPTIONAL;
+		} else if (returnType == List.class) {
+			shape = LIST;
+		} else if (returnType == Iterable.class) {
+			shape = ITERABLE;
+		} else if (returnType.isAssignableFrom(domainType)) {
+			shape = ENTITY;
+		} else {
+			throw unsupportedReturnType(returnType, method);
 		}
-		if (returnType == Optional.class) {
-			return OPTIONAL;
-		}
-		if (returnType == List.class) {
-			return LIST;
-		}
-		if (returnType == Iterable.class) {
-			return ITERABLE;
-		}
-		if (returnType.isAssignableFrom(domainType)) {
-			return ENTITY;
-		}
-		throw unsupportedReturnType(returnType, method);
+		return shape;
 	}
 
 	private static IllegalArgumentException unsupportedReturnType(Class<?> returnType, Method method) {
