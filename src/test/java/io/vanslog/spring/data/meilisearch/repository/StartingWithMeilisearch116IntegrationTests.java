@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.*;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
-import io.vanslog.spring.data.meilisearch.repository.StartingWithMeilisearchRepositoryIntegrationTests.PrefixMovie;
-import io.vanslog.spring.data.meilisearch.repository.StartingWithMeilisearchRepositoryIntegrationTests.PrefixRepository;
+import io.vanslog.spring.data.meilisearch.repository.StartingWithMeilisearch117IntegrationTests.PrefixMovie;
+import io.vanslog.spring.data.meilisearch.repository.StartingWithMeilisearch117IntegrationTests.PrefixRepository;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
 
 import org.junit.jupiter.api.Test;

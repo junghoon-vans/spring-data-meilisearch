@@ -39,8 +39,8 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Junghoon Ban
  */
 @MeilisearchTest(version = "v1.17.0")
-@ContextConfiguration(classes = StartingWithMeilisearchRepositoryIntegrationTests.Config.class)
-class StartingWithMeilisearchRepositoryIntegrationTests {
+@ContextConfiguration(classes = StartingWithMeilisearch117IntegrationTests.Config.class)
+class StartingWithMeilisearch117IntegrationTests {
 
 	@Autowired private PrefixRepository movieRepository;
 
