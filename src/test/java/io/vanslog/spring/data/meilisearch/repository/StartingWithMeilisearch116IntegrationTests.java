@@ -17,16 +17,13 @@ package io.vanslog.spring.data.meilisearch.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
-import io.vanslog.spring.data.meilisearch.annotations.Document;
-import io.vanslog.spring.data.meilisearch.annotations.Setting;
-import io.vanslog.spring.data.meilisearch.entities.Movie;
+import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
+import io.vanslog.spring.data.meilisearch.repository.StartingWithMeilisearchRepositoryIntegrationTests.PrefixMovie;
+import io.vanslog.spring.data.meilisearch.repository.StartingWithMeilisearchRepositoryIntegrationTests.PrefixRepository;
 import io.vanslog.spring.data.meilisearch.repository.config.EnableMeilisearchRepositories;
 
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -34,48 +31,24 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
- * Verifies the minimum Meilisearch version for derived prefix filters.
+ * Verifies that the previous Meilisearch release rejects derived prefix filters.
  *
  * @author Junghoon Ban
  */
-@MeilisearchTest(version = "v1.17.0")
-@ContextConfiguration(classes = StartingWithMeilisearchRepositoryIntegrationTests.Config.class)
-class StartingWithMeilisearchRepositoryIntegrationTests {
+@MeilisearchTest(version = "v1.16.0")
+@ContextConfiguration(classes = StartingWithMeilisearch116IntegrationTests.Config.class)
+class StartingWithMeilisearch116IntegrationTests {
 
 	@Autowired private PrefixRepository movieRepository;
 
-	@BeforeEach
-	void setUp() {
-		movieRepository.deleteAll();
-	}
-
 	@Test
-	void shouldFindLiteralPrefixOnMeilisearch117() {
-		PrefixMovie first = new PrefixMovie(1, "Star Trek");
-		PrefixMovie quoted = new PrefixMovie(2, "Star \"Quest\"");
-		PrefixMovie middle = new PrefixMovie(3, "The Star");
-		movieRepository.saveAll(List.of(first, quoted, middle));
+	void shouldRejectStartingWithOnMeilisearch116() {
+		PrefixMovie movie = new PrefixMovie(1, "Star Trek");
+		movieRepository.save(movie);
 
-		assertThat(movieRepository.findByTitleStartingWith("Star")).containsExactlyInAnyOrder(first, quoted);
-		assertThat(movieRepository.findByTitleStartingWith("Star \"")).containsExactly(quoted);
-	}
-
-	interface PrefixRepository extends MeilisearchRepository<PrefixMovie, Integer> {
-
-		List<PrefixMovie> findByTitle(String title);
-
-		List<PrefixMovie> findByTitleStartingWith(String prefix);
-	}
-
-	@Setting(filterableAttributes = { "title" })
-	@Document(indexUid = "prefix-version-movies")
-	static class PrefixMovie extends Movie {
-
-		PrefixMovie() {}
-
-		PrefixMovie(int id, String title) {
-			super(id, title, "", null);
-		}
+		assertThat(movieRepository.findByTitle("Star Trek")).containsExactly(movie);
+		assertThatThrownBy(() -> movieRepository.findByTitleStartingWith("Star"))
+				.isInstanceOf(UncategorizedMeilisearchException.class).hasMessageContaining("STARTS WITH");
 	}
 
 	@Configuration
