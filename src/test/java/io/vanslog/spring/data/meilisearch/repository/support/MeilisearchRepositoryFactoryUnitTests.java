@@ -39,6 +39,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
@@ -143,6 +144,10 @@ class MeilisearchRepositoryFactoryUnitTests {
 	@Test
 	void shouldRejectNonStringStartingWithMethodsAtBootstrap() {
 		assertThatThrownBy(() -> repositoryFactory.getRepository(NumericPrefixRepository.class))
+				.hasMessageContaining("StartingWith").hasMessageContaining("non-string property");
+		assertThatThrownBy(() -> repositoryFactory.getRepository(CollectionPrefixRepository.class))
+				.hasMessageContaining("StartingWith").hasMessageContaining("non-string property");
+		assertThatThrownBy(() -> repositoryFactory.getRepository(MapPrefixRepository.class))
 				.hasMessageContaining("StartingWith").hasMessageContaining("non-string property");
 		assertThatThrownBy(() -> repositoryFactory.getRepository(NumericPrefixArgumentRepository.class))
 				.hasMessageContaining("StartingWith").hasMessageContaining("String parameter");
@@ -543,6 +548,18 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@NoRepositoryBean
+	interface CollectionPrefixRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		List<QueryDocument> findByTitlesStartingWith(String prefix);
+	}
+
+	@NoRepositoryBean
+	interface MapPrefixRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		List<QueryDocument> findByTranslationsStartingWith(String prefix);
+	}
+
+	@NoRepositoryBean
 	interface NumericPrefixArgumentRepository extends MeilisearchRepository<QueryDocument, String> {
 
 		List<QueryDocument> findByTitleStartingWith(int prefix);
@@ -650,6 +667,8 @@ class MeilisearchRepositoryFactoryUnitTests {
 		@Id private String id;
 		private String title;
 		private String genre;
+		private List<String> titles;
+		private Map<String, String> translations;
 		private int price;
 		private boolean available;
 

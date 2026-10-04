@@ -537,7 +537,9 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			throw unsupportedOperator(
 					FilterSyntax.operatorName(part) + " on non-boolean property " + part.getProperty().toDotPath());
 		}
-		if (part.getType() == Part.Type.STARTING_WITH && property.valueType() != String.class) {
+		if (part.getType() == Part.Type.STARTING_WITH
+				&& mappingContext.getPersistentPropertyPath(part.getProperty().toDotPath(), domainType).getLeafProperty()
+						.getType() != String.class) {
 			throw unsupportedOperator(
 					FilterSyntax.operatorName(part) + " on non-string property " + part.getProperty().toDotPath());
 		}
