@@ -438,6 +438,17 @@ class MeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
+	void shouldCheckBoxedExistenceWithNullableCompoundFilter() {
+		Movie withoutGenres = new Movie(1, "Untyped", "No genres", null);
+		Movie withGenres = new Movie(2, "Typed", "Drama", new String[] { "Drama" });
+		movieRepository.saveAll(List.of(withoutGenres, withGenres));
+
+		assertThat(movieRepository.existsByGenresAndTitle(null, "Untyped")).isTrue();
+		assertThat(movieRepository.existsByGenresAndTitle(null, "Typed")).isFalse();
+		assertThat(movieRepository.existsByGenresAndTitle("Drama", "Typed")).isTrue();
+	}
+
+	@Test
 	void shouldDeleteByDerivedFilterAndPreserveUnmatchedDocuments() {
 		Movie first = new Movie(1, "Carol", "A love story", new String[] { "Drama" });
 		Movie second = new Movie(2, "Life of Pi", "A survival film", new String[] { "Drama", "Adventure" });
@@ -463,6 +474,20 @@ class MeilisearchRepositoryIntegrationTests {
 		assertThat(movieRepository.findById(other.getId())).contains(other);
 	}
 
+	@Test
+	void shouldDeleteByDerivedFilterWithVoidReturn() {
+		Movie first = new Movie(1, "Carol", "A love story", new String[] { "Drama" });
+		Movie second = new Movie(2, "Life of Pi", "A survival film", new String[] { "Drama", "Adventure" });
+		Movie other = new Movie(3, "Wonder Woman", "A superhero film", new String[] { "Action" });
+		movieRepository.saveAll(List.of(first, second, other));
+
+		movieRepository.deleteByGenresIn(List.of("Drama"));
+
+		assertThat(movieRepository.findById(first.getId())).isEmpty();
+		assertThat(movieRepository.findById(second.getId())).isEmpty();
+		assertThat(movieRepository.findById(other.getId())).contains(other);
+	}
+
 	interface MovieRepository extends MeilisearchRepository<Movie, Integer> {
 
 		List<Movie> findByGenres(@Nullable String genre);
@@ -477,9 +502,13 @@ class MeilisearchRepositoryIntegrationTests {
 
 		boolean existsByGenres(String genre);
 
+		Boolean existsByGenresAndTitle(@Nullable String genre, String title);
+
 		long deleteByGenres(String genre);
 
 		long removeByGenres(String genre);
+
+		void deleteByGenresIn(List<String> genres);
 	}
 
 	interface TotalHitsLimitedRepository extends MeilisearchRepository<TotalHitsLimited, String> {}

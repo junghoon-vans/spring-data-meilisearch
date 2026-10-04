@@ -54,6 +54,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.core.NamedQueries;
+import org.springframework.data.repository.query.QueryCreationException;
 
 /**
  * Tests repository query creation and execution.
@@ -284,6 +285,12 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@Test
+	void shouldRejectPageableDeleteProjectionDuringRepositoryBootstrap() {
+		assertThatThrownBy(() -> repositoryFactory.getRepository(PagedProjectionRepository.class))
+				.isInstanceOf(QueryCreationException.class);
+	}
+
+	@Test
 	void shouldRejectDeclaredAndNamedQueriesDuringRepositoryBootstrap() {
 		assertThatThrownBy(() -> repositoryFactory.getRepository(DeclaredQueryRepository.class))
 				.hasMessageContaining("Declared and named Meilisearch repository queries are not supported")
@@ -501,6 +508,12 @@ class MeilisearchRepositoryFactoryUnitTests {
 	interface DynamicSortedProjectionRepository extends MeilisearchRepository<QueryDocument, String> {
 
 		boolean existsByTitle(String title, Sort sort);
+	}
+
+	@NoRepositoryBean
+	interface PagedProjectionRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		long deleteByTitle(String title, Pageable pageable);
 	}
 
 	@NoRepositoryBean
