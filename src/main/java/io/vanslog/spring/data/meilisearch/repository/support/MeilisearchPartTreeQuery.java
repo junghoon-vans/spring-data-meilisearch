@@ -316,10 +316,21 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			case EXISTS -> field + " EXISTS";
 			case IN -> createInFilter(field, property, part, accessor.getBindableValue(parameterIndex), false);
 			case NOT_IN -> createInFilter(field, property, part, accessor.getBindableValue(parameterIndex), true);
+			case STARTING_WITH -> createPrefixFilter(field, part, accessor.getBindableValue(parameterIndex));
 			case GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL, BETWEEN, TRUE, FALSE ->
 				createComparisonFilter(part, property, accessor, parameterIndex);
 			default -> throw unsupportedOperator(FilterSyntax.operatorName(part));
 		};
+	}
+
+	private String createPrefixFilter(String field, Part part, @Nullable Object value) {
+		if (!(value instanceof String prefix)) {
+			throw invalidParameter(part, "requires a non-null String prefix");
+		}
+		if (prefix.isEmpty()) {
+			throw invalidParameter(part, "empty prefixes are not supported");
+		}
+		return field + " STARTS WITH " + FilterSyntax.quote(prefix);
 	}
 
 	private String createComparisonFilter(Part part, PropertyReference property, ParametersParameterAccessor accessor,
@@ -509,7 +520,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			throw unsupportedOperator(
 					"parameter count (expected " + expectedParameters + ", found " + actualParameters + ")");
 		}
-		validateInParameters(parsedParts);
+		validateFilterParameters(parsedParts);
 	}
 
 	private void validatePart(Part part) {
@@ -526,9 +537,15 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 			throw unsupportedOperator(
 					FilterSyntax.operatorName(part) + " on non-boolean property " + part.getProperty().toDotPath());
 		}
+		if (part.getType() == Part.Type.STARTING_WITH
+				&& mappingContext.getPersistentPropertyPath(part.getProperty().toDotPath(), domainType).getLeafProperty()
+						.getType() != String.class) {
+			throw unsupportedOperator(
+					FilterSyntax.operatorName(part) + " on non-string property " + part.getProperty().toDotPath());
+		}
 	}
 
-	private void validateInParameters(List<Part> parsedParts) {
+	private void validateFilterParameters(List<Part> parsedParts) {
 
 		int parameterIndex = 0;
 		for (Part part : parsedParts) {
@@ -537,6 +554,10 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 				if (!Iterable.class.isAssignableFrom(parameterType) && !parameterType.isArray()) {
 					throw unsupportedOperator(FilterSyntax.operatorName(part) + " requires a collection or array parameter");
 				}
+			}
+			if (part.getType() == Part.Type.STARTING_WITH
+					&& queryMethod.getParameters().getBindableParameter(parameterIndex).getType() != String.class) {
+				throw unsupportedOperator(FilterSyntax.operatorName(part) + " requires a String parameter");
 			}
 			parameterIndex += part.getNumberOfArguments();
 		}
@@ -592,7 +613,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		private static boolean isSupported(Part.Type type) {
 			return switch (type) {
 				case SIMPLE_PROPERTY, IN, NOT_IN, GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL, BETWEEN, TRUE,
-						FALSE, IS_NULL, IS_NOT_NULL, EXISTS ->
+						FALSE, IS_NULL, IS_NOT_NULL, EXISTS, STARTING_WITH ->
 					true;
 				default -> false;
 			};

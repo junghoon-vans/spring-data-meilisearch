@@ -33,6 +33,10 @@ Spring Data parses derived query method names when the repository is created. Fo
 |`findByGenreNotIn(Collection<String> genres)`
 |`genre NOT IN ["drama", "science fiction"]`
 
+|`StartingWith`
+|`findByTitleStartingWith(String prefix)`
+|`title STARTS WITH "Star"`
+
 |`GreaterThan`, `GreaterThanEqual`
 |`findByRatingGreaterThan(int rating)` / `findByRatingGreaterThanEqual(int rating)`
 |`rating > 7` / `rating >= 7`
@@ -59,6 +63,8 @@ Spring Data parses derived query method names when the repository is created. Fo
 |===
 
 An empty collection passed to an `In` predicate is rejected at invocation with an `IllegalArgumentException` that identifies the method and operator. An empty collection passed to `NotIn` contributes no filter. With `Or`, each branch must retain at least one effective predicate; a branch consisting only of an empty `NotIn` is rejected rather than turning the whole query into an unfiltered search or delete.
+
+`StartingWith` requires a `String` property marked filterable in Meilisearch and a `String` parameter. Null or empty prefixes are rejected before searching or deleting. It matches a literal prefix of the field value, not a token anywhere in the text; `findByTitleStartingWith("Star")` matches `Star Trek` but not `The Star`. The filter value is quoted and escaped. The server must run Meilisearch **v1.17.0 or newer**: `STARTS WITH` became stable in v1.17.0 and does not require enabling the experimental `containsFilter` feature. Older servers reject the filter at request time; this module does not emulate it with full-text search or client-side filtering.
 
 For an equality predicate with an `@Nullable` argument, passing `null` matches both an explicitly null field and a missing field. `IsNull` matches those same two states. `IsNotNull` requires a present, non-null field, while `Exists` also matches an explicitly null field. The mapping converter omits null-valued properties when saving documents, so a missing field is the usual result of saving a null property.
 
@@ -134,7 +140,7 @@ Repository configuration continues to expose `queryLookupStrategy` and `namedQue
 
 The supported predicate and return-type matrix is intentionally narrow. The repository rejects unsupported derived methods during bootstrap, with the method and unsupported operator or return type in the error. In particular:
 
-* Free-text predicates such as `Containing`, `StartingWith`, and `Like` are not derived filters. Use `MeilisearchOperations` with a `BasicQuery` when you need full-text search. `EndingWith` and `Regex` are also unsupported.
+* `Containing`, `EndingWith`, `Like`, and `Regex` are unsupported text-pattern predicates. `Containing` would require the experimental `CONTAINS` filter, which is not enabled by this module. Full-text search through `MeilisearchOperations` with a `BasicQuery` is a different, tokenized search mode, not an equivalent literal field-prefix or substring filter.
 * Filter-based count, existence, and delete methods are supported only through the patterns and return types listed above; they do not accept sorting or paging. The standard repository `count()` and delete methods are separate operations and are unchanged.
 * Methods annotated with repository `@Query` and named-query-backed methods are not supported.
 * Interface or class projections, `Slice`, streams, scalar-valued finder results, and return types outside the supported method matrix are not supported.

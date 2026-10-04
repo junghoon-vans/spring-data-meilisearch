@@ -39,6 +39,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
@@ -117,6 +118,39 @@ class MeilisearchRepositoryFactoryUnitTests {
 		assertFilter(() -> repository.findByAvailableTrue(), "available = true");
 		assertFilter(() -> repository.findByAvailableFalse(), "available = false");
 		assertFilter(() -> repository.findByTitleAndPriceGreaterThan("Arrival", 5), "title = \"Arrival\"", "price > 5");
+	}
+
+	@Test
+	void shouldApplyStringPrefixToFindCountExistsAndDeleteFilters() {
+		PrefixQueryRepository repository = repositoryFactory.getRepository(PrefixQueryRepository.class);
+		willReturn(1, new QueryDocument("1", "Director's \"cut\"", "drama", 8, true));
+		deletedCount = 1;
+
+		assertFilter(() -> repository.findByTitleStartingWithAndGenre("Director's \"", "drama"),
+				"title STARTS WITH \"Director's \\\"\"", "genre = \"drama\"");
+		assertThat(repository.countByTitleStartingWith("Director's \"")).isEqualTo(1);
+		assertThat(countedFilters).containsExactly("title STARTS WITH \"Director's \\\"\"");
+		assertThat(repository.existsByTitleStartingWith("Director's \"")).isTrue();
+		assertThat(lastQuery().getFilter()).containsExactly("title STARTS WITH \"Director's \\\"\"");
+		assertThat(repository.deleteByTitleStartingWith("Director's \"")).isEqualTo(1);
+		assertThat(deletedFilters).containsExactly("title STARTS WITH \"Director's \\\"\"");
+		assertThatThrownBy(() -> repository.deleteByTitleStartingWith(null)).isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("StartingWith").hasMessageContaining("null");
+		assertThatThrownBy(() -> repository.deleteByTitleStartingWith("")).isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("StartingWith").hasMessageContaining("empty");
+		assertThat(deletedFilters).hasSize(1);
+	}
+
+	@Test
+	void shouldRejectNonStringStartingWithMethodsAtBootstrap() {
+		assertThatThrownBy(() -> repositoryFactory.getRepository(NumericPrefixRepository.class))
+				.hasMessageContaining("StartingWith").hasMessageContaining("non-string property");
+		assertThatThrownBy(() -> repositoryFactory.getRepository(CollectionPrefixRepository.class))
+				.hasMessageContaining("StartingWith").hasMessageContaining("non-string property");
+		assertThatThrownBy(() -> repositoryFactory.getRepository(MapPrefixRepository.class))
+				.hasMessageContaining("StartingWith").hasMessageContaining("non-string property");
+		assertThatThrownBy(() -> repositoryFactory.getRepository(NumericPrefixArgumentRepository.class))
+				.hasMessageContaining("StartingWith").hasMessageContaining("String parameter");
 	}
 
 	@Test
@@ -496,6 +530,42 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@NoRepositoryBean
+	interface PrefixQueryRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		List<QueryDocument> findByTitleStartingWithAndGenre(String prefix, String genre);
+
+		long countByTitleStartingWith(String prefix);
+
+		boolean existsByTitleStartingWith(String prefix);
+
+		long deleteByTitleStartingWith(String prefix);
+	}
+
+	@NoRepositoryBean
+	interface NumericPrefixRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		List<QueryDocument> findByPriceStartingWith(String prefix);
+	}
+
+	@NoRepositoryBean
+	interface CollectionPrefixRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		List<QueryDocument> findByTitlesStartingWith(String prefix);
+	}
+
+	@NoRepositoryBean
+	interface MapPrefixRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		List<QueryDocument> findByTranslationsStartingWith(String prefix);
+	}
+
+	@NoRepositoryBean
+	interface NumericPrefixArgumentRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		List<QueryDocument> findByTitleStartingWith(int prefix);
+	}
+
+	@NoRepositoryBean
 	interface TextQueryRepository extends MeilisearchRepository<QueryDocument, String> {
 
 		List<QueryDocument> findByTitleContaining(String title);
@@ -597,6 +667,8 @@ class MeilisearchRepositoryFactoryUnitTests {
 		@Id private String id;
 		private String title;
 		private String genre;
+		private List<String> titles;
+		private Map<String, String> translations;
 		private int price;
 		private boolean available;
 
