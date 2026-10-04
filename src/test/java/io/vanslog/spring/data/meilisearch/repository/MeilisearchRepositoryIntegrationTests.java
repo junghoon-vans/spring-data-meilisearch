@@ -421,6 +421,21 @@ class MeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
+	void shouldFilterTitlesByLiteralPrefixAcrossRepositoryOperations() {
+		Movie first = new Movie(1, "Star Trek", "Starts with Star", new String[] { "Sci-Fi" });
+		Movie quoted = new Movie(2, "Star \"Quest\"", "Escaped prefix", new String[] { "Sci-Fi" });
+		Movie middle = new Movie(3, "The Star", "Contains Star", new String[] { "Sci-Fi" });
+		movieRepository.saveAll(List.of(first, quoted, middle));
+
+		assertThat(movieRepository.findByTitleStartingWith("Star")).containsExactlyInAnyOrder(first, quoted);
+		assertThat(movieRepository.findByTitleStartingWith("Star \"")).containsExactly(quoted);
+		assertThat(movieRepository.countByTitleStartingWith("Star")).isEqualTo(2);
+		assertThat(movieRepository.existsByTitleStartingWith("The")).isTrue();
+		assertThat(movieRepository.deleteByTitleStartingWith("Star \"")).isEqualTo(1);
+		assertThat(movieRepository.findAll()).containsExactlyInAnyOrder(first, middle);
+	}
+
+	@Test
 	void shouldFindDocumentWithMissingFieldByNullArgument() {
 		Movie withoutGenres = new Movie(1, "Untyped", "No genres", null);
 		Movie withGenres = new Movie(2, "Typed", "Has genres", new String[] { "Drama" });
@@ -577,6 +592,14 @@ class MeilisearchRepositoryIntegrationTests {
 		List<Movie> findByGenresNotIn(List<String> genres);
 
 		Page<Movie> findByGenres(String genre, Pageable pageable);
+
+		List<Movie> findByTitleStartingWith(String prefix);
+
+		long countByTitleStartingWith(String prefix);
+
+		boolean existsByTitleStartingWith(String prefix);
+
+		long deleteByTitleStartingWith(String prefix);
 
 		long countByGenres(String genre);
 
