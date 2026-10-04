@@ -17,6 +17,7 @@ package io.vanslog.spring.data.meilisearch.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
@@ -188,7 +189,24 @@ class SortableMeilisearchRepositoryIntegrationTests {
 		assertThat(page2.getContent().get(0)).isEqualTo(movie2);
 	}
 
-	interface SortableMovieRepository extends MeilisearchRepository<SortableMovie, Integer> {}
+	@Test
+	void shouldRejectStartingWithOnMeilisearchBefore117() {
+		SortableMovie movie = new SortableMovie();
+		movie.setId(1);
+		movie.setTitle("Star Trek");
+		movieRepository.save(movie);
+
+		assertThat(movieRepository.findByTitle("Star Trek")).containsExactly(movie);
+		assertThatThrownBy(() -> movieRepository.findByTitleStartingWith("Star"))
+				.isInstanceOf(UncategorizedMeilisearchException.class).hasMessageContaining("STARTS WITH");
+	}
+
+	interface SortableMovieRepository extends MeilisearchRepository<SortableMovie, Integer> {
+
+		List<SortableMovie> findByTitle(String title);
+
+		List<SortableMovie> findByTitleStartingWith(String prefix);
+	}
 
 	@Configuration
 	@Import(MeilisearchTestConfiguration.class)
