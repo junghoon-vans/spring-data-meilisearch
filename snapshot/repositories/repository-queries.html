@@ -433,7 +433,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Repository query methods can derive a Meilisearch filter from a method name. This module supports a limited, search-backed finder subset; use <code>MeilisearchOperations</code> for queries that need explicit search composition.</p>
+<p>Repository query methods can derive Meilisearch filters from method names. The module supports a limited, search-backed finder subset and filter-based count, existence, and delete methods; use <code>MeilisearchOperations</code> for queries that need explicit search composition.</p>
 </div>
 </div>
 </div>
@@ -507,21 +507,62 @@
 <p>For an equality predicate with an <code>@Nullable</code> argument, passing <code>null</code> matches both an explicitly null field and a missing field. The mapping converter omits null-valued properties when saving documents.</p>
 </div>
 <div class="sect2">
+<h3 id="_count_existence_and_delete_methods"><a class="anchor" href="#_count_existence_and_delete_methods"></a>Count, Existence, and Delete Methods</h3>
+<div class="paragraph">
+<p>Derived predicates can also be used with the following methods:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Supported filter-based projection methods</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Method pattern</th>
+<th class="tableblock halign-left valign-top">Return type</th>
+<th class="tableblock halign-left valign-top">Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>countBy&lt;Property&gt;(&#8230;&#8203;)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>long</code>, <code>Long</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Returns the exact number of matching documents using Meilisearch&#8217;s <code>documents/fetch</code> API. This count is not capped by the search <code>pagination.maxTotalHits</code> limit. If the predicates produce no effective filter, <code>countBy</code> returns the unfiltered document count.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>existsBy&lt;Property&gt;(&#8230;&#8203;)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>boolean</code>, <code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Checks for a matching document using search with a limit of one.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deleteBy&lt;Property&gt;(&#8230;&#8203;)</code>, <code>removeBy&lt;Property&gt;(&#8230;&#8203;)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>long</code>, <code>Long</code>, <code>void</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Deletes matching documents with Meilisearch&#8217;s native filter-delete API and waits for the task to succeed. Numeric return types report the deleted-document count; a failed task or unavailable deletion details fails the invocation instead of returning a count.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>These methods use the same supported predicates listed above. Every property used in a predicate must be configured as filterable. Count, existence, and delete methods do not accept a static <code>OrderBy</code> suffix or runtime <code>Sort</code> or <code>Pageable</code> parameters. A delete or remove method must produce a non-empty effective filter; an unfiltered method or predicates that produce no filter are rejected rather than deleting every document.</p>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_method_return_types"><a class="anchor" href="#_method_return_types"></a>Method Return Types</h3>
 <div class="paragraph">
-<p>The query method may return one entity, <code>Optional&lt;Entity&gt;</code>, <code>List&lt;Entity&gt;</code>, <code>Iterable&lt;Entity&gt;</code>, or <code>Page&lt;Entity&gt;</code>. Entity and <code>Optional</code> methods require at most one match. When no hit matches, an entity method returns <code>null</code> by default; if its repository package uses Spring&#8217;s <code>@NonNullApi</code>, an unannotated entity method instead throws <code>EmptyResultDataAccessException</code>, while an explicitly <code>@Nullable</code> method may return <code>null</code>. <code>Optional</code> returns the sole hit or <code>Optional.empty()</code>. Either single-result form throws <code>IncorrectResultSizeDataAccessException</code> if multiple hits match. <code>List</code> and <code>Iterable</code> contain matching entity content.</p>
+<p>A finder method may return one entity, <code>Optional&lt;Entity&gt;</code>, <code>List&lt;Entity&gt;</code>, <code>Iterable&lt;Entity&gt;</code>, or <code>Page&lt;Entity&gt;</code>. Entity and <code>Optional</code> methods require at most one match. When no hit matches, an entity method returns <code>null</code> by default; if its repository package uses Spring&#8217;s <code>@NonNullApi</code>, an unannotated entity method instead throws <code>EmptyResultDataAccessException</code>, while an explicitly <code>@Nullable</code> method may return <code>null</code>. <code>Optional</code> returns the sole hit or <code>Optional.empty()</code>. Either single-result form throws <code>IncorrectResultSizeDataAccessException</code> if multiple hits match. <code>List</code> and <code>Iterable</code> contain matching entity content.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_sorting_and_paging"><a class="anchor" href="#_sorting_and_paging"></a>Sorting and Paging</h3>
 <div class="paragraph">
-<p>Static ordering uses an <code>OrderBy</code> suffix, for example <code>findByGenreOrderByRatingDesc(String genre)</code>. A <code>Sort</code> parameter provides runtime ordering, and a <code>Pageable</code> parameter provides an offset, limit, and optional sort. A <code>Page</code> contains the requested window and exposes the total reported by Meilisearch. Without a <code>Pageable</code>, <code>List</code> and <code>Iterable</code> methods fetch all matching hits in chunks and require an exact total; they fail rather than return a partial collection if the index&#8217;s <code>pagination.maxTotalHits</code> cap (1,000 by default) prevents complete retrieval. Configure <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code> when the application needs a different search limit.</p>
+<p>For finder methods, static ordering uses an <code>OrderBy</code> suffix, for example <code>findByGenreOrderByRatingDesc(String genre)</code>. A <code>Sort</code> parameter provides runtime ordering, and a <code>Pageable</code> parameter provides an offset, limit, and optional sort. A <code>Page</code> contains the requested window and exposes the total reported by Meilisearch. Without a <code>Pageable</code>, <code>List</code> and <code>Iterable</code> methods fetch all matching hits in chunks and require an exact total; they fail rather than return a partial collection if the index&#8217;s <code>pagination.maxTotalHits</code> cap (1,000 by default) prevents complete retrieval. Configure <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code> when the application needs a different search limit.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_index_settings"><a class="anchor" href="#_index_settings"></a>Index Settings</h3>
 <div class="paragraph">
-<p>String arguments are values, not filter expressions. They are emitted as quoted and escaped Meilisearch filter literals; do not add quotes or filter syntax to the argument. Numeric and boolean values are emitted as literals. Every field used in a predicate must be configured as filterable, and every field used for sorting must be configured as sortable. For example:</p>
+<p>String arguments are values, not filter expressions. They are emitted as quoted and escaped Meilisearch filter literals; do not add quotes or filter syntax to the argument. Numeric and boolean values are emitted as literals. Every field used in a predicate—including predicates for count, existence, and delete methods—must be configured as filterable, and every field used for sorting must be configured as sortable. For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -573,13 +614,13 @@ interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
 <p>Free-text predicates such as <code>Containing</code>, <code>StartingWith</code>, and <code>Like</code> are not derived filters. Use <code>MeilisearchOperations</code> with a <code>BasicQuery</code> when you need full-text search.</p>
 </li>
 <li>
-<p>Derived count and delete methods such as <code>countByTitle(&#8230;&#8203;)</code> and <code>deleteByTitle(&#8230;&#8203;)</code> are not supported. This limitation does not affect the standard repository <code>count()</code> or delete methods.</p>
+<p>Filter-based count, existence, and delete methods are supported only through the patterns and return types listed above; they do not accept sorting or paging. The standard repository <code>count()</code> and delete methods are separate operations and are unchanged.</p>
 </li>
 <li>
 <p>Methods annotated with repository <code>@Query</code> and named-query-backed methods are not supported.</p>
 </li>
 <li>
-<p>Projections, <code>Slice</code>, streams, scalar values, and other return types outside the supported matrix are not supported.</p>
+<p>Interface or class projections, <code>Slice</code>, streams, scalar-valued finder results, and return types outside the supported method matrix are not supported.</p>
 </li>
 </ul>
 </div>
@@ -592,7 +633,7 @@ interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
 <h2 id="meilisearch.repositories.queries.scope"><a class="anchor" href="#meilisearch.repositories.queries.scope"></a>Using MeilisearchOperations for Custom Queries</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Use <code>MeilisearchRepository</code> for the built-in CRUD, ID lookup, collection listing, sorting, and pageable methods. Use <code>MeilisearchOperations</code> for search features that need an explicit Meilisearch query or richer search result data, such as facets, similar-document search, or federated multi-search.</p>
+<p>Use <code>MeilisearchRepository</code> for the built-in CRUD, ID lookup, collection listing, sorting, pageable methods, and the supported derived finder, count, existence, and filter-delete methods. Use <code>MeilisearchOperations</code> for search features that need an explicit Meilisearch query or richer search result data, such as facets, similar-document search, or federated multi-search.</p>
 </div>
 <div class="paragraph">
 <p>For a mapped domain type such as <code>Movie</code>, inject <code>MeilisearchOperations</code> when you need to compose a search query directly:</p>
@@ -627,7 +668,7 @@ import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
 <h2 id="meilisearch.repositories.queries.notes"><a class="anchor" href="#meilisearch.repositories.queries.notes"></a>Base Repository Paging, Sorting, and Result Limits</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The derived-query behavior above is search-backed. The standard repository methods have separate behavior:</p>
+<p>Derived finder and existence methods use search. Derived count methods use <code>documents/fetch</code>, and derived filter-delete methods use the native index filter-delete API. The standard repository methods have separate behavior:</p>
 </div>
 <div class="ulist">
 <ul>
