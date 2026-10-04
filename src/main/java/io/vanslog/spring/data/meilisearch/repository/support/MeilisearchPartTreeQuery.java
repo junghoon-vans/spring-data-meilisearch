@@ -575,18 +575,6 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		};
 	}
 
-	private static boolean isSupported(Part.Type type) {
-		return switch (type) {
-			case SIMPLE_PROPERTY, IN, NOT_IN, GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL, BETWEEN, TRUE,
-					FALSE, IS_NULL, IS_NOT_NULL, EXISTS ->
-				true;
-			default -> false;
-		};
-	}
-
-	private static String operatorName(Part part) {
-		return part.getType().getKeywords().stream().findFirst().orElse(part.getType().name());
-	}
 	private IllegalArgumentException unsupportedOperator(String operator) {
 		return new IllegalArgumentException(
 				"Unsupported derived query operator '" + operator + "' in method " + method.toGenericString());
