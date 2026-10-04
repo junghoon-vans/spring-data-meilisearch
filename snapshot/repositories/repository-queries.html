@@ -484,6 +484,11 @@
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>genre NOT IN ["drama", "science fiction"]</code></p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>StartingWith</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByTitleStartingWith(String prefix)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title STARTS WITH "Star"</code></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>GreaterThan</code>, <code>GreaterThanEqual</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByRatingGreaterThan(int rating)</code> / <code>findByRatingGreaterThanEqual(int rating)</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>rating &gt; 7</code> / <code>rating &gt;= 7</code></p></td>
@@ -517,6 +522,9 @@
 </table>
 <div class="paragraph">
 <p>An empty collection passed to an <code>In</code> predicate is rejected at invocation with an <code>IllegalArgumentException</code> that identifies the method and operator. An empty collection passed to <code>NotIn</code> contributes no filter. With <code>Or</code>, each branch must retain at least one effective predicate; a branch consisting only of an empty <code>NotIn</code> is rejected rather than turning the whole query into an unfiltered search or delete.</p>
+</div>
+<div class="paragraph">
+<p><code>StartingWith</code> requires a <code>String</code> property marked filterable in Meilisearch and a <code>String</code> parameter. Null or empty prefixes are rejected before searching or deleting. It matches a literal prefix of the field value, not a token anywhere in the text; <code>findByTitleStartingWith("Star")</code> matches <code>Star Trek</code> but not <code>The Star</code>. The filter value is quoted and escaped. The server must run Meilisearch <strong>v1.17.0 or newer</strong>: <code>STARTS WITH</code> became stable in v1.17.0 and does not require enabling the experimental <code>containsFilter</code> feature. Older servers reject the filter at request time; this module does not emulate it with full-text search or client-side filtering.</p>
 </div>
 <div class="paragraph">
 <p>For an equality predicate with an <code>@Nullable</code> argument, passing <code>null</code> matches both an explicitly null field and a missing field. <code>IsNull</code> matches those same two states. <code>IsNotNull</code> requires a present, non-null field, while <code>Exists</code> also matches an explicitly null field. The mapping converter omits null-valued properties when saving documents, so a missing field is the usual result of saving a null property.</p>
@@ -629,7 +637,7 @@ interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
 <div class="ulist">
 <ul>
 <li>
-<p>Free-text predicates such as <code>Containing</code>, <code>StartingWith</code>, and <code>Like</code> are not derived filters. Use <code>MeilisearchOperations</code> with a <code>BasicQuery</code> when you need full-text search. <code>EndingWith</code> and <code>Regex</code> are also unsupported.</p>
+<p><code>Containing</code>, <code>EndingWith</code>, <code>Like</code>, and <code>Regex</code> are unsupported text-pattern predicates. <code>Containing</code> would require the experimental <code>CONTAINS</code> filter, which is not enabled by this module. Full-text search through <code>MeilisearchOperations</code> with a <code>BasicQuery</code> is a different, tokenized search mode, not an equivalent literal field-prefix or substring filter.</p>
 </li>
 <li>
 <p>Filter-based count, existence, and delete methods are supported only through the patterns and return types listed above; they do not accept sorting or paging. The standard repository <code>count()</code> and delete methods are separate operations and are unchanged.</p>
