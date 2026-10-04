@@ -28,7 +28,7 @@ import org.springframework.data.annotation.Id;
  *
  * @author Junghoon Ban
  */
-@Setting(filterableAttributes = { "genres" })
+@Setting(filterableAttributes = { "genres", "title" })
 @Document(indexUid = "movies")
 @SuppressWarnings("unused")
 public class Movie {

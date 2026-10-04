@@ -54,6 +54,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.core.NamedQueries;
+import org.springframework.data.repository.query.QueryCreationException;
 
 /**
  * Tests repository query creation and execution.
@@ -64,6 +65,9 @@ class MeilisearchRepositoryFactoryUnitTests {
 
 	private MeilisearchRepositoryFactory repositoryFactory;
 	private List<BaseQuery> executedQueries;
+	private List<String> countedFilters;
+	private List<String> deletedFilters;
+	private long deletedCount;
 	private List<SearchHit<QueryDocument>> searchHits;
 	private long totalHits;
 	private TotalHitsRelation totalHitsRelation;
@@ -73,6 +77,9 @@ class MeilisearchRepositoryFactoryUnitTests {
 	void setUp() {
 		MappingMeilisearchConverter converter = new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 		executedQueries = new ArrayList<>();
+		countedFilters = new ArrayList<>();
+		deletedFilters = new ArrayList<>();
+		deletedCount = 0;
 		searchHits = List.of();
 		totalHits = 0;
 		totalHitsRelation = TotalHitsRelation.EQUAL_TO;
@@ -222,13 +229,65 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@Test
-	void shouldRejectDerivedCountExistsAndDeleteMethodsDuringRepositoryBootstrap() {
-		assertThatThrownBy(() -> repositoryFactory.getRepository(CountQueryRepository.class))
-				.hasMessageContaining("Unsupported derived query operator 'Count'");
-		assertThatThrownBy(() -> repositoryFactory.getRepository(ExistsQueryRepository.class))
-				.hasMessageContaining("Unsupported derived query operator 'Exists'");
-		assertThatThrownBy(() -> repositoryFactory.getRepository(DeleteQueryRepository.class))
-				.hasMessageContaining("Unsupported derived query operator 'Delete'");
+	void shouldExecuteCountAndExistsProjectionsWithMappedFilters() {
+		CountQueryRepository countRepository = repositoryFactory.getRepository(CountQueryRepository.class);
+		ExistsQueryRepository existsRepository = repositoryFactory.getRepository(ExistsQueryRepository.class);
+
+		willReturn(42);
+		assertThat(countRepository.countByTitle("Arrival")).isEqualTo(42);
+		assertThat(countRepository.countByGenreAndPriceGreaterThan("drama", 5)).isEqualTo(42);
+		assertThat(countRepository.countByAvailableTrue()).isEqualTo(42L);
+		assertThat(countedFilters).containsExactly("title = \"Arrival\"", "genre = \"drama\" AND price > 5",
+				"available = true");
+		assertThat(countRepository.countByGenreNotIn(List.of())).isEqualTo(42);
+		assertThat(countedFilters).hasSize(3);
+		assertThat(executedQueries).isEmpty();
+
+		willReturn(0);
+		assertThat(existsRepository.existsByTitle("missing")).isFalse();
+		willReturn(1, new QueryDocument("1", "Arrival", "drama", 8, true));
+		assertThat(existsRepository.existsByTitle("Arrival")).isTrue();
+		assertThat(existsRepository.existsByGenre("drama")).isTrue();
+		assertThat(lastQuery().getPageable().getPageSize()).isEqualTo(1);
+		assertThat(lastQuery().getFilter()).containsExactly("genre = \"drama\"");
+	}
+
+	@Test
+	void shouldDeleteByFilterWithoutMaterializingMatchingDocuments() {
+		DeleteQueryRepository repository = repositoryFactory.getRepository(DeleteQueryRepository.class);
+		deletedCount = 3;
+
+		assertThat(repository.deleteByTitle("Arrival")).isEqualTo(3);
+		assertThat(repository.removeByGenre("drama")).isEqualTo(3);
+		assertThat(repository.deleteByGenre("drama")).isEqualTo(3L);
+		repository.deleteByAvailableFalse();
+		assertThat(deletedFilters).containsExactly("title = \"Arrival\"", "genre = \"drama\"", "genre = \"drama\"",
+				"available = false");
+		assertThat(executedQueries).isEmpty();
+
+		assertThatThrownBy(() -> repository.deleteByGenreNotIn(List.of())).isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("effective filter");
+		assertThat(deletedFilters).hasSize(4);
+	}
+
+	@Test
+	void shouldRejectInvalidProjectionReturnsAndSortingAtBootstrap() {
+		assertThatThrownBy(() -> repositoryFactory.getRepository(InvalidCountReturnRepository.class))
+				.hasMessageContaining("countByTitle").hasMessageContaining("return type");
+		assertThatThrownBy(() -> repositoryFactory.getRepository(InvalidExistsReturnRepository.class))
+				.hasMessageContaining("existsByTitle").hasMessageContaining("return type");
+		assertThatThrownBy(() -> repositoryFactory.getRepository(InvalidDeleteReturnRepository.class))
+				.hasMessageContaining("deleteByTitle").hasMessageContaining("return type");
+		assertThatThrownBy(() -> repositoryFactory.getRepository(SortedProjectionRepository.class))
+				.hasMessageContaining("countByTitleOrderByPriceDesc").hasMessageContaining("Sort/Pageable");
+		assertThatThrownBy(() -> repositoryFactory.getRepository(DynamicSortedProjectionRepository.class))
+				.hasMessageContaining("existsByTitle").hasMessageContaining("Sort/Pageable");
+	}
+
+	@Test
+	void shouldRejectPageableDeleteProjectionDuringRepositoryBootstrap() {
+		assertThatThrownBy(() -> repositoryFactory.getRepository(PagedProjectionRepository.class))
+				.isInstanceOf(QueryCreationException.class);
 	}
 
 	@Test
@@ -306,6 +365,14 @@ class MeilisearchRepositoryFactoryUnitTests {
 								return new StubSearchHits<>(List.of(), totalHits, totalHitsRelation);
 							}
 							return new StubSearchHits<>(searchHits, totalHits, totalHitsRelation);
+						case "count":
+							if (args.length == 2) {
+								countedFilters.add((String) args[1]);
+							}
+							return totalHits;
+						case "deleteByFilter":
+							deletedFilters.add((String) args[1]);
+							return deletedCount;
 						case "toString":
 							return "test MeilisearchOperations proxy";
 						case "hashCode":
@@ -383,18 +450,70 @@ class MeilisearchRepositoryFactoryUnitTests {
 	interface CountQueryRepository extends MeilisearchRepository<QueryDocument, String> {
 
 		long countByTitle(String title);
+
+		long countByGenreAndPriceGreaterThan(String genre, int price);
+
+		Long countByAvailableTrue();
+
+		long countByGenreNotIn(Collection<String> genres);
 	}
 
 	@NoRepositoryBean
 	interface ExistsQueryRepository extends MeilisearchRepository<QueryDocument, String> {
 
 		boolean existsByTitle(String title);
+
+		boolean existsByGenre(String genre);
 	}
 
 	@NoRepositoryBean
 	interface DeleteQueryRepository extends MeilisearchRepository<QueryDocument, String> {
 
 		long deleteByTitle(String title);
+
+		long removeByGenre(String genre);
+
+		Long deleteByGenre(String genre);
+
+		void deleteByAvailableFalse();
+
+		long deleteByGenreNotIn(Collection<String> genres);
+	}
+
+	@NoRepositoryBean
+	interface InvalidCountReturnRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		String countByTitle(String title);
+	}
+
+	@NoRepositoryBean
+	interface InvalidExistsReturnRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		long existsByTitle(String title);
+	}
+
+	@NoRepositoryBean
+	interface InvalidDeleteReturnRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		boolean deleteByTitle(String title);
+	}
+
+	@NoRepositoryBean
+	interface SortedProjectionRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		long countByTitleOrderByPriceDesc(String title);
+	}
+
+	@NoRepositoryBean
+	interface DynamicSortedProjectionRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		boolean existsByTitle(String title, Sort sort);
+	}
+
+	@NoRepositoryBean
+	interface PagedProjectionRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		long deleteByTitle(String title, Pageable pageable);
 	}
 
 	@NoRepositoryBean
