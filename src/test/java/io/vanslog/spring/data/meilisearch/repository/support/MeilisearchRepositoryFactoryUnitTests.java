@@ -217,9 +217,44 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@Test
-	void shouldRejectOrPredicatesDuringRepositoryBootstrap() {
-		assertThatThrownBy(() -> repositoryFactory.getRepository(OrQueryRepository.class))
-				.hasMessageContaining("findByTitleOrGenre").hasMessageContaining("Or");
+	void shouldPreserveOrBranchesAndRejectAnEmptyBranch() {
+		OrQueryRepository repository = repositoryFactory.getRepository(OrQueryRepository.class);
+		willReturn(1, new QueryDocument("1", "Arrival", "drama", 8, true));
+
+		assertFilter(() -> repository.findByTitleAndPriceGreaterThanOrGenreAndAvailableTrue("Arrival", 5, "drama"),
+				"(title = \"Arrival\" AND price > 5) OR (genre = \"drama\" AND available = true)");
+		assertFilter(() -> repository.findByGenreNotInAndTitleOrAvailableTrue(List.of(), "Arrival"),
+				"(title = \"Arrival\") OR (available = true)");
+		assertThatThrownBy(() -> repository.findByGenreNotInOrTitle(List.of(), "Arrival"))
+				.isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Or branch")
+				.hasMessageContaining("findByGenreNotInOrTitle");
+		assertThatThrownBy(() -> repository.deleteByGenreNotInOrTitle(List.of(), "Arrival"))
+				.isInstanceOf(IllegalArgumentException.class).hasMessageContaining("effective filter");
+		assertThat(deletedFilters).isEmpty();
+	}
+
+	@Test
+	void shouldPreserveOrGroupingForCountExistenceAndDelete() {
+		OrQueryRepository repository = repositoryFactory.getRepository(OrQueryRepository.class);
+		willReturn(2, new QueryDocument("1", "Arrival", "drama", 8, true));
+		deletedCount = 2;
+
+		assertThat(repository.countByTitleOrGenre("Arrival", "drama")).isEqualTo(2);
+		assertThat(countedFilters).containsExactly("(title = \"Arrival\") OR (genre = \"drama\")");
+		assertThat(repository.existsByTitleOrGenre("Arrival", "drama")).isTrue();
+		assertThat(lastQuery().getFilter()).containsExactly("(title = \"Arrival\") OR (genre = \"drama\")");
+		assertThat(repository.deleteByTitleOrGenre("Arrival", "drama")).isEqualTo(2);
+		assertThat(deletedFilters).containsExactly("(title = \"Arrival\") OR (genre = \"drama\")");
+	}
+
+	@Test
+	void shouldDistinguishNullMissingAndExistingFields() {
+		SupportedRepository repository = repositoryFactory.getRepository(SupportedRepository.class);
+		willReturn(1, new QueryDocument("1", "Arrival", "drama", 8, true));
+
+		assertFilter(repository::findByGenreIsNull, "(genre IS NULL OR genre NOT EXISTS)");
+		assertFilter(repository::findByGenreIsNotNull, "(genre EXISTS AND genre IS NOT NULL)");
+		assertFilter(repository::findByGenreExists, "genre EXISTS");
 	}
 
 	@Test
@@ -432,12 +467,32 @@ class MeilisearchRepositoryFactoryUnitTests {
 		List<QueryDocument> findByAvailableFalse();
 
 		List<QueryDocument> findByTitleAndPriceGreaterThan(String title, int price);
+
+		List<QueryDocument> findByGenreIsNull();
+
+		List<QueryDocument> findByGenreIsNotNull();
+
+		List<QueryDocument> findByGenreExists();
 	}
 
 	@NoRepositoryBean
 	interface OrQueryRepository extends MeilisearchRepository<QueryDocument, String> {
 
 		List<QueryDocument> findByTitleOrGenre(String title, String genre);
+
+		List<QueryDocument> findByTitleAndPriceGreaterThanOrGenreAndAvailableTrue(String title, int price, String genre);
+
+		List<QueryDocument> findByGenreNotInAndTitleOrAvailableTrue(Collection<String> genres, String title);
+
+		List<QueryDocument> findByGenreNotInOrTitle(Collection<String> genres, String title);
+
+		long countByTitleOrGenre(String title, String genre);
+
+		boolean existsByTitleOrGenre(String title, String genre);
+
+		long deleteByTitleOrGenre(String title, String genre);
+
+		long deleteByGenreNotInOrTitle(Collection<String> genres, String title);
 	}
 
 	@NoRepositoryBean
