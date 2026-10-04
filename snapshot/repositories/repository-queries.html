@@ -464,6 +464,16 @@
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>title = "Arrival"</code></p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>IsNull</code>, <code>IsNotNull</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreIsNull()</code> / <code>findByGenreIsNotNull()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>(genre IS NULL OR genre NOT EXISTS)</code> / <code>(genre EXISTS AND genre IS NOT NULL)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Exists</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreExists()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>genre EXISTS</code></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>In</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreIn(Collection&lt;String&gt; genres)</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>genre IN ["drama", "science fiction"]</code></p></td>
@@ -498,13 +508,18 @@
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreAndRatingGreaterThan(String genre, int rating)</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Both predicates must match (<code>AND</code>)</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Or</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreAndRatingGreaterThanOrAvailableTrue(String genre, int rating)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>(genre = "drama" AND rating &gt; 7) OR (available = true)</code></p></td>
+</tr>
 </tbody>
 </table>
 <div class="paragraph">
-<p>An empty collection passed to an <code>In</code> predicate is rejected at invocation with an <code>IllegalArgumentException</code> that identifies the method and operator. An empty collection passed to <code>NotIn</code> contributes no filter.</p>
+<p>An empty collection passed to an <code>In</code> predicate is rejected at invocation with an <code>IllegalArgumentException</code> that identifies the method and operator. An empty collection passed to <code>NotIn</code> contributes no filter. With <code>Or</code>, each branch must retain at least one effective predicate; a branch consisting only of an empty <code>NotIn</code> is rejected rather than turning the whole query into an unfiltered search or delete.</p>
 </div>
 <div class="paragraph">
-<p>For an equality predicate with an <code>@Nullable</code> argument, passing <code>null</code> matches both an explicitly null field and a missing field. The mapping converter omits null-valued properties when saving documents.</p>
+<p>For an equality predicate with an <code>@Nullable</code> argument, passing <code>null</code> matches both an explicitly null field and a missing field. <code>IsNull</code> matches those same two states. <code>IsNotNull</code> requires a present, non-null field, while <code>Exists</code> also matches an explicitly null field. The mapping converter omits null-valued properties when saving documents, so a missing field is the usual result of saving a null property.</p>
 </div>
 <div class="sect2">
 <h3 id="_count_existence_and_delete_methods"><a class="anchor" href="#_count_existence_and_delete_methods"></a>Count, Existence, and Delete Methods</h3>
@@ -544,7 +559,7 @@
 </tbody>
 </table>
 <div class="paragraph">
-<p>These methods use the same supported predicates listed above. Every property used in a predicate must be configured as filterable. Count, existence, and delete methods do not accept a static <code>OrderBy</code> suffix or runtime <code>Sort</code> or <code>Pageable</code> parameters. A delete or remove method must produce a non-empty effective filter; an unfiltered method or predicates that produce no filter are rejected rather than deleting every document.</p>
+<p>These methods use the same supported predicates listed above, including grouped <code>Or</code> branches. Every property used in a predicate must be configured as filterable. Count, existence, and delete methods do not accept a static <code>OrderBy</code> suffix or runtime <code>Sort</code> or <code>Pageable</code> parameters. A delete or remove method must produce a non-empty effective filter; an unfiltered method or predicates that produce no filter are rejected rather than deleting every document.</p>
 </div>
 </div>
 <div class="sect2">
@@ -563,6 +578,12 @@
 <h3 id="_index_settings"><a class="anchor" href="#_index_settings"></a>Index Settings</h3>
 <div class="paragraph">
 <p>String arguments are values, not filter expressions. They are emitted as quoted and escaped Meilisearch filter literals; do not add quotes or filter syntax to the argument. Numeric and boolean values are emitted as literals. Every field used in a predicate—including predicates for count, existence, and delete methods—must be configured as filterable, and every field used for sorting must be configured as sortable. For example:</p>
+</div>
+<div class="paragraph">
+<p>Nested property paths use dotted Meilisearch field names. For example, <code>findByDetailsDirector(String director)</code> filters <code>details.director = "Director"</code> for an entity with a <code>details.director</code> property. The segments are the mapped Java field names; custom aliases for these fields are not supported. Configure <code>details.director</code> as a filterable attribute; a filter on the top-level <code>details</code> attribute does not substitute for that nested path.</p>
+</div>
+<div class="paragraph">
+<p>A collection of nested objects can also be filtered by a nested field. For example, <code>findByCreditsDirector("Director")</code> filters <code>credits.director</code> and matches a document with at least one matching object in its <code>credits</code> array. Configure <code>credits.director</code> as filterable. If the path is missing, <code>IsNull</code> matches it under the same missing-field semantics described above. Predicates on different nested fields are combined as document-level filters; they do not require values to come from the same array element.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -608,10 +629,7 @@ interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
 <div class="ulist">
 <ul>
 <li>
-<p><code>Or</code> predicates are not supported; only conjunctions (<code>And</code>) are supported.</p>
-</li>
-<li>
-<p>Free-text predicates such as <code>Containing</code>, <code>StartingWith</code>, and <code>Like</code> are not derived filters. Use <code>MeilisearchOperations</code> with a <code>BasicQuery</code> when you need full-text search.</p>
+<p>Free-text predicates such as <code>Containing</code>, <code>StartingWith</code>, and <code>Like</code> are not derived filters. Use <code>MeilisearchOperations</code> with a <code>BasicQuery</code> when you need full-text search. <code>EndingWith</code> and <code>Regex</code> are also unsupported.</p>
 </li>
 <li>
 <p>Filter-based count, existence, and delete methods are supported only through the patterns and return types listed above; they do not accept sorting or paging. The standard repository <code>count()</code> and delete methods are separate operations and are unchanged.</p>
