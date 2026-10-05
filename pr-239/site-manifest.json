@@ -1,15 +1,13 @@
 {
   "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
-  "generated": "2026-10-04T12:52:43.678Z",
+  "generated": "2026-10-05T06:42:11.386Z",
   "url": "https://junghoon-vans.github.io/spring-data-meilisearch",
   "components": {
     "data-meilisearch": {
       "title": "Spring Data Meilisearch",
-      "latest": "0.11.1",
+      "latest": "0.12.0",
       "versions": {
-        "0.11.1": {
-          "prerelease": true,
-          "displayVersion": "0.11.1-SNAPSHOT",
+        "0.12.0": {
           "url": "/index.html",
           "pages": [
             {

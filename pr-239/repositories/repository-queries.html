@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Query Methods :: Spring Data Meilisearch</title>
+    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/repositories/repository-queries.html">
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -19,9 +20,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.11.1">
-    <meta name="generation" content="0.11-SNAPSHOT">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.11-SNAPSHOT/repositories/repository-queries.html">
+    <meta name="version" content="0.12.0">
+    <meta name="generation" content="0.12">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.12/repositories/repository-queries.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -248,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.11.1">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.12.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.11.1-SNAPSHOT</span>
+  <span class="version">0.12.0</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -487,6 +488,11 @@
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>genre NOT IN ["drama", "science fiction"]</code></p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>StartingWith</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByTitleStartingWith(String prefix)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title STARTS WITH "Star"</code></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>GreaterThan</code>, <code>GreaterThanEqual</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByRatingGreaterThan(int rating)</code> / <code>findByRatingGreaterThanEqual(int rating)</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>rating &gt; 7</code> / <code>rating &gt;= 7</code></p></td>
@@ -520,6 +526,9 @@
 </table>
 <div class="paragraph">
 <p>An empty collection passed to an <code>In</code> predicate is rejected at invocation with an <code>IllegalArgumentException</code> that identifies the method and operator. An empty collection passed to <code>NotIn</code> contributes no filter. With <code>Or</code>, each branch must retain at least one effective predicate; a branch consisting only of an empty <code>NotIn</code> is rejected rather than turning the whole query into an unfiltered search or delete.</p>
+</div>
+<div class="paragraph">
+<p><code>StartingWith</code> requires a <code>String</code> property marked filterable in Meilisearch and a <code>String</code> parameter. Null or empty prefixes are rejected before searching or deleting. It matches a literal prefix of the field value, not a token anywhere in the text; <code>findByTitleStartingWith("Star")</code> matches <code>Star Trek</code> but not <code>The Star</code>. The filter value is quoted and escaped. The server must run Meilisearch <strong>v1.17.0 or newer</strong>: <code>STARTS WITH</code> became stable in v1.17.0 and does not require enabling the experimental <code>containsFilter</code> feature. Older servers reject the filter at request time; this module does not emulate it with full-text search or client-side filtering.</p>
 </div>
 <div class="paragraph">
 <p>For an equality predicate with an <code>@Nullable</code> argument, passing <code>null</code> matches both an explicitly null field and a missing field. <code>IsNull</code> matches those same two states. <code>IsNotNull</code> requires a present, non-null field, while <code>Exists</code> also matches an explicitly null field. The mapping converter omits null-valued properties when saving documents, so a missing field is the usual result of saving a null property.</p>
@@ -632,7 +641,7 @@ interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
 <div class="ulist">
 <ul>
 <li>
-<p>Free-text predicates such as <code>Containing</code>, <code>StartingWith</code>, and <code>Like</code> are not derived filters. Use <code>MeilisearchOperations</code> with a <code>BasicQuery</code> when you need full-text search. <code>EndingWith</code> and <code>Regex</code> are also unsupported.</p>
+<p><code>Containing</code>, <code>EndingWith</code>, <code>Like</code>, and <code>Regex</code> are unsupported text-pattern predicates. <code>Containing</code> would require the experimental <code>CONTAINS</code> filter, which is not enabled by this module. Full-text search through <code>MeilisearchOperations</code> with a <code>BasicQuery</code> is a different, tokenized search mode, not an equivalent literal field-prefix or substring filter.</p>
 </li>
 <li>
 <p>Filter-based count, existence, and delete methods are supported only through the patterns and return types listed above; they do not accept sorting or paging. The standard repository <code>count()</code> and delete methods are separate operations and are unchanged.</p>
@@ -734,17 +743,17 @@ import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
                       <li class="component">
                         <div>
                           <a class="title" href="../index.html">Spring Data Meilisearch</a>
-                        </div>                        <div class="version-item">
+                        </div>                        <div class="version-item is-active">
                           <div>
                             <button class="version-toggle" type="button">
                               <span></span>
-                              Snapshot
+                              Stable
                             </button>
                           </div>
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      0.11.1-SNAPSHOT
+      0.12.0
     </a>
   </li>
 </ul>                        </div>
@@ -1056,6 +1065,6 @@ import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
 <script src="../_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.11.1" data-page-generation="0.11-SNAPSHOT" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.12.0" data-page-generation="0.12" data-page-component="data-meilisearch"></script>
   </body>
 </html>
