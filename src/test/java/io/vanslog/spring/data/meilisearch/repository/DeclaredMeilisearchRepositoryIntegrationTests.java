@@ -87,6 +87,23 @@ class DeclaredMeilisearchRepositoryIntegrationTests {
 	}
 
 	@Test
+	void shouldPreserveControlCharactersInDeclaredAndDerivedFilterValues() {
+		String literal = "quote\" slash\\ newline\n carriage\r tab\t backspace\b formfeed\f control" + (char) 1;
+		String escapedText = "quote\" slash\\ newline\\n carriage\\r tab\\t backspace\\b formfeed\\f control\\u0001";
+		repository
+				.saveAll(List.of(product("controls", literal, "Film", 10), product("escaped-text", escapedText, "Film", 20)));
+		MeilisearchRepositoryFactory factory = new MeilisearchRepositoryFactory(operations);
+		factory.setQueryLookupStrategyKey(QueryLookupStrategy.Key.CREATE);
+		StrategyRepository derivedRepository = factory.getRepository(StrategyRepository.class);
+
+		assertThat(repository.byTitle(literal)).get().extracting(DeclaredProduct::getId).isEqualTo("controls");
+		assertThat(derivedRepository.findByTitle(literal)).extracting(DeclaredProduct::getId).containsExactly("controls");
+		assertThat(repository.byTitle(escapedText)).get().extracting(DeclaredProduct::getId).isEqualTo("escaped-text");
+		assertThat(derivedRepository.findByTitle(escapedText)).extracting(DeclaredProduct::getId)
+				.containsExactly("escaped-text");
+	}
+
+	@Test
 	void shouldBindCollectionsAndBooleansWithoutDroppingConditions() {
 		repository.saveAll(List.of(product("1", "Running shoes", "Sports", 30), product("2", "Walking shoes", "Casual", 10),
 				new DeclaredProduct("3", "Retired shoes", "Sports", 5, false), product("4", "Office shoes", "Business", 20)));

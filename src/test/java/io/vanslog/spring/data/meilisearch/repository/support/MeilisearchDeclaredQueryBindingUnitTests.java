@@ -56,14 +56,6 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 	}
 
 	@Test
-	void escapesFilterLiteralDelimitersAndControlCharacters() {
-
-		String value = "quote\" slash\\ line\n carriage\r tab\t backspace\b formfeed\f control" + (char) 1;
-		assertThat(MeilisearchFilterValue.quote(value))
-				.isEqualTo("\"quote\\\" slash\\\\ line\\n carriage\\r tab\\t backspace\\b formfeed\\f control\\u0001\"");
-	}
-
-	@Test
 	void consumesAllDigitsInPositionalIndex() throws Exception {
 
 		String[] parameterTypes = new String[11];
@@ -177,6 +169,15 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 		assertInvalid("stringValue", "tag IN ?0", "", String.class);
 		assertInvalid("geoText", "_geoRadius(?0, ?1, ?2)", "", String.class, String.class, String.class);
 		assertInvalid("mixed", "name = ?1 AND code = ?2", "", String.class, Pageable.class, String.class);
+	}
+
+	@Test
+	void rejectsMalformedFilterAndQPlaceholdersAtConstruction() {
+
+		for (String placeholder : List.of("?name", "?", "?-1", "?+0", "?{}")) {
+			assertInvalid("noArguments", "name = " + placeholder, "", new Class<?>[0]);
+			assertInvalid("noArguments", "", placeholder, new Class<?>[0]);
+		}
 	}
 
 	@Test

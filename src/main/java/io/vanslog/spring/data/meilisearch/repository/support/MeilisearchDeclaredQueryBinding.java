@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import org.springframework.data.repository.query.QueryMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * Compiles and binds positional parameters in a declared Meilisearch filter and {@code q} template.
@@ -73,7 +74,7 @@ final class MeilisearchDeclaredQueryBinding {
 		validateParameters();
 	}
 
-	BoundQuery bind(Object[] values) {
+	BoundQuery bind(@Nullable Object[] values) {
 
 		if (values == null || values.length != parameterCount) {
 			throw new IllegalArgumentException("Expected " + parameterCount + " arguments for method " + method);
@@ -210,7 +211,7 @@ final class MeilisearchDeclaredQueryBinding {
 				};
 	}
 
-	private static boolean isValueBoundary(Token next) {
+	private static boolean isValueBoundary(@Nullable Token next) {
 		return next == null || next.type() == TokenType.RIGHT_PAREN || next.type() == TokenType.WORD
 				&& (next.value().equalsIgnoreCase("AND") || next.value().equalsIgnoreCase("OR"));
 	}
@@ -226,15 +227,15 @@ final class MeilisearchDeclaredQueryBinding {
 						|| preceding.value().equalsIgnoreCase("OR") || preceding.value().equalsIgnoreCase("NOT"));
 	}
 
-	private static boolean atEndOfArrayElement(Token next) {
+	private static boolean atEndOfArrayElement(@Nullable Token next) {
 		return next != null && (next.type() == TokenType.COMMA || next.type() == TokenType.RIGHT_BRACKET);
 	}
 
-	private static boolean isGeoArrayFunction(String function) {
+	private static boolean isGeoArrayFunction(@Nullable String function) {
 		return "_GEOBOUNDINGBOX".equals(function) || "_GEOPOLYGON".equals(function);
 	}
 
-	private static boolean atEndOfGeoNumber(Token next) {
+	private static boolean atEndOfGeoNumber(@Nullable Token next) {
 		return next == null || next.type() == TokenType.COMMA || next.type() == TokenType.RIGHT_PAREN
 				|| next.type() == TokenType.RIGHT_BRACKET;
 	}
@@ -243,6 +244,7 @@ final class MeilisearchDeclaredQueryBinding {
 		return new IllegalArgumentException("Placeholder ?" + index + " " + reason);
 	}
 
+	@Nullable
 	private static Container nearestContainer(Deque<Container> containers, TokenType type) {
 		for (Container container : containers) {
 			if (container.type() == type) {
@@ -252,6 +254,7 @@ final class MeilisearchDeclaredQueryBinding {
 		return null;
 	}
 
+	@Nullable
 	private static String nearestGeoFunction(Deque<Container> containers) {
 		for (Container container : containers) {
 			if (container.type() == TokenType.LEFT_PAREN) {
@@ -325,7 +328,7 @@ final class MeilisearchDeclaredQueryBinding {
 				continue;
 			}
 
-			if (current == '?' && i + 1 < template.length() && Character.isDigit(template.charAt(i + 1))) {
+			if (current == '?') {
 				Placeholder placeholder = parsePlaceholder(template, i, Context.FILTER_SCALAR);
 				tokens.add(new Token(TokenType.PLACEHOLDER, "", i, placeholder.end(), placeholder.parameterIndex()));
 				i = placeholder.end();
@@ -371,7 +374,7 @@ final class MeilisearchDeclaredQueryBinding {
 
 		List<Placeholder> placeholders = new ArrayList<>();
 		for (int i = 0; i < template.length();) {
-			if (template.charAt(i) == '?' && i + 1 < template.length() && Character.isDigit(template.charAt(i + 1))) {
+			if (template.charAt(i) == '?') {
 				Placeholder placeholder = parsePlaceholder(template, i, context);
 				placeholders.add(placeholder);
 				i = placeholder.end();
@@ -397,7 +400,7 @@ final class MeilisearchDeclaredQueryBinding {
 		return new Placeholder(start, end, index, context);
 	}
 
-	private static String normalize(String template) {
+	private static String normalize(@Nullable String template) {
 		return template == null || template.isBlank() ? "" : template;
 	}
 
@@ -425,7 +428,7 @@ final class MeilisearchDeclaredQueryBinding {
 		return result.toString();
 	}
 
-	private static String collection(Object value) {
+	private static String collection(@Nullable Object value) {
 
 		if (value == null) {
 			throw new IllegalArgumentException("Filter IN parameter must not be null");
@@ -466,7 +469,7 @@ final class MeilisearchDeclaredQueryBinding {
 	private record Token(TokenType type, String value, int start, int end, int parameterIndex) {
 	}
 
-	private record Container(TokenType type, boolean inCollection, String geoFunction) {
+	private record Container(TokenType type, boolean inCollection, @Nullable String geoFunction) {
 	}
 
 	private enum Context {

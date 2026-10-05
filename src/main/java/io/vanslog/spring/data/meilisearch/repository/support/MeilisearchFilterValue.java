@@ -21,6 +21,8 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.UUID;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Serializes scalar values used in Meilisearch filter expressions.
  *
@@ -30,7 +32,7 @@ final class MeilisearchFilterValue {
 
 	private MeilisearchFilterValue() {}
 
-	static String quote(String value) {
+	static String quote(@Nullable String value) {
 
 		if (value == null) {
 			throw new IllegalArgumentException("Filter string value must not be null");
@@ -60,7 +62,7 @@ final class MeilisearchFilterValue {
 		return result.append('"').toString();
 	}
 
-	static String scalar(Object value) {
+	static String scalar(@Nullable Object value) {
 
 		if (value == null) {
 			throw new IllegalArgumentException("Filter scalar value must not be null");
@@ -91,7 +93,7 @@ final class MeilisearchFilterValue {
 				|| type == BigInteger.class || type == BigDecimal.class;
 	}
 
-	static String number(Object value) {
+	static String number(@Nullable Object value) {
 
 		if (value != null && value.getClass() == BigDecimal.class) {
 			return ((BigDecimal) value).toPlainString();
@@ -117,7 +119,7 @@ final class MeilisearchFilterValue {
 		throw new IllegalArgumentException("Unsupported numeric filter value: " + typeName(value));
 	}
 
-	static String text(Object value) {
+	static String text(@Nullable Object value) {
 
 		if (value == null) {
 			throw new IllegalArgumentException("Query parameter value must not be null");
@@ -149,7 +151,7 @@ final class MeilisearchFilterValue {
 		throw new IllegalArgumentException("Unsupported query parameter value: " + typeName(value));
 	}
 
-	private static String typeName(Object value) {
+	private static String typeName(@Nullable Object value) {
 		return value == null ? "null" : value.getClass().getName();
 	}
 }
