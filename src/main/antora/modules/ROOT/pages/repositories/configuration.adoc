@@ -35,10 +35,11 @@ repository factory selection, including:
 
 If no base packages are configured, Spring Data scans the package of the annotated configuration class.
 
-`queryLookupStrategy` defaults to `CREATE_IF_NOT_FOUND` and supports the derived finder subset documented in
-xref:repositories/repository-queries.adoc[Query Methods]. `USE_DECLARED_QUERY` cannot resolve
-derived methods. `namedQueriesLocation` remains available for Spring Data configuration compatibility, but named
-queries and declared `@Query` methods are rejected at repository bootstrap.
+`queryLookupStrategy` defaults to `CREATE_IF_NOT_FOUND`: it prefers annotated `@Query` searches, then named searches,
+then derives supported predicates from the method name. `USE_DECLARED_QUERY` requires an annotated or named search;
+`CREATE` uses method-name derivation only. `namedQueriesLocation` loads filter templates and optional `.q` search-text
+templates from a properties resource. See xref:repositories/repository-queries.adoc[Query Methods] for syntax,
+parameter binding, and lookup precedence.
 
 [[meilisearch.repositories.configuration.namespace]]
 == XML Namespace
