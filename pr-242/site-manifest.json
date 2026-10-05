@@ -1,15 +1,15 @@
 {
   "$id": "https://schemas.antora.org/site-manifest/1-0-0/draft-01",
-  "generated": "2026-09-24T12:26:37.610Z",
+  "generated": "2026-10-05T06:51:28.582Z",
   "url": "https://junghoon-vans.github.io/spring-data-meilisearch",
   "components": {
     "data-meilisearch": {
       "title": "Spring Data Meilisearch",
-      "latest": "0.10.1",
+      "latest": "0.12.1",
       "versions": {
-        "0.10.1": {
+        "0.12.1": {
           "prerelease": true,
-          "displayVersion": "0.10.1-SNAPSHOT",
+          "displayVersion": "0.12.1-SNAPSHOT",
           "url": "/index.html",
           "pages": [
             {
@@ -90,7 +90,7 @@
             {
               "path": "repositories/repository-queries.adoc",
               "url": "/repositories/repository-queries.html",
-              "title": "Repository Methods and Limitations"
+              "title": "Query Methods"
             },
             {
               "path": "search.adoc",

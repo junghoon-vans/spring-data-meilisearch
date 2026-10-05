@@ -19,9 +19,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.10.1">
-    <meta name="generation" content="0.10-SNAPSHOT">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.10-SNAPSHOT/repositories/core-concepts.html">
+    <meta name="version" content="0.12.1">
+    <meta name="generation" content="0.12-SNAPSHOT">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.12-SNAPSHOT/repositories/core-concepts.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.10.1">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.12.1">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.10.1-SNAPSHOT</span>
+  <span class="version">0.12.1-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -308,7 +308,7 @@
     <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Instance and Index Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
@@ -335,7 +335,7 @@
     <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="repository-queries.html">Repository Methods and Limitations</a>
+    <a class="nav-link"  href="repository-queries.html">Query Methods</a>
   </li>
 </ul>
   </li>
@@ -453,12 +453,15 @@
 <p>CRUD and paging/sorting methods implemented by <code>SimpleMeilisearchRepository</code>,</p>
 </li>
 <li>
+<p>filter-backed derived finder methods for a documented subset,</p>
+</li>
+<li>
 <p>direct access to advanced search features through <code>MeilisearchOperations</code>.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>It does <strong>not</strong> currently document or promise full Spring Data query derivation support, custom <code>@Query</code> methods, or named-query execution.</p>
+<p>Declared <code>@Query</code> methods, named queries, and unsupported derived operators fail during repository bootstrap. Use <code>MeilisearchOperations</code> for custom searches; see <a href="repository-queries.html" class="xref page">Query Methods</a>.</p>
 </div>
 </div>
 </div>
@@ -471,9 +474,14 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface MeilisearchRepository&lt;T, ID&gt;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.PagingAndSortingRepository;
+
+</span><span class="fold-block">@NoRepositoryBean
+public interface MeilisearchRepository&lt;T, ID&gt;
         extends CrudRepository&lt;T, ID&gt;, PagingAndSortingRepository&lt;T, ID&gt; {
-}</code></pre>
+}</span></code></pre>
 </div>
 </div>
 </div>
@@ -482,23 +490,26 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
 <h2 id="repositories.core-concepts.execution-model"><a class="anchor" href="#repositories.core-concepts.execution-model"></a>Execution Model</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The default repository implementation delegates to <code>MeilisearchOperations</code>, but not every repository method uses the same underlying Meilisearch API:</p>
+<p>The default repository implementation delegates to <code>MeilisearchOperations</code>, but repository methods use different Meilisearch APIs:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>findById(&#8230;&#8203;)</code> and <code>findAllById(&#8230;&#8203;)</code> use document APIs.</p>
+<p><code>findById(&#8230;&#8203;)</code> and <code>existsById(&#8230;&#8203;)</code> use direct document lookup; <code>findAllById(&#8230;&#8203;)</code> uses native ID-list retrieval.</p>
 </li>
 <li>
-<p><code>findAll()</code>, <code>findAll(Sort)</code>, and <code>findAll(Pageable)</code> use search APIs.</p>
+<p><code>findAll()</code> lists all documents in one document-list request. Sorted <code>findAll(Sort)</code> counts first, then fetches up to that count in one sorted request; additions between those requests can be absent.</p>
 </li>
 <li>
-<p><code>count()</code> is derived from the search-oriented operations layer.</p>
+<p>Paged <code>findAll(Pageable)</code> uses search APIs. An unpaged <code>Pageable</code> uses document listing and bases its total on the retrieved documents.</p>
+</li>
+<li>
+<p><code>count()</code> reads the total from a document-list request with a zero-document limit; it does not run a search.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>That difference matters because Meilisearch search settings can affect search-backed repository methods without affecting document lookups.</p>
+<p>Search-backed repository methods are subject to search settings such as <code>pagination.maxTotalHits</code>. Document-list reads are not capped by that setting and ignore <code>displayedAttributes</code>.</p>
 </div>
 </div>
 </div>
@@ -547,7 +558,7 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
 </ul>
 </div>
 <div class="paragraph">
-<p>For the concrete store-specific rules and current limitations, see <a href="meilisearch-repositories.html" class="xref page">Meilisearch Repositories</a> and <a href="repository-queries.html" class="xref page">Repository Methods and Limitations</a>.</p>
+<p>For the concrete store-specific rules and current limitations, see <a href="meilisearch-repositories.html" class="xref page">Meilisearch Repositories</a> and <a href="repository-queries.html" class="xref page">Query Methods</a>.</p>
 </div>
 </div>
 </div>
@@ -577,7 +588,7 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      0.10.1-SNAPSHOT
+      0.12.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
@@ -889,6 +900,6 @@ That means the stable repository contract is the built-in CRUD plus sorting/pagi
 <script src="../_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.10.1" data-page-generation="0.10-SNAPSHOT" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.12.1" data-page-generation="0.12-SNAPSHOT" data-page-component="data-meilisearch"></script>
   </body>
 </html>

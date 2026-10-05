@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Repository Methods and Limitations :: Spring Data Meilisearch</title>
+    <title>Query Methods :: Spring Data Meilisearch</title>
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -19,9 +19,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.10.1">
-    <meta name="generation" content="0.10-SNAPSHOT">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.10-SNAPSHOT/repositories/repository-queries.html">
+    <meta name="version" content="0.12.1">
+    <meta name="generation" content="0.12-SNAPSHOT">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.12-SNAPSHOT/repositories/repository-queries.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.10.1">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.12.1">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.10.1-SNAPSHOT</span>
+  <span class="version">0.12.1-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -308,7 +308,7 @@
     <a class="nav-link"  href="../meilisearch/template.html">Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../meilisearch/index-operations.html">Index and Instance Operations</a>
+    <a class="nav-link"  href="../meilisearch/index-operations.html">Instance and Index Operations</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link"  href="../meilisearch/settings.html">Settings</a>
@@ -335,7 +335,7 @@
     <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link"  href="repository-queries.html">Repository Methods and Limitations</a>
+    <a class="nav-link"  href="repository-queries.html">Query Methods</a>
   </li>
 </ul>
   </li>
@@ -387,7 +387,7 @@
   <div class="content">
     <div
       class="toc"
-      data-title="Repository Methods and Limitations"
+      data-title="Query Methods"
       data-levels="2"
     >
       <div class="toc-menu"></div>
@@ -429,120 +429,300 @@
       <li id="copy-url" title="Copy versioned URL"></li>
       <li><a href="../index.html">Spring Data Meilisearch</a></li>
       <li><a href="../repositories.html">Repositories</a></li>
-      <li><a href="repository-queries.html">Repository Methods and Limitations</a></li>
+      <li><a href="repository-queries.html">Query Methods</a></li>
     </ul>
   </nav>
-</div><h1 id="page-title" class="page">Repository Methods and Limitations</h1>
+</div><h1 id="page-title" class="page">Query Methods</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Spring Data Meilisearch currently focuses on the repository base interfaces and on direct use of <code>MeilisearchOperations</code> for advanced search features.</p>
-</div>
-<div class="paragraph">
-<p>This page intentionally documents the boundary of the current repository support so that the manual stays aligned with the implemented code rather than with the broader feature set available in some other Spring Data modules.</p>
-</div>
-<div class="paragraph">
-<p>That boundary is deliberate: the repository API covers the common persistence flow, while the operations API remains the explicit place for richer Meilisearch search capabilities.</p>
+<p>Repository query methods can derive Meilisearch filters from method names. The module supports a limited, search-backed finder subset and filter-based count, existence, and delete methods; use <code>MeilisearchOperations</code> for queries that need explicit search composition.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.repositories.queries.scope"><a class="anchor" href="#meilisearch.repositories.queries.scope"></a>Recommended Scope</h2>
+<h2 id="meilisearch.repositories.queries.derived"><a class="anchor" href="#meilisearch.repositories.queries.derived"></a>Query Creation</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Use repositories for:</p>
+<p>Spring Data parses derived query method names when the repository is created. For example, <code>findByGenreAndRatingGreaterThan(String genre, int rating)</code> requires both predicates to match. The following table lists the supported keywords and the filters they produce.</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>CRUD-style persistence,</p>
-</li>
-<li>
-<p>id-based lookup,</p>
-</li>
-<li>
-<p>simple <code>findAll</code>, sorting, and pageable access,</p>
-</li>
-<li>
-<p>integration with the general Spring Data repository programming model.</p>
-</li>
-</ul>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Supported keywords for query methods</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 40%;">
+<col style="width: 40%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Keyword</th>
+<th class="tableblock halign-left valign-top">Sample</th>
+<th class="tableblock halign-left valign-top">Meilisearch filter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Is</code>, <code>Equals</code> (or no keyword)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByTitle(String title)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title = "Arrival"</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>IsNull</code>, <code>IsNotNull</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreIsNull()</code> / <code>findByGenreIsNotNull()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>(genre IS NULL OR genre NOT EXISTS)</code> / <code>(genre EXISTS AND genre IS NOT NULL)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Exists</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreExists()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>genre EXISTS</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>In</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreIn(Collection&lt;String&gt; genres)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>genre IN ["drama", "science fiction"]</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>NotIn</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreNotIn(Collection&lt;String&gt; genres)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>genre NOT IN ["drama", "science fiction"]</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>StartingWith</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByTitleStartingWith(String prefix)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title STARTS WITH "Star"</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>GreaterThan</code>, <code>GreaterThanEqual</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByRatingGreaterThan(int rating)</code> / <code>findByRatingGreaterThanEqual(int rating)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>rating &gt; 7</code> / <code>rating &gt;= 7</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LessThan</code>, <code>LessThanEqual</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByRatingLessThan(int rating)</code> / <code>findByRatingLessThanEqual(int rating)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>rating &lt; 7</code> / <code>rating &lt;= 7</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Between</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByRatingBetween(int minimum, int maximum)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>rating 5 TO 9</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>True</code>, <code>False</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByAvailableTrue()</code> / <code>findByAvailableFalse()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>available = true</code> / <code>available = false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>And</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreAndRatingGreaterThan(String genre, int rating)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Both predicates must match (<code>AND</code>)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Or</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>findByGenreAndRatingGreaterThanOrAvailableTrue(String genre, int rating)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>(genre = "drama" AND rating &gt; 7) OR (available = true)</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>An empty collection passed to an <code>In</code> predicate is rejected at invocation with an <code>IllegalArgumentException</code> that identifies the method and operator. An empty collection passed to <code>NotIn</code> contributes no filter. With <code>Or</code>, each branch must retain at least one effective predicate; a branch consisting only of an empty <code>NotIn</code> is rejected rather than turning the whole query into an unfiltered search or delete.</p>
 </div>
 <div class="paragraph">
-<p>Use <code>MeilisearchOperations</code> when you need:</p>
+<p><code>StartingWith</code> requires a <code>String</code> property marked filterable in Meilisearch and a <code>String</code> parameter. Null or empty prefixes are rejected before searching or deleting. It matches a literal prefix of the field value, not a token anywhere in the text; <code>findByTitleStartingWith("Star")</code> matches <code>Star Trek</code> but not <code>The Star</code>. The filter value is quoted and escaped. The server must run Meilisearch <strong>v1.17.0 or newer</strong>: <code>STARTS WITH</code> became stable in v1.17.0 and does not require enabling the experimental <code>containsFilter</code> feature. Older servers reject the filter at request time; this module does not emulate it with full-text search or client-side filtering.</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>full control over <code>BasicQuery</code>, <code>IndexQuery</code>, <code>FacetQuery</code>, or <code>SimilarQuery</code>,</p>
-</li>
-<li>
-<p>federated multi-search,</p>
-</li>
-<li>
-<p>facet search,</p>
-</li>
-<li>
-<p>similar-document search,</p>
-</li>
-<li>
-<p>index lifecycle or runtime settings updates.</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>For an equality predicate with an <code>@Nullable</code> argument, passing <code>null</code> matches both an explicitly null field and a missing field. <code>IsNull</code> matches those same two states. <code>IsNotNull</code> requires a present, non-null field, while <code>Exists</code> also matches an explicitly null field. The mapping converter omits null-valued properties when saving documents, so a missing field is the usual result of saving a null property.</p>
+</div>
+<div class="sect2">
+<h3 id="_count_existence_and_delete_methods"><a class="anchor" href="#_count_existence_and_delete_methods"></a>Count, Existence, and Delete Methods</h3>
+<div class="paragraph">
+<p>Derived predicates can also be used with the following methods:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Supported filter-based projection methods</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Method pattern</th>
+<th class="tableblock halign-left valign-top">Return type</th>
+<th class="tableblock halign-left valign-top">Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>countBy&lt;Property&gt;(&#8230;&#8203;)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>long</code>, <code>Long</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Returns the exact number of matching documents using Meilisearch&#8217;s <code>documents/fetch</code> API. This count is not capped by the search <code>pagination.maxTotalHits</code> limit. If the predicates produce no effective filter, <code>countBy</code> returns the unfiltered document count.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>existsBy&lt;Property&gt;(&#8230;&#8203;)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>boolean</code>, <code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Checks for a matching document using search with a limit of one.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deleteBy&lt;Property&gt;(&#8230;&#8203;)</code>, <code>removeBy&lt;Property&gt;(&#8230;&#8203;)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>long</code>, <code>Long</code>, <code>void</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Deletes matching documents with Meilisearch&#8217;s native filter-delete API and waits for the task to succeed. Numeric return types report the deleted-document count; a failed task or unavailable deletion details fails the invocation instead of returning a count.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>These methods use the same supported predicates listed above, including grouped <code>Or</code> branches. Every property used in a predicate must be configured as filterable. Count, existence, and delete methods do not accept a static <code>OrderBy</code> suffix or runtime <code>Sort</code> or <code>Pageable</code> parameters. A delete or remove method must produce a non-empty effective filter; an unfiltered method or predicates that produce no filter are rejected rather than deleting every document.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_method_return_types"><a class="anchor" href="#_method_return_types"></a>Method Return Types</h3>
+<div class="paragraph">
+<p>A finder method may return one entity, <code>Optional&lt;Entity&gt;</code>, <code>List&lt;Entity&gt;</code>, <code>Iterable&lt;Entity&gt;</code>, or <code>Page&lt;Entity&gt;</code>. Entity and <code>Optional</code> methods require at most one match. When no hit matches, an entity method returns <code>null</code> by default; if its repository package uses Spring&#8217;s <code>@NonNullApi</code>, an unannotated entity method instead throws <code>EmptyResultDataAccessException</code>, while an explicitly <code>@Nullable</code> method may return <code>null</code>. <code>Optional</code> returns the sole hit or <code>Optional.empty()</code>. Either single-result form throws <code>IncorrectResultSizeDataAccessException</code> if multiple hits match. <code>List</code> and <code>Iterable</code> contain matching entity content.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sorting_and_paging"><a class="anchor" href="#_sorting_and_paging"></a>Sorting and Paging</h3>
+<div class="paragraph">
+<p>For finder methods, static ordering uses an <code>OrderBy</code> suffix, for example <code>findByGenreOrderByRatingDesc(String genre)</code>. A <code>Sort</code> parameter provides runtime ordering, and a <code>Pageable</code> parameter provides an offset, limit, and optional sort. A <code>Page</code> contains the requested window and exposes the total reported by Meilisearch. Without a <code>Pageable</code>, <code>List</code> and <code>Iterable</code> methods fetch all matching hits in chunks and require an exact total; they fail rather than return a partial collection if the index&#8217;s <code>pagination.maxTotalHits</code> cap (1,000 by default) prevents complete retrieval. Configure <code>@Pagination(maxTotalHits = &#8230;&#8203;)</code> when the application needs a different search limit.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_index_settings"><a class="anchor" href="#_index_settings"></a>Index Settings</h3>
+<div class="paragraph">
+<p>String arguments are values, not filter expressions. They are emitted as quoted and escaped Meilisearch filter literals; do not add quotes or filter syntax to the argument. Numeric and boolean values are emitted as literals. Every field used in a predicate—including predicates for count, existence, and delete methods—must be configured as filterable, and every field used for sorting must be configured as sortable. For example:</p>
+</div>
+<div class="paragraph">
+<p>Nested property paths use dotted Meilisearch field names. For example, <code>findByDetailsDirector(String director)</code> filters <code>details.director = "Director"</code> for an entity with a <code>details.director</code> property. The segments are the mapped Java field names; custom aliases for these fields are not supported. Configure <code>details.director</code> as a filterable attribute; a filter on the top-level <code>details</code> attribute does not substitute for that nested path.</p>
+</div>
+<div class="paragraph">
+<p>A collection of nested objects can also be filtered by a nested field. For example, <code>findByCreditsDirector("Director")</code> filters <code>credits.director</code> and matches a document with at least one matching object in its <code>credits</code> array. Configure <code>credits.director</code> as filterable. If the path is missing, <code>IsNull</code> matches it under the same missing-field semantics described above. Predicates on different nested fields are combined as document-level filters; they do not require values to come from the same array element.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Setting(
+    filterableAttributes = { "genre", "rating", "available" },
+    sortableAttributes = { "rating" }
+)
+@Document(indexUid = "movies")
+class Movie {
+  @Id String id;
+  String genre;
+  int rating;
+  boolean available;
+}
+
+interface MovieRepository extends MeilisearchRepository&lt;Movie, String&gt; {
+
+  Page&lt;Movie&gt; findByGenreInAndRatingGreaterThanEqual(
+      Collection&lt;String&gt; genres, int rating, Pageable pageable);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Those index settings must be applied to Meilisearch before the search runs. See <a href="../meilisearch/settings.html" class="xref page">Settings</a> for annotation and programmatic configuration.</p>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.repositories.queries.unsupported"><a class="anchor" href="#meilisearch.repositories.queries.unsupported"></a>Features Not Documented as Repository Capabilities</h2>
+<h2 id="_query_lookup_strategies"><a class="anchor" href="#_query_lookup_strategies"></a>Query Lookup Strategies</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The repository documentation intentionally does not advertise the following as supported repository features:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>derived finder methods such as <code>findByTitle(&#8230;&#8203;)</code>,</p>
-</li>
-<li>
-<p>repository <code>@Query</code> methods,</p>
-</li>
-<li>
-<p>named queries,</p>
-</li>
-<li>
-<p>repository-level access to facet or federated-search metadata.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Those topics are common in longer repository chapters from other Spring Data libraries because those modules implement them.
-Spring Data Meilisearch currently keeps advanced querying in the <code>MeilisearchOperations</code> layer instead.</p>
-</div>
-<div class="paragraph">
-<p>Repository interfaces that declare derived finder methods, repository <code>@Query</code> methods, or named-query-backed methods fail
-during repository bootstrap with a Meilisearch-specific message.
-This keeps unsupported query-method configuration from looking like an implemented feature.</p>
+<p>Repository configuration continues to expose <code>queryLookupStrategy</code> and <code>namedQueriesLocation</code> for Spring Data compatibility. Use <code>CREATE</code> or <code>CREATE_IF_NOT_FOUND</code> for derived methods; <code>USE_DECLARED_QUERY</code> cannot resolve them, and declared or named queries are rejected in all lookup modes. See <a href="configuration.html" class="xref page">Repository Configuration</a>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="meilisearch.repositories.queries.notes"><a class="anchor" href="#meilisearch.repositories.queries.notes"></a>Practical Notes</h2>
+<h2 id="meilisearch.repositories.queries.unsupported"><a class="anchor" href="#meilisearch.repositories.queries.unsupported"></a>Unsupported Query Methods</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>The supported predicate and return-type matrix is intentionally narrow. The repository rejects unsupported derived methods during bootstrap, with the method and unsupported operator or return type in the error. In particular:</p>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p>Search-backed repository methods inherit Meilisearch search semantics, including pagination limits and search-only settings.</p>
+<p><code>Containing</code>, <code>EndingWith</code>, <code>Like</code>, and <code>Regex</code> are unsupported text-pattern predicates. <code>Containing</code> would require the experimental <code>CONTAINS</code> filter, which is not enabled by this module. Full-text search through <code>MeilisearchOperations</code> with a <code>BasicQuery</code> is a different, tokenized search mode, not an equivalent literal field-prefix or substring filter.</p>
 </li>
 <li>
-<p>Document-backed repository methods do not expose search response features such as facet metadata.</p>
+<p>Filter-based count, existence, and delete methods are supported only through the patterns and return types listed above; they do not accept sorting or paging. The standard repository <code>count()</code> and delete methods are separate operations and are unchanged.</p>
 </li>
 <li>
-<p>If your use case depends on advanced query composition or store-specific search options, prefer <code>MeilisearchOperations</code> explicitly in the service layer.</p>
+<p>Methods annotated with repository <code>@Query</code> and named-query-backed methods are not supported.</p>
+</li>
+<li>
+<p>Interface or class projections, <code>Slice</code>, streams, scalar-valued finder results, and return types outside the supported method matrix are not supported.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>For many applications, this split is a good fit: repositories cover the common persistence flow, while <code>MeilisearchOperations</code> remains the explicit entry point for Meilisearch-specific search behavior.</p>
+<p>For search modes outside this subset, use <code>MeilisearchOperations</code> directly; it exposes explicit Meilisearch query construction without bypassing the operations abstraction.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.repositories.queries.scope"><a class="anchor" href="#meilisearch.repositories.queries.scope"></a>Using MeilisearchOperations for Custom Queries</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Use <code>MeilisearchRepository</code> for the built-in CRUD, ID lookup, collection listing, sorting, pageable methods, and the supported derived finder, count, existence, and filter-delete methods. Use <code>MeilisearchOperations</code> for search features that need an explicit Meilisearch query or richer search result data, such as facets, similar-document search, or federated multi-search.</p>
+</div>
+<div class="paragraph">
+<p>For a mapped domain type such as <code>Movie</code>, inject <code>MeilisearchOperations</code> when you need to compose a search query directly:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.core.SearchHits;
+import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
+
+</span><span class="fold-block">class MovieSearchService {
+
+  private final MeilisearchOperations operations;
+
+  MovieSearchService(MeilisearchOperations operations) {
+    this.operations = operations;
+  }
+
+  SearchHits&lt;Movie&gt; search(String text) {
+    BasicQuery query = BasicQuery.builder().withQ(text).build();
+    return operations.search(query, Movie.class);
+  }
+}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This service-level call returns Meilisearch search hits. Repository derived queries provide a small, filter-oriented subset for common lookups; use <code>MeilisearchOperations</code> when search needs free-text ranking, facets, similar-document search, or federated multi-search.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.repositories.queries.notes"><a class="anchor" href="#meilisearch.repositories.queries.notes"></a>Base Repository Paging, Sorting, and Result Limits</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Derived finder and existence methods use search. Derived count methods use <code>documents/fetch</code>, and derived filter-delete methods use the native index filter-delete API. The standard repository methods have separate behavior:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A paged <code>findAll(Pageable)</code> is search-backed. Its <code>Page</code> total comes from the total reported by Meilisearch search results. <code>pagination.maxTotalHits</code> can cap returned content without capping that reported total.</p>
+</li>
+<li>
+<p>An unpaged <code>findAll(Pageable)</code> uses the document-list API, retrieves all documents into memory, and sets the <code>Page</code> total to the retrieved count. It is not limited by <code>maxTotalHits</code>.</p>
+</li>
+<li>
+<p><code>findAll()</code> also lists all documents through the document API. Sorted <code>findAll(Sort)</code> and sorted unpaged <code>findAll(Pageable)</code> count first, then fetch up to that count; additions between those requests may be absent.</p>
+</li>
+<li>
+<p>Sorting document listings requires a sortable index attribute and Meilisearch 1.16 or later. <code>findAllById(&#8230;&#8203;)</code> uses native ID-list retrieval, available from Meilisearch 1.14, with no fallback on older servers.</p>
+</li>
+<li>
+<p>Document-list reads are not capped by search <code>maxTotalHits</code> and ignore <code>displayedAttributes</code>.</p>
+</li>
+<li>
+<p>Empty <code>saveAll(&#8230;&#8203;)</code>, <code>deleteAll(Iterable)</code>, and <code>deleteAllById(&#8230;&#8203;)</code> operations complete without a server request. The no-argument <code>deleteAll()</code> still deletes all documents for the entity type.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For full method-to-API behavior, see <a href="meilisearch-repositories.html#meilisearch.repositories.lookup-methods.behavior-table" class="xref page">Method Behavior at a Glance</a>.</p>
 </div>
 </div>
 </div>
@@ -572,7 +752,7 @@ This keeps unsupported query-method configuration from looking like an implement
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      0.10.1-SNAPSHOT
+      0.12.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
@@ -884,6 +1064,6 @@ This keeps unsupported query-method configuration from looking like an implement
 <script src="../_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.10.1" data-page-generation="0.10-SNAPSHOT" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.12.1" data-page-generation="0.12-SNAPSHOT" data-page-component="data-meilisearch"></script>
   </body>
 </html>
