@@ -674,7 +674,8 @@ Every bindable method argument must appear in the filter or search-text template
 <div class="paragraph">
 <p>Filter placeholders must occupy complete value positions; do not quote them or interpolate them into field names, operators, or existing string literals.
 For example, use <code>category = ?0</code>, not <code>category = "?0"</code> or <code>?0 = true</code>.
-Strings are quoted and escaped so a value such as <code>x" OR active = true</code> remains one literal rather than adding a condition.</p>
+Strings are quoted and escaped so a value such as <code>x" OR active = true</code> remains one literal rather than adding a condition.
+Control characters and literal backslash escape sequences remain distinct filter values.</p>
 </div>
 <div class="paragraph">
 <p>Supported value positions include comparison right-hand sides, both bounds of <code>price ?0 TO ?1</code>, <code>STARTS WITH</code> and <code>CONTAINS</code> operands, scalar entries in <code>category IN [?0, ?1]</code>, and complete flat collections/arrays in <code>category IN ?0</code> or <code>category NOT IN ?0</code>.
@@ -692,11 +693,12 @@ Unlike derived <code>NotIn</code>, a declared <code>NOT IN</code> with an empty 
 <div class="paragraph">
 <p>Search-text placeholders use the textual representation of supported scalar values without filter quoting.
 They retain Meilisearch&#8217;s search-text semantics, including any search syntax in the text.
+A <code>?</code> in a <code>q</code> template starts a positional placeholder; include literal question marks in bound argument text instead of the template.
 A q-only search that binds to blank text is rejected rather than becoming an unrestricted placeholder search.
 Blank search text is allowed when the declaration also supplies a filter.</p>
 </div>
 <div class="paragraph">
-<p>Invalid placeholder positions, out-of-range indices, special-parameter references, incompatible declared parameter types, and unused bindable parameters fail during repository creation.
+<p>Malformed placeholders (including <code>?name</code>, <code>?-1</code>, and a bare <code>?</code>), invalid placeholder positions, out-of-range indices, special-parameter references, incompatible declared parameter types, and unused bindable parameters fail during repository creation.
 Filter placeholders inside quoted literals are not supported.
 The binder checks substitution boundaries, not the entire server query language: actual filter syntax, operator availability, and index settings are validated by Meilisearch.</p>
 </div>
