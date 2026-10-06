@@ -185,6 +185,99 @@ reporting 11 total matches when `maxTotalHits` is 10. Repository `findAll(Pageab
 reported total, while an unpaged repository lookup uses document retrieval. See
 xref:meilisearch/settings.adoc#meilisearch.settings.pagination[Pagination Limits] for the pagination setting.
 
+[[meilisearch.operations.native-access]]
+== Native SDK Access
+
+For regular application work, prefer `MeilisearchOperations`, its `indexOps(...)` and `instanceOps()` entry points,
+or xref:repositories/meilisearch-repositories.adoc[repositories]. These APIs apply the selected operation's mapping,
+result, exception, and blocking/task contract. Do not assume every operation waits or throws on a failed task:
+for example, document deletion methods report success through a boolean.
+
+`MeilisearchTemplate.execute(MeilisearchCallback)` is a supported low-level escape hatch for deliberate native SDK work.
+It is a concrete-template API, not a method on `MeilisearchOperations`. Inject `MeilisearchTemplate` only where this
+boundary is needed. First check the mapped Operations APIs rather than treating callbacks as the default solution
+for every missing operation; raw access does not make deferred operational/admin APIs part of the module's contract.
+
+[cols="1,2,2,2", options="header"]
+|===
+|Access path |Mapping and results |Exceptions |Task completion
+
+|Operations/repositories
+|Follow the selected operation's mapped request/result contract.
+|Follow that operation's Spring Data exception or return contract.
+|Follow that operation's blocking/task contract.
+
+|`MeilisearchTemplate.execute(...)`
+|Callback supplies SDK requests and interprets SDK results; no automatic entity conversion or mapped index selection.
+|SDK `MeilisearchException` failures escaping callback execution receive Template translation.
+|No automatic wait or completed-task status validation.
+
+|Direct native client calls
+|Caller supplies SDK requests and interprets SDK results.
+|Do not pass through Template exception translation.
+|Caller manages task submission, waiting, and outcome checks.
+|===
+
+The callback translation boundary is precise: an SDK API error with code `document_not_found` becomes
+`DocumentAccessException`; other SDK `MeilisearchException` failures become `UncategorizedMeilisearchException`.
+Other runtime exceptions are not translated by `execute(...)`. If a callback catches an SDK exception itself,
+there is no escaping failure for the template to translate.
+For comparison, mapped `get(id, Entity.class)` handles a missing document by returning `null`;
+a raw callback requesting the same missing document throws `DocumentAccessException`.
+
+=== Submission Is Not Completion
+
+Native requests and results remain SDK-coupled. The following example uses the supported SDK's `TaskInfo`, `Task`,
+and `TaskStatus` models; it does not change the ordinary operation task-failure exception contract.
+It accepts caller-provided JSON with an `id` primary key, not a mapped entity or its annotation settings.
+For ordinary entity writes, use `operations.save(entity)` instead.
+
+[source,java]
+----
+import java.util.Objects;
+
+import com.meilisearch.sdk.model.Task;
+import com.meilisearch.sdk.model.TaskInfo;
+import com.meilisearch.sdk.model.TaskStatus;
+import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate;
+
+class NativeDocuments {
+
+    static Task submitAndCheck(MeilisearchTemplate template, String indexUid, String documentJson) {
+        TaskInfo submitted = Objects.requireNonNull(
+                template.execute(client -> client.index(indexUid).addDocuments(documentJson, "id")));
+
+        // Submission alone does not confirm success. Waiting and retrieval are explicit native SDK calls.
+        Task completed = Objects.requireNonNull(template.execute(client -> {
+            var index = client.index(indexUid);
+            index.waitForTask(submitted.getTaskUid(), 5_000, 50);
+            return index.getTask(submitted.getTaskUid());
+        }));
+
+        if (completed.getStatus() != TaskStatus.SUCCEEDED) {
+            // Application policy, not automatic Template task-status validation.
+            throw new IllegalStateException(
+                    "Task " + completed.getUid() + " completed with " + completed.getStatus());
+        }
+        return completed;
+    }
+}
+----
+
+The example waits synchronously with an explicit timeout and polling interval in milliseconds.
+SDK failures during submission, waiting, or retrieval cross the callback translation boundary.
+A wait timeout is not proof of a failed task: the final outcome may still be unknown.
+After a successful wait, inspect the retrieved status rather than the submission status; failed or canceled
+outcomes are not made successful by returning normally from `waitForTask(...)`.
+The example's `IllegalStateException` is an application choice. Use the SDK task's error details when available
+to apply the application's failure policy; avoid including document payloads or credentials in diagnostics.
+
+Callbacks and direct calls do not automatically use `MeilisearchConverter`, infer entity metadata/index settings,
+or wrap native results in mapped `SearchHits<T>`. SDK method signatures, model types, and version compatibility
+remain part of native access. See xref:meilisearch/client-configuration.adoc#meilisearch.clients.native-boundary[Native Client Boundary]
+for the intentionally retained SDK inheritance. This does not promise SDK task models in ordinary operation failure APIs
+or add a general-purpose task lifecycle API.
+
 [[meilisearch.operations.kotlin]]
 == Kotlin Extensions
 

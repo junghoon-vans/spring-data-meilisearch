@@ -5,6 +5,19 @@ Spring Data Meilisearch operates on top of the Meilisearch Java client and expos
 
 In most applications, the entry point is a Java configuration class that extends `MeilisearchConfiguration`. XML namespace support is available for applications that still use XML-based container configuration.
 
+[[meilisearch.clients.native-boundary]]
+== Native Client Boundary
+
+`MeilisearchClient` intentionally extends the Meilisearch Java SDK `Client`. This inheritance is retained as a supported
+low-level boundary, including for 1.0; it is not a reason to make ordinary application access a thin SDK wrapper.
+Prefer `MeilisearchOperations`, `indexOps(...)`, `instanceOps()`, and repositories for regular application work.
+See xref:meilisearch/template.adoc#meilisearch.operations.native-access[Native SDK Access] for callback and direct-client guarantees.
+
+Inherited SDK methods, SDK model types, and native JSON-handler configuration remain coupled to the supported SDK API
+and version. They do not make the entire public API SDK-independent. A future composition change would require a concrete
+driver and an explicit migration for inherited calls, SDK `Client` assignment/injection, and subclass/override assumptions;
+it is not a prerequisite for synchronous client support or a consequence of evaluating Reactive support.
+
 [[meilisearch.clients.javaconfig]]
 == JavaConfig
 
