@@ -6,7 +6,7 @@
 It does not execute blocking SDK requests on a worker scheduler.
 Existing synchronous operations remain separate and unchanged.
 
-This API provides document and search operations, not reactive repositories, index administration, or coroutine extensions.
+This API provides document and search operations. xref:repositories/reactive-meilisearch-repositories.adoc[Reactive Repositories] build on it with explicit repository enablement; index administration and coroutine extensions are not provided.
 Existing query, result, and mapping types are shared with the synchronous API; the library still depends on the Meilisearch Java SDK.
 
 [[meilisearch.reactive-operations.configuration]]

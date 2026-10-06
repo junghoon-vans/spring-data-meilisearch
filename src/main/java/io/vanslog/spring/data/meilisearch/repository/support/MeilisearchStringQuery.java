@@ -19,7 +19,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
@@ -28,8 +27,6 @@ import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.lang.Nullable;
 
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
-import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
-import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 
 /**
  * Executes a declared Meilisearch repository query.
@@ -39,8 +36,11 @@ import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProp
 class MeilisearchStringQuery implements RepositoryQuery {
 
 	private final Method method;
+
 	private final QueryMethod queryMethod;
+
 	private final MeilisearchDeclaredQueryBinding binding;
+
 	private final MeilisearchFinderExecution finderExecution;
 
 	MeilisearchStringQuery(Method method, RepositoryMetadata metadata, ProjectionFactory projectionFactory,
@@ -51,10 +51,11 @@ class MeilisearchStringQuery implements RepositoryQuery {
 		validateUnsupportedSpecialParameters();
 		MeilisearchQueryReturnShape returnShape = MeilisearchQueryReturnShape.resolveFinder(method, metadata);
 		validateSingleResultParameters(returnShape);
-		MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext = operations
-				.getMeilisearchConverter().getMappingContext();
+		var converter = operations.getMeilisearchConverter();
+		MeilisearchQueryPlanner planner = new MeilisearchQueryPlanner(method, queryMethod, metadata.getDomainType(),
+				converter.getMappingContext(), converter.getConversionService(), "declared");
 		this.finderExecution = new MeilisearchFinderExecution(method, queryMethod, metadata.getDomainType(), operations,
-				returnShape, Sort.unsorted(), mappingContext, "declared");
+				returnShape, Sort.unsorted(), planner, "declared");
 		this.binding = new MeilisearchDeclaredQueryBinding(method, queryMethod, filter, q);
 	}
 
@@ -98,4 +99,5 @@ class MeilisearchStringQuery implements RepositoryQuery {
 		return new IllegalArgumentException(
 				"Unsupported declared query option '" + option + "' in method " + method.toGenericString());
 	}
+
 }

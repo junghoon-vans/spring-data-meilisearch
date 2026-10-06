@@ -1,0 +1,145 @@
+[[meilisearch.repositories.reactive]]
+= Reactive Repositories
+
+`ReactiveMeilisearchRepository<T, ID>` extends Spring Data Commons' `ReactiveCrudRepository` and `ReactiveSortingRepository`.
+It uses `ReactiveMeilisearchOperations`, not a blocking repository scheduled on a worker thread.
+The synchronous and reactive repository contracts remain separate.
+
+[[meilisearch.repositories.reactive.configuration]]
+== Java Configuration
+
+Register reactive operations and enable reactive repository scanning explicitly:
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
+import io.vanslog.spring.data.meilisearch.config.ReactiveMeilisearchConfiguration;
+import io.vanslog.spring.data.meilisearch.repository.config.EnableReactiveMeilisearchRepositories;
+
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@EnableReactiveMeilisearchRepositories(basePackageClasses = ReactiveMovieRepository.class)
+class ReactiveRepositoryConfig extends ReactiveMeilisearchConfiguration {
+
+    @Override
+    public ClientConfiguration reactiveClientConfiguration() {
+        return ClientConfiguration.builder()
+                .connectedTo("http://localhost:7700")
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
+                .withRequestTimeout(5_000)
+                .withRequestInterval(50)
+                .build();
+    }
+}
+----
+
+The default operations reference is `reactiveMeilisearchTemplate`, an alias supplied by `ReactiveMeilisearchConfiguration`.
+Set `reactiveMeilisearchTemplateRef` on `@EnableReactiveMeilisearchRepositories` to select another `ReactiveMeilisearchOperations` bean.
+The annotation also supports package/filter selection, `considerNestedRepositories`, `repositoryImplementationPostfix`, `repositoryFactoryBeanClass`, `namedQueriesLocation`, and `queryLookupStrategy`.
+Without an explicit package, scanning starts in the configuration class's package.
+There is no reactive XML namespace or Spring Boot auto-configuration.
+
+For blocking/reactive coexistence, use the shared beans shown in xref:meilisearch/reactive-template.adoc#meilisearch.reactive-operations.configuration[Reactive Operations configuration] and add both repository enablement annotations.
+Both scanners can inspect the same package: blocking enablement selects synchronous interfaces and reactive enablement selects reactive interfaces.
+Do not mix blocking abstract methods into a reactive repository interface.
+
+[[meilisearch.repositories.reactive.crud]]
+== CRUD, Task Completion, and Settings
+
+CRUD follows the Commons contracts, including `Iterable` and `Publisher` input overloads, and returns cold `Mono`/`Flux` publishers.
+Constructing a repository or invoking a method does not perform network I/O; subscribe to execute it.
+`findById`, `existsById`, and `findAllById` use document APIs rather than search APIs.
+IDs are converted through the configured mapping converter.
+Single-ID publisher overloads use the first ID; `findAllById` preserves requested order and duplicates and omits absent documents.
+
+`save` emits its entity after the server task succeeds, and `saveAll` emits each bounded batch only after that batch succeeds.
+Deletes complete after successful tasks; failures, observation errors, and timeouts propagate unchanged from reactive operations.
+Bulk operations do not buffer the entire input and are not transactional.
+Canceling a subscription stops subsequent local work, but does not roll back a completed batch or cancel an already accepted server task.
+Re-subscribing to a write can submit it again.
+See xref:meilisearch/reactive-template.adoc#meilisearch.reactive-operations.tasks[Task Completion, Errors, and Cancellation] for accepted-task UIDs and unknown outcomes.
+
+Before a subscribed CRUD or query operation, the repository lazily applies annotation-derived settings when `@Document.applySettings` is enabled.
+CRUD and query methods for that repository/domain share one initialization publisher.
+Concurrent subscribers share an active attempt; successful initialization is retained, but failed or fully canceled attempts are not cached.
+Canceling one waiter does not cancel initialization for other waiters. Canceling the last waiter cancels local observation, and a new explicit subscription can start another attempt.
+This is not an automatic retry or a guarantee that a canceled server task did not execute.
+With `applySettings = false`, initialization performs no settings write; configure the index yourself.
+
+`findAll()` and `findAll(Sort)` traverse bounded document pages independently of search's `pagination.maxTotalHits` ceiling.
+Sorted document reads require Meilisearch 1.16 or later, and batched ID retrieval requires 1.14 or later.
+Configure sortable attributes before sorted reads.
+The template's batch/page size also controls repository bulk buffering and document traversal; the default is 100.
+A page may be in flight ahead of the current page, and every HTTP response is materialized as finite JSON.
+A consumer's `collectList()` still accumulates all emitted results.
+
+[[meilisearch.repositories.reactive.queries]]
+== Query Methods
+
+Derived and declared queries share the synchronous xref:repositories/repository-queries.adoc[query grammar, field mapping, filter binding, and lookup precedence].
+Reactive execution does not invoke the synchronous query executor.
+For example, configure `genre` and `title` as filterable and `title` as sortable on the mapped `Movie` type:
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.repository.Query;
+import io.vanslog.spring.data.meilisearch.repository.ReactiveMeilisearchRepository;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+interface ReactiveMovieRepository extends ReactiveMeilisearchRepository<Movie, String> {
+
+    Flux<Movie> findByGenre(String genre, Sort sort);
+    Flux<Movie> findByGenre(String genre, Pageable pageable);
+    Mono<Movie> findByTitle(String title);
+    Mono<Long> countByGenre(String genre);
+    Mono<Boolean> existsByTitle(String title);
+    Mono<Long> deleteByGenre(String genre);
+    Mono<Void> deleteByTitle(String title);
+
+    @Query(filter = "genre = ?0", q = "?1")
+    Flux<Movie> searchGenre(String genre, String text, Pageable pageable);
+
+    Flux<Movie> namedGenre(String genre);
+}
+----
+
+[cols="1,3",options="header"]
+|===
+|Return shape |Contract
+|`Flux<T>` |Derived or declared domain finder; finite `Pageable` selects a search window and `Sort` maps entity fields.
+|`Mono<T>` |Domain finder; completes empty for no result and fails with `IncorrectResultSizeDataAccessException` for multiple results.
+|`Mono<Long>` |Derived count or delete-count. Delete-count comes from the succeeded task's `deletedDocuments` detail.
+|`Mono<Boolean>` |Derived existence check.
+|`Mono<Void>` |Derived deletion without a count result.
+|===
+
+Declared `@Query` and named queries are searches only, regardless of their method names, and require `Flux<T>` or `Mono<T>`.
+They use native Meilisearch field names in filter templates; derived predicates and `Sort` use mapped entity properties.
+The named query for `namedGenre` can be loaded with `namedQueriesLocation = "classpath:meilisearch-named-queries.properties"`:
+
+[source,properties]
+----
+Movie.namedGenre=genre = ?0
+----
+
+A named filter can also have a `.q` companion, and q-only named/annotated searches are supported.
+`CREATE_IF_NOT_FOUND` resolves annotation, then named query, then derivation; `CREATE` derives only; `USE_DECLARED_QUERY` requires an annotation or named query.
+Binding and argument-validation failures are emitted through the returned publisher before dependent HTTP requests.
+
+Unsupported return types, unresolved generic payloads, projections, nested wrappers such as `Mono<List<T>>`, and `Mono<Page<T>>` fail at repository bootstrap.
+Dynamic projections, `Limit`, and `ScrollPosition` are unsupported.
+`Pageable` is supported only for `Flux<T>` finders; count, existence, and delete methods do not accept `Sort` or `Pageable`.
+This API does not synthesize aggregate `Page` or `Slice` objects.
+
+Without a finite `Pageable`, collection queries stream search pages of at most 1,000 hits.
+They require exact totals and fail if totals change or the server cannot provide the complete reported set; configure `@Pagination(maxTotalHits = ...)` when necessary.
+Previously emitted hits are not withdrawn when a later page fails.
+Search pages and document traversal are offset-based, not snapshots: concurrent writes can cause omissions or duplicates even when the total stays unchanged.
+Cancellation stops further local traversal and attempts to cancel an in-flight exchange.
+For richer search metadata, facets, multi-search, or similar-document search, use `ReactiveMeilisearchOperations` directly.

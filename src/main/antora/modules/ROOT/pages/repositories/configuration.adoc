@@ -1,7 +1,7 @@
 [[meilisearch.repositories.configuration]]
 = Repository Configuration
 
-Spring Data Meilisearch repositories are enabled through `@EnableMeilisearchRepositories` or the XML namespace.
+Synchronous Spring Data Meilisearch repositories are enabled through `@EnableMeilisearchRepositories` or the XML namespace. Reactive repositories use `@EnableReactiveMeilisearchRepositories` and a separate `ReactiveMeilisearchOperations` bean; see xref:repositories/reactive-meilisearch-repositories.adoc[Reactive Repositories].
 
 Repository bootstrap registers interfaces against a `MeilisearchOperations` bean. It does not create the client, template, or converter for you, and this module does not provide Spring Boot auto-configuration. The default operations bean name is `meilisearchTemplate`; use `meilisearchTemplateRef` to select another bean. Repository creation can apply settings declared on the mapped entity; see xref:repositories/meilisearch-repositories.adoc#meilisearch.repositories.autocreation[Automatic Settings Application].
 
