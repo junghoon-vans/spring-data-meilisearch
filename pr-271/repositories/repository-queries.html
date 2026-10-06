@@ -576,7 +576,8 @@
 <div class="sect2">
 <h3 id="_method_return_types"><a class="anchor" href="#_method_return_types"></a>Method Return Types</h3>
 <div class="paragraph">
-<p>A finder method may return the repository&#8217;s domain type <code>T</code> directly, or one flat container: <code>Optional&lt;T&gt;</code>, <code>List&lt;T&gt;</code>, <code>Iterable&lt;T&gt;</code>, or <code>Page&lt;T&gt;</code>. Entity subtypes, projections, and nested containers are rejected. Entity and <code>Optional</code> methods require at most one match. When no hit matches, an entity method returns <code>null</code> by default; if its repository package uses Spring&#8217;s <code>@NonNullApi</code>, an unannotated entity method instead throws <code>EmptyResultDataAccessException</code>, while an explicitly <code>@Nullable</code> method may return <code>null</code>. <code>Optional</code> returns the sole hit or <code>Optional.empty()</code>. Either single-result form throws <code>IncorrectResultSizeDataAccessException</code> if multiple hits match. <code>List</code> and <code>Iterable</code> contain matching entity content.</p>
+<p>A finder method may return the repository&#8217;s domain type <code>T</code> directly, or one flat container: <code>Optional&lt;T&gt;</code>, <code>List&lt;T&gt;</code>, <code>Iterable&lt;T&gt;</code>, or <code>Page&lt;T&gt;</code>. Entity subtypes, projections, and nested containers are rejected. Entity and <code>Optional</code> methods require at most one match. When no hit matches, an entity method returns <code>null</code> by default; if its repository package uses Spring&#8217;s <code>@NonNullApi</code>, an unannotated entity method instead throws <code>EmptyResultDataAccessException</code>, while an explicitly <code>@Nullable</code> method may return <code>null</code>. <code>Optional</code> returns the sole hit or <code>Optional.empty()</code>. Either single-result form throws <code>IncorrectResultSizeDataAccessException</code> if multiple hits match. <code>List</code> and <code>Iterable</code> contain matching entity content.
+Inherited repository type variables are resolved in the concrete repository&#8217;s domain context. Method-level type variables are rejected, including inside a container, because the finder can only materialize the repository&#8217;s exact domain type.</p>
 </div>
 </div>
 <div class="sect2">
@@ -729,6 +730,8 @@ This binding support does not enable experimental operators or emulate operators
 <div class="paragraph">
 <p>Boolean and finite standard numeric values are emitted as native literals.
 <code>BigInteger</code> and <code>BigDecimal</code> are supported; <code>Date</code> values use epoch milliseconds.
+Numeric binding preserves the literal&#8217;s integer precision and decimal scale without converting through floating point; this does not change Meilisearch&#8217;s own numeric storage or comparison semantics.
+<code>Number</code> parameter declarations are supported, but runtime numeric values must have one of the exact standard boxed primitive, <code>BigInteger</code>, or <code>BigDecimal</code> classes. Custom numeric subclasses are rejected rather than trusting their string representation as filter syntax.
 Strings, characters, enum names, temporal values, and UUIDs are quoted.
 These are native literal representations: the binder does not infer a property&#8217;s type from the filter string.
 Null values, non-finite numbers, unsupported value types, empty collections/arrays, null collection elements, and nested collections are rejected before searching.
