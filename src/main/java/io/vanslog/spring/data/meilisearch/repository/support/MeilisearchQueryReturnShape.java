@@ -16,15 +16,19 @@
 package io.vanslog.spring.data.meilisearch.repository.support;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.repository.query.QueryMethod;
+import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.parser.PartTree;
+import org.springframework.data.util.TypeInformation;
 
 /**
- * Validates the supported result shapes of derived repository methods.
+ * Validates the supported result shapes of repository query methods.
  *
  * @author Junghoon Ban
  */
@@ -32,32 +36,34 @@ enum MeilisearchQueryReturnShape {
 
 	ENTITY, OPTIONAL, LIST, ITERABLE, PAGE, COUNT, EXISTS, DELETE_COUNT, DELETE_VOID;
 
-	static MeilisearchQueryReturnShape resolve(PartTree tree, Method method, QueryMethod queryMethod,
-			Class<?> domainType) {
+	static MeilisearchQueryReturnShape resolve(PartTree tree, Method method, RepositoryMetadata metadata) {
 		Class<?> returnType = method.getReturnType();
-		MeilisearchQueryReturnShape shape;
 		if (tree.isCountProjection()) {
-			shape = resolveCount(returnType, method);
-		} else if (tree.isExistsProjection()) {
-			shape = resolveExists(returnType, method);
-		} else if (tree.isDelete()) {
-			shape = resolveDelete(returnType, method);
-		} else {
-			shape = resolveFinder(returnType, method, queryMethod, domainType);
+			return resolveCount(returnType, method);
 		}
-		return shape;
+		if (tree.isExistsProjection()) {
+			return resolveExists(returnType, method);
+		}
+		if (tree.isDelete()) {
+			return resolveDelete(returnType, method);
+		}
+		return resolveFinder(method, metadata, "derived query");
+	}
+
+	static MeilisearchQueryReturnShape resolveFinder(Method method, RepositoryMetadata metadata) {
+		return resolveFinder(method, metadata, "repository query");
 	}
 
 	private static MeilisearchQueryReturnShape resolveCount(Class<?> returnType, Method method) {
 		if (returnType != long.class && returnType != Long.class) {
-			throw unsupportedReturnType(returnType, method);
+			throw unsupportedReturnType(returnType, method, "derived query");
 		}
 		return COUNT;
 	}
 
 	private static MeilisearchQueryReturnShape resolveExists(Class<?> returnType, Method method) {
 		if (returnType != boolean.class && returnType != Boolean.class) {
-			throw unsupportedReturnType(returnType, method);
+			throw unsupportedReturnType(returnType, method, "derived query");
 		}
 		return EXISTS;
 	}
@@ -69,33 +75,48 @@ enum MeilisearchQueryReturnShape {
 		if (returnType == long.class || returnType == Long.class) {
 			return DELETE_COUNT;
 		}
-		throw unsupportedReturnType(returnType, method);
+		throw unsupportedReturnType(returnType, method, "derived query");
 	}
 
-	private static MeilisearchQueryReturnShape resolveFinder(Class<?> returnType, Method method, QueryMethod queryMethod,
-			Class<?> domainType) {
-		if (!queryMethod.isQueryForEntity()) {
-			throw unsupportedReturnType(returnType, method);
+	private static MeilisearchQueryReturnShape resolveFinder(Method method, RepositoryMetadata metadata,
+			String queryKind) {
+		TypeInformation<?> returnInformation = metadata.getReturnType(method);
+		Class<?> returnType = returnInformation.getType();
+		Class<?> domainType = metadata.getDomainType();
+		Type declaration = method.getGenericReturnType();
+		if (declaration instanceof ParameterizedType container) {
+			Type[] arguments = container.getActualTypeArguments();
+			if (arguments.length == 1) {
+				declaration = arguments[0];
+			}
 		}
-		MeilisearchQueryReturnShape shape;
+		if (declaration instanceof TypeVariable<?> variable && variable.getGenericDeclaration() instanceof Method) {
+			throw unsupportedReturnType(returnType, method, queryKind);
+		}
+		if (returnType == domainType) {
+			return ENTITY;
+		}
+		TypeInformation<?> component = returnInformation.getComponentType();
+		if (component == null || component.getType() != domainType) {
+			throw unsupportedReturnType(returnType, method, queryKind);
+		}
 		if (returnType == Page.class) {
-			shape = PAGE;
-		} else if (returnType == Optional.class) {
-			shape = OPTIONAL;
-		} else if (returnType == List.class) {
-			shape = LIST;
-		} else if (returnType == Iterable.class) {
-			shape = ITERABLE;
-		} else if (returnType.isAssignableFrom(domainType)) {
-			shape = ENTITY;
-		} else {
-			throw unsupportedReturnType(returnType, method);
+			return PAGE;
 		}
-		return shape;
+		if (returnType == Optional.class) {
+			return OPTIONAL;
+		}
+		if (returnType == List.class) {
+			return LIST;
+		}
+		if (returnType == Iterable.class) {
+			return ITERABLE;
+		}
+		throw unsupportedReturnType(returnType, method, queryKind);
 	}
 
-	private static IllegalArgumentException unsupportedReturnType(Class<?> returnType, Method method) {
+	private static IllegalArgumentException unsupportedReturnType(Class<?> returnType, Method method, String queryKind) {
 		return new IllegalArgumentException(
-				"Unsupported derived query return type " + returnType.getName() + " in method " + method.toGenericString());
+				"Unsupported " + queryKind + " return type " + returnType.getName() + " in method " + method.toGenericString());
 	}
 }
