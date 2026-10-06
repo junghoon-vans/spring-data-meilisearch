@@ -709,7 +709,7 @@ class ProductSearch {
 <p>Generic parameters and result types inherited from a repository base interface are resolved against the concrete repository&#8217;s type arguments before validation. The resolved types must still fit the supported binding and result forms; a parameter explicitly declared as <code>Serializable</code>, for example, does not become supported just because the caller supplies a string.</p>
 </div>
 <div class="paragraph">
-<p>Method-level result variables, such as <code>&lt;S extends Product&gt; Optional&lt;S&gt;</code>, are not concrete result declarations and are rejected even when their upper bound is the repository domain type. The repository materializes its fixed domain type; callers cannot select a different subtype through a method type argument.</p>
+<p>Method-level result variables, such as <code>&lt;S extends Product&gt; Optional&lt;S&gt;</code> or <code>&lt;S extends Product&gt; List&lt;? extends S&gt;</code>, are not concrete result declarations and are rejected even when their upper bound is the repository domain type. This restriction also applies to variables nested in wildcard bounds, generic owners, or array components. The repository materializes its fixed domain type; callers cannot select a different subtype through a method type argument. Concrete domain wildcards and inherited repository type variables remain supported when they resolve to a supported result form.</p>
 </div>
 <div class="sect2">
 <h3 id="_parameter_binding"><a class="anchor" href="#_parameter_binding"></a>Parameter Binding</h3>
@@ -724,6 +724,7 @@ Control characters and literal backslash escape sequences remain distinct filter
 </div>
 <div class="paragraph">
 <p>Supported value positions include comparison right-hand sides, both bounds of <code>price ?0 TO ?1</code>, <code>STARTS WITH</code> and <code>CONTAINS</code> operands, scalar entries in <code>category IN [?0, ?1]</code>, and complete flat collections/arrays in <code>category IN ?0</code> or <code>category NOT IN ?0</code>.
+Collection and array element declarations must support scalar binding. Known unsupported element types, including domain objects, nested collections, and arrays of collections or arrays, fail during repository creation. Inherited generic element types are resolved against the repository interface before this check. Raw collections, unresolved type variables, and <code>Object</code> element declarations retain runtime value validation.
 Numeric placeholders are also supported in <code>_geoRadius</code>, <code>_geoBoundingBox</code>, and <code>_geoPolygon</code> arguments.
 This binding support does not enable experimental operators or emulate operators missing from the server version.</p>
 </div>
@@ -742,7 +743,7 @@ Unlike derived <code>NotIn</code>, a declared <code>NOT IN</code> with an empty 
 A q-only search that binds to blank text is rejected rather than becoming an unrestricted placeholder search. Blank search text is allowed when the declaration also supplies a filter.</p>
 </div>
 <div class="paragraph">
-<p>Malformed placeholders (including <code>?name</code>, <code>?-1</code>, a bare <code>?</code>, or a marker using non-ASCII digits), invalid placeholder positions, out-of-range indices, special-parameter references, incompatible declared parameter types, and unused bindable parameters fail during repository creation.
+<p>Malformed placeholders (including <code>?name</code>, <code>?-1</code>, a bare <code>?</code>, or a marker using non-ASCII digits), invalid placeholder positions, out-of-range indices, special-parameter references, incompatible declared parameter types, and unused bindable parameters fail during repository creation. A non-ASCII digit immediately following an ASCII index, such as the Arabic-Indic digit in <code>?0٠</code>, is also invalid; this includes supplementary Unicode digits. Literal Unicode text separated from the index and runtime argument text are not restricted by the placeholder digit rule.
 A <code>?</code> outside a quoted filter literal is placeholder syntax; placeholders inside quoted filter literals are not supported.
 The binder checks substitution boundaries, not the entire server query language: actual filter syntax, operator availability, and index settings are validated by Meilisearch.</p>
 </div>
@@ -763,7 +764,7 @@ The binder checks substitution boundaries, not the entire server query language:
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Repository creation</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Conflicting <code>value</code>/<code>filter</code> aliases, an empty declaration, malformed or out-of-range placeholders, references to special parameters, unused bindable parameters, unsupported declared return types, or a missing declaration under <code>USE_DECLARED_QUERY</code> fail while the repository is created.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Conflicting <code>value</code>/<code>filter</code> aliases, an empty declaration, malformed or out-of-range placeholders, references to special parameters, unused bindable parameters, incompatible declared scalar or collection element types, unsupported declared return types, or a missing declaration under <code>USE_DECLARED_QUERY</code> fail while the repository is created.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Method invocation, before the search request</p></td>
