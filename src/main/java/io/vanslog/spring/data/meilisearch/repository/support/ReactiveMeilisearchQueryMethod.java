@@ -24,9 +24,8 @@ import org.springframework.data.repository.query.QueryMethod;
 import reactor.core.publisher.Flux;
 
 /**
- * Reactor query metadata whose Pageable parameter selects a streamed window rather than a
- * blocking Page wrapper. Concrete Mono/Flux payloads and supported special parameters are
- * validated by the reactive query executor.
+ * Reactor query metadata whose Pageable parameter selects a streamed window rather than a blocking Page wrapper.
+ * Concrete Mono/Flux payloads and supported special parameters are validated by the reactive query executor.
  *
  * @author Junghoon Ban
  */

@@ -52,8 +52,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 /**
- * Exercises reactive CRUD through the public repository proxy against a real Meilisearch
- * index.
+ * Exercises reactive CRUD through the public repository proxy against a real Meilisearch index.
  *
  * @author Junghoon Ban
  */
@@ -63,22 +62,18 @@ class ReactiveMeilisearchRepositoryIntegrationTests {
 
 	private static final String INDEX_UID = "gh215-reactive-crud";
 
-	@Autowired
-	MeilisearchClient meilisearchClient;
+	@Autowired MeilisearchClient meilisearchClient;
 
-	@Autowired
-	ReactiveMeilisearchOperations operations;
+	@Autowired ReactiveMeilisearchOperations operations;
 
-	@Autowired
-	ReactiveCrudEntryRepository repository;
+	@Autowired ReactiveCrudEntryRepository repository;
 
 	@BeforeEach
 	void createIndex() throws MeilisearchException {
 		deleteIndexIfExists();
 		TaskInfo task = meilisearchClient.createIndex(INDEX_UID, "id");
-		meilisearchClient.index(INDEX_UID)
-			.waitForTask(task.getTaskUid(), meilisearchClient.getRequestTimeout(),
-					meilisearchClient.getRequestInterval());
+		meilisearchClient.index(INDEX_UID).waitForTask(task.getTaskUid(), meilisearchClient.getRequestTimeout(),
+				meilisearchClient.getRequestInterval());
 	}
 
 	@AfterEach
@@ -101,21 +96,18 @@ class ReactiveMeilisearchRepositoryIntegrationTests {
 		assertThat(repository.saveAll(Flux.just(fourth)).collectList().block()).containsExactly(fourth);
 
 		assertThat(repository.findById(first.getId()).block().getId()).isEqualTo(first.getId());
-		assertThat(repository.findById(Flux.just(second.getId(), third.getId())).block().getId())
-			.isEqualTo(second.getId());
+		assertThat(repository.findById(Flux.just(second.getId(), third.getId())).block().getId()).isEqualTo(second.getId());
 		assertThat(repository.existsById(third.getId()).block()).isTrue();
 		assertThat(repository.existsById(Flux.just(third.getId(), first.getId())).block()).isTrue();
-		assertThat(repository.findAllById(List.of(third.getId(), missingId(), first.getId(), third.getId()))
-			.collectList()
-			.block()).extracting(ReactiveCrudEntry::getId).containsExactly(third.getId(), first.getId(), third.getId());
+		assertThat(
+				repository.findAllById(List.of(third.getId(), missingId(), first.getId(), third.getId())).collectList().block())
+				.extracting(ReactiveCrudEntry::getId).containsExactly(third.getId(), first.getId(), third.getId());
 		assertThat(repository.findAllById(Flux.just(second.getId(), missingId(), fourth.getId())).collectList().block())
-			.extracting(ReactiveCrudEntry::getId)
-			.containsExactly(second.getId(), fourth.getId());
+				.extracting(ReactiveCrudEntry::getId).containsExactly(second.getId(), fourth.getId());
 		assertThat(repository.findAll().collectList().block()).extracting(ReactiveCrudEntry::getId)
-			.containsExactlyInAnyOrder(first.getId(), second.getId(), third.getId(), fourth.getId());
+				.containsExactlyInAnyOrder(first.getId(), second.getId(), third.getId(), fourth.getId());
 		assertThat(repository.findAll(Sort.by(Sort.Direction.DESC, "rank")).collectList().block())
-			.extracting(ReactiveCrudEntry::getRank)
-			.containsExactly(4, 3, 2, 1);
+				.extracting(ReactiveCrudEntry::getRank).containsExactly(4, 3, 2, 1);
 		assertThat(repository.count().block()).isEqualTo(4L);
 
 		repository.deleteById(first.getId()).block();
@@ -143,10 +135,7 @@ class ReactiveMeilisearchRepositoryIntegrationTests {
 			int rank = generated.getAndIncrement();
 			sink.next(entry("bulk-" + rank, "Bulk " + rank, "fiction", rank));
 		});
-		List<ReactiveCrudEntry> written = repository.saveAll(unbounded)
-			.take(7)
-			.collectList()
-			.block(Duration.ofSeconds(30));
+		List<ReactiveCrudEntry> written = repository.saveAll(unbounded).take(7).collectList().block(Duration.ofSeconds(30));
 		assertThat(written).hasSize(7);
 		assertThat(generated.get()).isBetween(7, 14);
 		assertThat(repository.count().block()).isEqualTo(7L);
@@ -163,11 +152,9 @@ class ReactiveMeilisearchRepositoryIntegrationTests {
 	private void deleteIndexIfExists() throws MeilisearchException {
 		try {
 			TaskInfo task = meilisearchClient.deleteIndex(INDEX_UID);
-			meilisearchClient.index(INDEX_UID)
-				.waitForTask(task.getTaskUid(), meilisearchClient.getRequestTimeout(),
-						meilisearchClient.getRequestInterval());
-		}
-		catch (MeilisearchApiException error) {
+			meilisearchClient.index(INDEX_UID).waitForTask(task.getTaskUid(), meilisearchClient.getRequestTimeout(),
+					meilisearchClient.getRequestInterval());
+		} catch (MeilisearchApiException error) {
 			if (!"index_not_found".equals(error.getCode())) {
 				throw error;
 			}
@@ -182,8 +169,7 @@ class ReactiveMeilisearchRepositoryIntegrationTests {
 		@Bean(name = { "reactiveMeilisearchOperations", "reactiveMeilisearchTemplate" })
 		ReactiveMeilisearchOperations reactiveMeilisearchOperations(
 				@Qualifier("meilisearchClientConfiguration") ClientConfiguration clientConfiguration,
-				MeilisearchConverter meilisearchConverter,
-				@Qualifier("meilisearchObjectMapper") ObjectMapper objectMapper) {
+				MeilisearchConverter meilisearchConverter, @Qualifier("meilisearchObjectMapper") ObjectMapper objectMapper) {
 			return new io.vanslog.spring.data.meilisearch.client.msc.ReactiveMeilisearchTemplate(clientConfiguration,
 					meilisearchConverter, objectMapper, 7);
 		}

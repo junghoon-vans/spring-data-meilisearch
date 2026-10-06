@@ -29,7 +29,7 @@ import io.vanslog.spring.data.meilisearch.repository.support.ReactiveMeilisearch
 
 /**
  * Selects reactive repository metadata and its distinct operations bean reference.
- * 
+ *
  * @author Junghoon Ban
  */
 public class ReactiveMeilisearchRepositoryConfigExtension extends RepositoryConfigurationExtensionSupport {

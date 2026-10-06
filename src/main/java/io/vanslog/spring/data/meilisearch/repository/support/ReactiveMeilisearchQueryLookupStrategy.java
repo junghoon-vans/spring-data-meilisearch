@@ -33,15 +33,13 @@ import io.vanslog.spring.data.meilisearch.repository.Query;
 import reactor.core.publisher.Mono;
 
 /**
- * Selects declared, named, or derived reactive query execution using the configured
- * Spring Data lookup strategy.
+ * Selects declared, named, or derived reactive query execution using the configured Spring Data lookup strategy.
  *
  * @author Junghoon Ban
  */
 final class ReactiveMeilisearchQueryLookupStrategy implements QueryLookupStrategy {
 
-	@Nullable
-	private final QueryLookupStrategy.Key key;
+	@Nullable private final QueryLookupStrategy.Key key;
 
 	private final ReactiveMeilisearchOperations operations;
 

@@ -25,14 +25,13 @@ import io.vanslog.spring.data.meilisearch.core.ReactiveMeilisearchOperations;
 
 /**
  * Factory bean for reactive Meilisearch repositories.
- * 
+ *
  * @author Junghoon Ban
  */
 public class ReactiveMeilisearchRepositoryFactoryBean<T extends Repository<S, ID>, S, ID extends Serializable>
 		extends RepositoryFactoryBeanSupport<T, S, ID> {
 
-	@Nullable
-	private ReactiveMeilisearchOperations reactiveMeilisearchOperations;
+	@Nullable private ReactiveMeilisearchOperations reactiveMeilisearchOperations;
 
 	public ReactiveMeilisearchRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
 		super(repositoryInterface);

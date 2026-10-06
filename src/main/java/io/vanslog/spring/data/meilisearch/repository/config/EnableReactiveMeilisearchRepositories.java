@@ -27,9 +27,8 @@ import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 import io.vanslog.spring.data.meilisearch.repository.support.ReactiveMeilisearchRepositoryFactoryBean;
 
 /**
- * Enables reactive Meilisearch repositories without constructor-time network
- * initialization.
- * 
+ * Enables reactive Meilisearch repositories without constructor-time network initialization.
+ *
  * @author Junghoon Ban
  */
 @Target(ElementType.TYPE)

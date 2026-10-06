@@ -51,8 +51,9 @@ class ReactiveMeilisearchIndexInitializationTests {
 		AtomicInteger applications = new AtomicInteger();
 		MappingMeilisearchConverter converter = converter();
 		ReactiveMeilisearchOperations operations = operations(converter,
-				() -> Mono.defer(() -> applications.incrementAndGet() == 1
-						? Mono.error(new IllegalStateException("settings task failed")) : Mono.empty()));
+				() -> Mono.defer(
+						() -> applications.incrementAndGet() == 1 ? Mono.error(new IllegalStateException("settings task failed"))
+								: Mono.empty()));
 		ReactiveMeilisearchIndexInitialization initialization = new ReactiveMeilisearchIndexInitialization(
 				SettingsEntry.class, operations);
 
@@ -97,10 +98,8 @@ class ReactiveMeilisearchIndexInitializationTests {
 		AtomicReference<Throwable> secondFailure = new AtomicReference<>();
 
 		Disposable first = initialization.initialize().subscribe();
-		Disposable second = initialization.initialize()
-			.doOnSuccess(ignored -> secondCompleted.set(true))
-			.doOnError(secondFailure::set)
-			.subscribe();
+		Disposable second = initialization.initialize().doOnSuccess(ignored -> secondCompleted.set(true))
+				.doOnError(secondFailure::set).subscribe();
 		assertThat(attempts).hasValue(1);
 
 		first.dispose();
@@ -152,17 +151,13 @@ class ReactiveMeilisearchIndexInitializationTests {
 		MappingMeilisearchConverter converter = converter();
 		ReactiveMeilisearchOperations operations = operations(converter, () -> Mono.defer(() -> {
 			attempts.incrementAndGet();
-			return Mono.<Void>never().doOnCancel(cancellations::incrementAndGet).timeout(Duration.ofMillis(10));
+			return Mono.<Void> never().doOnCancel(cancellations::incrementAndGet).timeout(Duration.ofMillis(10));
 		}));
 		ReactiveMeilisearchIndexInitialization initialization = new ReactiveMeilisearchIndexInitialization(
 				SettingsEntry.class, operations);
 
-		StepVerifier.create(initialization.initialize())
-			.expectError(TimeoutException.class)
-			.verify(Duration.ofSeconds(2));
-		StepVerifier.create(initialization.initialize())
-			.expectError(TimeoutException.class)
-			.verify(Duration.ofSeconds(2));
+		StepVerifier.create(initialization.initialize()).expectError(TimeoutException.class).verify(Duration.ofSeconds(2));
+		StepVerifier.create(initialization.initialize()).expectError(TimeoutException.class).verify(Duration.ofSeconds(2));
 
 		assertThat(attempts).hasValue(2);
 		assertThat(cancellations).hasValue(2);
@@ -176,7 +171,7 @@ class ReactiveMeilisearchIndexInitializationTests {
 		ReactiveMeilisearchOperations operations = operations(converter,
 				() -> Mono.fromRunnable(applications::incrementAndGet), converterReads);
 		var entityInformation = new MeilisearchEntityInformationCreatorImpl(converter.getMappingContext())
-			.getEntityInformation(SettingsEntry.class);
+				.getEntityInformation(SettingsEntry.class);
 
 		new SimpleReactiveMeilisearchRepository<>(entityInformation, operations);
 
@@ -198,8 +193,8 @@ class ReactiveMeilisearchIndexInitializationTests {
 	private static ReactiveMeilisearchOperations operations(MappingMeilisearchConverter converter,
 			Supplier<Mono<Void>> applySettings, AtomicInteger converterReads) {
 		return (ReactiveMeilisearchOperations) java.lang.reflect.Proxy.newProxyInstance(
-				ReactiveMeilisearchOperations.class.getClassLoader(),
-				new Class<?>[] { ReactiveMeilisearchOperations.class }, (proxy, method, arguments) -> {
+				ReactiveMeilisearchOperations.class.getClassLoader(), new Class<?>[] { ReactiveMeilisearchOperations.class },
+				(proxy, method, arguments) -> {
 					if (method.getName().equals("getMeilisearchConverter")) {
 						converterReads.incrementAndGet();
 						return converter;
@@ -218,8 +213,7 @@ class ReactiveMeilisearchIndexInitializationTests {
 	@Document(indexUid = "gh215-initialization")
 	static class SettingsEntry {
 
-		@Id
-		private String id;
+		@Id private String id;
 
 		private String category;
 
@@ -229,8 +223,7 @@ class ReactiveMeilisearchIndexInitializationTests {
 	@Document(indexUid = "gh215-initialization-disabled", applySettings = false)
 	static class SettingsDisabledEntry {
 
-		@Id
-		private String id;
+		@Id private String id;
 
 		private String category;
 

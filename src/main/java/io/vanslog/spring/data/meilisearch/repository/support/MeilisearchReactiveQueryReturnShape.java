@@ -29,8 +29,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Validates the concrete Reactor wrapper and payload supported by a repository query
- * method.
+ * Validates the concrete Reactor wrapper and payload supported by a repository query method.
  *
  * @author Junghoon Ban
  */
@@ -100,8 +99,8 @@ enum MeilisearchReactiveQueryReturnShape {
 			throw unsupportedReturnType(method, queryKind);
 		}
 		Type declaredPayload = parameterizedType.getActualTypeArguments()[0];
-		if (declaredPayload instanceof WildcardType || declaredPayload instanceof TypeVariable<?> variable
-				&& variable.getGenericDeclaration() instanceof Method) {
+		if (declaredPayload instanceof WildcardType
+				|| declaredPayload instanceof TypeVariable<?> variable && variable.getGenericDeclaration() instanceof Method) {
 			throw unsupportedReturnType(method, queryKind);
 		}
 
@@ -113,8 +112,8 @@ enum MeilisearchReactiveQueryReturnShape {
 	}
 
 	private static IllegalArgumentException unsupportedReturnType(Method method, String queryKind) {
-		return new IllegalArgumentException("Unsupported " + queryKind + " return type "
-				+ method.getReturnType().getName() + " in method " + method.toGenericString());
+		return new IllegalArgumentException("Unsupported " + queryKind + " return type " + method.getReturnType().getName()
+				+ " in method " + method.toGenericString());
 	}
 
 }

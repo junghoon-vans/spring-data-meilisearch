@@ -54,9 +54,9 @@ class ReactiveMeilisearchQueryValidationUnitTests {
 	@Test
 	void resolvesConcreteTypesInInheritedReactiveFinderMethods() throws Exception {
 		assertThat(shape(GenericProductRepository.class, "findByTitle"))
-			.isEqualTo(MeilisearchReactiveQueryReturnShape.FLUX);
+				.isEqualTo(MeilisearchReactiveQueryReturnShape.FLUX);
 		assertThat(shape(GenericProductRepository.class, "readByTitle"))
-			.isEqualTo(MeilisearchReactiveQueryReturnShape.MONO);
+				.isEqualTo(MeilisearchReactiveQueryReturnShape.MONO);
 	}
 
 	@Test
@@ -64,7 +64,7 @@ class ReactiveMeilisearchQueryValidationUnitTests {
 		for (String name : List.of("findNestedListByTitle", "findPageByTitle", "findWrongMonoProjectionByTitle",
 				"countByTitle", "deleteByTitle")) {
 			assertThatThrownBy(() -> shape(InvalidRepository.class, name)).isInstanceOf(IllegalArgumentException.class)
-				.hasMessageContaining("return type");
+					.hasMessageContaining("return type");
 		}
 	}
 
@@ -80,8 +80,7 @@ class ReactiveMeilisearchQueryValidationUnitTests {
 		RepositoryMetadata metadata = new DefaultRepositoryMetadata(InvalidRepository.class);
 		Method method = findMethod(InvalidRepository.class, "declaredCountByTitle");
 		assertThatThrownBy(() -> MeilisearchReactiveQueryReturnShape.resolveFinder(method, metadata))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("return type");
+				.isInstanceOf(IllegalArgumentException.class).hasMessageContaining("return type");
 	}
 
 	@Test
@@ -106,15 +105,13 @@ class ReactiveMeilisearchQueryValidationUnitTests {
 		ReactiveMeilisearchQueryLookupStrategy create = new ReactiveMeilisearchQueryLookupStrategy(
 				QueryLookupStrategy.Key.CREATE, operations, type -> Mono.empty());
 		assertThatThrownBy(() -> create.resolveQuery(annotated, metadata, projectionFactory, noNamedQueries))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("return type");
+				.isInstanceOf(IllegalArgumentException.class).hasMessageContaining("return type");
 
 		Method derived = StrategyRepository.class.getMethod("findByTitle", String.class);
 		ReactiveMeilisearchQueryLookupStrategy declaredOnly = new ReactiveMeilisearchQueryLookupStrategy(
 				QueryLookupStrategy.Key.USE_DECLARED_QUERY, operations, type -> Mono.empty());
 		assertThatThrownBy(() -> declaredOnly.resolveQuery(derived, metadata, projectionFactory, noNamedQueries))
-			.isInstanceOf(IllegalStateException.class)
-			.hasMessageContaining("No declared Meilisearch query");
+				.isInstanceOf(IllegalStateException.class).hasMessageContaining("No declared Meilisearch query");
 	}
 
 	@Test
@@ -155,8 +152,7 @@ class ReactiveMeilisearchQueryValidationUnitTests {
 	}
 
 	private static ReactiveMeilisearchOperations operations(MeilisearchConverter converter) {
-		return (ReactiveMeilisearchOperations) Proxy.newProxyInstance(
-				ReactiveMeilisearchOperations.class.getClassLoader(),
+		return (ReactiveMeilisearchOperations) Proxy.newProxyInstance(ReactiveMeilisearchOperations.class.getClassLoader(),
 				new Class<?>[] { ReactiveMeilisearchOperations.class }, (proxy, method, arguments) -> {
 					if (method.getName().equals("getMeilisearchConverter")) {
 						return converter;
@@ -217,8 +213,7 @@ class ReactiveMeilisearchQueryValidationUnitTests {
 
 	static class Product {
 
-		@Id
-		private String id;
+		@Id private String id;
 
 		private String title;
 

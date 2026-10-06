@@ -35,7 +35,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * Factory for repositories executing exclusively through reactive Meilisearch operations.
- * 
+ *
  * @author Junghoon Ban
  */
 public class ReactiveMeilisearchRepositoryFactory extends ReactiveRepositoryFactorySupport {

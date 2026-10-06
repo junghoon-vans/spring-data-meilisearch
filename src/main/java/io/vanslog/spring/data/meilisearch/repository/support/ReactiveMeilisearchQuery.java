@@ -74,8 +74,7 @@ final class ReactiveMeilisearchQuery implements RepositoryQuery {
 	private final Sort staticSort;
 
 	ReactiveMeilisearchQuery(Method method, RepositoryMetadata metadata, ProjectionFactory projectionFactory,
-			ReactiveMeilisearchOperations operations, Mono<Void> initialization, boolean declared, String filter,
-			String q) {
+			ReactiveMeilisearchOperations operations, Mono<Void> initialization, boolean declared, String filter, String q) {
 
 		this.method = method;
 		this.queryMethod = new ReactiveMeilisearchQueryMethod(method, metadata, projectionFactory);
@@ -86,7 +85,7 @@ final class ReactiveMeilisearchQuery implements RepositoryQuery {
 
 		var converter = operations.getMeilisearchConverter();
 		MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext = converter
-			.getMappingContext();
+				.getMappingContext();
 		this.planner = new MeilisearchQueryPlanner(method, queryMethod, domainType, mappingContext,
 				converter.getConversionService(), declared ? "declared" : "derived");
 
@@ -94,8 +93,7 @@ final class ReactiveMeilisearchQuery implements RepositoryQuery {
 			this.tree = null;
 			this.returnShape = MeilisearchReactiveQueryReturnShape.resolveFinder(method, metadata);
 			this.binding = new MeilisearchDeclaredQueryBinding(method, queryMethod, filter, q);
-		}
-		else {
+		} else {
 			this.tree = planner.parseDerivedQuery();
 			this.returnShape = MeilisearchReactiveQueryReturnShape.resolve(tree, method, metadata);
 			this.binding = null;
@@ -140,8 +138,8 @@ final class ReactiveMeilisearchQuery implements RepositoryQuery {
 		return Mono.defer(() -> {
 			QueryPlan plan = plan(values);
 			String filter = plan.filters().isEmpty() ? null : String.join(" AND ", plan.filters());
-			return initialization.then(Mono
-				.defer(() -> filter == null ? operations.count(domainType) : operations.count(domainType, filter)));
+			return initialization
+					.then(Mono.defer(() -> filter == null ? operations.count(domainType) : operations.count(domainType, filter)));
 		});
 	}
 
@@ -149,7 +147,7 @@ final class ReactiveMeilisearchQuery implements RepositoryQuery {
 		return Mono.defer(() -> {
 			QueryPlan plan = plan(values);
 			return initialization.then(search(plan, Sort.unsorted(), PageRequest.of(0, 1)))
-				.map(hits -> !hits.getSearchHits().isEmpty());
+					.map(hits -> !hits.getSearchHits().isEmpty());
 		});
 	}
 
@@ -175,8 +173,7 @@ final class ReactiveMeilisearchQuery implements RepositoryQuery {
 			MeilisearchDeclaredQueryBinding.BoundQuery bound = binding.bind(values);
 			q = bound.q();
 			filters = bound.filter().isEmpty() ? List.of() : List.of(bound.filter());
-		}
-		else {
+		} else {
 			filters = planner.createFilters(tree, accessor);
 		}
 
@@ -198,8 +195,8 @@ final class ReactiveMeilisearchQuery implements RepositoryQuery {
 		FetchState state = new FetchState();
 		Sort sort = staticSort.and(plan.dynamicSort());
 		return searchPage(plan, sort, 0, state)
-			.expand(page -> page.complete() ? Mono.empty() : searchPage(plan, sort, page.number() + 1, state), 1)
-			.concatMap(page -> contentsOf(page.hits()), 0);
+				.expand(page -> page.complete() ? Mono.empty() : searchPage(plan, sort, page.number() + 1, state), 1)
+				.concatMap(page -> contentsOf(page.hits()), 0);
 	}
 
 	private Mono<SearchPage> searchPage(QueryPlan plan, Sort sort, int pageNumber, FetchState state) {
@@ -299,10 +296,8 @@ final class ReactiveMeilisearchQuery implements RepositoryQuery {
 			}
 			if (expectedTotal == null) {
 				expectedTotal = total;
-			}
-			else if (expectedTotal.longValue() != total) {
-				throw new IllegalStateException(
-						"Result count changed while loading all results for " + queryDescription());
+			} else if (expectedTotal.longValue() != total) {
+				throw new IllegalStateException("Result count changed while loading all results for " + queryDescription());
 			}
 			if (pageHits.isEmpty() && loaded < expectedTotal) {
 				throw incompleteResultSet(expectedTotal, loaded);
@@ -310,8 +305,7 @@ final class ReactiveMeilisearchQuery implements RepositoryQuery {
 
 			long nextLoaded = loaded + pageHits.size();
 			if (nextLoaded > expectedTotal) {
-				throw new IllegalStateException(
-						"Search returned more results than the exact total for " + queryDescription());
+				throw new IllegalStateException("Search returned more results than the exact total for " + queryDescription());
 			}
 			if (nextLoaded < expectedTotal && pageHits.size() < FETCH_PAGE_SIZE) {
 				throw incompleteResultSet(expectedTotal, nextLoaded);

@@ -22,8 +22,8 @@ import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEnti
 import reactor.core.publisher.Mono;
 
 /**
- * Lazily applies a domain type's default settings once, sharing an active attempt without
- * retaining failed or abandoned attempts.
+ * Lazily applies a domain type's default settings once, sharing an active attempt without retaining failed or abandoned
+ * attempts.
  *
  * @author Junghoon Ban
  */
@@ -36,10 +36,8 @@ final class ReactiveMeilisearchIndexInitialization {
 		Assert.notNull(domainType, "Domain type must not be null");
 		Assert.notNull(operations, "ReactiveMeilisearchOperations must not be null");
 
-		this.initialization = Mono.defer(() -> initialize(domainType, operations))
-			.thenReturn(Boolean.TRUE)
-			.cacheInvalidateIf(ignored -> false)
-			.then();
+		this.initialization = Mono.defer(() -> initialize(domainType, operations)).thenReturn(Boolean.TRUE)
+				.cacheInvalidateIf(ignored -> false).then();
 	}
 
 	Mono<Void> initialize() {
@@ -48,9 +46,8 @@ final class ReactiveMeilisearchIndexInitialization {
 
 	private static Mono<Void> initialize(Class<?> domainType, ReactiveMeilisearchOperations operations) {
 
-		MeilisearchPersistentEntity<?> entity = operations.getMeilisearchConverter()
-			.getMappingContext()
-			.getRequiredPersistentEntity(domainType);
+		MeilisearchPersistentEntity<?> entity = operations.getMeilisearchConverter().getMappingContext()
+				.getRequiredPersistentEntity(domainType);
 
 		return entity.isApplySettings() ? applySettings(operations, domainType) : Mono.empty();
 	}

@@ -29,8 +29,7 @@ import io.vanslog.spring.data.meilisearch.annotations.Setting;
 @Document(indexUid = "gh215-reactive-crud")
 public class ReactiveCrudEntry {
 
-	@Id
-	private Long id;
+	@Id private Long id;
 
 	private String title;
 
@@ -38,8 +37,7 @@ public class ReactiveCrudEntry {
 
 	private int rank;
 
-	public ReactiveCrudEntry() {
-	}
+	public ReactiveCrudEntry() {}
 
 	public ReactiveCrudEntry(Long id, String title, String category, int rank) {
 		this.id = id;

@@ -21,7 +21,7 @@ import org.springframework.data.repository.config.RepositoryConfigurationExtensi
 
 /**
  * Registrar for explicitly enabled reactive repositories.
- * 
+ *
  * @author Junghoon Ban
  */
 class ReactiveMeilisearchRepositoriesRegistrar extends RepositoryBeanDefinitionRegistrarSupport {

@@ -24,15 +24,13 @@ import io.vanslog.spring.data.meilisearch.annotations.Setting;
 @Setting(filterableAttributes = { "category" }, sortableAttributes = { "title" })
 public class CoexistingDocument {
 
-	@Id
-	private String id;
+	@Id private String id;
 
 	private String title;
 
 	private String category;
 
-	public CoexistingDocument() {
-	}
+	public CoexistingDocument() {}
 
 	public CoexistingDocument(String id, String title, String category) {
 		this.id = id;

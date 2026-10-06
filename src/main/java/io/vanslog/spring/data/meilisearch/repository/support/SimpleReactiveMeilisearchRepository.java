@@ -26,8 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Reactive CRUD implementation backed by cold {@link ReactiveMeilisearchOperations}
- * publishers.
+ * Reactive CRUD implementation backed by cold {@link ReactiveMeilisearchOperations} publishers.
  *
  * @param <T> the document type
  * @param <ID> the document identifier type
@@ -143,8 +142,8 @@ public class SimpleReactiveMeilisearchRepository<T, ID> implements ReactiveMeili
 	public Flux<T> findAllById(Publisher<ID> idStream) {
 		return Flux.defer(() -> {
 			Assert.notNull(idStream, "Id publisher must not be null");
-			return initialization.thenMany(Flux
-				.defer(() -> operations.multiGet(entityType, Flux.from(idStream).map(this::stringIdRepresentation))));
+			return initialization.thenMany(
+					Flux.defer(() -> operations.multiGet(entityType, Flux.from(idStream).map(this::stringIdRepresentation))));
 		});
 	}
 
@@ -174,7 +173,7 @@ public class SimpleReactiveMeilisearchRepository<T, ID> implements ReactiveMeili
 		return Mono.defer(() -> {
 			Assert.notNull(entity, "Entity must not be null");
 			return initialization
-				.then(Mono.defer(() -> operations.delete(stringIdRepresentation(requiredId(entity)), entityType)));
+					.then(Mono.defer(() -> operations.delete(stringIdRepresentation(requiredId(entity)), entityType)));
 		});
 	}
 
@@ -182,8 +181,8 @@ public class SimpleReactiveMeilisearchRepository<T, ID> implements ReactiveMeili
 	public Mono<Void> deleteAllById(Iterable<? extends ID> ids) {
 		return Mono.defer(() -> {
 			Assert.notNull(ids, "Ids must not be null");
-			return initialization.then(Mono.defer(() -> operations
-				.deleteAllById(Flux.fromIterable(ids).map(this::stringIdRepresentation), entityType)));
+			return initialization.then(Mono
+					.defer(() -> operations.deleteAllById(Flux.fromIterable(ids).map(this::stringIdRepresentation), entityType)));
 		});
 	}
 

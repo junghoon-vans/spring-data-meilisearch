@@ -39,9 +39,8 @@ import io.vanslog.spring.data.meilisearch.repository.config.EnableReactiveMeilis
 import reactor.core.publisher.Flux;
 
 /**
- * Both scanners discover the same package but execute only their own repository
- * contracts.
- * 
+ * Both scanners discover the same package but execute only their own repository contracts.
+ *
  * @author Junghoon Ban
  */
 @MeilisearchTest
@@ -51,11 +50,9 @@ class ReactiveRepositoryCoexistenceIntegrationTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(15);
 
-	@Autowired
-	BlockingCoexistingRepository blocking;
+	@Autowired BlockingCoexistingRepository blocking;
 
-	@Autowired
-	ReactiveCoexistingRepository reactive;
+	@Autowired ReactiveCoexistingRepository reactive;
 
 	@BeforeEach
 	void clearDocuments() {
@@ -70,10 +67,9 @@ class ReactiveRepositoryCoexistenceIntegrationTests {
 		assertThat(blocking.findById("shared-1")).get().extracting(CoexistingDocument::getTitle).isEqualTo("First");
 		blocking.save(second);
 		assertThat(reactive.findById("shared-2").block(TIMEOUT).getTitle()).isEqualTo("Second");
-		assertThat(reactive.findByCategoryOrderByTitleAsc("fiction")
-			.map(CoexistingDocument::getId)
-			.collectList()
-			.block(TIMEOUT)).containsExactly("shared-1", "shared-2");
+		assertThat(
+				reactive.findByCategoryOrderByTitleAsc("fiction").map(CoexistingDocument::getId).collectList().block(TIMEOUT))
+				.containsExactly("shared-1", "shared-2");
 		reactive.deleteById("shared-1").block(TIMEOUT);
 		assertThat(blocking.existsById("shared-1")).isFalse();
 		blocking.deleteById("shared-2");
@@ -83,16 +79,11 @@ class ReactiveRepositoryCoexistenceIntegrationTests {
 	@Test // GH-215
 	void reactiveIdLookupPreservesDuplicateOrderingAlongsideBlockingRepository() {
 		reactive.saveAll(Flux.just(new CoexistingDocument("ordered-1", "One", "fiction"),
-				new CoexistingDocument("ordered-2", "Two", "reference")))
-			.then()
-			.block(TIMEOUT);
+				new CoexistingDocument("ordered-2", "Two", "reference"))).then().block(TIMEOUT);
 		assertThat(reactive.findAllById(Flux.just("ordered-2", "absent", "ordered-1", "ordered-2"))
-			.map(CoexistingDocument::getId)
-			.collectList()
-			.block(TIMEOUT)).containsExactly("ordered-2", "ordered-1", "ordered-2");
-		assertThat(blocking.findById("ordered-2")).get()
-			.extracting(CoexistingDocument::getCategory)
-			.isEqualTo("reference");
+				.map(CoexistingDocument::getId).collectList().block(TIMEOUT))
+				.containsExactly("ordered-2", "ordered-1", "ordered-2");
+		assertThat(blocking.findById("ordered-2")).get().extracting(CoexistingDocument::getCategory).isEqualTo("reference");
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -103,8 +94,8 @@ class ReactiveRepositoryCoexistenceIntegrationTests {
 
 		@Bean("coexistingReactiveOperations")
 		ReactiveMeilisearchOperations reactiveOperations(
-				@Qualifier("meilisearchClientConfiguration") ClientConfiguration configuration,
-				MeilisearchConverter converter, @Qualifier("meilisearchObjectMapper") ObjectMapper mapper) {
+				@Qualifier("meilisearchClientConfiguration") ClientConfiguration configuration, MeilisearchConverter converter,
+				@Qualifier("meilisearchObjectMapper") ObjectMapper mapper) {
 			return new ReactiveMeilisearchTemplate(configuration, converter, mapper, 7);
 		}
 

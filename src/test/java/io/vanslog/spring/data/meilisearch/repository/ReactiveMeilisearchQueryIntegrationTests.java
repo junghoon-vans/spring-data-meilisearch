@@ -55,35 +55,26 @@ class ReactiveMeilisearchQueryIntegrationTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(15);
 
-	@Autowired
-	private ReactiveQueryProductRepository repository;
+	@Autowired private ReactiveQueryProductRepository repository;
 
 	@BeforeEach
 	void populateIndex() {
 		repository.deleteAll()
-			.thenMany(repository
-				.saveAll(List.of(product("1", "Alpha Reactor", 10, true), product("2", "Beta Reactor", 20, false),
-						product("3", "Gamma Reactor", 30, true), product("4", "Other Record", "other", 15, true),
-						product("5", "Director's \"cut\"", "other", 40, false),
+				.thenMany(repository.saveAll(List.of(product("1", "Alpha Reactor", 10, true),
+						product("2", "Beta Reactor", 20, false), product("3", "Gamma Reactor", 30, true),
+						product("4", "Other Record", "other", 15, true), product("5", "Director's \"cut\"", "other", 40, false),
 						product("6", "Duplicate", "other", 50, true), product("7", "Duplicate", "other", 60, false))))
-			.then()
-			.block(TIMEOUT);
+				.then().block(TIMEOUT);
 	}
 
 	@Test
 	void runsDerivedPredicatesAndReactiveProjections() {
-		assertThat(repository.findByCategoryAndPriceLessThanEqual("media", 20)
-			.map(ReactiveQueryProduct::getId)
-			.collectList()
-			.block(TIMEOUT)).containsExactly("1", "2");
-		assertThat(repository.findByCategoryOrderByPriceDesc("media")
-			.map(ReactiveQueryProduct::getId)
-			.collectList()
-			.block(TIMEOUT)).containsExactly("3", "2", "1");
-		assertThat(repository.findByCategory("media", Sort.by("price"))
-			.map(ReactiveQueryProduct::getId)
-			.collectList()
-			.block(TIMEOUT)).containsExactly("1", "2", "3");
+		assertThat(repository.findByCategoryAndPriceLessThanEqual("media", 20).map(ReactiveQueryProduct::getId)
+				.collectList().block(TIMEOUT)).containsExactly("1", "2");
+		assertThat(repository.findByCategoryOrderByPriceDesc("media").map(ReactiveQueryProduct::getId).collectList()
+				.block(TIMEOUT)).containsExactly("3", "2", "1");
+		assertThat(repository.findByCategory("media", Sort.by("price")).map(ReactiveQueryProduct::getId).collectList()
+				.block(TIMEOUT)).containsExactly("1", "2", "3");
 		assertThat(repository.findByTitle("Alpha Reactor").block(TIMEOUT).getId()).isEqualTo("1");
 		assertThat(repository.countByCategory("media").block(TIMEOUT)).isEqualTo(3L);
 		assertThat(repository.existsByTitle("Beta Reactor").block(TIMEOUT)).isTrue();
@@ -93,53 +84,42 @@ class ReactiveMeilisearchQueryIntegrationTests {
 	@Test
 	void returnsFiniteDeclaredWindowsWithMappedSortAndBindsQAndFilters() {
 		assertThat(repository.combined("Reactor", "media", 30, PageRequest.of(0, 2, Sort.by(Sort.Order.desc("price"))))
-			.map(ReactiveQueryProduct::getId)
-			.collectList()
-			.block(TIMEOUT)).containsExactly("3", "2");
+				.map(ReactiveQueryProduct::getId).collectList().block(TIMEOUT)).containsExactly("3", "2");
 		assertThat(repository.combined("Reactor", "media", 30, PageRequest.of(1, 2, Sort.by(Sort.Order.desc("price"))))
-			.map(ReactiveQueryProduct::getId)
-			.collectList()
-			.block(TIMEOUT)).containsExactly("1");
+				.map(ReactiveQueryProduct::getId).collectList().block(TIMEOUT)).containsExactly("1");
 		assertThat(repository.fullText("Reactor").map(ReactiveQueryProduct::getId).collectList().block(TIMEOUT))
-			.containsExactly("1", "2", "3");
+				.containsExactly("1", "2", "3");
 		assertThat(repository.filterOnly("media").map(ReactiveQueryProduct::getId).collectList().block(TIMEOUT))
-			.containsExactly("1", "2", "3");
+				.containsExactly("1", "2", "3");
 	}
 
 	@Test
 	void streamsUnpagedCollectionsAcrossBoundedSearchPages() {
 		long matches = repository
-			.saveAll(reactor.core.publisher.Flux.range(0, 1001)
-				.map(index -> new ReactiveQueryProduct("bulk-" + index, "Bulk result " + index, "bulk", index, true)))
-			.thenMany(repository.filterOnly("bulk"))
-			.count()
-			.block(Duration.ofSeconds(90));
+				.saveAll(reactor.core.publisher.Flux.range(0, 1001)
+						.map(index -> new ReactiveQueryProduct("bulk-" + index, "Bulk result " + index, "bulk", index, true)))
+				.thenMany(repository.filterOnly("bulk")).count().block(Duration.ofSeconds(90));
 		assertThat(matches).isEqualTo(1001L);
 	}
 
 	@Test
 	void bindsEscapedDeclaredValuesAndHonorsAnnotationAndNamedQueryPrecedence() {
 		assertThat(repository.byLiteralTitle("Director's \"cut\"").single().block(TIMEOUT).getId()).isEqualTo("5");
-		assertThat(repository.namedSearch("Reactor", "media")
-			.map(ReactiveQueryProduct::getId)
-			.collectList()
-			.block(TIMEOUT)).containsExactly("1", "3");
-		assertThat(
-				repository.preferred("Reactor", "media").map(ReactiveQueryProduct::getId).collectList().block(TIMEOUT))
-			.containsExactly("1", "2", "3");
+		assertThat(repository.namedSearch("Reactor", "media").map(ReactiveQueryProduct::getId).collectList().block(TIMEOUT))
+				.containsExactly("1", "3");
+		assertThat(repository.preferred("Reactor", "media").map(ReactiveQueryProduct::getId).collectList().block(TIMEOUT))
+				.containsExactly("1", "2", "3");
 	}
 
 	@Test
 	void preservesSingleResultCardinalityAndReactiveDeleteResults() {
 		assertThatThrownBy(() -> repository.findByTitle("Duplicate").block(TIMEOUT))
-			.isInstanceOf(org.springframework.dao.IncorrectResultSizeDataAccessException.class);
+				.isInstanceOf(org.springframework.dao.IncorrectResultSizeDataAccessException.class);
 		assertThat(repository.deleteByTitle("Beta Reactor").block(TIMEOUT)).isEqualTo(1L);
 		assertThat(repository.countByCategory("media").block(TIMEOUT)).isEqualTo(2L);
 		repository.deleteByActiveFalse().block(TIMEOUT);
-		assertThat(repository.findByCategory("media", Sort.unsorted())
-			.map(ReactiveQueryProduct::getId)
-			.collectList()
-			.block(TIMEOUT)).containsExactly("1", "3");
+		assertThat(repository.findByCategory("media", Sort.unsorted()).map(ReactiveQueryProduct::getId).collectList()
+				.block(TIMEOUT)).containsExactly("1", "3");
 	}
 
 	private static ReactiveQueryProduct product(String id, String title, int price, boolean active) {

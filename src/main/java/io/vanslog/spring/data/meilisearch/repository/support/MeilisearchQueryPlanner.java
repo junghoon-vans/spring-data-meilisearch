@@ -38,8 +38,8 @@ import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
 import io.vanslog.spring.data.meilisearch.core.query.BasicQueryBuilder;
 
 /**
- * Pure query parsing, field mapping, sorting, filter binding, and search request planning
- * shared by blocking and reactive repository queries.
+ * Pure query parsing, field mapping, sorting, filter binding, and search request planning shared by blocking and
+ * reactive repository queries.
  *
  * @author Junghoon Ban
  */
@@ -76,11 +76,9 @@ final class MeilisearchQueryPlanner {
 		PartTree tree;
 		try {
 			tree = new PartTree(method.getName(), domainType);
-		}
-		catch (RuntimeException exception) {
+		} catch (RuntimeException exception) {
 			throw new IllegalArgumentException(
-					"Cannot parse derived query method " + method.toGenericString() + ": " + exception.getMessage(),
-					exception);
+					"Cannot parse derived query method " + method.toGenericString() + ": " + exception.getMessage(), exception);
 		}
 
 		validateTree(tree);
@@ -97,8 +95,7 @@ final class MeilisearchQueryPlanner {
 		for (PartTree.OrPart orPart : tree) {
 			List<String> filters = new ArrayList<>();
 			for (Part part : orPart) {
-				PropertyReference property = resolveProperty(part.getProperty().toDotPath(),
-						FilterSyntax.operatorName(part));
+				PropertyReference property = resolveProperty(part.getProperty().toDotPath(), FilterSyntax.operatorName(part));
 				String filter = createFilter(part, property, accessor, parameterIndex);
 				if (filter != null) {
 					filters.add(filter);
@@ -117,8 +114,7 @@ final class MeilisearchQueryPlanner {
 		}
 		if (groups.size() != groupCount) {
 			throw new IllegalArgumentException(
-					"Cannot evaluate an Or branch without an effective filter for derived query "
-							+ method.toGenericString());
+					"Cannot evaluate an Or branch without an effective filter for derived query " + method.toGenericString());
 		}
 		return List.of(String.join(" OR ", groups));
 	}
@@ -196,11 +192,9 @@ final class MeilisearchQueryPlanner {
 		String field = property.fieldName();
 		return switch (part.getType()) {
 			case GREATER_THAN -> field + " > " + toLiteral(accessor.getBindableValue(parameterIndex), property, part);
-			case GREATER_THAN_EQUAL ->
-				field + " >= " + toLiteral(accessor.getBindableValue(parameterIndex), property, part);
+			case GREATER_THAN_EQUAL -> field + " >= " + toLiteral(accessor.getBindableValue(parameterIndex), property, part);
 			case LESS_THAN -> field + " < " + toLiteral(accessor.getBindableValue(parameterIndex), property, part);
-			case LESS_THAN_EQUAL ->
-				field + " <= " + toLiteral(accessor.getBindableValue(parameterIndex), property, part);
+			case LESS_THAN_EQUAL -> field + " <= " + toLiteral(accessor.getBindableValue(parameterIndex), property, part);
 			case BETWEEN -> field + " " + toLiteral(accessor.getBindableValue(parameterIndex), property, part) + " TO "
 					+ toLiteral(accessor.getBindableValue(parameterIndex + 1), property, part);
 			case TRUE -> field + " = true";
@@ -224,8 +218,7 @@ final class MeilisearchQueryPlanner {
 				}
 				literals.add(toLiteral(item, property, part));
 			}
-		}
-		else if (value.getClass().isArray()) {
+		} else if (value.getClass().isArray()) {
 			for (int i = 0; i < Array.getLength(value); i++) {
 				Object item = Array.get(value, i);
 				if (item == null) {
@@ -233,8 +226,7 @@ final class MeilisearchQueryPlanner {
 				}
 				literals.add(toLiteral(item, property, part));
 			}
-		}
-		else {
+		} else {
 			throw invalidParameter(part, "IN/NotIn requires a collection or array parameter");
 		}
 
@@ -274,8 +266,7 @@ final class MeilisearchQueryPlanner {
 
 		try {
 			return MeilisearchFilterValue.scalar(converted);
-		}
-		catch (IllegalArgumentException exception) {
+		} catch (IllegalArgumentException exception) {
 			throw invalidParameter(part, exception.getMessage());
 		}
 	}
@@ -324,9 +315,8 @@ final class MeilisearchQueryPlanner {
 					FilterSyntax.operatorName(part) + " on non-boolean property " + part.getProperty().toDotPath());
 		}
 		if (part.getType() == Part.Type.STARTING_WITH
-				&& mappingContext.getPersistentPropertyPath(part.getProperty().toDotPath(), domainType)
-					.getLeafProperty()
-					.getType() != String.class) {
+				&& mappingContext.getPersistentPropertyPath(part.getProperty().toDotPath(), domainType).getLeafProperty()
+						.getType() != String.class) {
 			throw unsupportedOperator(
 					FilterSyntax.operatorName(part) + " on non-string property " + part.getProperty().toDotPath());
 		}
@@ -339,8 +329,7 @@ final class MeilisearchQueryPlanner {
 			if (part.getType() == Part.Type.IN || part.getType() == Part.Type.NOT_IN) {
 				Class<?> parameterType = queryMethod.getParameters().getBindableParameter(parameterIndex).getType();
 				if (!Iterable.class.isAssignableFrom(parameterType) && !parameterType.isArray()) {
-					throw unsupportedOperator(
-							FilterSyntax.operatorName(part) + " requires a collection or array parameter");
+					throw unsupportedOperator(FilterSyntax.operatorName(part) + " requires a collection or array parameter");
 				}
 			}
 			if (part.getType() == Part.Type.STARTING_WITH
@@ -354,8 +343,8 @@ final class MeilisearchQueryPlanner {
 	private PropertyReference resolveProperty(String pathName, String operator) {
 
 		try {
-			PersistentPropertyPath<MeilisearchPersistentProperty> path = mappingContext
-				.getPersistentPropertyPath(pathName, domainType);
+			PersistentPropertyPath<MeilisearchPersistentProperty> path = mappingContext.getPersistentPropertyPath(pathName,
+					domainType);
 			StringBuilder fieldName = new StringBuilder();
 			for (MeilisearchPersistentProperty property : path) {
 				if (property.isTransient()) {
@@ -376,13 +365,13 @@ final class MeilisearchQueryPlanner {
 				valueType = leaf.getType();
 			}
 			return new PropertyReference(fieldName.toString(), valueType);
-		}
-		catch (RuntimeException exception) {
+		} catch (RuntimeException exception) {
 			if (exception.getMessage() != null && exception.getMessage().contains(method.toGenericString())) {
 				throw exception;
 			}
-			throw new IllegalArgumentException("Invalid property '" + pathName + "' for " + queryKind + " query method "
-					+ method.toGenericString(), exception);
+			throw new IllegalArgumentException(
+					"Invalid property '" + pathName + "' for " + queryKind + " query method " + method.toGenericString(),
+					exception);
 		}
 	}
 
@@ -396,24 +385,22 @@ final class MeilisearchQueryPlanner {
 				return false;
 			}
 		}
-		return fieldName.charAt(0) != '.' && fieldName.charAt(fieldName.length() - 1) != '.'
-				&& !fieldName.contains("..");
+		return fieldName.charAt(0) != '.' && fieldName.charAt(fieldName.length() - 1) != '.' && !fieldName.contains("..");
 	}
 
 	private IllegalArgumentException invalidParameter(Part part, String reason) {
-		return new IllegalArgumentException("Invalid value for derived query operator '"
-				+ FilterSyntax.operatorName(part) + "' in method " + method.toGenericString() + ": " + reason);
+		return new IllegalArgumentException("Invalid value for derived query operator '" + FilterSyntax.operatorName(part)
+				+ "' in method " + method.toGenericString() + ": " + reason);
 	}
 
 	private static final class FilterSyntax {
 
-		private FilterSyntax() {
-		}
+		private FilterSyntax() {}
 
 		private static boolean isSupported(Part.Type type) {
 			return switch (type) {
-				case SIMPLE_PROPERTY, IN, NOT_IN, GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL, BETWEEN,
-						TRUE, FALSE, IS_NULL, IS_NOT_NULL, EXISTS, STARTING_WITH ->
+				case SIMPLE_PROPERTY, IN, NOT_IN, GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL, BETWEEN, TRUE,
+						FALSE, IS_NULL, IS_NOT_NULL, EXISTS, STARTING_WITH ->
 					true;
 				default -> false;
 			};

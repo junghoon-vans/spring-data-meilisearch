@@ -52,8 +52,7 @@ class ReactiveRepositoryTaskTests {
 			try (exchange) {
 				if (exchange.getRequestURI().getPath().equals("/tasks/73")) {
 					respond(exchange, 200, "{\"uid\":73,\"status\":\"processing\"}");
-				}
-				else {
+				} else {
 					submissions.incrementAndGet();
 					respond(exchange, 202, "{\"taskUid\":73,\"status\":\"enqueued\"}");
 				}
@@ -69,8 +68,7 @@ class ReactiveRepositoryTaskTests {
 				assertThat(((ReactiveTaskTimeoutException) error).getTaskUid()).isEqualTo(73);
 			}).verify(Duration.ofSeconds(5));
 			assertThat(submissions).hasValue(1);
-		}
-		finally {
+		} finally {
 			server.stop(0);
 		}
 	}
@@ -84,8 +82,7 @@ class ReactiveRepositoryTaskTests {
 				if (exchange.getRequestURI().getPath().equals("/tasks/74")) {
 					respond(exchange, 200,
 							"{\"uid\":74,\"status\":\"failed\",\"error\":{\"code\":\"index_not_found\",\"message\":\"Index was removed\"}}");
-				}
-				else {
+				} else {
 					submissions.incrementAndGet();
 					respond(exchange, 202, "{\"taskUid\":74,\"status\":\"enqueued\"}");
 				}
@@ -102,21 +99,17 @@ class ReactiveRepositoryTaskTests {
 				assertThat(taskError.getErrorCode()).isEqualTo("index_not_found");
 			}).verify(Duration.ofSeconds(5));
 			assertThat(submissions).hasValue(1);
-		}
-		finally {
+		} finally {
 			server.stop(0);
 		}
 	}
 
 	private static TaskRepository repository(HttpServer server, int timeout) {
 		ClientConfiguration configuration = ClientConfiguration.builder()
-			.connectedTo("http://127.0.0.1:" + server.getAddress().getPort())
-			.withApiKey("")
-			.withRequestTimeout(timeout)
-			.withRequestInterval(5)
-			.build();
+				.connectedTo("http://127.0.0.1:" + server.getAddress().getPort()).withApiKey("").withRequestTimeout(timeout)
+				.withRequestInterval(5).build();
 		return new ReactiveMeilisearchRepositoryFactory(new ReactiveMeilisearchTemplate(configuration))
-			.getRepository(TaskRepository.class);
+				.getRepository(TaskRepository.class);
 	}
 
 	private static void respond(HttpExchange exchange, int status, String json) throws IOException {

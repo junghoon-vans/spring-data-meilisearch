@@ -77,10 +77,9 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		List<String> filters = planner.createFilters(tree, accessor);
 		return switch (returnShape) {
 			case COUNT -> executeCount(filters);
-			case EXISTS -> !operations
-				.search(finderExecution.createQuery("", filters, Sort.unsorted(), PageRequest.of(0, 1)), domainType)
-				.getSearchHits()
-				.isEmpty();
+			case EXISTS ->
+				!operations.search(finderExecution.createQuery("", filters, Sort.unsorted(), PageRequest.of(0, 1)), domainType)
+						.getSearchHits().isEmpty();
 			case DELETE_COUNT, DELETE_VOID -> executeDelete(filters);
 			case ENTITY, OPTIONAL, PAGE, LIST, ITERABLE -> finderExecution.execute("", filters, accessor);
 		};

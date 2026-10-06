@@ -33,8 +33,8 @@ import org.springframework.data.repository.core.RepositoryMetadata;
 import org.w3c.dom.Element;
 
 /**
- * {@link org.springframework.data.repository.config.RepositoryConfigurationExtension}
- * implementation to configure Meilisearch repository configuration support.
+ * {@link org.springframework.data.repository.config.RepositoryConfigurationExtension} implementation to configure
+ * Meilisearch repository configuration support.
  *
  * @author Junghoon Ban
  */

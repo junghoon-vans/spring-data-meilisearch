@@ -32,8 +32,7 @@ import io.vanslog.spring.data.meilisearch.annotations.Setting;
 @Pagination(maxTotalHits = 2000)
 public class ReactiveQueryProduct {
 
-	@Id
-	private String id;
+	@Id private String id;
 
 	private String title;
 
@@ -43,8 +42,7 @@ public class ReactiveQueryProduct {
 
 	private boolean active;
 
-	public ReactiveQueryProduct() {
-	}
+	public ReactiveQueryProduct() {}
 
 	public ReactiveQueryProduct(String id, String title, String category, int price, boolean active) {
 		this.id = id;

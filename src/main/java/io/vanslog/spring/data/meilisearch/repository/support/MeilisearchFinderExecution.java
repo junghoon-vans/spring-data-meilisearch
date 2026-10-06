@@ -87,8 +87,7 @@ final class MeilisearchFinderExecution {
 			case ENTITY, OPTIONAL -> executeSingle(q, filters, completeSort);
 			case PAGE -> executePage(q, filters, pageable, mappedDynamicSort);
 			case LIST, ITERABLE -> executeCollection(q, filters, pageable, completeSort, mappedDynamicSort);
-			case COUNT, EXISTS, DELETE_COUNT, DELETE_VOID ->
-				throw new IllegalStateException("Projection already handled");
+			case COUNT, EXISTS, DELETE_COUNT, DELETE_VOID -> throw new IllegalStateException("Projection already handled");
 		};
 	}
 
@@ -136,8 +135,7 @@ final class MeilisearchFinderExecution {
 		List<Object> content;
 		if (pageable == null || pageable.isUnpaged()) {
 			content = fetchAll(q, filters, completeSort);
-		}
-		else {
+		} else {
 			Pageable mappedPageable = mapPageable(pageable, dynamicSort);
 			SearchHits<?> hits = operations.search(createQuery(q, filters, staticSort, mappedPageable), domainType);
 			content = contentsOf(hits);
@@ -168,10 +166,8 @@ final class MeilisearchFinderExecution {
 
 			if (expectedTotal == null) {
 				expectedTotal = total;
-			}
-			else if (expectedTotal.longValue() != total) {
-				throw new IllegalStateException(
-						"Result count changed while loading all results for " + queryDescription());
+			} else if (expectedTotal.longValue() != total) {
+				throw new IllegalStateException("Result count changed while loading all results for " + queryDescription());
 			}
 
 			List<? extends SearchHit<?>> pageHits = hits.getSearchHits();
@@ -184,8 +180,7 @@ final class MeilisearchFinderExecution {
 			}
 
 			if (results.size() > expectedTotal) {
-				throw new IllegalStateException(
-						"Search returned more results than the exact total for " + queryDescription());
+				throw new IllegalStateException("Search returned more results than the exact total for " + queryDescription());
 			}
 			if (results.size() == expectedTotal) {
 				return results;
