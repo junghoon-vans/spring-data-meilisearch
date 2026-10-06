@@ -154,8 +154,9 @@ Their defaults are 5,000 ms and 50 ms. The separate HTTP exchange timeout is 10 
 Both task settings must be positive for a write.
 
 * `ReactiveTaskTimeoutException` exposes the UID and configured observation timeout. The server outcome is unknown; the task may still succeed later.
+* `ReactiveTaskObservationException` exposes the accepted task UID when polling fails because of HTTP, communication, JSON, or malformed task data. Its cause preserves the polling failure; the server outcome remains unknown.
 * `MeilisearchRestException` exposes the HTTP status and server `code`, `type`, and `link` for non-successful HTTP responses.
-* `UncategorizedMeilisearchException` reports communication, JSON, and malformed task-response failures, preserving causes where available.
+* `UncategorizedMeilisearchException` reports communication, JSON, and malformed submission-response failures, preserving causes where available. Failures after a valid task receipt are wrapped in `ReactiveTaskObservationException`.
 
 Cancellation stops local observation and further batch/page processing, and attempts to cancel an in-flight HTTP exchange.
 It does not cancel an accepted Meilisearch task or roll back completed work.

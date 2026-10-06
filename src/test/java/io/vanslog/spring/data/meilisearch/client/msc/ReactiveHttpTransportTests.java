@@ -37,6 +37,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import io.vanslog.spring.data.meilisearch.MeilisearchRestException;
 import io.vanslog.spring.data.meilisearch.ReactiveTaskException;
+import io.vanslog.spring.data.meilisearch.ReactiveTaskObservationException;
 import io.vanslog.spring.data.meilisearch.ReactiveTaskTimeoutException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
@@ -156,6 +157,35 @@ class ReactiveHttpTransportTests {
 			assertThat(task.path("details").path("deletedDocuments").intValue()).isEqualTo(3);
 			assertThat(submittedBody).hasValue("{\"filter\": [1, 2]}");
 			assertThat(polls).hasValue(2);
+		}
+	}
+
+	@Test // GH-214
+	void pollingFailureRetainsTheAcceptedTaskUidAndOriginalHttpFailure() throws Exception {
+		try (TestServer server = new TestServer()) {
+			AtomicInteger submissions = new AtomicInteger();
+			AtomicInteger polls = new AtomicInteger();
+			server.setHandler(exchange -> {
+				try (exchange) {
+					if (exchange.getRequestMethod().equals("POST")) {
+						submissions.incrementAndGet();
+						respond(exchange, 202, "{\"taskUid\":73,\"status\":\"enqueued\"}");
+					} else {
+						polls.incrementAndGet();
+						respond(exchange, 503, "{\"code\":\"unavailable\",\"type\":\"internal\"}");
+					}
+				}
+			});
+			ReactiveHttpTransport transport = new ReactiveHttpTransport(configuration(server.url(), 1000, 10), OBJECT_MAPPER);
+
+			Throwable failure = catchThrowable(() -> transport.write("POST", "/writes", "{}").block(Duration.ofSeconds(2)));
+
+			assertThat(failure).isInstanceOf(ReactiveTaskObservationException.class);
+			assertThat(((ReactiveTaskObservationException) failure).getTaskUid()).isEqualTo(73);
+			assertThat(failure.getCause()).isInstanceOf(MeilisearchRestException.class);
+			assertThat(((MeilisearchRestException) failure.getCause()).getStatusCode()).isEqualTo(503);
+			assertThat(submissions).hasValue(1);
+			assertThat(polls).hasValue(1);
 		}
 	}
 
@@ -296,12 +326,16 @@ class ReactiveHttpTransportTests {
 
 			Throwable missingStatus = catchThrowable(
 					() -> transport.write("POST", "/writes", "{}").block(Duration.ofSeconds(2)));
-			assertThat(missingStatus).isInstanceOf(UncategorizedMeilisearchException.class);
+			assertThat(missingStatus).isInstanceOf(ReactiveTaskObservationException.class);
+			assertThat(((ReactiveTaskObservationException) missingStatus).getTaskUid()).isEqualTo(51);
+			assertThat(missingStatus.getCause()).isInstanceOf(UncategorizedMeilisearchException.class);
 
 			taskStatus.set("unknown-status");
 			Throwable unknownStatus = catchThrowable(
 					() -> transport.write("POST", "/writes", "{}").block(Duration.ofSeconds(2)));
-			assertThat(unknownStatus).isInstanceOf(UncategorizedMeilisearchException.class);
+			assertThat(unknownStatus).isInstanceOf(ReactiveTaskObservationException.class);
+			assertThat(((ReactiveTaskObservationException) unknownStatus).getTaskUid()).isEqualTo(51);
+			assertThat(unknownStatus.getCause()).isInstanceOf(UncategorizedMeilisearchException.class);
 		}
 	}
 

@@ -352,6 +352,7 @@ public class ReactiveMeilisearchTemplate implements ReactiveMeilisearchOperation
 		});
 	}
 
+	@Nullable
 	private String[] sortOptions(MeilisearchPersistentEntity<?> entity, Sort sort) {
 		List<String> options = new ArrayList<>();
 		for (Sort.Order order : sort) {
@@ -427,6 +428,7 @@ public class ReactiveMeilisearchTemplate implements ReactiveMeilisearchOperation
 		return deletedDocuments.asLong();
 	}
 
+	@Nullable
 	private String documentId(io.vanslog.spring.data.meilisearch.core.document.Document document, String idField) {
 		Object rawId = document.get(idField);
 		if (rawId == null) {

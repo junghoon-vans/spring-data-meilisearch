@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.node.NullNode;
 
 import io.vanslog.spring.data.meilisearch.MeilisearchRestException;
 import io.vanslog.spring.data.meilisearch.ReactiveTaskException;
+import io.vanslog.spring.data.meilisearch.ReactiveTaskObservationException;
 import io.vanslog.spring.data.meilisearch.ReactiveTaskTimeoutException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.client.ClientConfiguration;
@@ -137,8 +138,10 @@ final class ReactiveHttpTransport {
 	}
 
 	private Mono<JsonNode> observeTask(long taskUid, Duration timeout, Duration interval) {
-		return pollTask(taskUid, interval).timeout(timeout, Mono.error(new ReactiveTaskTimeoutException(taskUid, timeout)),
-				scheduler);
+		return pollTask(taskUid, interval)
+				.onErrorMap(error -> !(error instanceof ReactiveTaskException),
+						error -> new ReactiveTaskObservationException(taskUid, error))
+				.timeout(timeout, Mono.error(new ReactiveTaskTimeoutException(taskUid, timeout)), scheduler);
 	}
 
 	private Mono<JsonNode> pollTask(long taskUid, Duration interval) {
