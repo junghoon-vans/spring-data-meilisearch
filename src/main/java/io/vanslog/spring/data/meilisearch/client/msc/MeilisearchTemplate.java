@@ -391,11 +391,23 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	}
 
 	/**
-	 * Execute the given {@link MeilisearchCallback}.
+	 * Execute a supported, SDK-coupled low-level callback using the configured native client. Prefer
+	 * {@link MeilisearchOperations} and repositories for regular mapped application access.
+	 * <p>
+	 * The callback supplies SDK requests and interprets SDK results. This method does not automatically map entities,
+	 * wait for task completion, or validate completed task status. A returned {@link TaskInfo} confirms submission, not
+	 * task success; retrieving and interpreting the completed outcome is the caller's responsibility.
+	 * <p>
+	 * SDK {@link MeilisearchException} failures escaping callback execution are translated: the
+	 * {@code document_not_found} API error becomes {@link DocumentAccessException}, and other SDK failures become
+	 * {@link UncategorizedMeilisearchException}. Other runtime exceptions are not translated by this method. Direct SDK
+	 * calls outside this method do not pass through this translation boundary.
 	 *
 	 * @param callback must not be {@literal null}.
 	 * @return a result object returned by the action or {@literal null}.
 	 * @param <T> the type of the result object
+	 * @throws DocumentAccessException if an SDK API failure reports {@code document_not_found}
+	 * @throws UncategorizedMeilisearchException for other SDK {@link MeilisearchException} failures
 	 */
 	@Nullable
 	public <T> T execute(MeilisearchCallback<T> callback) {
