@@ -278,8 +278,8 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 		Method method = StringNameRepository.class.getMethod("search", Serializable.class);
 		var metadata = new DefaultRepositoryMetadata(StringNameRepository.class);
 		QueryMethod queryMethod = new QueryMethod(method, metadata, new SpelAwareProxyProjectionFactory());
-		MeilisearchDeclaredQueryBinding binding = new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata,
-				"name = ?0", "");
+		MeilisearchDeclaredQueryBinding binding = new MeilisearchDeclaredQueryBinding(method, queryMethod,
+				metadata.getRepositoryInterface(), "name = ?0", "");
 
 		assertThat(binding.bind(new Object[] { "name" }).filter()).isEqualTo("name = \"name\"");
 	}
@@ -322,8 +322,8 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 		var metadata = new DefaultRepositoryMetadata(SerializableNameRepository.class);
 		QueryMethod queryMethod = new QueryMethod(method, metadata, new SpelAwareProxyProjectionFactory());
 
-		assertThatThrownBy(() -> new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata, "name = ?0", ""))
-				.isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata.getRepositoryInterface(),
+				"name = ?0", "")).isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -378,7 +378,7 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 
 		var metadata = new DefaultRepositoryMetadata(repositoryInterface);
 		QueryMethod queryMethod = new QueryMethod(method, metadata, new SpelAwareProxyProjectionFactory());
-		return new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata, "name IN ?0", "");
+		return new MeilisearchDeclaredQueryBinding(method, queryMethod, repositoryInterface, "name IN ?0", "");
 	}
 
 	private static MeilisearchDeclaredQueryBinding binding(String methodName, String filter, String q,
@@ -386,7 +386,7 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 		Method method = SampleRepository.class.getMethod(methodName, parameterTypes);
 		var metadata = new DefaultRepositoryMetadata(SampleRepository.class);
 		QueryMethod queryMethod = new QueryMethod(method, metadata, new SpelAwareProxyProjectionFactory());
-		return new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata, filter, q);
+		return new MeilisearchDeclaredQueryBinding(method, queryMethod, SampleRepository.class, filter, q);
 	}
 
 	@NoRepositoryBean

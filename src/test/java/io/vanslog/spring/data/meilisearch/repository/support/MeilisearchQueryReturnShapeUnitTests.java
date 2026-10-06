@@ -56,11 +56,14 @@ class MeilisearchQueryReturnShapeUnitTests {
 
 	@Test
 	void rejectsMethodVariablesNestedInWildcardResults() {
-		for (String method : List.of("wildcardOptional", "wildcardCollection", "wildcardIterable", "wildcardPage")) {
+		for (String method : List.of("wildcardOptional", "wildcardCollection", "wildcardIterable")) {
 			assertThatThrownBy(() -> shape(InvalidRepository.class, method))
 					.as("Method-declared wildcard payload in %s cannot be materialized safely", method)
 					.isInstanceOf(IllegalArgumentException.class);
 		}
+		assertThatThrownBy(
+				() -> shape(InvalidRepository.class, "wildcardPage", org.springframework.data.domain.Pageable.class))
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -83,8 +86,9 @@ class MeilisearchQueryReturnShapeUnitTests {
 		assertThat(shape(GenericProductRepository.class, "collection")).isEqualTo(MeilisearchQueryReturnShape.LIST);
 	}
 
-	private static MeilisearchQueryReturnShape shape(Class<?> repositoryType, String name) throws Exception {
-		Method method = repositoryType.getMethod(name);
+	private static MeilisearchQueryReturnShape shape(Class<?> repositoryType, String name, Class<?>... parameterTypes)
+			throws Exception {
+		Method method = repositoryType.getMethod(name, parameterTypes);
 		var metadata = new DefaultRepositoryMetadata(repositoryType);
 		return MeilisearchQueryReturnShape.resolveFinder(method, metadata);
 	}
@@ -116,7 +120,8 @@ class MeilisearchQueryReturnShapeUnitTests {
 
 		<S extends Product> Iterable<? extends S> wildcardIterable();
 
-		<S extends Product> org.springframework.data.domain.Page<? extends S> wildcardPage();
+		<S extends Product> org.springframework.data.domain.Page<? extends S> wildcardPage(
+				org.springframework.data.domain.Pageable pageable);
 	}
 
 	@NoRepositoryBean

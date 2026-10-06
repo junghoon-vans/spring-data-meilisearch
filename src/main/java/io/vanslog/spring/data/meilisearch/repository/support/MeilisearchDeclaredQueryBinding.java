@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.lang.Nullable;
@@ -50,16 +49,16 @@ final class MeilisearchDeclaredQueryBinding {
 	private final List<Placeholder> qPlaceholders;
 	private final boolean qOnly;
 
-	MeilisearchDeclaredQueryBinding(Method method, QueryMethod queryMethod, RepositoryMetadata metadata, String filter,
+	MeilisearchDeclaredQueryBinding(Method method, QueryMethod queryMethod, Class<?> repositoryInterface, String filter,
 			String q) {
 
 		this.method = Objects.requireNonNull(method, "Method must not be null");
 		Objects.requireNonNull(queryMethod, "QueryMethod must not be null");
 		Objects.requireNonNull(queryMethod.getParameters(), "Query method parameters must not be null");
-		RepositoryMetadata repositoryMetadata = Objects.requireNonNull(metadata, "Repository metadata must not be null");
 
 		this.parameterCount = method.getParameterCount();
-		this.repositoryTypeInformation = TypeInformation.of(repositoryMetadata.getRepositoryInterface());
+		this.repositoryTypeInformation = TypeInformation
+				.of(Objects.requireNonNull(repositoryInterface, "Repository interface must not be null"));
 		this.parameterTypeInformation = repositoryTypeInformation.getParameterTypes(method);
 		if (queryMethod.getParameters().getNumberOfParameters() != parameterCount
 				|| parameterTypeInformation.size() != parameterCount) {
@@ -172,16 +171,24 @@ final class MeilisearchDeclaredQueryBinding {
 
 	private boolean isUnresolved(java.lang.reflect.Type type, TypeInformation<?> parameterType) {
 
-		if (type instanceof WildcardType wildcard) {
-			for (java.lang.reflect.Type bound : wildcard.getUpperBounds()) {
-				if (isUnresolved(bound, parameterType)) {
-					return true;
-				}
+		if (type instanceof TypeVariable<?> variable) {
+			return isUnresolvedVariable(variable, parameterType);
+		}
+		return type instanceof WildcardType wildcard && hasUnresolvedBound(wildcard.getUpperBounds(), parameterType);
+	}
+
+	private boolean hasUnresolvedBound(java.lang.reflect.Type[] bounds, TypeInformation<?> parameterType) {
+
+		for (java.lang.reflect.Type bound : bounds) {
+			if (isUnresolved(bound, parameterType)) {
+				return true;
 			}
 		}
-		if (!(type instanceof TypeVariable<?> variable)) {
-			return false;
-		}
+		return false;
+	}
+
+	private boolean isUnresolvedVariable(TypeVariable<?> variable, TypeInformation<?> parameterType) {
+
 		if (!(variable.getGenericDeclaration() instanceof Class<?> declaringType)) {
 			return true;
 		}
@@ -189,9 +196,12 @@ final class MeilisearchDeclaredQueryBinding {
 		if (owner == null) {
 			owner = repositoryTypeInformation.getSuperTypeInformation(declaringType);
 		}
-		if (owner == null) {
-			return true;
-		}
+		return owner == null || isUnresolvedArgument(variable, declaringType, owner, parameterType);
+	}
+
+	private boolean isUnresolvedArgument(TypeVariable<?> variable, Class<?> declaringType, TypeInformation<?> owner,
+			TypeInformation<?> parameterType) {
+
 		TypeVariable<?>[] parameters = declaringType.getTypeParameters();
 		List<TypeInformation<?>> arguments = owner.getTypeArguments();
 		for (int i = 0; i < parameters.length; i++) {

@@ -111,9 +111,6 @@ enum MeilisearchQueryReturnShape {
 	}
 
 	private static boolean containsMethodTypeVariable(@Nullable Type type) {
-		if (type instanceof TypeVariable<?> variable) {
-			return variable.getGenericDeclaration() instanceof Method;
-		}
 		if (type instanceof ParameterizedType parameterizedType) {
 			return containsMethodTypeVariable(parameterizedType.getOwnerType())
 					|| containsMethodTypeVariable(parameterizedType.getActualTypeArguments());
@@ -122,8 +119,9 @@ enum MeilisearchQueryReturnShape {
 			return containsMethodTypeVariable(wildcardType.getUpperBounds())
 					|| containsMethodTypeVariable(wildcardType.getLowerBounds());
 		}
-		return type instanceof GenericArrayType arrayType
-				&& containsMethodTypeVariable(arrayType.getGenericComponentType());
+		return (type instanceof TypeVariable<?> variable && variable.getGenericDeclaration() instanceof Method)
+				|| (type instanceof GenericArrayType arrayType
+						&& containsMethodTypeVariable(arrayType.getGenericComponentType()));
 	}
 
 	private static boolean containsMethodTypeVariable(Type[] types) {
