@@ -454,8 +454,9 @@ import org.springframework.context.annotation.Configuration;
 
 </span><span class="fold-block">@Configuration
 @EnableMeilisearchRepositories(
-        basePackages = "com.example.movies",
-        meilisearchTemplateRef = "meilisearchTemplate")
+        basePackages = "com.example.products",
+        meilisearchTemplateRef = "meilisearchTemplate",
+        namedQueriesLocation = "classpath:meilisearch-named-queries.properties")
 class RepositoryConfig {
 }</span></code></pre>
 </div>
@@ -493,11 +494,8 @@ repository factory selection, including:</p>
 <p>If no base packages are configured, Spring Data scans the package of the annotated configuration class.</p>
 </div>
 <div class="paragraph">
-<p><code>queryLookupStrategy</code> defaults to <code>CREATE_IF_NOT_FOUND</code>: it prefers annotated <code>@Query</code> searches, then named searches,
-then derives supported predicates from the method name. <code>USE_DECLARED_QUERY</code> requires an annotated or named search;
-<code>CREATE</code> uses method-name derivation only. <code>namedQueriesLocation</code> loads filter templates and optional <code>.q</code> search-text
-templates from a properties resource. See <a href="repository-queries.html" class="xref page">Query Methods</a> for syntax,
-parameter binding, and lookup precedence.</p>
+<p><code>queryLookupStrategy</code> defaults to <code>CREATE_IF_NOT_FOUND</code>: it prefers annotated <code>@Query</code> searches, then named searches, then derives supported predicates from the method name. <code>USE_DECLARED_QUERY</code> requires an annotated or named search; <code>CREATE</code> uses method-name derivation only.
+<code>namedQueriesLocation</code> loads filter templates and optional <code>.q</code> search-text templates from a properties resource. The location is optional when all queries are annotated or derived. See <a href="repository-queries.html" class="xref page">Query Methods</a> for the resolution table, syntax, parameter binding, and lookup precedence.</p>
 </div>
 </div>
 </div>
