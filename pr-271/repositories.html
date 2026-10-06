@@ -457,12 +457,15 @@ In particular, Spring Data Meilisearch currently documents:</p>
 <p>a limited set of filter-backed derived finder methods,</p>
 </li>
 <li>
+<p>declared filter/full-text searches through <code>@Query</code> annotations or named query templates,</p>
+</li>
+<li>
 <p>store-specific behavior such as automatic settings application and the difference between document-backed and search-backed methods.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Declared queries, named queries, and advanced derived operators remain unsupported. See <a href="repositories/repository-queries.html" class="xref page">Query Methods</a> for the supported subset.</p>
+<p>Derived operators remain limited to the documented subset. See <a href="repositories/repository-queries.html" class="xref page">Query Methods</a> for derived and declared query contracts and their limits.</p>
 </div>
 <div class="paragraph">
 <p>Read the common repository fundamentals first, then continue with the store-specific pages in this chapter to understand the exact repository surface exposed by Spring Data Meilisearch.</p>
