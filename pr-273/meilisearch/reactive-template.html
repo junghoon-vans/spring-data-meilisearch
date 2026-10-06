@@ -679,10 +679,13 @@ Both task settings must be positive for a write.</p>
 <p><code>ReactiveTaskTimeoutException</code> exposes the UID and configured observation timeout. The server outcome is unknown; the task may still succeed later.</p>
 </li>
 <li>
+<p><code>ReactiveTaskObservationException</code> exposes the accepted task UID when polling fails because of HTTP, communication, JSON, or malformed task data. Its cause preserves the polling failure; the server outcome remains unknown.</p>
+</li>
+<li>
 <p><code>MeilisearchRestException</code> exposes the HTTP status and server <code>code</code>, <code>type</code>, and <code>link</code> for non-successful HTTP responses.</p>
 </li>
 <li>
-<p><code>UncategorizedMeilisearchException</code> reports communication, JSON, and malformed task-response failures, preserving causes where available.</p>
+<p><code>UncategorizedMeilisearchException</code> reports communication, JSON, and malformed submission-response failures, preserving causes where available. Failures after a valid task receipt are wrapped in <code>ReactiveTaskObservationException</code>.</p>
 </li>
 </ul>
 </div>
