@@ -707,6 +707,9 @@ class ProductSearch {
 <div class="paragraph">
 <p>Generic parameters and result types inherited from a repository base interface are resolved against the concrete repository&#8217;s type arguments before validation. The resolved types must still fit the supported binding and result forms; a parameter explicitly declared as <code>Serializable</code>, for example, does not become supported just because the caller supplies a string.</p>
 </div>
+<div class="paragraph">
+<p>Method-level result variables, such as <code>&lt;S extends Product&gt; Optional&lt;S&gt;</code>, are not concrete result declarations and are rejected even when their upper bound is the repository domain type. The repository materializes its fixed domain type; callers cannot select a different subtype through a method type argument.</p>
+</div>
 <div class="sect2">
 <h3 id="_parameter_binding"><a class="anchor" href="#_parameter_binding"></a>Parameter Binding</h3>
 <div class="paragraph">
