@@ -17,6 +17,7 @@ package io.vanslog.spring.data.meilisearch.repository.support;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -181,6 +182,36 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 	}
 
 	@Test
+	void rejectsNonAsciiPositionalDigitsInFilterAndQ() {
+
+		String placeholder = "?\u0660";
+		assertInvalid("stringValue", "name = " + placeholder, "", String.class);
+		assertInvalid("stringValue", "", placeholder, String.class);
+	}
+
+	@Test
+	void resolvesInheritedGenericParameterTypesUsingRepositoryMetadata() throws Exception {
+
+		Method method = StringNameRepository.class.getMethod("search", Serializable.class);
+		QueryMethod queryMethod = new QueryMethod(method, new DefaultRepositoryMetadata(StringNameRepository.class),
+				new SpelAwareProxyProjectionFactory());
+		MeilisearchDeclaredQueryBinding binding = new MeilisearchDeclaredQueryBinding(method, queryMethod, "name = ?0", "");
+
+		assertThat(binding.bind(new Object[] { "name" }).filter()).isEqualTo("name = \"name\"");
+	}
+
+	@Test
+	void rejectsUnsupportedSerializableParameterType() throws Exception {
+
+		Method method = SerializableNameRepository.class.getMethod("search", Serializable.class);
+		QueryMethod queryMethod = new QueryMethod(method, new DefaultRepositoryMetadata(SerializableNameRepository.class),
+				new SpelAwareProxyProjectionFactory());
+
+		assertThatThrownBy(() -> new MeilisearchDeclaredQueryBinding(method, queryMethod, "name = ?0", ""))
+				.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
 	void rejectsUnusedBindablesAndEmptyDeclarations() {
 
 		assertInvalid("pair", "first = ?0", "", String.class, String.class);
@@ -256,6 +287,21 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 		List<Sample> polygon(Number firstLatitude, Number firstLongitude, Number secondLatitude, Number secondLongitude);
 
 		List<Sample> noArguments();
+	}
+
+	@NoRepositoryBean
+	interface GenericNameRepository<T extends Serializable> extends Repository<Sample, String> {
+
+		List<Sample> search(T name);
+	}
+
+	@NoRepositoryBean
+	interface StringNameRepository extends GenericNameRepository<String> {}
+
+	@NoRepositoryBean
+	interface SerializableNameRepository extends Repository<Sample, String> {
+
+		List<Sample> search(Serializable name);
 	}
 
 	static class Sample {}

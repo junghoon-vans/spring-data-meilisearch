@@ -52,14 +52,16 @@ final class MeilisearchDeclaredQueryBinding {
 		Objects.requireNonNull(queryMethod.getParameters(), "Query method parameters must not be null");
 
 		this.parameterCount = method.getParameterCount();
-		this.parameterTypes = method.getParameterTypes();
+		this.parameterTypes = new Class<?>[parameterCount];
 		if (queryMethod.getParameters().getNumberOfParameters() != parameterCount) {
 			throw new IllegalArgumentException("Query method parameters do not match method " + method);
 		}
 
 		this.specialParameters = new boolean[parameterCount];
 		for (int i = 0; i < parameterCount; i++) {
-			this.specialParameters[i] = queryMethod.getParameters().getParameter(i).isSpecialParameter();
+			var parameter = queryMethod.getParameters().getParameter(i);
+			this.parameterTypes[i] = parameter.getType();
+			this.specialParameters[i] = parameter.isSpecialParameter();
 		}
 
 		this.filter = normalize(filter);
@@ -317,7 +319,7 @@ final class MeilisearchDeclaredQueryBinding {
 						end++;
 						break;
 					}
-					if (character == '?' && end + 1 < template.length() && Character.isDigit(template.charAt(end + 1))) {
+					if (character == '?' && end + 1 < template.length() && isIndexDigit(template.charAt(end + 1))) {
 						Placeholder placeholder = parsePlaceholder(template, end, Context.FILTER_SCALAR);
 						throw unsafePlaceholder(placeholder.parameterIndex(), "inside a quoted filter literal");
 					}
@@ -388,7 +390,7 @@ final class MeilisearchDeclaredQueryBinding {
 	private static Placeholder parsePlaceholder(String template, int start, Context context) {
 
 		int end = start + 1;
-		while (end < template.length() && Character.isDigit(template.charAt(end))) {
+		while (end < template.length() && isIndexDigit(template.charAt(end))) {
 			end++;
 		}
 		int index;
@@ -398,6 +400,10 @@ final class MeilisearchDeclaredQueryBinding {
 			throw new IllegalArgumentException("Invalid positional placeholder in declared query", exception);
 		}
 		return new Placeholder(start, end, index, context);
+	}
+
+	private static boolean isIndexDigit(char character) {
+		return character >= '0' && character <= '9';
 	}
 
 	private static String normalize(@Nullable String template) {

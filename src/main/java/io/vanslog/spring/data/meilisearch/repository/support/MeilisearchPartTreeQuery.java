@@ -68,7 +68,7 @@ class MeilisearchPartTreeQuery implements RepositoryQuery {
 		this.conversionService = operations.getMeilisearchConverter().getConversionService();
 		this.tree = createPartTree();
 		validateTree();
-		this.returnShape = MeilisearchQueryReturnShape.resolve(tree, method, queryMethod, domainType);
+		this.returnShape = MeilisearchQueryReturnShape.resolve(tree, method, metadata);
 		validateSpecialParameters();
 		this.finderExecution = new MeilisearchFinderExecution(method, queryMethod, domainType, operations, returnShape,
 				tree.getSort(), mappingContext, "derived");

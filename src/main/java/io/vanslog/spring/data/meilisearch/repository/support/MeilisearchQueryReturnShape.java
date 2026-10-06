@@ -20,8 +20,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.repository.query.QueryMethod;
+import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.parser.PartTree;
+import org.springframework.data.util.TypeInformation;
 
 /**
  * Validates the supported result shapes of repository query methods.
@@ -32,8 +33,7 @@ enum MeilisearchQueryReturnShape {
 
 	ENTITY, OPTIONAL, LIST, ITERABLE, PAGE, COUNT, EXISTS, DELETE_COUNT, DELETE_VOID;
 
-	static MeilisearchQueryReturnShape resolve(PartTree tree, Method method, QueryMethod queryMethod,
-			Class<?> domainType) {
+	static MeilisearchQueryReturnShape resolve(PartTree tree, Method method, RepositoryMetadata metadata) {
 		Class<?> returnType = method.getReturnType();
 		if (tree.isCountProjection()) {
 			return resolveCount(returnType, method);
@@ -44,11 +44,11 @@ enum MeilisearchQueryReturnShape {
 		if (tree.isDelete()) {
 			return resolveDelete(returnType, method);
 		}
-		return resolveFinder(returnType, method, queryMethod, domainType, "derived query");
+		return resolveFinder(method, metadata, "derived query");
 	}
 
-	static MeilisearchQueryReturnShape resolveFinder(Method method, QueryMethod queryMethod, Class<?> domainType) {
-		return resolveFinder(method.getReturnType(), method, queryMethod, domainType, "repository query");
+	static MeilisearchQueryReturnShape resolveFinder(Method method, RepositoryMetadata metadata) {
+		return resolveFinder(method, metadata, "repository query");
 	}
 
 	private static MeilisearchQueryReturnShape resolveCount(Class<?> returnType, Method method) {
@@ -75,9 +75,16 @@ enum MeilisearchQueryReturnShape {
 		throw unsupportedReturnType(returnType, method, "derived query");
 	}
 
-	private static MeilisearchQueryReturnShape resolveFinder(Class<?> returnType, Method method, QueryMethod queryMethod,
-			Class<?> domainType, String queryKind) {
-		if (!queryMethod.isQueryForEntity()) {
+	private static MeilisearchQueryReturnShape resolveFinder(Method method, RepositoryMetadata metadata,
+			String queryKind) {
+		TypeInformation<?> returnInformation = metadata.getReturnType(method);
+		Class<?> returnType = returnInformation.getType();
+		Class<?> domainType = metadata.getDomainType();
+		if (returnType == domainType) {
+			return ENTITY;
+		}
+		TypeInformation<?> component = returnInformation.getComponentType();
+		if (component == null || component.getType() != domainType) {
 			throw unsupportedReturnType(returnType, method, queryKind);
 		}
 		if (returnType == Page.class) {
@@ -91,9 +98,6 @@ enum MeilisearchQueryReturnShape {
 		}
 		if (returnType == Iterable.class) {
 			return ITERABLE;
-		}
-		if (returnType.isAssignableFrom(domainType)) {
-			return ENTITY;
 		}
 		throw unsupportedReturnType(returnType, method, queryKind);
 	}

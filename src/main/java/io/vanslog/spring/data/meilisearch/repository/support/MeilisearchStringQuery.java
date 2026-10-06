@@ -49,8 +49,7 @@ class MeilisearchStringQuery implements RepositoryQuery {
 		this.method = method;
 		this.queryMethod = new QueryMethod(method, metadata, projectionFactory);
 		validateUnsupportedSpecialParameters();
-		MeilisearchQueryReturnShape returnShape = MeilisearchQueryReturnShape.resolveFinder(method, queryMethod,
-				metadata.getDomainType());
+		MeilisearchQueryReturnShape returnShape = MeilisearchQueryReturnShape.resolveFinder(method, metadata);
 		validateSingleResultParameters(returnShape);
 		MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext = operations
 				.getMeilisearchConverter().getMappingContext();

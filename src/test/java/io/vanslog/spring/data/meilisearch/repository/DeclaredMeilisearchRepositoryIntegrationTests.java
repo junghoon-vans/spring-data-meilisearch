@@ -17,7 +17,9 @@ package io.vanslog.spring.data.meilisearch.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -159,6 +161,25 @@ class DeclaredMeilisearchRepositoryIntegrationTests {
 		assertThatThrownBy(() -> repository.byTitle(null)).isInstanceOf(IllegalArgumentException.class);
 	}
 
+	@Test
+	void shouldResolveInheritedGenericQueryParametersAndResults() {
+		repository.save(product("generic", "Running shoes", "Sports", 10));
+		MeilisearchRepositoryFactory factory = new MeilisearchRepositoryFactory(operations);
+
+		assertThat(factory.getRepository(GenericProductRepository.class).byTitle("Running shoes")).get()
+				.extracting(DeclaredProduct::getId).isEqualTo("generic");
+	}
+
+	@Test
+	void shouldRejectNestedOrSubtypeDeclaredResultsAtBootstrap() {
+		MeilisearchRepositoryFactory factory = new MeilisearchRepositoryFactory(operations);
+
+		assertThatThrownBy(() -> factory.getRepository(NestedResultRepository.class))
+				.isInstanceOf(QueryCreationException.class);
+		assertThatThrownBy(() -> factory.getRepository(SubtypeResultRepository.class))
+				.isInstanceOf(QueryCreationException.class);
+	}
+
 	private static DeclaredProduct product(String id, String title, String category, int price) {
 		return new DeclaredProduct(id, title, category, price, true);
 	}
@@ -175,6 +196,32 @@ class DeclaredMeilisearchRepositoryIntegrationTests {
 
 		List<DeclaredProduct> findByTitle(String value);
 	}
+
+	@NoRepositoryBean
+	interface GenericQueryRepository<T, V extends Serializable> extends MeilisearchRepository<T, String> {
+
+		@Query("title = ?0")
+		Optional<T> byTitle(V value);
+	}
+
+	@NoRepositoryBean
+	interface GenericProductRepository extends GenericQueryRepository<DeclaredProduct, String> {}
+
+	@NoRepositoryBean
+	interface NestedResultRepository extends MeilisearchRepository<DeclaredProduct, String> {
+
+		@Query("active = true")
+		List<List<DeclaredProduct>> nested();
+	}
+
+	@NoRepositoryBean
+	interface SubtypeResultRepository extends MeilisearchRepository<DeclaredProduct, String> {
+
+		@Query("active = true")
+		Optional<SpecialProduct> subtype();
+	}
+
+	static class SpecialProduct extends DeclaredProduct {}
 
 	@Configuration
 	@Import(MeilisearchTestConfiguration.class)
