@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2026 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,73 +15,60 @@
  */
 package io.vanslog.spring.data.meilisearch.repository.config;
 
-import io.vanslog.spring.data.meilisearch.annotations.Document;
-import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
-import io.vanslog.spring.data.meilisearch.repository.support.MeilisearchRepositoryFactoryBean;
-
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource;
 import org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport;
-import org.springframework.data.repository.config.XmlRepositoryConfigurationSource;
 import org.springframework.data.repository.core.RepositoryMetadata;
-import org.w3c.dom.Element;
+import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.repository.ReactiveMeilisearchRepository;
+import io.vanslog.spring.data.meilisearch.repository.support.ReactiveMeilisearchRepositoryFactoryBean;
 
 /**
- * {@link org.springframework.data.repository.config.RepositoryConfigurationExtension} implementation to configure
- * Meilisearch repository configuration support.
+ * Selects reactive repository metadata and its distinct operations bean reference.
  *
  * @author Junghoon Ban
  */
-public class MeilisearchRepositoryConfigExtension extends RepositoryConfigurationExtensionSupport {
-
-	private static final String MODULE_NAME = "Meilisearch";
+public class ReactiveMeilisearchRepositoryConfigExtension extends RepositoryConfigurationExtensionSupport {
 
 	@Override
 	public String getRepositoryFactoryBeanClassName() {
-		return MeilisearchRepositoryFactoryBean.class.getName();
+		return ReactiveMeilisearchRepositoryFactoryBean.class.getName();
 	}
 
 	@Override
 	protected String getModulePrefix() {
-		return getModuleIdentifier();
+		return "reactive-meilisearch";
 	}
 
 	@Override
 	public String getModuleName() {
-		return MODULE_NAME;
+		return "Reactive Meilisearch";
 	}
 
 	@Override
 	public void postProcess(BeanDefinitionBuilder builder, AnnotationRepositoryConfigurationSource config) {
 		AnnotationAttributes attributes = config.getAttributes();
-		builder.addPropertyReference("meilisearchOperations", attributes.getString("meilisearchTemplateRef"));
-	}
-
-	@Override
-	public void postProcess(BeanDefinitionBuilder builder, XmlRepositoryConfigurationSource config) {
-		Element element = config.getElement();
-		builder.addPropertyReference("meilisearchOperations", element.getAttribute("meilisearch-template-ref"));
+		builder.addPropertyReference("reactiveMeilisearchOperations",
+				attributes.getString("reactiveMeilisearchTemplateRef"));
 	}
 
 	@Override
 	protected Collection<Class<? extends Annotation>> getIdentifyingAnnotations() {
-		return Collections.singleton(Document.class);
+		return List.of(Document.class);
 	}
 
 	@Override
 	protected Collection<Class<?>> getIdentifyingTypes() {
-		return List.of(MeilisearchRepository.class);
+		return List.of(ReactiveMeilisearchRepository.class);
 	}
 
 	@Override
 	protected boolean useRepositoryConfiguration(RepositoryMetadata metadata) {
-		return !metadata.isReactiveRepository() && super.useRepositoryConfiguration(metadata);
+		return metadata.isReactiveRepository();
 	}
 
 }

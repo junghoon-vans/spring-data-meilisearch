@@ -25,8 +25,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mapping.PersistentPropertyPath;
-import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.lang.Nullable;
@@ -35,10 +33,7 @@ import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.TotalHitsRelation;
-import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentEntity;
-import io.vanslog.spring.data.meilisearch.core.mapping.MeilisearchPersistentProperty;
 import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
-import io.vanslog.spring.data.meilisearch.core.query.BasicQueryBuilder;
 
 /**
  * Executes finder queries through {@link MeilisearchOperations}.
@@ -50,27 +45,33 @@ final class MeilisearchFinderExecution {
 	private static final int FETCH_PAGE_SIZE = 1000;
 
 	private final Method method;
+
 	private final QueryMethod queryMethod;
+
 	private final Class<?> domainType;
+
 	private final MeilisearchOperations operations;
+
 	private final MeilisearchQueryReturnShape returnShape;
+
 	private final String queryKind;
-	private final MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext;
+
+	private final MeilisearchQueryPlanner planner;
+
 	private final Sort staticSort;
 
 	MeilisearchFinderExecution(Method method, QueryMethod queryMethod, Class<?> domainType,
 			MeilisearchOperations operations, MeilisearchQueryReturnShape returnShape, Sort staticSort,
-			MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext,
-			String queryKind) {
+			MeilisearchQueryPlanner planner, String queryKind) {
 
 		this.method = method;
 		this.queryMethod = queryMethod;
 		this.domainType = domainType;
 		this.operations = operations;
 		this.returnShape = returnShape;
-		this.mappingContext = mappingContext;
+		this.planner = planner;
 		this.queryKind = queryKind;
-		this.staticSort = mapSort(staticSort);
+		this.staticSort = planner.mapSort(staticSort);
 	}
 
 	@Nullable
@@ -91,65 +92,7 @@ final class MeilisearchFinderExecution {
 	}
 
 	BasicQuery createQuery(String q, List<String> filters, Sort sort, Pageable pageable) {
-
-		BasicQueryBuilder builder = BasicQuery.builder().withQ(q);
-		if (!filters.isEmpty()) {
-			builder.withFilter(filters.toArray(String[]::new));
-		}
-		if (sort.isSorted()) {
-			builder.withSort(sort);
-		}
-		return builder.withPageable(pageable).build();
-	}
-
-	static PropertyReference resolveProperty(
-			MappingContext<? extends MeilisearchPersistentEntity<?>, MeilisearchPersistentProperty> mappingContext,
-			Class<?> domainType, Method method, String pathName, String operator, String queryKind) {
-
-		try {
-			PersistentPropertyPath<MeilisearchPersistentProperty> path = mappingContext.getPersistentPropertyPath(pathName,
-					domainType);
-			StringBuilder fieldName = new StringBuilder();
-			for (MeilisearchPersistentProperty property : path) {
-				if (property.isTransient()) {
-					throw unsupportedOperator(queryKind, method, operator + " on transient property " + pathName);
-				}
-				String mappedName = property.getFieldName();
-				if (!isFilterFieldName(mappedName)) {
-					throw unsupportedOperator(queryKind, method, operator + " on mapped field " + mappedName);
-				}
-				if (fieldName.length() > 0) {
-					fieldName.append('.');
-				}
-				fieldName.append(mappedName);
-			}
-			MeilisearchPersistentProperty leaf = path.getLeafProperty();
-			Class<?> valueType = leaf.getActualType();
-			if (valueType == null || valueType == Object.class) {
-				valueType = leaf.getType();
-			}
-			return new PropertyReference(fieldName.toString(), valueType);
-		} catch (RuntimeException exception) {
-			if (exception.getMessage() != null && exception.getMessage().contains(method.toGenericString())) {
-				throw exception;
-			}
-			throw new IllegalArgumentException(
-					"Invalid property '" + pathName + "' for " + queryKind + " query method " + method.toGenericString(),
-					exception);
-		}
-	}
-
-	private static boolean isFilterFieldName(String fieldName) {
-		if (fieldName.isEmpty()) {
-			return false;
-		}
-		for (int i = 0; i < fieldName.length(); i++) {
-			char character = fieldName.charAt(i);
-			if (!(Character.isLetterOrDigit(character) || character == '_' || character == '-' || character == '.')) {
-				return false;
-			}
-		}
-		return fieldName.charAt(0) != '.' && fieldName.charAt(fieldName.length() - 1) != '.' && !fieldName.contains("..");
+		return planner.createQuery(q, filters, sort, pageable);
 	}
 
 	@Nullable
@@ -265,35 +208,11 @@ final class MeilisearchFinderExecution {
 	}
 
 	private Sort mapSort(Sort sort) {
-
-		if (sort == null || sort.isUnsorted()) {
-			return Sort.unsorted();
-		}
-
-		List<Sort.Order> mappedOrders = new ArrayList<>();
-		for (Sort.Order order : sort) {
-			if (order.isIgnoreCase() || order.getNullHandling() != Sort.NullHandling.NATIVE) {
-				throw unsupportedOperator("Sort options for " + order.getProperty());
-			}
-			PropertyReference property = resolveProperty(mappingContext, domainType, method, order.getProperty(), "Sort",
-					queryKind);
-			mappedOrders.add(order.withProperty(property.fieldName()));
-		}
-		return Sort.by(mappedOrders);
+		return planner.mapSort(sort);
 	}
 
 	private Pageable mapPageable(Pageable pageable, Sort mappedSort) {
 		return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), mappedSort);
-	}
-
-	private IllegalArgumentException unsupportedOperator(String operator) {
-		return unsupportedOperator(queryKind, method, operator);
-	}
-
-	private static IllegalArgumentException unsupportedOperator(String queryKind, Method method, String operator) {
-		String category = "derived".equals(queryKind) ? "operator" : "option";
-		return new IllegalArgumentException("Unsupported " + queryKind + " query " + category + " '" + operator
-				+ "' in method " + method.toGenericString());
 	}
 
 	private String queryDescription() {
@@ -304,6 +223,4 @@ final class MeilisearchFinderExecution {
 		return Character.toUpperCase(value.charAt(0)) + value.substring(1);
 	}
 
-	record PropertyReference(String fieldName, Class<?> valueType) {
-	}
 }

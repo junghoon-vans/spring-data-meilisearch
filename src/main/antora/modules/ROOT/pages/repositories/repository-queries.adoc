@@ -3,6 +3,8 @@
 
 Repository query methods can derive Meilisearch filters from method names or declare native filter and search-text templates. The module supports search-backed finders and derived filter-based count, existence, and delete methods; use `MeilisearchOperations` for dynamic search composition and richer search options.
 
+For `Mono`/`Flux` query methods, streaming windows, and lazy settings initialization, see xref:repositories/reactive-meilisearch-repositories.adoc[Reactive Repositories]. The grammar and declared-query binding described here are shared, while synchronous and reactive return contracts remain separate.
+
 [[meilisearch.repositories.queries.derived]]
 == Query Creation
 

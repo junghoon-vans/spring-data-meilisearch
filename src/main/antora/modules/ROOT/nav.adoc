@@ -15,6 +15,7 @@
 ** xref:repositories/create-instances.adoc[]
 ** xref:repositories/configuration.adoc[]
 ** xref:repositories/meilisearch-repositories.adoc[]
+** xref:repositories/reactive-meilisearch-repositories.adoc[]
 ** xref:repositories/repository-queries.adoc[]
 
 * xref:appendix.adoc[]
