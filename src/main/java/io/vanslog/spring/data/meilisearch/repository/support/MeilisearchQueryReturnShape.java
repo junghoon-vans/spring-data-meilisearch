@@ -20,6 +20,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -36,6 +37,11 @@ enum MeilisearchQueryReturnShape {
 
 	ENTITY, OPTIONAL, LIST, ITERABLE, PAGE, COUNT, EXISTS, DELETE_COUNT, DELETE_VOID;
 
+	private static final String DERIVED_QUERY = "derived query";
+
+	private static final Map<Class<?>, MeilisearchQueryReturnShape> FINDER_CONTAINERS = Map.of(Page.class, PAGE,
+			Optional.class, OPTIONAL, List.class, LIST, Iterable.class, ITERABLE);
+
 	static MeilisearchQueryReturnShape resolve(PartTree tree, Method method, RepositoryMetadata metadata) {
 		Class<?> returnType = method.getReturnType();
 		if (tree.isCountProjection()) {
@@ -47,7 +53,7 @@ enum MeilisearchQueryReturnShape {
 		if (tree.isDelete()) {
 			return resolveDelete(returnType, method);
 		}
-		return resolveFinder(method, metadata, "derived query");
+		return resolveFinder(method, metadata, DERIVED_QUERY);
 	}
 
 	static MeilisearchQueryReturnShape resolveFinder(Method method, RepositoryMetadata metadata) {
@@ -56,14 +62,14 @@ enum MeilisearchQueryReturnShape {
 
 	private static MeilisearchQueryReturnShape resolveCount(Class<?> returnType, Method method) {
 		if (returnType != long.class && returnType != Long.class) {
-			throw unsupportedReturnType(returnType, method, "derived query");
+			throw unsupportedReturnType(returnType, method, DERIVED_QUERY);
 		}
 		return COUNT;
 	}
 
 	private static MeilisearchQueryReturnShape resolveExists(Class<?> returnType, Method method) {
 		if (returnType != boolean.class && returnType != Boolean.class) {
-			throw unsupportedReturnType(returnType, method, "derived query");
+			throw unsupportedReturnType(returnType, method, DERIVED_QUERY);
 		}
 		return EXISTS;
 	}
@@ -75,14 +81,27 @@ enum MeilisearchQueryReturnShape {
 		if (returnType == long.class || returnType == Long.class) {
 			return DELETE_COUNT;
 		}
-		throw unsupportedReturnType(returnType, method, "derived query");
+		throw unsupportedReturnType(returnType, method, DERIVED_QUERY);
 	}
 
 	private static MeilisearchQueryReturnShape resolveFinder(Method method, RepositoryMetadata metadata,
 			String queryKind) {
 		TypeInformation<?> returnInformation = metadata.getReturnType(method);
 		Class<?> returnType = returnInformation.getType();
+		validateDeclaration(method, returnType, queryKind);
 		Class<?> domainType = metadata.getDomainType();
+		if (returnType == domainType) {
+			return ENTITY;
+		}
+		MeilisearchQueryReturnShape shape = FINDER_CONTAINERS.get(returnType);
+		TypeInformation<?> component = returnInformation.getComponentType();
+		if (shape == null || component == null || component.getType() != domainType) {
+			throw unsupportedReturnType(returnType, method, queryKind);
+		}
+		return shape;
+	}
+
+	private static void validateDeclaration(Method method, Class<?> returnType, String queryKind) {
 		Type declaration = method.getGenericReturnType();
 		if (declaration instanceof ParameterizedType container) {
 			Type[] arguments = container.getActualTypeArguments();
@@ -93,26 +112,6 @@ enum MeilisearchQueryReturnShape {
 		if (declaration instanceof TypeVariable<?> variable && variable.getGenericDeclaration() instanceof Method) {
 			throw unsupportedReturnType(returnType, method, queryKind);
 		}
-		if (returnType == domainType) {
-			return ENTITY;
-		}
-		TypeInformation<?> component = returnInformation.getComponentType();
-		if (component == null || component.getType() != domainType) {
-			throw unsupportedReturnType(returnType, method, queryKind);
-		}
-		if (returnType == Page.class) {
-			return PAGE;
-		}
-		if (returnType == Optional.class) {
-			return OPTIONAL;
-		}
-		if (returnType == List.class) {
-			return LIST;
-		}
-		if (returnType == Iterable.class) {
-			return ITERABLE;
-		}
-		throw unsupportedReturnType(returnType, method, queryKind);
 	}
 
 	private static IllegalArgumentException unsupportedReturnType(Class<?> returnType, Method method, String queryKind) {

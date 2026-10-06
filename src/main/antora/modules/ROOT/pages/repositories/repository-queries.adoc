@@ -95,6 +95,7 @@ These methods use the same supported predicates listed above, including grouped 
 === Method Return Types
 
 A finder method may return the repository's domain type `T` directly, or one flat container: `Optional<T>`, `List<T>`, `Iterable<T>`, or `Page<T>`. Entity subtypes, projections, and nested containers are rejected. Entity and `Optional` methods require at most one match. When no hit matches, an entity method returns `null` by default; if its repository package uses Spring's `@NonNullApi`, an unannotated entity method instead throws `EmptyResultDataAccessException`, while an explicitly `@Nullable` method may return `null`. `Optional` returns the sole hit or `Optional.empty()`. Either single-result form throws `IncorrectResultSizeDataAccessException` if multiple hits match. `List` and `Iterable` contain matching entity content.
+Inherited repository type variables are resolved in the concrete repository's domain context. Method-level type variables are rejected, including inside a container, because the finder can only materialize the repository's exact domain type.
 
 === Sorting and Paging
 
@@ -226,6 +227,8 @@ This binding support does not enable experimental operators or emulate operators
 
 Boolean and finite standard numeric values are emitted as native literals.
 `BigInteger` and `BigDecimal` are supported; `Date` values use epoch milliseconds.
+Numeric binding preserves the literal's integer precision and decimal scale without converting through floating point; this does not change Meilisearch's own numeric storage or comparison semantics.
+`Number` parameter declarations are supported, but runtime numeric values must have one of the exact standard boxed primitive, `BigInteger`, or `BigDecimal` classes. Custom numeric subclasses are rejected rather than trusting their string representation as filter syntax.
 Strings, characters, enum names, temporal values, and UUIDs are quoted.
 These are native literal representations: the binder does not infer a property's type from the filter string.
 Null values, non-finite numbers, unsupported value types, empty collections/arrays, null collection elements, and nested collections are rejected before searching.

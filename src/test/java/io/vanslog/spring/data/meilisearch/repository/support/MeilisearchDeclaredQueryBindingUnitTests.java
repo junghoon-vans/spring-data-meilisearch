@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -119,6 +120,31 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 		MeilisearchDeclaredQueryBinding binding = binding("numberValue", "amount = ?0", "", Number.class);
 		assertThat(binding.bind(new Object[] { new BigDecimal("1E+3") }).filter()).isEqualTo("amount = 1000");
 		assertThat(MeilisearchFilterValue.scalar(new Date(42))).isEqualTo("42");
+	}
+
+	@Test
+	void preservesNumericPrecisionBeyondFloatingPointRange() throws Exception {
+
+		MeilisearchDeclaredQueryBinding binding = binding("numberValue", "amount = ?0", "", Number.class);
+		assertThat(binding.bind(new Object[] { new BigInteger("9007199254740993") }).filter())
+				.as("Integer filter binding must not round through double precision").isEqualTo("amount = 9007199254740993");
+		assertThat(binding.bind(new Object[] { new BigDecimal("1234567890.12345678901234567890") }).filter())
+				.as("Decimal filter binding must preserve all significant digits and scale")
+				.isEqualTo("amount = 1234567890.12345678901234567890");
+	}
+
+	@Test
+	void rejectsNumericSubclassesWithUntrustedStringRepresentations() throws Exception {
+
+		MeilisearchDeclaredQueryBinding binding = binding("numberValue", "amount = ?0", "", Number.class);
+		BigDecimal value = new BigDecimal("1") {
+
+			@Override
+			public String toString() {
+				return "0 OR active = true";
+			}
+		};
+		assertThatIllegalArgumentException().isThrownBy(() -> binding.bind(new Object[] { value }));
 	}
 
 	@Test

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.lang.Nullable;
@@ -29,6 +30,12 @@ import org.springframework.lang.Nullable;
  * @author Junghoon Ban
  */
 final class MeilisearchFilterValue {
+
+	private static final Set<Class<?>> NUMBER_TYPES = Set.of(Number.class, Byte.class, byte.class, Short.class,
+			short.class, Integer.class, int.class, Long.class, long.class, Float.class, float.class, Double.class,
+			double.class, BigInteger.class, BigDecimal.class);
+
+	private static final Set<Class<?>> SIMPLE_TEXT_TYPES = Set.of(Character.class, Boolean.class, UUID.class);
 
 	private MeilisearchFilterValue() {}
 
@@ -67,16 +74,17 @@ final class MeilisearchFilterValue {
 		if (value == null) {
 			throw new IllegalArgumentException("Filter scalar value must not be null");
 		}
+		String result;
 		if (value instanceof Boolean booleanValue) {
-			return booleanValue.toString();
+			result = booleanValue.toString();
+		} else if (value instanceof Number) {
+			result = number(value);
+		} else if (value instanceof Date date) {
+			result = Long.toString(date.getTime());
+		} else {
+			result = quote(text(value));
 		}
-		if (value instanceof Number) {
-			return number(value);
-		}
-		if (value instanceof Date date) {
-			return Long.toString(date.getTime());
-		}
-		return quote(text(value));
+		return result;
 	}
 
 	static boolean supportsScalarType(Class<?> type) {
@@ -87,36 +95,22 @@ final class MeilisearchFilterValue {
 	}
 
 	static boolean supportsNumberType(Class<?> type) {
-		return type == Number.class || type == Byte.class || type == byte.class || type == Short.class
-				|| type == short.class || type == Integer.class || type == int.class || type == Long.class || type == long.class
-				|| type == Float.class || type == float.class || type == Double.class || type == double.class
-				|| type == BigInteger.class || type == BigDecimal.class;
+		return NUMBER_TYPES.contains(type);
 	}
 
 	static String number(@Nullable Object value) {
 
-		if (value != null && value.getClass() == BigDecimal.class) {
-			return ((BigDecimal) value).toPlainString();
+		if (value == null || !supportsNumberType(value.getClass())) {
+			throw new IllegalArgumentException("Unsupported numeric filter value: " + typeName(value));
 		}
-		if (value != null && value.getClass() == BigInteger.class) {
-			return ((BigInteger) value).toString();
+		if ((value instanceof Float floatValue && !Float.isFinite(floatValue))
+				|| (value instanceof Double doubleValue && !Double.isFinite(doubleValue))) {
+			throw new IllegalArgumentException("Filter number must be finite");
 		}
-		if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long) {
-			return value.toString();
+		if (value instanceof BigDecimal decimal) {
+			return decimal.toPlainString();
 		}
-		if (value instanceof Float floatValue) {
-			if (!Float.isFinite(floatValue)) {
-				throw new IllegalArgumentException("Filter number must be finite");
-			}
-			return Float.toString(floatValue);
-		}
-		if (value instanceof Double doubleValue) {
-			if (!Double.isFinite(doubleValue)) {
-				throw new IllegalArgumentException("Filter number must be finite");
-			}
-			return Double.toString(doubleValue);
-		}
-		throw new IllegalArgumentException("Unsupported numeric filter value: " + typeName(value));
+		return value.toString();
 	}
 
 	static String text(@Nullable Object value) {
@@ -124,31 +118,25 @@ final class MeilisearchFilterValue {
 		if (value == null) {
 			throw new IllegalArgumentException("Query parameter value must not be null");
 		}
-		if (value instanceof CharSequence sequence) {
-			return sequence.toString();
+		String result;
+		if (supportsSimpleTextValue(value)) {
+			result = value.toString();
+		} else if (value instanceof Number) {
+			result = number(value);
+		} else if (value instanceof Date date) {
+			result = Long.toString(date.getTime());
+		} else if (value instanceof Enum<?> enumValue) {
+			result = enumValue.name();
+		} else if (value instanceof TemporalAccessor temporal) {
+			result = temporal.toString();
+		} else {
+			throw new IllegalArgumentException("Unsupported query parameter value: " + typeName(value));
 		}
-		if (value instanceof Character character) {
-			return character.toString();
-		}
-		if (value instanceof Boolean booleanValue) {
-			return booleanValue.toString();
-		}
-		if (value instanceof Number) {
-			return number(value);
-		}
-		if (value instanceof Date date) {
-			return Long.toString(date.getTime());
-		}
-		if (value instanceof Enum<?> enumValue) {
-			return enumValue.name();
-		}
-		if (value instanceof TemporalAccessor temporal) {
-			return temporal.toString();
-		}
-		if (value instanceof UUID uuid) {
-			return uuid.toString();
-		}
-		throw new IllegalArgumentException("Unsupported query parameter value: " + typeName(value));
+		return result;
+	}
+
+	private static boolean supportsSimpleTextValue(Object value) {
+		return SIMPLE_TEXT_TYPES.contains(value.getClass()) || value instanceof CharSequence;
 	}
 
 	private static String typeName(@Nullable Object value) {
