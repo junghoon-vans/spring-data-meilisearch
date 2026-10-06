@@ -17,6 +17,8 @@ package io.vanslog.spring.data.meilisearch.repository.support;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +27,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.QueryMethod;
+import org.springframework.data.util.TypeInformation;
 import org.springframework.lang.Nullable;
 
 /**
@@ -37,7 +41,8 @@ final class MeilisearchDeclaredQueryBinding {
 
 	private final Method method;
 	private final int parameterCount;
-	private final Class<?>[] parameterTypes;
+	private final List<TypeInformation<?>> parameterTypeInformation;
+	private final TypeInformation<?> repositoryTypeInformation;
 	private final boolean[] specialParameters;
 	private final String filter;
 	private final String q;
@@ -45,22 +50,25 @@ final class MeilisearchDeclaredQueryBinding {
 	private final List<Placeholder> qPlaceholders;
 	private final boolean qOnly;
 
-	MeilisearchDeclaredQueryBinding(Method method, QueryMethod queryMethod, String filter, String q) {
+	MeilisearchDeclaredQueryBinding(Method method, QueryMethod queryMethod, RepositoryMetadata metadata, String filter,
+			String q) {
 
 		this.method = Objects.requireNonNull(method, "Method must not be null");
 		Objects.requireNonNull(queryMethod, "QueryMethod must not be null");
 		Objects.requireNonNull(queryMethod.getParameters(), "Query method parameters must not be null");
+		RepositoryMetadata repositoryMetadata = Objects.requireNonNull(metadata, "Repository metadata must not be null");
 
 		this.parameterCount = method.getParameterCount();
-		this.parameterTypes = new Class<?>[parameterCount];
-		if (queryMethod.getParameters().getNumberOfParameters() != parameterCount) {
+		this.repositoryTypeInformation = TypeInformation.of(repositoryMetadata.getRepositoryInterface());
+		this.parameterTypeInformation = repositoryTypeInformation.getParameterTypes(method);
+		if (queryMethod.getParameters().getNumberOfParameters() != parameterCount
+				|| parameterTypeInformation.size() != parameterCount) {
 			throw new IllegalArgumentException("Query method parameters do not match method " + method);
 		}
 
 		this.specialParameters = new boolean[parameterCount];
 		for (int i = 0; i < parameterCount; i++) {
 			var parameter = queryMethod.getParameters().getParameter(i);
-			this.parameterTypes[i] = parameter.getType();
 			this.specialParameters[i] = parameter.isSpecialParameter();
 		}
 
@@ -123,17 +131,76 @@ final class MeilisearchDeclaredQueryBinding {
 
 	private void validateParameterType(Placeholder placeholder, int index) {
 
-		Class<?> type = parameterTypes[index];
+		TypeInformation<?> parameterType = parameterTypeInformation.get(index);
+		Class<?> type = parameterType.getType();
 		boolean supported = switch (placeholder.context()) {
 			case QUERY_TEXT, FILTER_SCALAR -> MeilisearchFilterValue.supportsScalarType(type);
-			case FILTER_COLLECTION -> type == Object.class || Collection.class.isAssignableFrom(type)
-					|| type.isArray() && MeilisearchFilterValue.supportsScalarType(type.getComponentType());
+			case FILTER_COLLECTION -> supportsCollectionParameter(parameterType);
 			case GEO_NUMBER -> type == Object.class || MeilisearchFilterValue.supportsNumberType(type);
 		};
 		if (!supported) {
 			throw new IllegalArgumentException("Parameter ?" + index + " has unsupported declared type " + type.getTypeName()
 					+ " for " + placeholder.context());
 		}
+	}
+
+	private boolean supportsCollectionParameter(TypeInformation<?> parameterType) {
+
+		Class<?> type = parameterType.getType();
+		if (type == Object.class) {
+			return true;
+		}
+		if (Collection.class.isAssignableFrom(type)) {
+			return supportsCollectionElement(parameterType.getComponentType(), parameterType, true);
+		}
+		return type.isArray() && supportsCollectionElement(parameterType.getComponentType(), parameterType, false);
+	}
+
+	private boolean supportsCollectionElement(@Nullable TypeInformation<?> elementType, TypeInformation<?> parameterType,
+			boolean rawAllowed) {
+
+		if (elementType == null) {
+			return rawAllowed;
+		}
+		Class<?> type = elementType.getType();
+		if (Collection.class.isAssignableFrom(type) || type.isArray()) {
+			return false;
+		}
+		return MeilisearchFilterValue.supportsScalarType(type)
+				|| isUnresolved(elementType.toTypeDescriptor().getResolvableType().getType(), parameterType);
+	}
+
+	private boolean isUnresolved(java.lang.reflect.Type type, TypeInformation<?> parameterType) {
+
+		if (type instanceof WildcardType wildcard) {
+			for (java.lang.reflect.Type bound : wildcard.getUpperBounds()) {
+				if (isUnresolved(bound, parameterType)) {
+					return true;
+				}
+			}
+		}
+		if (!(type instanceof TypeVariable<?> variable)) {
+			return false;
+		}
+		if (!(variable.getGenericDeclaration() instanceof Class<?> declaringType)) {
+			return true;
+		}
+		TypeInformation<?> owner = parameterType.getSuperTypeInformation(declaringType);
+		if (owner == null) {
+			owner = repositoryTypeInformation.getSuperTypeInformation(declaringType);
+		}
+		if (owner == null) {
+			return true;
+		}
+		TypeVariable<?>[] parameters = declaringType.getTypeParameters();
+		List<TypeInformation<?>> arguments = owner.getTypeArguments();
+		for (int i = 0; i < parameters.length; i++) {
+			if (parameters[i].equals(variable)) {
+				java.lang.reflect.Type argument = arguments.get(i).toTypeDescriptor().getResolvableType().getType();
+				return argument.equals(variable) || isUnresolved(argument, parameterType);
+			}
+		}
+		return true;
 	}
 
 	private List<Placeholder> compileFilter(String template) {
@@ -392,6 +459,9 @@ final class MeilisearchDeclaredQueryBinding {
 		int end = start + 1;
 		while (end < template.length() && isIndexDigit(template.charAt(end))) {
 			end++;
+		}
+		if (end > start + 1 && end < template.length() && Character.isDigit(template.codePointAt(end))) {
+			throw new IllegalArgumentException("Non-ASCII digit in positional placeholder");
 		}
 		int index;
 		try {

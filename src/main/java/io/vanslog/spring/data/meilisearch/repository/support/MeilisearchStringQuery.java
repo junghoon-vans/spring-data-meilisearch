@@ -55,7 +55,7 @@ class MeilisearchStringQuery implements RepositoryQuery {
 				.getMeilisearchConverter().getMappingContext();
 		this.finderExecution = new MeilisearchFinderExecution(method, queryMethod, metadata.getDomainType(), operations,
 				returnShape, Sort.unsorted(), mappingContext, "declared");
-		this.binding = new MeilisearchDeclaredQueryBinding(method, queryMethod, filter, q);
+		this.binding = new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata, filter, q);
 	}
 
 	@Override

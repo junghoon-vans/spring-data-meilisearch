@@ -210,7 +210,7 @@ Declared searches use `MeilisearchOperations` and the existing converter and fin
 
 Generic parameters and result types inherited from a repository base interface are resolved against the concrete repository's type arguments before validation. The resolved types must still fit the supported binding and result forms; a parameter explicitly declared as `Serializable`, for example, does not become supported just because the caller supplies a string.
 
-Method-level result variables, such as `<S extends Product> Optional<S>`, are not concrete result declarations and are rejected even when their upper bound is the repository domain type. The repository materializes its fixed domain type; callers cannot select a different subtype through a method type argument.
+Method-level result variables, such as `<S extends Product> Optional<S>` or `<S extends Product> List<? extends S>`, are not concrete result declarations and are rejected even when their upper bound is the repository domain type. This restriction also applies to variables nested in wildcard bounds, generic owners, or array components. The repository materializes its fixed domain type; callers cannot select a different subtype through a method type argument. Concrete domain wildcards and inherited repository type variables remain supported when they resolve to a supported result form.
 
 === Parameter Binding
 
@@ -222,6 +222,7 @@ Strings are quoted and escaped so a value such as `x" OR active = true` remains 
 Control characters and literal backslash escape sequences remain distinct filter values.
 
 Supported value positions include comparison right-hand sides, both bounds of `price ?0 TO ?1`, `STARTS WITH` and `CONTAINS` operands, scalar entries in `category IN [?0, ?1]`, and complete flat collections/arrays in `category IN ?0` or `category NOT IN ?0`.
+Collection and array element declarations must support scalar binding. Known unsupported element types, including domain objects, nested collections, and arrays of collections or arrays, fail during repository creation. Inherited generic element types are resolved against the repository interface before this check. Raw collections, unresolved type variables, and `Object` element declarations retain runtime value validation.
 Numeric placeholders are also supported in `_geoRadius`, `_geoBoundingBox`, and `_geoPolygon` arguments.
 This binding support does not enable experimental operators or emulate operators missing from the server version.
 
@@ -237,7 +238,7 @@ Unlike derived `NotIn`, a declared `NOT IN` with an empty bound collection does 
 Search-text templates are scanned for positional placeholders: every `?` in `q` must begin a placeholder with ASCII digits, such as `?0`; there is no quoted-literal exception. Put a literal question mark in the bound argument instead, as in the invocation above. Runtime text is inserted after template parsing and its `?` characters are not interpreted again. Search-text values are not filter-quoted and retain Meilisearch's normal full-text syntax.
 A q-only search that binds to blank text is rejected rather than becoming an unrestricted placeholder search. Blank search text is allowed when the declaration also supplies a filter.
 
-Malformed placeholders (including `?name`, `?-1`, a bare `?`, or a marker using non-ASCII digits), invalid placeholder positions, out-of-range indices, special-parameter references, incompatible declared parameter types, and unused bindable parameters fail during repository creation.
+Malformed placeholders (including `?name`, `?-1`, a bare `?`, or a marker using non-ASCII digits), invalid placeholder positions, out-of-range indices, special-parameter references, incompatible declared parameter types, and unused bindable parameters fail during repository creation. A non-ASCII digit immediately following an ASCII index, such as the Arabic-Indic digit in `?0٠`, is also invalid; this includes supplementary Unicode digits. Literal Unicode text separated from the index and runtime argument text are not restricted by the placeholder digit rule.
 A `?` outside a quoted filter literal is placeholder syntax; placeholders inside quoted filter literals are not supported.
 The binder checks substitution boundaries, not the entire server query language: actual filter syntax, operator availability, and index settings are validated by Meilisearch.
 
@@ -248,7 +249,7 @@ The failure boundary depends on what is wrong:
 |When |Examples
 
 |Repository creation
-|Conflicting `value`/`filter` aliases, an empty declaration, malformed or out-of-range placeholders, references to special parameters, unused bindable parameters, unsupported declared return types, or a missing declaration under `USE_DECLARED_QUERY` fail while the repository is created.
+|Conflicting `value`/`filter` aliases, an empty declaration, malformed or out-of-range placeholders, references to special parameters, unused bindable parameters, incompatible declared scalar or collection element types, unsupported declared return types, or a missing declaration under `USE_DECLARED_QUERY` fail while the repository is created.
 
 |Method invocation, before the search request
 |Invalid runtime values such as `null`, an empty or nested collection, an unsupported value type, a non-finite number, or blank text for a q-only template are rejected by binding.

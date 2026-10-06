@@ -55,6 +55,28 @@ class MeilisearchQueryReturnShapeUnitTests {
 	}
 
 	@Test
+	void rejectsMethodVariablesNestedInWildcardResults() {
+		for (String method : List.of("wildcardOptional", "wildcardCollection", "wildcardIterable", "wildcardPage")) {
+			assertThatThrownBy(() -> shape(InvalidRepository.class, method))
+					.as("Method-declared wildcard payload in %s cannot be materialized safely", method)
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+	}
+
+	@Test
+	void rejectsMethodVariablesNestedInParameterizedOwners() {
+		assertThatThrownBy(() -> shape(OwnerRepository.class, "ownerVariable"))
+				.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	void resolvesConcreteAndInheritedRepositoryWildcards() throws Exception {
+		assertThat(shape(ConcreteWildcardRepository.class, "concreteWildcard")).isEqualTo(MeilisearchQueryReturnShape.LIST);
+		assertThat(shape(InheritedWildcardRepository.class, "inheritedWildcard"))
+				.isEqualTo(MeilisearchQueryReturnShape.LIST);
+	}
+
+	@Test
 	void resolvesDomainTypeInInheritedGenericFinderSignatures() throws Exception {
 		assertThat(shape(GenericProductRepository.class, "entity")).isEqualTo(MeilisearchQueryReturnShape.ENTITY);
 		assertThat(shape(GenericProductRepository.class, "optional")).isEqualTo(MeilisearchQueryReturnShape.OPTIONAL);
@@ -87,7 +109,41 @@ class MeilisearchQueryReturnShapeUnitTests {
 		<S extends Product> Optional<S> genericOptional();
 
 		<S extends Product> List<S> genericCollection();
+
+		<S extends Product> Optional<? extends S> wildcardOptional();
+
+		<S extends Product> List<? extends S> wildcardCollection();
+
+		<S extends Product> Iterable<? extends S> wildcardIterable();
+
+		<S extends Product> org.springframework.data.domain.Page<? extends S> wildcardPage();
 	}
+
+	@NoRepositoryBean
+	interface OwnerRepository extends Repository<Owner<?>.Item, String> {
+
+		<S extends Product> List<Owner<S>.Item> ownerVariable();
+	}
+
+	static class Owner<T> {
+
+		class Item {}
+	}
+
+	@NoRepositoryBean
+	interface ConcreteWildcardRepository extends Repository<Product, String> {
+
+		List<? extends Product> concreteWildcard();
+	}
+
+	@NoRepositoryBean
+	interface GenericWildcardRepository<T> extends Repository<T, String> {
+
+		List<? extends T> inheritedWildcard();
+	}
+
+	@NoRepositoryBean
+	interface InheritedWildcardRepository extends GenericWildcardRepository<Product> {}
 
 	@NoRepositoryBean
 	interface GenericRepository<T> extends Repository<T, String> {

@@ -216,24 +216,113 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 	}
 
 	@Test
+	void rejectsMixedAsciiAndNonAsciiPositionalDigits() {
+		String placeholder = "?0\u0660";
+		assertInvalid("stringValue", "name = " + placeholder, "", String.class);
+		assertInvalid("stringValue", "", placeholder, String.class);
+	}
+
+	@Test
+	void rejectsBmpDigitImmediatelyAfterMultiDigitPlaceholder() {
+
+		assertInvalidDigitAfterElevenPlaceholder("\u0661");
+	}
+
+	@Test
+	void rejectsSupplementaryDigitImmediatelyAfterMultiDigitPlaceholder() {
+
+		assertInvalidDigitAfterElevenPlaceholder("\uD835\uDFD8");
+	}
+
+	@Test
+	void preservesUnicodeQTextSeparatedFromPlaceholder() throws Exception {
+
+		MeilisearchDeclaredQueryBinding binding = binding("stringValue", "", "?0 \u0661", String.class);
+		assertThat(binding.bind(new Object[] { "cats ?10" }).q()).isEqualTo("cats ?10 \u0661");
+	}
+
+	@Test
+	void rejectsUnsupportedDeclaredCollectionElementTypes() {
+
+		assertInvalid("unsupportedCollection", "name IN ?0", "", List.class);
+		assertInvalid("nestedCollection", "name IN ?0", "", List.class);
+	}
+
+	@Test
+	void rejectsNestedArraysAndArraysOfCollections() {
+		assertInvalid("nestedArrays", "name IN ?0", "", String[][].class);
+		assertInvalid("arrayOfCollections", "name IN ?0", "", List[].class);
+		assertInvalid("arrayElements", "name IN ?0", "", List.class);
+	}
+
+	@Test
+	void supportsScalarArraysAndRuntimeChecksRawCollections() throws Exception {
+
+		MeilisearchDeclaredQueryBinding strings = binding("stringArrayValues", "name IN ?0", "", String[].class);
+		assertThat(strings.bind(new Object[] { new String[] { "books" } }).filter()).isEqualTo("name IN [\"books\"]");
+
+		MeilisearchDeclaredQueryBinding integers = binding("integerArrayValues", "id IN ?0", "", int[].class);
+		assertThat(integers.bind(new Object[] { new int[] { 7, 9 } }).filter()).isEqualTo("id IN [7, 9]");
+
+		MeilisearchDeclaredQueryBinding numbers = binding("numberCollection", "amount IN ?0", "", List.class);
+		assertThat(numbers.bind(new Object[] { List.of(1, 2) }).filter()).isEqualTo("amount IN [1, 2]");
+
+		MeilisearchDeclaredQueryBinding raw = binding("rawCollection", "name IN ?0", "", List.class);
+		assertThat(raw.bind(new Object[] { List.of("books") }).filter()).isEqualTo("name IN [\"books\"]");
+		assertThatIllegalArgumentException().isThrownBy(() -> raw.bind(new Object[] { List.of(List.of("nested")) }));
+	}
+
+	@Test
 	void resolvesInheritedGenericParameterTypesUsingRepositoryMetadata() throws Exception {
 
 		Method method = StringNameRepository.class.getMethod("search", Serializable.class);
-		QueryMethod queryMethod = new QueryMethod(method, new DefaultRepositoryMetadata(StringNameRepository.class),
-				new SpelAwareProxyProjectionFactory());
-		MeilisearchDeclaredQueryBinding binding = new MeilisearchDeclaredQueryBinding(method, queryMethod, "name = ?0", "");
+		var metadata = new DefaultRepositoryMetadata(StringNameRepository.class);
+		QueryMethod queryMethod = new QueryMethod(method, metadata, new SpelAwareProxyProjectionFactory());
+		MeilisearchDeclaredQueryBinding binding = new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata,
+				"name = ?0", "");
 
 		assertThat(binding.bind(new Object[] { "name" }).filter()).isEqualTo("name = \"name\"");
+	}
+
+	@Test
+	void resolvesInheritedCollectionElementTypesFromRepositoryMetadata() throws Exception {
+
+		Method supportedMethod = StringCollectionRepository.class.getMethod("searchByValues", List.class);
+		MeilisearchDeclaredQueryBinding supported = repositoryBinding(supportedMethod, StringCollectionRepository.class);
+		assertThat(supported.bind(new Object[] { List.of("books") }).filter()).isEqualTo("name IN [\"books\"]");
+
+		Method unsupportedMethod = UnsupportedCollectionRepository.class.getMethod("searchByValues", List.class);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> repositoryBinding(unsupportedMethod, UnsupportedCollectionRepository.class));
+	}
+
+	@Test
+	void rejectsKnownCollectionBindingsDespiteUnresolvedRepositoryVariables() throws Exception {
+
+		for (Class<?> repository : List.of(SerializableCollectionRepository.class,
+				PartiallyResolvedCollectionRepository.class)) {
+			Method method = repository.getMethod("searchByValues", List.class);
+			assertThatIllegalArgumentException().isThrownBy(() -> repositoryBinding(method, repository));
+		}
+	}
+
+	@Test
+	void keepsUnresolvedCollectionElementTypesUnderRuntimeValidation() throws Exception {
+
+		Method method = GenericCollectionRepository.class.getMethod("searchByValues", List.class);
+		MeilisearchDeclaredQueryBinding binding = repositoryBinding(method, GenericCollectionRepository.class);
+		assertThat(binding.bind(new Object[] { List.of("books") }).filter()).isEqualTo("name IN [\"books\"]");
+		assertThatIllegalArgumentException().isThrownBy(() -> binding.bind(new Object[] { List.of(List.of("nested")) }));
 	}
 
 	@Test
 	void rejectsUnsupportedSerializableParameterType() throws Exception {
 
 		Method method = SerializableNameRepository.class.getMethod("search", Serializable.class);
-		QueryMethod queryMethod = new QueryMethod(method, new DefaultRepositoryMetadata(SerializableNameRepository.class),
-				new SpelAwareProxyProjectionFactory());
+		var metadata = new DefaultRepositoryMetadata(SerializableNameRepository.class);
+		QueryMethod queryMethod = new QueryMethod(method, metadata, new SpelAwareProxyProjectionFactory());
 
-		assertThatThrownBy(() -> new MeilisearchDeclaredQueryBinding(method, queryMethod, "name = ?0", ""))
+		assertThatThrownBy(() -> new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata, "name = ?0", ""))
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
@@ -276,12 +365,28 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
+	private static void assertInvalidDigitAfterElevenPlaceholder(String digit) {
+
+		Class<?>[] parameterTypes = new Class<?>[11];
+		for (int i = 0; i < parameterTypes.length; i++) {
+			parameterTypes[i] = String.class;
+		}
+		assertInvalid("eleven", "", "?0 ?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9 ?10" + digit, parameterTypes);
+	}
+
+	private static MeilisearchDeclaredQueryBinding repositoryBinding(Method method, Class<?> repositoryInterface) {
+
+		var metadata = new DefaultRepositoryMetadata(repositoryInterface);
+		QueryMethod queryMethod = new QueryMethod(method, metadata, new SpelAwareProxyProjectionFactory());
+		return new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata, "name IN ?0", "");
+	}
+
 	private static MeilisearchDeclaredQueryBinding binding(String methodName, String filter, String q,
 			Class<?>... parameterTypes) throws NoSuchMethodException {
 		Method method = SampleRepository.class.getMethod(methodName, parameterTypes);
-		QueryMethod queryMethod = new QueryMethod(method, new DefaultRepositoryMetadata(SampleRepository.class),
-				new SpelAwareProxyProjectionFactory());
-		return new MeilisearchDeclaredQueryBinding(method, queryMethod, filter, q);
+		var metadata = new DefaultRepositoryMetadata(SampleRepository.class);
+		QueryMethod queryMethod = new QueryMethod(method, metadata, new SpelAwareProxyProjectionFactory());
+		return new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata, filter, q);
 	}
 
 	@NoRepositoryBean
@@ -313,6 +418,24 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 		List<Sample> polygon(Number firstLatitude, Number firstLongitude, Number secondLatitude, Number secondLongitude);
 
 		List<Sample> noArguments();
+
+		List<Sample> unsupportedCollection(List<Sample> values);
+
+		List<Sample> nestedCollection(List<List<String>> values);
+
+		List<Sample> nestedArrays(String[][] values);
+
+		List<Sample> arrayOfCollections(List<?>[] values);
+
+		List<Sample> arrayElements(List<String[]> values);
+
+		List<Sample> stringArrayValues(String[] values);
+
+		List<Sample> integerArrayValues(int[] values);
+
+		List<Sample> numberCollection(List<? extends Number> values);
+
+		List<Sample> rawCollection(List values);
 	}
 
 	@NoRepositoryBean
@@ -325,10 +448,31 @@ class MeilisearchDeclaredQueryBindingUnitTests {
 	interface StringNameRepository extends GenericNameRepository<String> {}
 
 	@NoRepositoryBean
+	interface GenericCollectionRepository<T extends Serializable> extends Repository<Sample, String> {
+
+		List<Sample> searchByValues(List<T> values);
+	}
+
+	@NoRepositoryBean
+	interface StringCollectionRepository extends GenericCollectionRepository<String> {}
+
+	@NoRepositoryBean
+	interface UnsupportedCollectionRepository extends GenericCollectionRepository<UnsupportedCollectionElement> {}
+
+	@NoRepositoryBean
+	interface SerializableCollectionRepository extends GenericCollectionRepository<Serializable> {}
+
+	@NoRepositoryBean
+	interface PartiallyResolvedCollectionRepository<U>
+			extends GenericCollectionRepository<UnsupportedCollectionElement> {}
+
+	@NoRepositoryBean
 	interface SerializableNameRepository extends Repository<Sample, String> {
 
 		List<Sample> search(Serializable name);
 	}
+
+	static final class UnsupportedCollectionElement implements Serializable {}
 
 	static class Sample {}
 

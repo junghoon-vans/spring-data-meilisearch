@@ -15,10 +15,12 @@
  */
 package io.vanslog.spring.data.meilisearch.repository.support;
 
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +29,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.data.util.TypeInformation;
+import org.springframework.lang.Nullable;
 
 /**
  * Validates the supported result shapes of repository query methods.
@@ -102,16 +105,34 @@ enum MeilisearchQueryReturnShape {
 	}
 
 	private static void validateDeclaration(Method method, Class<?> returnType, String queryKind) {
-		Type declaration = method.getGenericReturnType();
-		if (declaration instanceof ParameterizedType container) {
-			Type[] arguments = container.getActualTypeArguments();
-			if (arguments.length == 1) {
-				declaration = arguments[0];
-			}
-		}
-		if (declaration instanceof TypeVariable<?> variable && variable.getGenericDeclaration() instanceof Method) {
+		if (containsMethodTypeVariable(method.getGenericReturnType())) {
 			throw unsupportedReturnType(returnType, method, queryKind);
 		}
+	}
+
+	private static boolean containsMethodTypeVariable(@Nullable Type type) {
+		if (type instanceof TypeVariable<?> variable) {
+			return variable.getGenericDeclaration() instanceof Method;
+		}
+		if (type instanceof ParameterizedType parameterizedType) {
+			return containsMethodTypeVariable(parameterizedType.getOwnerType())
+					|| containsMethodTypeVariable(parameterizedType.getActualTypeArguments());
+		}
+		if (type instanceof WildcardType wildcardType) {
+			return containsMethodTypeVariable(wildcardType.getUpperBounds())
+					|| containsMethodTypeVariable(wildcardType.getLowerBounds());
+		}
+		return type instanceof GenericArrayType arrayType
+				&& containsMethodTypeVariable(arrayType.getGenericComponentType());
+	}
+
+	private static boolean containsMethodTypeVariable(Type[] types) {
+		for (Type type : types) {
+			if (containsMethodTypeVariable(type)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static IllegalArgumentException unsupportedReturnType(Class<?> returnType, Method method, String queryKind) {
