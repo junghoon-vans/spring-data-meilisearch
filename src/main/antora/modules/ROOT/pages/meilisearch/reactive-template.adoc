@@ -1,0 +1,165 @@
+[[meilisearch.reactive-operations]]
+= Reactive Operations
+
+`ReactiveMeilisearchOperations` combines `ReactiveDocumentOperations` and `ReactiveSearchOperations`.
+`ReactiveMeilisearchTemplate` implements these contracts with non-blocking REST calls through the JDK HTTP client and Reactor.
+It does not execute blocking SDK requests on a worker scheduler.
+Existing synchronous operations remain separate and unchanged.
+
+This API provides document and search operations, not reactive repositories, index administration, or coroutine extensions.
+Existing query, result, and mapping types are shared with the synchronous API; the library still depends on the Meilisearch Java SDK.
+
+[[meilisearch.reactive-operations.configuration]]
+== Explicit Java Configuration
+
+Extend `ReactiveMeilisearchConfiguration` for a reactive-only application:
+
+[source,java]
+----
+@Configuration
+class ReactiveConfig extends ReactiveMeilisearchConfiguration {
+
+    @Override
+    public ClientConfiguration reactiveClientConfiguration() {
+        return ClientConfiguration.builder()
+                .connectedTo("http://localhost:7700")
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
+                .withRequestTimeout(5_000)
+                .withRequestInterval(50)
+                .build();
+    }
+}
+----
+
+This configuration registers the connection bean as `reactiveMeilisearchClientConfiguration` and one
+`ReactiveMeilisearchOperations` bean with the aliases `reactiveMeilisearchOperations` and `reactiveMeilisearchTemplate`.
+It also registers the existing mapping context, converter, custom conversions, and object mapper without creating a synchronous SDK client.
+See xref:meilisearch/object-mapping.adoc[] for conversion customization.
+No Spring Boot auto-configuration or reactive XML namespace is provided.
+
+For coexistence, keep the existing `MeilisearchConfiguration` and add a reactive bean using its connection and mapping beans:
+
+[source,java]
+----
+@Configuration
+class CombinedConfig extends MeilisearchConfiguration {
+
+    @Override
+    public ClientConfiguration clientConfiguration() {
+        return ClientConfiguration.builder()
+                .connectedTo("http://localhost:7700")
+                .withApiKey(System.getenv("MEILISEARCH_API_KEY"))
+                .build();
+    }
+
+    @Bean(name = { "reactiveMeilisearchOperations", "reactiveMeilisearchTemplate" })
+    ReactiveMeilisearchOperations reactiveOperations(
+            @Qualifier("meilisearchClientConfiguration") ClientConfiguration configuration,
+            MeilisearchConverter converter,
+            @Qualifier("meilisearchObjectMapper") ObjectMapper mapper) {
+        return new ReactiveMeilisearchTemplate(configuration, converter, mapper, 100);
+    }
+}
+----
+
+Inject `MeilisearchOperations` for synchronous access or `ReactiveMeilisearchOperations` for reactive access.
+Do not import both configuration base classes together: they declare the same mapping infrastructure bean names.
+A standalone template can also be constructed with `new ReactiveMeilisearchTemplate(configuration)`.
+The converter/mapper constructors reuse an application's mapping infrastructure, and the four-argument constructor sets the batch/page size.
+
+[[meilisearch.reactive-operations.documents]]
+== Document Operations
+
+All operations are cold: constructing a publisher performs no HTTP request.
+Each subscription performs its own requests; subscribing to a write again can submit another server task.
+
+[cols="1,1,3",options="header"]
+|===
+|Operation |Result |Behavior
+|`save(entity)` |`Mono<T>` |Emits the entity after its write task succeeds.
+|`saveAll(Publisher<T>)` |`Flux<T>` |Submits bounded batches sequentially and emits each batch only after its task succeeds.
+|`get(id, type)` |`Mono<T>` |Completes empty only for `document_not_found`; missing indexes and other errors propagate.
+|`multiGet(type, Publisher<String>)` |`Flux<T>` |Fetches bounded ID batches, preserves requested order and duplicates, and omits missing IDs.
+|`findAll(type)` / `findAll(type, sort)` |`Flux<T>` |Traverses bounded document pages instead of an unbounded search request.
+|`exists(id, type)` |`Mono<Boolean>` |Checks document existence without hiding unrelated errors.
+|`count(type)` / `count(type, filter)` |`Mono<Long>` |Reads the document API's total without downloading documents.
+|`delete(id, type)` / `delete(entity)` |`Mono<Void>` |Completes after the delete task succeeds.
+|`deleteAllById(ids, type)` |`Mono<Void>` |Submits bounded ID batches sequentially and waits for each task.
+|`deleteAll(type)` |`Mono<Void>` |Deletes the mapped index's documents and awaits task success.
+|`deleteByFilter(type, filter)` |`Mono<Long>` |Emits `details.deletedDocuments` from the succeeded server task.
+|`applySettings(type)` |`Mono<Void>` |Explicitly applies annotation-derived settings and awaits task success; completes without a request when no settings are configured.
+|===
+
+The default batch/page size is 100. Internal bulk buffering is bounded, with one batch prefetched; it does not collect an entire input publisher.
+Entities within a save batch must have the same runtime type.
+Document traversal respects downstream demand and can have one page in flight ahead of the page being consumed.
+Each HTTP response is finite JSON materialized in memory; this is not streaming JSON decoding or a byte-based memory limit.
+A consumer's `collectList()` still accumulates its entire result.
+
+`multiGet` uses the document API's `ids` option, requiring Meilisearch 1.14 or later.
+Sorted `findAll` uses its `sort` option, requiring Meilisearch 1.16 or later; configure sortable attributes first.
+Unlike search, document traversal is not limited by `pagination.maxTotalHits`.
+Offset-based traversal is not a snapshot: concurrent writes can cause skipped or repeated documents.
+
+The template constructor performs no index lookup or settings write.
+Compose explicit initialization with subsequent operations; do not call `block()` inside a reactive application flow:
+
+[source,java]
+----
+Mono<Movie> saved = operations.applySettings(Movie.class)
+        .then(operations.save(movie));
+
+Flux<Movie> movies = operations.findAll(Movie.class, Sort.by("title"));
+----
+
+[[meilisearch.reactive-operations.search]]
+== Search Operations
+
+`search(query, type)`, both `multiSearch` variants, `facetSearch(query, type)`, and `similarSearch(query, type)` return a finite `Mono<SearchHits<T>>`.
+Facet search uses `SearchHits<FacetHit>`.
+Queries and mapped hits use the existing xref:meilisearch/template.adoc#meilisearch.operations.search[search model].
+Single-search results retain total-hit and facet metadata.
+Non-federated multi-search flattens hits in query order while retaining per-query metadata; neither multi-search variant invents an exact aggregate total (`TotalHitsRelation.OFF`).
+
+Use the library's `core.federation.Federation` and `FacetMergeOptions` records for reactive federation options:
+
+[source,java]
+----
+Federation federation = new Federation(20, 0,
+        Map.of("movies", List.of("genre")), new FacetMergeOptions(10));
+
+Mono<SearchHits<Movie>> hits = operations.multiSearch(queries, federation, Movie.class);
+----
+
+Federation `limit` and `offset` control the global window; per-query `Pageable` is not the federation window.
+Shared `IndexQuery` supports per-index query and weight options.
+Each federated hit retains `_federation` metadata through `SearchHit.getFederation()`.
+
+With `mergeFacets`, `SearchHit.getFacetDistribution()` exposes the normal merged distribution.
+Without merging, the same Object-valued accessor exposes `{ "facetsByIndex": { "indexUid": { "distribution": ..., "stats": ... } } }`.
+If a server returns both forms, that wrapper additionally contains `"facetDistribution"`.
+This preserves per-index facet statistics without changing the existing synchronous result types.
+
+[[meilisearch.reactive-operations.tasks]]
+== Task Completion, Errors, and Cancellation
+
+HTTP acceptance is not write completion.
+Writes poll `/tasks/<uid>` non-blockingly until `succeeded`; `enqueued` and `processing` continue polling.
+A failed or canceled task emits `ReactiveTaskException`, exposing the task UID, terminal status, and server error details.
+A failed batch emits none of that batch's entities, but already succeeded batches remain committed: bulk writes are not transactional.
+
+`ClientConfiguration.withRequestTimeout(...)` sets the task-observation timeout in milliseconds,
+starting after the write receipt has been received; `withRequestInterval(...)` sets the polling interval.
+Their defaults are 5,000 ms and 50 ms. The separate HTTP exchange timeout is 10 seconds.
+Both task settings must be positive for a write.
+
+* `ReactiveTaskTimeoutException` exposes the UID and configured observation timeout. The server outcome is unknown; the task may still succeed later.
+* `ReactiveTaskObservationException` exposes the accepted task UID when polling fails because of HTTP, communication, JSON, or malformed task data. Its cause preserves the polling failure; the server outcome remains unknown.
+* `MeilisearchRestException` exposes the HTTP status and server `code`, `type`, and `link` for non-successful HTTP responses.
+* `UncategorizedMeilisearchException` reports communication, JSON, and malformed submission-response failures, preserving causes where available. Failures after a valid task receipt are wrapped in `ReactiveTaskObservationException`.
+
+Cancellation stops local observation and further batch/page processing, and attempts to cancel an in-flight HTTP exchange.
+It does not cancel an accepted Meilisearch task or roll back completed work.
+A canceled or timed-out write can therefore have an unknown server outcome.
+The template does not automatically retry requests: applying Reactor `retry` or re-subscribing can repeat a submitted write.
+Use the reported task UID to investigate an accepted task rather than assuming it failed.

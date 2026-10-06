@@ -27,6 +27,7 @@
     <properties>
         <springdata.commons>3.3.13-SNAPSHOT</springdata.commons>
         <meilisearch-java>0.21.0</meilisearch-java>
+        <gson>2.13.2</gson>
         <okhttp>5.3.2</okhttp>
         <kotlin-stdlib>2.2.21</kotlin-stdlib>
         <testcontainers-meilisearch>2.0.0</testcontainers-meilisearch>
@@ -65,11 +66,22 @@
             <version>${springdata.commons}</version>
         </dependency>
 
+        <!-- Reactive operations -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+
         <!-- Meilisearch -->
         <dependency>
             <groupId>com.meilisearch.sdk</groupId>
             <artifactId>meilisearch-java</artifactId>
             <version>${meilisearch-java}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson}</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -93,6 +105,11 @@
         </dependency>
 
         <!-- Test -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>io.vanslog</groupId>
             <artifactId>testcontainers-meilisearch</artifactId>
