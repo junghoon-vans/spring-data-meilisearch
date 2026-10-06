@@ -48,6 +48,13 @@ class MeilisearchQueryReturnShapeUnitTests {
 	}
 
 	@Test
+	void rejectsUnresolvedMethodGenericResults() {
+		for (String method : List.of("genericEntity", "genericOptional", "genericCollection")) {
+			assertThatThrownBy(() -> shape(InvalidRepository.class, method)).isInstanceOf(IllegalArgumentException.class);
+		}
+	}
+
+	@Test
 	void resolvesDomainTypeInInheritedGenericFinderSignatures() throws Exception {
 		assertThat(shape(GenericProductRepository.class, "entity")).isEqualTo(MeilisearchQueryReturnShape.ENTITY);
 		assertThat(shape(GenericProductRepository.class, "optional")).isEqualTo(MeilisearchQueryReturnShape.OPTIONAL);
@@ -74,6 +81,12 @@ class MeilisearchQueryReturnShapeUnitTests {
 		Optional<SpecialProduct> optionalSubtype();
 
 		List<SpecialProduct> collectionSubtype();
+
+		<S extends Product> S genericEntity();
+
+		<S extends Product> Optional<S> genericOptional();
+
+		<S extends Product> List<S> genericCollection();
 	}
 
 	@NoRepositoryBean

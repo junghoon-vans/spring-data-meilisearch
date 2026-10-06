@@ -178,6 +178,8 @@ class DeclaredMeilisearchRepositoryIntegrationTests {
 				.isInstanceOf(QueryCreationException.class);
 		assertThatThrownBy(() -> factory.getRepository(SubtypeResultRepository.class))
 				.isInstanceOf(QueryCreationException.class);
+		assertThatThrownBy(() -> factory.getRepository(MethodGenericResultRepository.class))
+				.isInstanceOf(QueryCreationException.class);
 	}
 
 	private static DeclaredProduct product(String id, String title, String category, int price) {
@@ -219,6 +221,13 @@ class DeclaredMeilisearchRepositoryIntegrationTests {
 
 		@Query("active = true")
 		Optional<SpecialProduct> subtype();
+	}
+
+	@NoRepositoryBean
+	interface MethodGenericResultRepository extends MeilisearchRepository<DeclaredProduct, String> {
+
+		@Query("active = true")
+		<S extends DeclaredProduct> Optional<S> genericResult();
 	}
 
 	static class SpecialProduct extends DeclaredProduct {}

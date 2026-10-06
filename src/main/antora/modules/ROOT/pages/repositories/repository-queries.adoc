@@ -209,6 +209,8 @@ Declared searches use `MeilisearchOperations` and the existing converter and fin
 
 Generic parameters and result types inherited from a repository base interface are resolved against the concrete repository's type arguments before validation. The resolved types must still fit the supported binding and result forms; a parameter explicitly declared as `Serializable`, for example, does not become supported just because the caller supplies a string.
 
+Method-level result variables, such as `<S extends Product> Optional<S>`, are not concrete result declarations and are rejected even when their upper bound is the repository domain type. The repository materializes its fixed domain type; callers cannot select a different subtype through a method type argument.
+
 === Parameter Binding
 
 Positional placeholders use a `?` followed by one or more ASCII digits, such as `?0` or `?12`, and refer to zero-based *method parameter positions*, including positions occupied by special parameters. Unlike the JPA reference's `?1` example, the index here is zero-based and is not the ordinal among bindable parameters. `Sort`, `Pageable`, and other special parameters cannot be bound. In the example, `byCategoryAndPrice(String category, Pageable pageable, int maximumPrice)` uses `?0` and `?2`; `?1` names the special `Pageable` and is invalid. Every bindable method argument must appear in the filter or search-text template.

@@ -16,6 +16,9 @@
 package io.vanslog.spring.data.meilisearch.repository.support;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,6 +83,16 @@ enum MeilisearchQueryReturnShape {
 		TypeInformation<?> returnInformation = metadata.getReturnType(method);
 		Class<?> returnType = returnInformation.getType();
 		Class<?> domainType = metadata.getDomainType();
+		Type declaration = method.getGenericReturnType();
+		if (declaration instanceof ParameterizedType container) {
+			Type[] arguments = container.getActualTypeArguments();
+			if (arguments.length == 1) {
+				declaration = arguments[0];
+			}
+		}
+		if (declaration instanceof TypeVariable<?> variable && variable.getGenericDeclaration() instanceof Method) {
+			throw unsupportedReturnType(returnType, method, queryKind);
+		}
 		if (returnType == domainType) {
 			return ENTITY;
 		}
