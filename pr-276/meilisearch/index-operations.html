@@ -624,7 +624,9 @@ milliseconds. A failed or canceled completed task raises <code>TaskStatusExcepti
 <code>getStatus()</code>, and the server error code through <code>getErrorCode()</code> when one is available. The error code is <code>null</code>
 when Meilisearch provides no task error details. The exception message retains the operation and server failure
 reason when available. A wait timeout is an unconfirmed outcome and remains a distinct
-<code>UncategorizedMeilisearchException</code>; it is not reported as a failed task.</p>
+<code>UncategorizedMeilisearchException</code>; it is not reported as a failed task.
+Template document/settings operations also reject a missing completed-task response as an unconfirmed outcome,
+using <code>UncategorizedMeilisearchException</code> rather than inventing a failed task status.</p>
 </div>
 <div class="paragraph">
 <p>Handle a completed task failure with the SDK-independent diagnostics:</p>
