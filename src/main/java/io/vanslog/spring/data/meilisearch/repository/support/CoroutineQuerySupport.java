@@ -18,16 +18,23 @@ package io.vanslog.spring.data.meilisearch.repository.support;
 import java.lang.reflect.Method;
 
 import org.springframework.core.KotlinDetector;
+import org.springframework.data.util.ReactiveWrappers;
+
+import kotlinx.coroutines.flow.Flow;
 
 /**
- * Optional bridge to Kotlin reflection. Keeping Kotlin types behind this bridge lets Reactor repositories remain usable
- * when Kotlin reflection and coroutine libraries are absent.
+ * Optional bridge to coroutine types and Kotlin reflection. Exact class identity checks are guarded by coroutine
+ * availability, keeping Reactor repositories usable when Kotlin reflection and coroutine libraries are absent.
  *
  * @author Junghoon Ban
  */
 final class CoroutineQuerySupport {
 
 	private CoroutineQuerySupport() {}
+
+	static boolean isFlow(Class<?> type) {
+		return ReactiveWrappers.isAvailable(ReactiveWrappers.ReactiveLibrary.KOTLIN_COROUTINES) && type == Flow.class;
+	}
 
 	static boolean isSuspend(Method method) {
 		requireKotlinReflection();

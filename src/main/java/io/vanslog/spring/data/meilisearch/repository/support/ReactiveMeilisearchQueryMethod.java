@@ -36,8 +36,7 @@ final class ReactiveMeilisearchQueryMethod extends QueryMethod {
 
 	ReactiveMeilisearchQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory) {
 		super(method, metadata, factory);
-		this.collection = method.getReturnType() == Flux.class
-				|| "kotlinx.coroutines.flow.Flow".equals(method.getReturnType().getName());
+		this.collection = method.getReturnType() == Flux.class || CoroutineQuerySupport.isFlow(method.getReturnType());
 	}
 
 	@Override

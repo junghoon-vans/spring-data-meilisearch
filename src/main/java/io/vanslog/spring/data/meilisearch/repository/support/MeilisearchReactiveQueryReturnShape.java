@@ -26,6 +26,8 @@ import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.data.util.TypeInformation;
 
+import kotlin.Unit;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -63,7 +65,7 @@ enum MeilisearchReactiveQueryReturnShape {
 
 		Class<?> domainType = metadata.getDomainType();
 
-		if (isCoroutineFlow(method.getReturnType())) {
+		if (CoroutineQuerySupport.isFlow(method.getReturnType())) {
 			if (resolveCoroutineFlowPayloadType(method, metadata, queryKind) != domainType) {
 				throw unsupportedReturnType(method, queryKind);
 			}
@@ -124,7 +126,8 @@ enum MeilisearchReactiveQueryReturnShape {
 		}
 
 		TypeInformation<?> returnInformation = metadata.getReturnType(method);
-		if (!isCoroutineFlow(returnInformation.getType()) || returnInformation.getTypeArguments().size() != 1) {
+		if (!CoroutineQuerySupport.isFlow(returnInformation.getType())
+				|| returnInformation.getTypeArguments().size() != 1) {
 			throw unsupportedReturnType(method, queryKind);
 		}
 
@@ -158,15 +161,11 @@ enum MeilisearchReactiveQueryReturnShape {
 
 	private static boolean isCoroutineUnit(Method method, RepositoryMetadata metadata) {
 		return isSuspending(method) && !CoroutineQuerySupport.hasUnresolvedMethodTypeParameter(method)
-				&& "kotlin.Unit".equals(metadata.getReturnType(method).getType().getName());
+				&& metadata.getReturnType(method).getType() == Unit.class;
 	}
 
 	private static boolean isSuspending(Method method) {
 		return KotlinDetector.isKotlinReflectPresent() && CoroutineQuerySupport.isSuspend(method);
-	}
-
-	private static boolean isCoroutineFlow(Class<?> type) {
-		return "kotlinx.coroutines.flow.Flow".equals(type.getName());
 	}
 
 	private static boolean matchesLogicalType(Class<?> actualType, Class<?> expectedType) {
