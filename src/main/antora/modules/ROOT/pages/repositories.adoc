@@ -13,8 +13,9 @@ In particular, Spring Data Meilisearch currently documents:
 * repository bootstrap through Java configuration and the XML namespace,
 * the built-in CRUD, sorting, and paging methods backed by `SimpleMeilisearchRepository`,
 * a limited set of filter-backed derived finder methods,
+* declared filter/full-text searches through `@Query` annotations or named query templates,
 * store-specific behavior such as automatic settings application and the difference between document-backed and search-backed methods.
 
-Declared queries, named queries, and advanced derived operators remain unsupported. See xref:repositories/repository-queries.adoc[Query Methods] for the supported subset.
+Derived operators remain limited to the documented subset. See xref:repositories/repository-queries.adoc[Query Methods] for derived and declared query contracts and their limits.
 
 Read the common repository fundamentals first, then continue with the store-specific pages in this chapter to understand the exact repository surface exposed by Spring Data Meilisearch.
