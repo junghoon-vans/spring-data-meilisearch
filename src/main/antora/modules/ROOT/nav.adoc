@@ -6,6 +6,7 @@
 ** xref:meilisearch/object-mapping.adoc[]
 ** xref:meilisearch/template.adoc[]
 ** xref:meilisearch/reactive-template.adoc[]
+*** xref:meilisearch/reactive-template.adoc#meilisearch.reactive-operations.kotlin[Reified Kotlin Extensions]
 ** xref:meilisearch/index-operations.adoc[Instance and Index Operations]
 ** xref:meilisearch/settings.adoc[]
 
@@ -16,6 +17,7 @@
 ** xref:repositories/configuration.adoc[]
 ** xref:repositories/meilisearch-repositories.adoc[]
 ** xref:repositories/reactive-meilisearch-repositories.adoc[]
+*** xref:repositories/reactive-meilisearch-repositories.adoc#meilisearch.repositories.coroutines[Coroutine Repositories]
 ** xref:repositories/repository-queries.adoc[]
 
 * xref:appendix.adoc[]

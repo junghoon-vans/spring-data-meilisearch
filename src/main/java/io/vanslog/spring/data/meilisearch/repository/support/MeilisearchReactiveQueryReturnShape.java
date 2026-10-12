@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 
+import org.springframework.core.KotlinDetector;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.data.util.TypeInformation;
@@ -45,7 +46,7 @@ enum MeilisearchReactiveQueryReturnShape {
 			return resolveMonoProjection(method, metadata, Boolean.class, EXISTS);
 		}
 		if (tree.isDelete()) {
-			if (isMonoPayload(method, metadata, Void.class)) {
+			if (isCoroutineUnit(method, metadata) || isMonoPayload(method, metadata, Void.class)) {
 				return DELETE_VOID;
 			}
 			return resolveMonoProjection(method, metadata, Long.class, DELETE_COUNT);
@@ -60,33 +61,77 @@ enum MeilisearchReactiveQueryReturnShape {
 	private static MeilisearchReactiveQueryReturnShape resolveFinder(Method method, RepositoryMetadata metadata,
 			String queryKind) {
 
-		Class<?> returnType = method.getReturnType();
 		Class<?> domainType = metadata.getDomainType();
-		Class<?> payloadType = resolvePayloadType(method, metadata, queryKind);
+
+		if (isCoroutineFlow(method.getReturnType())) {
+			if (resolveCoroutineFlowPayloadType(method, metadata, queryKind) != domainType) {
+				throw unsupportedReturnType(method, queryKind);
+			}
+			return FLUX;
+		}
+
+		if (isSuspending(method)) {
+			if (resolveCoroutineSingleType(method, metadata, queryKind) != domainType) {
+				throw unsupportedReturnType(method, queryKind);
+			}
+			return MONO;
+		}
+
+		Class<?> returnType = method.getReturnType();
+		Class<?> payloadType = resolveReactivePayloadType(method, metadata, queryKind);
 		if (payloadType != domainType) {
 			throw unsupportedReturnType(method, queryKind);
 		}
-		if (returnType == Flux.class) {
-			return FLUX;
-		}
-		return MONO;
+		return returnType == Flux.class ? FLUX : MONO;
 	}
 
 	private static MeilisearchReactiveQueryReturnShape resolveMonoProjection(Method method, RepositoryMetadata metadata,
 			Class<?> expectedPayload, MeilisearchReactiveQueryReturnShape shape) {
+
+		if (isSuspending(method)) {
+			if (!matchesLogicalType(resolveCoroutineSingleType(method, metadata, "derived query"), expectedPayload)) {
+				throw unsupportedReturnType(method, "derived query");
+			}
+			return shape;
+		}
+
 		if (method.getReturnType() != Mono.class
-				|| resolvePayloadType(method, metadata, "derived query") != expectedPayload) {
+				|| resolveReactivePayloadType(method, metadata, "derived query") != expectedPayload) {
 			throw unsupportedReturnType(method, "derived query");
 		}
 		return shape;
 	}
 
 	private static boolean isMonoPayload(Method method, RepositoryMetadata metadata, Class<?> expectedPayload) {
+		if (isCoroutineUnit(method, metadata)) {
+			return expectedPayload == Void.class;
+		}
 		return method.getReturnType() == Mono.class
-				&& resolvePayloadType(method, metadata, "derived query") == expectedPayload;
+				&& resolveReactivePayloadType(method, metadata, "derived query") == expectedPayload;
 	}
 
-	private static Class<?> resolvePayloadType(Method method, RepositoryMetadata metadata, String queryKind) {
+	private static Class<?> resolveCoroutineSingleType(Method method, RepositoryMetadata metadata, String queryKind) {
+		if (CoroutineQuerySupport.hasUnresolvedMethodTypeParameter(method)) {
+			throw unsupportedReturnType(method, queryKind);
+		}
+		return metadata.getReturnType(method).getType();
+	}
+
+	private static Class<?> resolveCoroutineFlowPayloadType(Method method, RepositoryMetadata metadata,
+			String queryKind) {
+		if (CoroutineQuerySupport.hasUnresolvedMethodTypeParameter(method)) {
+			throw unsupportedReturnType(method, queryKind);
+		}
+
+		TypeInformation<?> returnInformation = metadata.getReturnType(method);
+		if (!isCoroutineFlow(returnInformation.getType()) || returnInformation.getTypeArguments().size() != 1) {
+			throw unsupportedReturnType(method, queryKind);
+		}
+
+		return returnInformation.getTypeArguments().get(0).getType();
+	}
+
+	private static Class<?> resolveReactivePayloadType(Method method, RepositoryMetadata metadata, String queryKind) {
 
 		Class<?> returnType = method.getReturnType();
 		if (returnType != Mono.class && returnType != Flux.class) {
@@ -109,6 +154,36 @@ enum MeilisearchReactiveQueryReturnShape {
 			throw unsupportedReturnType(method, queryKind);
 		}
 		return returnInformation.getTypeArguments().get(0).getType();
+	}
+
+	private static boolean isCoroutineUnit(Method method, RepositoryMetadata metadata) {
+		return isSuspending(method) && !CoroutineQuerySupport.hasUnresolvedMethodTypeParameter(method)
+				&& "kotlin.Unit".equals(metadata.getReturnType(method).getType().getName());
+	}
+
+	private static boolean isSuspending(Method method) {
+		return KotlinDetector.isKotlinReflectPresent() && CoroutineQuerySupport.isSuspend(method);
+	}
+
+	private static boolean isCoroutineFlow(Class<?> type) {
+		return "kotlinx.coroutines.flow.Flow".equals(type.getName());
+	}
+
+	private static boolean matchesLogicalType(Class<?> actualType, Class<?> expectedType) {
+		return wrapPrimitive(actualType) == wrapPrimitive(expectedType);
+	}
+
+	private static Class<?> wrapPrimitive(Class<?> type) {
+		if (!type.isPrimitive()) {
+			return type;
+		}
+		if (type == long.class) {
+			return Long.class;
+		}
+		if (type == boolean.class) {
+			return Boolean.class;
+		}
+		return type;
 	}
 
 	private static IllegalArgumentException unsupportedReturnType(Method method, String queryKind) {

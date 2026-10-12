@@ -23,7 +23,7 @@ interface MovieRepository extends MeilisearchRepository<Movie, String> {
 }
 ----
 
-The module supports blocking repository interfaces only. Reactive, RxJava, and Kotlin coroutine repository interfaces are not supported.
+`MeilisearchRepository` remains the blocking contract. For separate `Mono`/`Flux` and Kotlin `suspend`/`Flow` contracts, use xref:repositories/reactive-meilisearch-repositories.adoc[Reactive and Coroutine Repositories] with explicit reactive enablement. RxJava repositories and mixed blocking/reactive interfaces are not supported.
 
 You can expose a smaller subset of the standard methods by extending the generic Spring Data `Repository` marker or by using `@RepositoryDefinition`. Declare only method signatures implemented by the repository base class:
 

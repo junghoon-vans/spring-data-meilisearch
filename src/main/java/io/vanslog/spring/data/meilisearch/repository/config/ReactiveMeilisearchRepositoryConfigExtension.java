@@ -18,12 +18,17 @@ package io.vanslog.spring.data.meilisearch.repository.config;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
+
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource;
 import org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport;
 import org.springframework.data.repository.core.RepositoryMetadata;
+import org.springframework.data.util.ReactiveWrappers;
+
 import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.repository.CoroutineMeilisearchRepository;
 import io.vanslog.spring.data.meilisearch.repository.ReactiveMeilisearchRepository;
 import io.vanslog.spring.data.meilisearch.repository.support.ReactiveMeilisearchRepositoryFactoryBean;
 
@@ -63,6 +68,10 @@ public class ReactiveMeilisearchRepositoryConfigExtension extends RepositoryConf
 
 	@Override
 	protected Collection<Class<?>> getIdentifyingTypes() {
+		if (KotlinDetector.isKotlinReflectPresent()
+				&& ReactiveWrappers.isAvailable(ReactiveWrappers.ReactiveLibrary.KOTLIN_COROUTINES)) {
+			return List.of(ReactiveMeilisearchRepository.class, CoroutineMeilisearchRepository.class);
+		}
 		return List.of(ReactiveMeilisearchRepository.class);
 	}
 
