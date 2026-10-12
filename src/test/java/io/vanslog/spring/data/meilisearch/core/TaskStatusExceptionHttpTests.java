@@ -91,32 +91,26 @@ class TaskStatusExceptionHttpTests {
 
 	@Test // GH-219
 	void rejectsMissingFinalTaskResponseAsAnUnconfirmedOutcome() throws Exception {
-		AtomicInteger taskReads = new AtomicInteger();
-		HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-		server.createContext("/", exchange -> {
-			try (exchange) {
-				exchange.getRequestBody().readAllBytes();
-				boolean readTask = exchange.getRequestURI().getPath().equals("/tasks/" + FIRST_TASK_UID);
-				String json = readTask
-						? taskReads.incrementAndGet() == 1 ? "{\"uid\":" + FIRST_TASK_UID + ",\"status\":\"succeeded\"}" : "null"
-						: "{\"taskUid\":" + FIRST_TASK_UID + ",\"status\":\"enqueued\"}";
-				TaskServer.respond(exchange, readTask ? 200 : 202, json);
-			}
-		});
-		server.start();
-		try {
-			ClientConfiguration configuration = ClientConfiguration.builder()
-					.connectedTo("http://127.0.0.1:" + server.getAddress().getPort()).withApiKey("test-key")
-					.withRequestTimeout(1000).withRequestInterval(1).build();
-			MeilisearchTemplate template = new MeilisearchTemplate(new MeilisearchClient(configuration));
+		try (TaskServer server = new TaskServer(List.of(TaskOutcome.withoutError("succeeded")), true)) {
+			MeilisearchTemplate template = newTemplate(server, 1000, 1);
 
 			Throwable failure = catchThrowable(
 					() -> template.save(new Movie(1, "Title", "Description", new String[] { "Drama" })));
 
 			assertThat(failure).isInstanceOf(UncategorizedMeilisearchException.class)
 					.isNotInstanceOf(TaskStatusException.class).hasMessageContaining(Integer.toString(FIRST_TASK_UID));
-		} finally {
-			server.stop(0);
+		}
+	}
+
+	@Test // GH-219
+	void rejectsMissingFinalIndexTaskResponseAsAnUnconfirmedOutcome() throws Exception {
+		try (TaskServer server = new TaskServer(List.of(TaskOutcome.withoutError("succeeded")), true)) {
+			MeilisearchTemplate template = newTemplate(server, 1000, 1);
+
+			Throwable failure = catchThrowable(() -> template.indexOps("movies").create());
+
+			assertThat(failure).isInstanceOf(UncategorizedMeilisearchException.class)
+					.isNotInstanceOf(TaskStatusException.class).hasMessageContaining(Integer.toString(FIRST_TASK_UID));
 		}
 	}
 
@@ -144,10 +138,18 @@ class TaskStatusExceptionHttpTests {
 
 		private final HttpServer server;
 		private final List<TaskOutcome> outcomes;
+		private final boolean missingFinalTaskResponse;
+		private final AtomicInteger taskReads = new AtomicInteger();
+
 		private final AtomicInteger submittedTasks = new AtomicInteger();
 
 		TaskServer(List<TaskOutcome> outcomes) throws IOException {
+			this(outcomes, false);
+		}
+
+		TaskServer(List<TaskOutcome> outcomes, boolean missingFinalTaskResponse) throws IOException {
 			this.outcomes = outcomes;
+			this.missingFinalTaskResponse = missingFinalTaskResponse;
 			this.server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
 			this.server.createContext("/", this::handle);
 			this.server.start();
@@ -163,8 +165,12 @@ class TaskStatusExceptionHttpTests {
 				String path = exchange.getRequestURI().getPath();
 				if ("GET".equals(exchange.getRequestMethod()) && path.startsWith("/tasks/")) {
 					int taskUid = Integer.parseInt(path.substring("/tasks/".length()));
-					TaskOutcome outcome = outcomes.get(taskUid - FIRST_TASK_UID);
-					respond(exchange, 200, outcome.toTaskJson(taskUid));
+					if (missingFinalTaskResponse && taskReads.incrementAndGet() > 1) {
+						respond(exchange, 200, "null");
+					} else {
+						TaskOutcome outcome = outcomes.get(taskUid - FIRST_TASK_UID);
+						respond(exchange, 200, outcome.toTaskJson(taskUid));
+					}
 					return;
 				}
 

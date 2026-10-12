@@ -24,6 +24,8 @@ import com.meilisearch.sdk.model.Task;
 import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
 
+import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
+
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndex;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexCreateRequest;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexList;
@@ -168,10 +170,14 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 
 		int taskUid = taskInfo.getTaskUid();
 
-		return executor.execute(client -> {
+		Task task = executor.execute(client -> {
 			Index index = client.index(indexUid);
 			index.waitForTask(taskUid, requestTimeout, requestInterval);
 			return index.getTask(taskUid);
 		});
+		if (task == null) {
+			throw new UncategorizedMeilisearchException("Failed to retrieve completed task " + taskUid + ".");
+		}
+		return task;
 	}
 }
