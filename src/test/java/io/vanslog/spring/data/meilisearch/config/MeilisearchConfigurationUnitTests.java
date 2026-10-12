@@ -35,6 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.json.JsonHandler;
 
@@ -48,6 +49,7 @@ import com.meilisearch.sdk.json.JsonHandler;
 class MeilisearchConfigurationUnitTests {
 
 	@Autowired private MeilisearchClient meilisearchClient;
+	@Autowired private Client sdkClient;
 	@Autowired private MeilisearchOperations meilisearchTemplate;
 	@Autowired private io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate clientMeilisearchTemplate;
 	@Autowired
@@ -61,6 +63,7 @@ class MeilisearchConfigurationUnitTests {
 
 	@Test
 	void shouldConfigureMeilisearchClient() {
+		assertThat(sdkClient).isSameAs(meilisearchClient);
 		assertThat(meilisearchClient.getJsonHandler()).isInstanceOf(JacksonJsonHandler.class);
 		assertThat(meilisearchClient.getRequestTimeout()).isEqualTo(2000);
 		assertThat(meilisearchClient.getRequestInterval()).isEqualTo(20);
