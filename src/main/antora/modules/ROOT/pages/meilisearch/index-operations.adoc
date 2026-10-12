@@ -118,6 +118,36 @@ not expose task ids or return immediately after enqueueing. This applies to docu
 settings mutations.
 
 `ClientConfigurationBuilder.withRequestTimeout(...)` and `withRequestInterval(...)` configure these values in
-milliseconds. A non-succeeded task raises `TaskStatusException` from `save(...)`, `applySettings(...)`, index
-`create(...)` and `update(...)`, and settings mutations. Boolean deletion operations return `false` when their task
-does not succeed.
+milliseconds. A failed or canceled completed task raises `TaskStatusException` from `save(...)`, `applySettings(...)`,
+`deleteByFilter(...)`, index `create()` and `update(...)`, and settings mutations. Boolean deletion operations return
+`false` when their task does not succeed.
+
+`TaskStatusException` reports the completed task's UID through `getTaskUid()`, its server-reported status through
+`getStatus()`, and the server error code through `getErrorCode()` when one is available. The error code is `null`
+when Meilisearch provides no task error details. The exception message retains the operation and server failure
+reason when available. A wait timeout is an unconfirmed outcome and remains a distinct
+`UncategorizedMeilisearchException`; it is not reported as a failed task.
+
+Handle a completed task failure with the SDK-independent diagnostics:
+
+[source,java]
+----
+import io.vanslog.spring.data.meilisearch.TaskStatusException;
+
+try {
+    operations.save(movie);
+} catch (TaskStatusException ex) {
+    System.err.printf("Task %d ended with status %s (error %s): %s%n",
+            ex.getTaskUid(), ex.getStatus(), ex.getErrorCode(), ex.getMessage());
+}
+----
+
+The exception contract no longer exposes `com.meilisearch.sdk.model.TaskStatus`. Its SDK-typed public constructors
+and `getTaskStatus()` accessor have been removed, which is a source and binary compatibility change. Recompile
+applications that used the old constructors and replace `getTaskStatus()` with `getStatus()`; use `getTaskUid()` and
+`getErrorCode()` for the other diagnostics. Code constructing the exception directly must use its UID, string status,
+nullable error code, message, and optional cause constructor arguments.
+
+This change is limited to task failure diagnostics. The supported SDK-coupled callback and native client access
+boundaries remain unchanged; see xref:meilisearch/template.adoc[] and
+xref:meilisearch/client-configuration.adoc[].
