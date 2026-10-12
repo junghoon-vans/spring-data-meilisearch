@@ -316,9 +316,6 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 		}
 		int taskUid = taskInfo.getTaskUid();
 		Task task = getCompletedTask(indexUid, taskUid);
-		if (task == null) {
-			throw new UncategorizedMeilisearchException("Failed to retrieve completed delete task.");
-		}
 		if (task.getStatus() != TaskStatus.SUCCEEDED) {
 			throw TaskStatusExceptionSupport.fromCompletedTask(task, "Failed to delete documents by filter.");
 		}
@@ -424,13 +421,18 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	 * @param indexUid the index UID
 	 * @param taskUid the task UID
 	 * @return the completed task
+	 * @throws UncategorizedMeilisearchException if no completed task is returned
 	 */
 	private Task getCompletedTask(String indexUid, int taskUid) {
-		return execute((Client client) -> {
+		Task task = execute((Client client) -> {
 			Index index = client.index(indexUid);
 			index.waitForTask(taskUid, meilisearchClient.getRequestTimeout(), meilisearchClient.getRequestInterval());
 			return index.getTask(taskUid);
 		});
+		if (task == null) {
+			throw new UncategorizedMeilisearchException("Failed to retrieve completed task " + taskUid + ".");
+		}
+		return task;
 	}
 
 	/**

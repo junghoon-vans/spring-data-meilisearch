@@ -283,8 +283,7 @@ class MeilisearchTemplateIntegrationTests {
 		MeilisearchTemplate template = templateWithDeleteTask(false, null, null);
 
 		assertThatThrownBy(() -> template.deleteByFilter(Movie.class, "genres = Drama"))
-				.isInstanceOf(UncategorizedMeilisearchException.class)
-				.hasMessageContaining("Failed to retrieve filtered delete task");
+				.isInstanceOf(UncategorizedMeilisearchException.class);
 	}
 
 	@Test

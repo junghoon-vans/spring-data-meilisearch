@@ -89,6 +89,37 @@ class TaskStatusExceptionHttpTests {
 		}
 	}
 
+	@Test // GH-219
+	void rejectsMissingFinalTaskResponseAsAnUnconfirmedOutcome() throws Exception {
+		AtomicInteger taskReads = new AtomicInteger();
+		HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+		server.createContext("/", exchange -> {
+			try (exchange) {
+				exchange.getRequestBody().readAllBytes();
+				boolean readTask = exchange.getRequestURI().getPath().equals("/tasks/" + FIRST_TASK_UID);
+				String json = readTask
+						? taskReads.incrementAndGet() == 1 ? "{\"uid\":" + FIRST_TASK_UID + ",\"status\":\"succeeded\"}" : "null"
+						: "{\"taskUid\":" + FIRST_TASK_UID + ",\"status\":\"enqueued\"}";
+				TaskServer.respond(exchange, readTask ? 200 : 202, json);
+			}
+		});
+		server.start();
+		try {
+			ClientConfiguration configuration = ClientConfiguration.builder()
+					.connectedTo("http://127.0.0.1:" + server.getAddress().getPort()).withApiKey("test-key")
+					.withRequestTimeout(1000).withRequestInterval(1).build();
+			MeilisearchTemplate template = new MeilisearchTemplate(new MeilisearchClient(configuration));
+
+			Throwable failure = catchThrowable(
+					() -> template.save(new Movie(1, "Title", "Description", new String[] { "Drama" })));
+
+			assertThat(failure).isInstanceOf(UncategorizedMeilisearchException.class)
+					.isNotInstanceOf(TaskStatusException.class).hasMessageContaining(Integer.toString(FIRST_TASK_UID));
+		} finally {
+			server.stop(0);
+		}
+	}
+
 	private static MeilisearchTemplate newTemplate(TaskServer server, int requestTimeout, int requestInterval) {
 		ClientConfiguration configuration = ClientConfiguration.builder().connectedTo(server.hostUrl())
 				.withApiKey("test-key").withRequestTimeout(requestTimeout).withRequestInterval(requestInterval).build();
