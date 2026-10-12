@@ -97,8 +97,9 @@ class TaskStatusExceptionHttpTests {
 			Throwable failure = catchThrowable(
 					() -> template.save(new Movie(1, "Title", "Description", new String[] { "Drama" })));
 
-			assertThat(failure).isInstanceOf(UncategorizedMeilisearchException.class)
-					.isNotInstanceOf(TaskStatusException.class).hasMessageContaining(Integer.toString(FIRST_TASK_UID));
+			assertThat(failure).as("Missing completed document task remains unconfirmed")
+					.isInstanceOf(UncategorizedMeilisearchException.class).isNotInstanceOf(TaskStatusException.class)
+					.hasMessageContaining(Integer.toString(FIRST_TASK_UID));
 		}
 	}
 
@@ -109,8 +110,9 @@ class TaskStatusExceptionHttpTests {
 
 			Throwable failure = catchThrowable(() -> template.indexOps("movies").create());
 
-			assertThat(failure).isInstanceOf(UncategorizedMeilisearchException.class)
-					.isNotInstanceOf(TaskStatusException.class).hasMessageContaining(Integer.toString(FIRST_TASK_UID));
+			assertThat(failure).as("Missing completed index task remains unconfirmed")
+					.isInstanceOf(UncategorizedMeilisearchException.class).isNotInstanceOf(TaskStatusException.class)
+					.hasMessageContaining(Integer.toString(FIRST_TASK_UID));
 		}
 	}
 

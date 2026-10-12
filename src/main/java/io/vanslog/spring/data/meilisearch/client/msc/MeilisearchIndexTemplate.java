@@ -17,6 +17,7 @@ package io.vanslog.spring.data.meilisearch.client.msc;
 
 import org.springframework.util.Assert;
 
+import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.model.IndexesQuery;
 import com.meilisearch.sdk.model.Settings;
@@ -170,7 +171,7 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 
 		int taskUid = taskInfo.getTaskUid();
 
-		Task task = executor.execute(client -> {
+		Task task = executor.execute((Client client) -> {
 			Index index = client.index(indexUid);
 			index.waitForTask(taskUid, requestTimeout, requestInterval);
 			return index.getTask(taskUid);
