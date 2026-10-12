@@ -261,6 +261,7 @@ class MeilisearchTemplateIntegrationTests {
 				});
 
 	}
+
 	@Test
 	void shouldRejectFilteredDeleteTaskWithoutDetails() {
 		MeilisearchTemplate template = templateWithDeleteTask(true, TaskStatus.SUCCEEDED, null);
