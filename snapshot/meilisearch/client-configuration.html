@@ -441,6 +441,23 @@
 </div>
 </div>
 <div class="sect1">
+<h2 id="meilisearch.clients.native-boundary"><a class="anchor" href="#meilisearch.clients.native-boundary"></a>Native Client Boundary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>MeilisearchClient</code> intentionally extends the Meilisearch Java SDK <code>Client</code>. This inheritance is retained as a supported
+low-level boundary, including for 1.0; it is not a reason to make ordinary application access a thin SDK wrapper.
+Prefer <code>MeilisearchOperations</code>, <code>indexOps(&#8230;&#8203;)</code>, <code>instanceOps()</code>, and repositories for regular application work.
+See <a href="template.html#meilisearch.operations.native-access" class="xref page">Native SDK Access</a> for callback and direct-client guarantees.</p>
+</div>
+<div class="paragraph">
+<p>Inherited SDK methods, SDK model types, and native JSON-handler configuration remain coupled to the supported SDK API
+and version. They do not make the entire public API SDK-independent. A future composition change would require a concrete
+driver and an explicit migration for inherited calls, SDK <code>Client</code> assignment/injection, and subclass/override assumptions;
+it is not a prerequisite for synchronous client support or a consequence of evaluating Reactive support.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="meilisearch.clients.javaconfig"><a class="anchor" href="#meilisearch.clients.javaconfig"></a>JavaConfig</h2>
 <div class="sectionbody">
 <div class="paragraph">
