@@ -115,6 +115,73 @@ class ReactiveSearchOperationsIntegrationTests {
 		assertThat(result.getSearchHit(0).getContent().getId()).isEqualTo("book-2");
 		assertThat(result.getSearchHit(0).getQuery()).isEqualTo("hero");
 		assertThat(asMap(result.getSearchHit(0).getFacetDistribution()).get("category")).isEqualTo(Map.of("drama", 3));
+		assertThat(result.hasResponseMetadata()).isTrue();
+		assertThat(result.getResponseMetadata()).hasSize(1);
+		assertThat(result.getResponseMetadata().get(0).getPage()).isEqualTo(2);
+		assertThat(result.getResponseMetadata().get(0).getHitCount()).isEqualTo(1);
+	}
+
+	@Test
+	void shouldKeepPerQueryMetadataAndNotAggregateRepeatedTotals() {
+		reactiveOperations.saveAll(Flux.just(book("book-1", "Hero Alpha", "drama"), book("book-2", "Hero Bravo", "action"),
+				book("book-3", "Hero Charlie", "drama"))).collectList().block(BLOCK_TIMEOUT);
+		List<BaseQuery> queries = List.of(
+				BasicQuery.builder().withQ("hero").withFacets("category", "rating").withPageable(PageRequest.of(0, 1)).build(),
+				BasicQuery.builder().withQ("hero").withFacets("category", "rating").withPageable(PageRequest.of(1, 1)).build(),
+				BasicQuery.builder().withQ("hero").withFacets("category", "rating").withPageable(PageRequest.of(5, 1)).build());
+
+		SearchHits<SearchBook> result = reactiveOperations.multiSearch(queries, SearchBook.class).block(BLOCK_TIMEOUT);
+		assertThat(result.hasResponseMetadata()).isTrue();
+		List<SearchResponseMetadata> responses = result.getResponseMetadata();
+
+		assertThat(responses).hasSize(3);
+		assertThat(responses).extracting(SearchResponseMetadata::getQueryIndex).containsExactly(0, 1, 2);
+		assertThat(responses).extracting(SearchResponseMetadata::getFirstHitIndex).containsExactly(0, 1, 2);
+		assertThat(responses).extracting(SearchResponseMetadata::getHitCount).containsExactly(1, 1, 0);
+		assertThat(responses).extracting(SearchResponseMetadata::getTotalHits).containsExactly(3L, 3L, 3L);
+		assertThat(responses).extracting(SearchResponseMetadata::getTotalHitsRelation)
+				.containsOnly(SearchResponseTotalHitsRelation.EQUAL_TO);
+		assertThat(responses).extracting(SearchResponseMetadata::getProcessingTimeMs).doesNotContainNull();
+		assertThat(responses).extracting(SearchResponseMetadata::getPage).containsExactly(1, 2, 6);
+		assertThat(responses).extracting(SearchResponseMetadata::getTotalPages).containsOnly(3);
+		assertThat(responses.get(2).getFacetStats()).containsKey("rating");
+		assertThat(responses).extracting(SearchResponseMetadata::getHitsPerPage).containsOnly(1);
+		assertThat(responses.get(2).getFacetDistribution()).containsEntry("category", Map.of("drama", 2, "action", 1));
+		assertThat(result.getSearchHits()).hasSize(2);
+		assertThat(result.getTotalHits()).isEqualTo(2);
+		assertThat(result.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
+	}
+
+	@Test
+	void shouldDistinguishAnEmptyMultiSearchResponseFromUncapturedMetadata() {
+		SearchHits<SearchBook> result = reactiveOperations.multiSearch(List.<BasicQuery> of(), SearchBook.class)
+				.block(BLOCK_TIMEOUT);
+
+		assertThat(result.getSearchHits()).isEmpty();
+		assertThat(result.getResponseMetadata()).isEmpty();
+		assertThat(result.hasResponseMetadata()).isTrue();
+	}
+
+	@Test
+	void shouldExposeRequestedHitMetadataWithoutChangingMappedContent() {
+		reactiveOperations.save(book("book-1", "Hero Alpha", "drama")).block(BLOCK_TIMEOUT);
+
+		SearchHit<SearchBook> plainHit = reactiveOperations.search(new BasicQuery("hero"), SearchBook.class)
+				.block(BLOCK_TIMEOUT).getSearchHit(0);
+		SearchHit<SearchBook> detailedHit = reactiveOperations
+				.search(BasicQuery.builder().withQ("hero").withAttributesToHighlight("title").withShowMatchesPosition(true)
+						.withShowRankingScore(true).withShowRankingScoreDetails(true).build(), SearchBook.class)
+				.block(BLOCK_TIMEOUT).getSearchHit(0);
+
+		assertThat(plainHit.getFormattedFields()).isNull();
+		assertThat(plainHit.getMatchesPosition()).isNull();
+		assertThat(plainHit.getRankingScore()).isNull();
+		assertThat(plainHit.getRankingScoreDetails()).isNull();
+		assertThat(detailedHit.getContent().getTitle()).isEqualTo("Hero Alpha");
+		assertThat(detailedHit.getFormattedFields()).containsKey("title");
+		assertThat(detailedHit.getMatchesPosition()).containsKey("title");
+		assertThat(detailedHit.getRankingScore()).isNotNull();
+		assertThat(detailedHit.getRankingScoreDetails()).isNotNull();
 	}
 
 	@Test
@@ -178,6 +245,8 @@ class ReactiveSearchOperationsIntegrationTests {
 				.block(BLOCK_TIMEOUT);
 
 		assertThat(result).isNotNull();
+		assertThat(result.hasResponseMetadata()).isTrue();
+		assertThat(result.getResponseMetadata()).hasSize(1);
 		assertThat(result.getSearchHits()).hasSize(2);
 		assertThat(result.getSearchHit(0).getFederation()).isNotNull();
 		assertThat(result.getSearchHit(0).getFederation().getIndexUid()).isEqualTo(COMICS_INDEX);
@@ -197,6 +266,17 @@ class ReactiveSearchOperationsIntegrationTests {
 		assertThat(asMap(mergedResult.getSearchHit(0).getFacetDistribution()).get("category"))
 				.isEqualTo(Map.of("drama", 1, "comics", 1));
 
+		Federation emptyWindow = new Federation(10, 100, federation.facetsByIndex(), null);
+		SearchHits<SearchBook> emptyResult = reactiveOperations.multiSearch(queries, emptyWindow, SearchBook.class)
+				.block(BLOCK_TIMEOUT);
+		assertThat(emptyResult.getSearchHits()).isEmpty();
+		assertThat(emptyResult.hasResponseMetadata()).isTrue();
+		SearchResponseMetadata emptyResponse = emptyResult.getResponseMetadata().get(0);
+		Map<?, ?> emptyFacetsByIndex = asMap(emptyResponse.getFacetsByIndex());
+		assertThat(asMap(asMap(emptyFacetsByIndex.get(BOOKS_INDEX)).get("distribution")).get("category"))
+				.isEqualTo(Map.of("drama", 1));
+		assertThat(asMap(asMap(emptyFacetsByIndex.get(COMICS_INDEX)).get("distribution")).get("category"))
+				.isEqualTo(Map.of("comics", 1));
 	}
 
 	@Test
@@ -205,15 +285,18 @@ class ReactiveSearchOperationsIntegrationTests {
 				Flux.just(book("book-1", "One", "drama"), book("book-2", "Two", "drama"), book("book-3", "Three", "action")))
 				.collectList().block(BLOCK_TIMEOUT);
 
-		SearchHits<FacetHit> result = reactiveOperations.facetSearch(new FacetQuery("category"), SearchBook.class)
-				.block(BLOCK_TIMEOUT);
+		FacetQuery query = new FacetQuery(FacetQuery.builder().withFacetName("category").withFacetQuery("dra"));
+		SearchHits<FacetHit> result = reactiveOperations.facetSearch(query, SearchBook.class).block(BLOCK_TIMEOUT);
 
 		assertThat(result).isNotNull();
-		assertThat(result.getSearchHits()).hasSize(2);
-		assertThat(result.getSearchHits()).extracting(hit -> hit.getContent().value()).containsExactlyInAnyOrder("drama",
-				"action");
+		assertThat(result.getSearchHits()).extracting(hit -> hit.getContent().value()).containsExactly("drama");
 		assertThat(result.getSearchHits()).filteredOn(hit -> hit.getContent().value().equals("drama"))
 				.extracting(hit -> hit.getContent().count()).containsExactly(2);
+		assertThat(result.getResponseMetadata()).hasSize(1);
+		assertThat(result.getResponseMetadata().get(0).getQuery()).isEqualTo("dra");
+		assertThat(result.getResponseMetadata().get(0).getHitCount()).isEqualTo(1);
+		assertThat(result.hasResponseMetadata()).isTrue();
+
 	}
 
 	@Test
@@ -222,12 +305,24 @@ class ReactiveSearchOperationsIntegrationTests {
 				vectorDocument("near", "Near", List.of(0.9, 0.1, 0.0)), vectorDocument("far", "Far", List.of(0.2, 0.8, 0.0))))
 				.collectList().block(BLOCK_TIMEOUT);
 
-		SearchHits<UserVectorDocument> result = reactiveOperations
-				.similarSearch(new SimilarQuery("reference", "manual"), UserVectorDocument.class).block(BLOCK_TIMEOUT);
+		SimilarQuery query = new SimilarQuery(SimilarQuery.builder().withDocumentId("reference").withEmbedder("manual")
+				.withShowRankingScore(true).withShowRankingScoreDetails(true));
+		SearchHits<UserVectorDocument> result = reactiveOperations.similarSearch(query, UserVectorDocument.class)
+				.block(BLOCK_TIMEOUT);
 
 		assertThat(result).isNotNull();
 		assertThat(result.getSearchHits()).extracting(hit -> hit.getContent().getId()).contains("near", "far");
 		assertThat(result.getSearchHit(0).getContent().getId()).isEqualTo("near");
+		assertThat(result.getSearchHit(0).getRankingScore()).isNotNull();
+		assertThat(result.getSearchHit(0).getRankingScoreDetails()).isNotNull();
+		assertThat(result.getResponseMetadata()).hasSize(1);
+		assertThat(result.getResponseMetadata().get(0).getEstimatedTotalHits()).isNotNull();
+		assertThat(result.getResponseMetadata().get(0).getTotalHits()).isNull();
+		assertThat(result.getResponseMetadata().get(0).getTotalHitsRelation())
+				.isEqualTo(SearchResponseTotalHitsRelation.ESTIMATED);
+		assertThat(result.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
+		assertThat(result.hasResponseMetadata()).isTrue();
+
 	}
 
 	private static SearchBook book(String id, String title, String category) {
@@ -269,13 +364,14 @@ class ReactiveSearchOperationsIntegrationTests {
 		}
 	}
 
-	@Setting(filterableAttributes = { "category" }, sortableAttributes = { "title" })
+	@Setting(filterableAttributes = { "category", "rating" }, sortableAttributes = { "title" })
 	@Document(indexUid = BOOKS_INDEX)
 	static class SearchBook {
 
 		@Id private String id;
 		private String title;
 		private String category;
+		private int rating;
 
 		public SearchBook() {}
 
@@ -283,6 +379,7 @@ class ReactiveSearchOperationsIntegrationTests {
 			this.id = id;
 			this.title = title;
 			this.category = category;
+			this.rating = 7;
 		}
 
 		public String getId() {
@@ -307,6 +404,14 @@ class ReactiveSearchOperationsIntegrationTests {
 
 		public void setCategory(String category) {
 			this.category = category;
+		}
+
+		public int getRating() {
+			return rating;
+		}
+
+		public void setRating(int rating) {
+			this.rating = rating;
 		}
 	}
 

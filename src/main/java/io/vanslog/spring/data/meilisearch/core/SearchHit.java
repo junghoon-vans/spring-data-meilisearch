@@ -34,15 +34,23 @@ public class SearchHit<T> {
 	@Nullable private final Map<String, FacetRating> facetStats;
 	@Nullable private final Object facetDistribution;
 	@Nullable private final FederationResponse federation;
+	@Nullable private final SearchHitMetadata metadata;
 
 	public SearchHit(T content, int processingTimeMs, String query, @Nullable Map<String, FacetRating> facetStats,
 			@Nullable Object facetDistribution, @Nullable FederationResponse federation) {
+		this(content, processingTimeMs, query, facetStats, facetDistribution, federation, null);
+	}
+
+	public SearchHit(T content, int processingTimeMs, String query, @Nullable Map<String, FacetRating> facetStats,
+			@Nullable Object facetDistribution, @Nullable FederationResponse federation,
+			@Nullable SearchHitMetadata metadata) {
 		this.content = content;
 		this.processingTimeMs = processingTimeMs;
 		this.query = query;
 		this.facetStats = facetStats;
 		this.facetDistribution = facetDistribution;
 		this.federation = federation;
+		this.metadata = metadata;
 	}
 
 	public SearchHit(T content, Searchable result) {
@@ -89,4 +97,37 @@ public class SearchHit<T> {
 	public FederationResponse getFederation() {
 		return federation;
 	}
+
+	/**
+	 * @return formatted fields returned for this hit, or {@literal null} when not requested or returned
+	 */
+	@Nullable
+	public Map<String, Object> getFormattedFields() {
+		return metadata == null ? null : metadata.getFormattedFields();
+	}
+
+	/**
+	 * @return match positions by field, or {@literal null} when not requested or returned
+	 */
+	@Nullable
+	public Map<String, Object> getMatchesPosition() {
+		return metadata == null ? null : metadata.getMatchesPosition();
+	}
+
+	/**
+	 * @return the Meilisearch ranking score, or {@literal null} when not requested or returned
+	 */
+	@Nullable
+	public Double getRankingScore() {
+		return metadata == null ? null : metadata.getRankingScore();
+	}
+
+	/**
+	 * @return ranking score details, or {@literal null} when not requested or returned
+	 */
+	@Nullable
+	public Map<String, Object> getRankingScoreDetails() {
+		return metadata == null ? null : metadata.getRankingScoreDetails();
+	}
+
 }

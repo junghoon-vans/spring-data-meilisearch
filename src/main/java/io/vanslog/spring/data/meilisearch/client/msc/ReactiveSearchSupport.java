@@ -24,6 +24,7 @@ import java.util.Map;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -36,8 +37,11 @@ import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.core.FacetHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
+import io.vanslog.spring.data.meilisearch.core.SearchHitMetadata;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
+import io.vanslog.spring.data.meilisearch.core.SearchResponseMetadata;
+import io.vanslog.spring.data.meilisearch.core.TotalHitsRelation;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.federation.Federation;
 import io.vanslog.spring.data.meilisearch.core.federation.FederationResponse;
@@ -53,6 +57,8 @@ import reactor.core.publisher.Mono;
  * @author Junghoon Ban
  */
 final class ReactiveSearchSupport {
+
+	private static final TypeReference<LinkedHashMap<String, Object>> METADATA_MAP_TYPE = new TypeReference<>() {};
 
 	private final ReactiveHttpTransport transport;
 	private final ObjectMapper objectMapper;
@@ -81,8 +87,7 @@ final class ReactiveSearchSupport {
 			String indexUid = getIndexUidFor(clazz);
 			String path = indexPath(indexUid, "search");
 			String body = toSearchJson(requestConverter.searchRequest(query)).toString();
-			return transport.request("POST", path, body)
-					.map(response -> responseConverter.mapHits(MeilisearchSearchResult.from(response, objectMapper), clazz));
+			return transport.request("POST", path, body).map(response -> mapSearch(response, clazz));
 		});
 	}
 
@@ -110,8 +115,7 @@ final class ReactiveSearchSupport {
 		return Mono.defer(() -> {
 			String path = indexPath(getIndexUidFor(clazz), "facet-search");
 			String body = toSearchJson(requestConverter.searchRequest(query)).toString();
-			return transport.request("POST", path, body).map(response -> responseConverter
-					.mapHits(MeilisearchFacetSearchResult.from(response, objectMapper), FacetHit.class));
+			return transport.request("POST", path, body).map(this::mapFacetSearch);
 		});
 	}
 
@@ -119,9 +123,18 @@ final class ReactiveSearchSupport {
 		return Mono.defer(() -> {
 			String path = indexPath(getIndexUidFor(clazz), "similar");
 			String body = toSearchJson(requestConverter.similarSearchRequest(query)).toString();
-			return transport.request("POST", path, body).map(response -> responseConverter
-					.mapResult(objectMapper.convertValue(response, SimilarDocumentsResults.class), clazz));
+			return transport.request("POST", path, body).map(response -> mapSimilarSearch(response, clazz));
 		});
+	}
+
+	private <T> SearchHits<T> mapSearch(JsonNode response, Class<T> clazz) {
+
+		MeilisearchSearchResult result = MeilisearchSearchResult.from(response, objectMapper);
+		List<SearchHit<T>> hits = mapHitList(result, clazz, result.getFacetDistribution(), false);
+		TotalHitsRelation relation = result.hasTotalHits() ? TotalHitsRelation.EQUAL_TO : TotalHitsRelation.OFF;
+		SearchResponseMetadata metadata = readResponseMetadata(response, 0, 0, hits.size());
+		return new SearchHitsImpl<>(Duration.ofMillis(result.getProcessingTimeMs()), hits, result.getTotalHits(), relation,
+				List.of(metadata));
 	}
 
 	private <T> SearchHits<T> mapMultiSearchResults(JsonNode response, Class<T> clazz) {
@@ -132,32 +145,140 @@ final class ReactiveSearchSupport {
 		}
 
 		List<SearchHit<T>> hits = new ArrayList<>();
+		List<SearchResponseMetadata> responseMetadata = new ArrayList<>(results.size());
 		int maxProcessingTime = 0;
+		int queryIndex = 0;
 		for (JsonNode resultJson : results) {
 			MeilisearchSearchResult result = MeilisearchSearchResult.from(resultJson, objectMapper);
-			hits.addAll(responseConverter.mapHitList(result, clazz));
+			int firstHitIndex = hits.size();
+			List<SearchHit<T>> queryHits = mapHitList(result, clazz, result.getFacetDistribution(), false);
+			hits.addAll(queryHits);
+			responseMetadata.add(readResponseMetadata(resultJson, queryIndex++, firstHitIndex, queryHits.size()));
 			maxProcessingTime = Math.max(maxProcessingTime, result.getProcessingTimeMs());
 		}
 
-		return new SearchHitsImpl<>(Duration.ofMillis(maxProcessingTime), hits);
+		return new SearchHitsImpl<>(Duration.ofMillis(maxProcessingTime), hits, hits.size(), TotalHitsRelation.OFF,
+				responseMetadata);
 	}
 
 	private <T> SearchHits<T> mapFederatedSearch(JsonNode response, Class<T> clazz) {
 
 		MeilisearchSearchResult result = MeilisearchSearchResult.from(response, objectMapper);
 		Object facetDistribution = readFederatedFacetDistribution(response, result.getFacetDistribution());
-		List<SearchHit<T>> hits = new ArrayList<>(result.getHits().size());
+		List<SearchHit<T>> hits = mapHitList(result, clazz, facetDistribution, true);
+		SearchResponseMetadata metadata = readResponseMetadata(response, 0, 0, hits.size());
+		return new SearchHitsImpl<>(Duration.ofMillis(result.getProcessingTimeMs()), hits, hits.size(),
+				TotalHitsRelation.OFF, List.of(metadata));
+	}
 
-		for (Map<String, Object> hit : result.getHits()) {
-			Map<String, Object> source = new LinkedHashMap<>(hit);
-			Object federationValue = source.remove("_federation");
-			FederationResponse federation = federationValue == null ? null
-					: objectMapper.convertValue(federationValue, FederationResponse.class);
-			hits.add(new SearchHit<>(readHit(source, clazz), result.getProcessingTimeMs(), result.getQuery(),
-					result.getFacetStats(), facetDistribution, federation));
+	private SearchHits<FacetHit> mapFacetSearch(JsonNode response) {
+
+		SearchHits<FacetHit> mapped = responseConverter.mapHits(MeilisearchFacetSearchResult.from(response, objectMapper),
+				FacetHit.class);
+		SearchResponseMetadata metadata = readResponseMetadata(response, 0, 0, mapped.getSearchHits().size());
+		return new SearchHitsImpl<>(mapped.getExecutionDuration(), mapped.getSearchHits(), mapped.getTotalHits(),
+				mapped.getTotalHitsRelation(), List.of(metadata));
+	}
+
+	private <T> SearchHits<T> mapSimilarSearch(JsonNode response, Class<T> clazz) {
+
+		SimilarDocumentsResults result = objectMapper.convertValue(response, SimilarDocumentsResults.class);
+		List<SearchHit<T>> hits = new ArrayList<>(result.getHits().size());
+		for (Map<String, Object> rawHit : result.getHits()) {
+			SearchHitMetadata metadata = readHitMetadata(rawHit);
+			hits.add(new SearchHit<>(readHit(rawHit, clazz), result.getProcessingTimeMs(), "", null, null, null, metadata));
 		}
 
-		return new SearchHitsImpl<>(Duration.ofMillis(result.getProcessingTimeMs()), hits);
+		SearchResponseMetadata metadata = readResponseMetadata(response, 0, 0, hits.size());
+		return new SearchHitsImpl<>(Duration.ofMillis(result.getProcessingTimeMs()), hits, hits.size(),
+				TotalHitsRelation.OFF, List.of(metadata));
+	}
+
+	private <T> List<SearchHit<T>> mapHitList(MeilisearchSearchResult result, Class<T> clazz,
+			@Nullable Object facetDistribution, boolean federated) {
+
+		List<SearchHit<T>> hits = new ArrayList<>(result.getHits().size());
+		for (Map<String, Object> rawHit : result.getHits()) {
+			Map<String, Object> source = federated ? new LinkedHashMap<>(rawHit) : rawHit;
+			Object federationValue = federated ? source.remove("_federation") : null;
+			FederationResponse federation = federationValue == null ? null
+					: objectMapper.convertValue(federationValue, FederationResponse.class);
+			SearchHitMetadata metadata = readHitMetadata(source);
+			hits.add(new SearchHit<>(readHit(source, clazz), result.getProcessingTimeMs(), result.getQuery(),
+					result.getFacetStats(), facetDistribution, federation, metadata));
+		}
+		return hits;
+	}
+
+	private SearchResponseMetadata readResponseMetadata(JsonNode response, int queryIndex, int firstHitIndex,
+			int hitCount) {
+
+		return new SearchResponseMetadata(queryIndex, firstHitIndex, hitCount, readInteger(response, "processingTimeMs"),
+				readQuery(response), readText(response, "indexUid"), readLong(response, "totalHits"),
+				readLong(response, "estimatedTotalHits"), readInteger(response, "page"), readInteger(response, "hitsPerPage"),
+				readInteger(response, "totalPages"), readInteger(response, "offset"), readInteger(response, "limit"),
+				readObject(response, "facetDistribution"), readObject(response, "facetStats"),
+				readObject(response, "facetsByIndex"));
+	}
+
+	private SearchHitMetadata readHitMetadata(Map<String, Object> source) {
+
+		Map<String, Object> formattedFields = readMap(source.get("_formatted"));
+		Map<String, Object> matchesPosition = readMap(source.get("_matchesPosition"));
+		Object rankingScoreValue = source.get("_rankingScore");
+		Double rankingScore = rankingScoreValue instanceof Number number ? number.doubleValue() : null;
+		Map<String, Object> rankingScoreDetails = readMap(source.get("_rankingScoreDetails"));
+		if (formattedFields == null && matchesPosition == null && rankingScore == null && rankingScoreDetails == null) {
+			return null;
+		}
+		return new SearchHitMetadata(formattedFields, matchesPosition, rankingScore, rankingScoreDetails);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private Map<String, Object> readMap(@Nullable Object value) {
+
+		if (!(value instanceof Map<?, ?> source)) {
+			return null;
+		}
+
+		// These maps come from JSON object fields, whose keys are strings; the metadata constructor snapshots them.
+		return (Map<String, Object>) source;
+	}
+
+	@Nullable
+	private Map<String, Object> readObject(JsonNode response, String field) {
+
+		JsonNode value = response.get(field);
+		return value == null || !value.isObject() ? null : objectMapper.convertValue(value, METADATA_MAP_TYPE);
+	}
+
+	@Nullable
+	private Integer readInteger(JsonNode response, String field) {
+
+		JsonNode value = response.get(field);
+		return value == null || !value.canConvertToInt() ? null : value.intValue();
+	}
+
+	@Nullable
+	private Long readLong(JsonNode response, String field) {
+
+		JsonNode value = response.get(field);
+		return value == null || !value.canConvertToLong() ? null : value.longValue();
+	}
+
+	@Nullable
+	private String readQuery(JsonNode response) {
+
+		String query = readText(response, "query");
+		return query != null ? query : readText(response, "facetQuery");
+	}
+
+	@Nullable
+	private String readText(JsonNode response, String field) {
+
+		JsonNode value = response.get(field);
+		return value == null || !value.isTextual() ? null : value.textValue();
 	}
 
 	@Nullable
