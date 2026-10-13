@@ -17,8 +17,21 @@ package io.vanslog.spring.data.meilisearch.client.msc;
 
 import io.vanslog.spring.data.meilisearch.core.MeilisearchCallback;
 
+import org.springframework.lang.Nullable;
+
+/**
+ * Internal boundary for executing SDK client callbacks.
+ *
+ * @author Junghoon Ban
+ */
 @FunctionalInterface
 interface MeilisearchClientExecutor {
 
+	/**
+	 * Execute a callback using the configured client.
+	 *
+	 * @return the callback result, which may be {@literal null}.
+	 */
+	@Nullable
 	<T> T execute(MeilisearchCallback<T> callback);
 }
