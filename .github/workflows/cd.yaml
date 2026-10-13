@@ -22,25 +22,8 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
 
-      - name: Scope Central Publishing credentials to Sonatype
-        shell: python
-        run: |
-          from pathlib import Path
-          import xml.etree.ElementTree as ET
-
-          settings_path = Path.home() / ".m2" / "settings.xml"
-          namespace = "http://maven.apache.org/SETTINGS/1.0.0"
-          ET.register_namespace("", namespace)
-          settings = ET.parse(settings_path)
-          server = settings.find("m:servers/m:server[m:id='central']", {"m": namespace})
-          if server is None:
-              raise RuntimeError("Central Publishing server is missing from Maven settings")
-          origins = ET.SubElement(server, f"{{{namespace}}}repositoryOrigins")
-          ET.SubElement(origins, f"{{{namespace}}}repositoryOrigin").text = "https://central.sonatype.com"
-          settings.write(settings_path, encoding="utf-8", xml_declaration=True)
-
       - name: Deploy to Central Publishing
-        run: mvn deploy -DskipTests -P central
+        run: ./mvnw deploy -DskipTests -P central
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}

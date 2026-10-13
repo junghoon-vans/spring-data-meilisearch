@@ -103,8 +103,8 @@ _Also see link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] if you wish to submit pull r
 === Continuous deployment
 
 Pushes to `main` and `develop` run `.github/workflows/cd.yaml`.
-The workflow explicitly allows `https://central.sonatype.com` in the generated `central` server's `repositoryOrigins` so Maven's origin-scoped authentication can publish snapshots.
-Preserve this allowance when changing the Maven or credentials setup; do not disable credential origin checks.
+The workflow uses the bundled Maven Wrapper, matching the Maven version used by CI and local builds instead of the changing Maven installation on the hosted runner.
+Verify publishing compatibility when changing the wrapper's Maven version.
 
 === Building reference documentation
 
