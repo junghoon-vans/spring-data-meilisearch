@@ -78,6 +78,7 @@ A consumer's `collectList()` still accumulates all emitted results.
 == Query Methods
 
 Derived and declared queries share the synchronous xref:repositories/repository-queries.adoc[query grammar, field mapping, filter binding, and lookup precedence].
+Declared-query parameter types inherited from a generic repository are resolved against the concrete repository interface, using the same binding rules as synchronous repositories.
 Reactive execution does not invoke the synchronous query executor.
 For example, configure `genre` and `title` as filterable and `title` as sortable on the mapped `Movie` type:
 

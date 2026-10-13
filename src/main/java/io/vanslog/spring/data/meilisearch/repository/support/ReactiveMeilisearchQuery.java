@@ -92,8 +92,8 @@ final class ReactiveMeilisearchQuery implements RepositoryQuery {
 		if (declared) {
 			this.tree = null;
 			this.returnShape = MeilisearchReactiveQueryReturnShape.resolveFinder(method, metadata);
-			this.binding = new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata.getRepositoryInterface(), filter,
-					q);
+			this.binding = new MeilisearchDeclaredQueryBinding(method, queryMethod, metadata.getRepositoryInterface(),
+					filter, q);
 		} else {
 			this.tree = planner.parseDerivedQuery();
 			this.returnShape = MeilisearchReactiveQueryReturnShape.resolve(tree, method, metadata);

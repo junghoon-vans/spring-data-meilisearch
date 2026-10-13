@@ -23,7 +23,7 @@ jobs:
           gpg-passphrase: GPG_PASSPHRASE
 
       - name: Deploy to Central Publishing
-        run: mvn deploy -DskipTests -P central
+        run: ./mvnw deploy -DskipTests -P central
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
