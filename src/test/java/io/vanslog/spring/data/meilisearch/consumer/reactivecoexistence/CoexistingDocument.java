@@ -19,9 +19,9 @@ import org.springframework.data.annotation.Id;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
 
-/** Shared domain model used by both repository implementations. @author Junghoon Ban */
+/** Shared domain model used by blocking, reactive, and coroutine repositories. @author Junghoon Ban */
 @Document(indexUid = "gh215-reactive-coexistence")
-@Setting(filterableAttributes = { "category" }, sortableAttributes = { "title" })
+@Setting(filterableAttributes = { "category", "title" }, sortableAttributes = { "title" })
 public class CoexistingDocument {
 
 	@Id private String id;

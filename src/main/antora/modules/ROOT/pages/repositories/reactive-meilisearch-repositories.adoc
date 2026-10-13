@@ -144,3 +144,91 @@ Previously emitted hits are not withdrawn when a later page fails.
 Search pages and document traversal are offset-based, not snapshots: concurrent writes can cause omissions or duplicates even when the total stays unchanged.
 Cancellation stops further local traversal and attempts to cancel an in-flight exchange.
 For richer search metadata, facets, multi-search, or similar-document search, use `ReactiveMeilisearchOperations` directly.
+
+[[meilisearch.repositories.coroutines]]
+== Coroutine Repositories
+
+Kotlin applications can extend `CoroutineMeilisearchRepository<T, ID>`, a separate contract built on Commons'
+`CoroutineCrudRepository` and `CoroutineSortingRepository`.
+Commons adapts its `suspend` and `Flow` methods to the same non-blocking reactive repository implementation;
+there is no blocking SDK call, worker-thread offload, or separate coroutine query executor.
+
+Use `@EnableReactiveMeilisearchRepositories` and the same reactive operations bean.
+Blocking, Reactor, and coroutine interfaces can coexist in one scanned package, but must remain separate interfaces.
+No coroutine XML namespace or Spring Boot auto-configuration is provided.
+
+The coroutine bridge dependencies are optional so Java applications and reified `Mono`/`Flux` extensions do not require them.
+Add Kotlin reflection aligned with the Kotlin runtime and `kotlinx-coroutines-reactor`, whose transitive dependencies
+provide `kotlinx-coroutines-core` and `kotlinx-coroutines-reactive`.
+The module uses Kotlin 2.2.21 and the managed coroutines 1.8.1 line:
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.jetbrains.kotlin</groupId>
+    <artifactId>kotlin-reflect</artifactId>
+    <version>2.2.21</version>
+</dependency>
+<dependency>
+    <groupId>org.jetbrains.kotlinx</groupId>
+    <artifactId>kotlinx-coroutines-reactor</artifactId>
+    <version>1.8.1</version>
+</dependency>
+----
+
+Configure `title` and `genre` as filterable and `title` as sortable, as in the Reactor example above:
+
+[source,kotlin]
+----
+import io.vanslog.spring.data.meilisearch.repository.CoroutineMeilisearchRepository
+import io.vanslog.spring.data.meilisearch.repository.Query
+import kotlinx.coroutines.flow.Flow
+import org.springframework.data.domain.Pageable
+
+interface CoroutineMovieRepository : CoroutineMeilisearchRepository<Movie, String> {
+    suspend fun findByTitle(title: String): Movie?
+    suspend fun countByGenre(genre: String): Long
+    suspend fun existsByTitle(title: String): Boolean
+    suspend fun deleteByGenre(genre: String): Long
+    suspend fun deleteByTitle(title: String)
+    fun findByGenre(genre: String, pageable: Pageable): Flow<Movie>
+
+    @Query(filter = "genre = ?0", q = "?1")
+    fun searchGenre(genre: String, text: String, pageable: Pageable): Flow<Movie>
+}
+----
+
+For Kotlin configuration, extend `ReactiveMeilisearchConfiguration`, override `reactiveClientConfiguration()`,
+and select `basePackageClasses = [CoroutineMovieRepository::class]` on `@EnableReactiveMeilisearchRepositories`.
+Use `@Configuration(proxyBeanMethods = false)` for a final Kotlin configuration class.
+
+[cols="1,3",options="header"]
+|===
+|Shape |Contract
+|`suspend ...: T?` |Single domain finder; no match returns `null`; multiple matches retain `IncorrectResultSizeDataAccessException`.
+|`suspend ...: T` |Non-null single domain finder; use the nullable form when absence is expected.
+|`Flow<T>` |Domain collection finder or CRUD traversal; finite `Pageable` selects a search window.
+|`suspend ...: Long` |Derived count or delete-count, with deletion counts taken from the succeeded task.
+|`suspend ...: Boolean` |Derived existence check.
+|`suspend ...: Unit` |Derived deletion that completes only after its task succeeds.
+|===
+
+Implicit continuation parameters are not filter placeholders; `?0`, `?1`, and special query parameters retain their
+declared Kotlin argument positions.
+Annotation, named-query, and derived-query precedence is unchanged.
+Custom query methods returning `List`, `Page`, nested wrappers, projections, or unresolved method type variables
+are rejected at bootstrap; plain blocking methods cannot be mixed into a coroutine repository.
+Custom collection finders are non-suspending `Flow<T>` functions; suspend collection-returning queries are not supported.
+Declared and named searches require domain single values or `Flow<T>`, not count/delete projections.
+
+Suspend calls subscribe when invoked; `Flow` results fetch when collected.
+Bulk writes and traversal retain the reactive implementation's bounded batches/pages and one-batch/page prefetch;
+an application's `toList()` can still accumulate the entire result.
+Task success, terminal failure, observation timeout, and unknown outcomes retain the distinctions documented above.
+Cancelling a coroutine or its Flow collection cancels the underlying subscription, stops local observation,
+and attempts to cancel an in-flight exchange; it does not cancel an accepted server task or roll back completed work.
+Collecting a write Flow again can submit the write again.
+
+Repositories return domain entities, not search metadata.
+Use xref:meilisearch/reactive-template.adoc#meilisearch.reactive-operations.kotlin[reified reactive operations]
+for `Mono<SearchHits<T>>`; a coroutine caller can use `awaitSingle()` from `kotlinx-coroutines-reactor` when needed.

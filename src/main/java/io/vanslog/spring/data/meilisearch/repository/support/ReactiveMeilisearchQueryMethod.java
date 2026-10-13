@@ -24,8 +24,9 @@ import org.springframework.data.repository.query.QueryMethod;
 import reactor.core.publisher.Flux;
 
 /**
- * Reactor query metadata whose Pageable parameter selects a streamed window rather than a blocking Page wrapper.
- * Concrete Mono/Flux payloads and supported special parameters are validated by the reactive query executor.
+ * Reactor and coroutine query metadata whose Pageable parameter selects a streamed window rather than a blocking Page
+ * wrapper. Concrete Mono/Flux/Flow payloads and supported special parameters are validated by the reactive query
+ * executor.
  *
  * @author Junghoon Ban
  */
@@ -35,7 +36,7 @@ final class ReactiveMeilisearchQueryMethod extends QueryMethod {
 
 	ReactiveMeilisearchQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory) {
 		super(method, metadata, factory);
-		this.collection = method.getReturnType() == Flux.class;
+		this.collection = method.getReturnType() == Flux.class || CoroutineQuerySupport.isFlow(method.getReturnType());
 	}
 
 	@Override

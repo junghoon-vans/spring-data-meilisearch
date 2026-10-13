@@ -94,6 +94,19 @@
             <version>${kotlin-stdlib}</version>
         </dependency>
 
+        <!-- Optional Kotlin coroutine repository bridge -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin-stdlib}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-reactor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Jackson JSON Mapper -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

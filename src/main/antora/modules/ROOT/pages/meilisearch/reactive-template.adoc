@@ -6,7 +6,7 @@
 It does not execute blocking SDK requests on a worker scheduler.
 Existing synchronous operations remain separate and unchanged.
 
-This API provides document and search operations. xref:repositories/reactive-meilisearch-repositories.adoc[Reactive Repositories] build on it with explicit repository enablement; index administration and coroutine extensions are not provided.
+This API provides document and search operations. xref:repositories/reactive-meilisearch-repositories.adoc[Reactive Repositories] build on it with explicit repository enablement, including a separate Kotlin coroutine contract. Index administration is not provided.
 Existing query, result, and mapping types are shared with the synchronous API; the library still depends on the Meilisearch Java SDK.
 
 [[meilisearch.reactive-operations.configuration]]
@@ -163,3 +163,36 @@ It does not cancel an accepted Meilisearch task or roll back completed work.
 A canceled or timed-out write can therefore have an unknown server outcome.
 The template does not automatically retry requests: applying Reactor `retry` or re-subscribing can repeat a submitted write.
 Use the reported task UID to investigate an accepted task rather than assuming it failed.
+
+[[meilisearch.reactive-operations.kotlin]]
+== Reified Kotlin Extensions
+
+Kotlin extensions for `ReactiveDocumentOperations`, `ReactiveSearchOperations`, and `ReactiveMeilisearchOperations`
+replace explicit entity `Class` arguments with reified type parameters:
+
+[source,kotlin]
+----
+import io.vanslog.spring.data.meilisearch.core.ReactiveMeilisearchOperations
+import io.vanslog.spring.data.meilisearch.core.applySettings
+import io.vanslog.spring.data.meilisearch.core.get
+import io.vanslog.spring.data.meilisearch.core.search
+import io.vanslog.spring.data.meilisearch.core.SearchHits
+import io.vanslog.spring.data.meilisearch.core.query.BaseQuery
+import reactor.core.publisher.Mono
+
+fun movieQueries(operations: ReactiveMeilisearchOperations, query: BaseQuery) {
+    val movie: Mono<Movie> = operations.get<Movie>("movie-1")
+    val hits: Mono<SearchHits<Movie>> = operations.search<Movie>(query)
+    val initializedMovie = operations.applySettings<Movie>().then(movie)
+}
+----
+
+The receiver selects the blocking or reactive extension overload.
+These extensions retain `Mono`/`Flux`, cold subscription, empty-document, task-completion, and cancellation semantics;
+they do not turn operations into `suspend` functions or buffer a `Flux` into a list.
+Search results still include totals, facets, per-query metadata, and federation details.
+`save`, `saveAll`, and entity-based `delete` already infer the entity type and need no reified counterpart.
+
+The extensions require no coroutine bridge or Kotlin reflection dependency.
+For a separate `suspend`/`Flow` repository API, see
+xref:repositories/reactive-meilisearch-repositories.adoc#meilisearch.repositories.coroutines[Coroutine Repositories].

@@ -298,8 +298,10 @@ val index = operations.indexOps<Movie>()
 operations.applySettings<Movie>()
 ----
 
-These extensions are thin wrappers over the Java contracts. They do not change blocking execution behavior or add
-reactive or coroutine repository support.
+These extensions are thin wrappers over the blocking Java contracts and do not change their execution behavior.
+The xref:meilisearch/reactive-template.adoc#meilisearch.reactive-operations.kotlin[reactive Kotlin extensions] and
+xref:repositories/reactive-meilisearch-repositories.adoc#meilisearch.repositories.coroutines[coroutine repositories]
+are separate non-blocking APIs.
 
 [[meilisearch.operations.notes]]
 == Repository Results and Search Metadata
