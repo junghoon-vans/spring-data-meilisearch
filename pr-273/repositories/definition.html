@@ -19,9 +19,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.12.1">
-    <meta name="generation" content="0.12-SNAPSHOT">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.12-SNAPSHOT/repositories/definition.html">
+    <meta name="version" content="0.13.1">
+    <meta name="generation" content="0.13-SNAPSHOT">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.13-SNAPSHOT/repositories/definition.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.12.1">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.13.1">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.12.1-SNAPSHOT</span>
+  <span class="version">0.13.1-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -492,7 +492,7 @@ interface MovieRepository extends IdentifiedRepository&lt;Movie, String&gt; {
 <p>In a multi-module application, annotate the domain type with Meilisearch&#8217;s <code>@Document</code> when the repository does not extend <code>MeilisearchRepository</code>, so strict repository configuration can identify it. In a single-module application, the generic repository may be discovered in the configured package, but extending <code>MeilisearchRepository</code> makes the store binding explicit. Mark generic intermediate interfaces with <code>@NoRepositoryBean</code> so Spring does not try to instantiate them directly.</p>
 </div>
 <div class="paragraph">
-<p>The method declarations above match built-in CRUD methods. Repositories can also declare the filter-backed derived finders documented in <a href="repository-queries.html" class="xref page">Query Methods</a>. Declared <code>@Query</code> and named-query methods are not supported; use <code>MeilisearchOperations</code> for custom searches.</p>
+<p>The method declarations above match built-in CRUD methods. Repositories can also declare supported derived methods or native filter/full-text searches using <code>@Query</code> and named templates, as documented in <a href="repository-queries.html" class="xref page">Query Methods</a>. Use <code>MeilisearchOperations</code> for dynamically composed searches and advanced search options.</p>
 </div>
 </div>
 </div>
@@ -579,7 +579,7 @@ interface MovieRepository extends Repository&lt;Movie, String&gt; {
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      0.12.1-SNAPSHOT
+      0.13.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
@@ -891,6 +891,6 @@ interface MovieRepository extends Repository&lt;Movie, String&gt; {
 <script src="../_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.12.1" data-page-generation="0.12-SNAPSHOT" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.13.1" data-page-generation="0.13-SNAPSHOT" data-page-component="data-meilisearch"></script>
   </body>
 </html>
