@@ -512,6 +512,13 @@ Do not import both configuration base classes together: they declare the same ma
 A standalone template can also be constructed with <code>new ReactiveMeilisearchTemplate(configuration)</code>.
 The converter/mapper constructors reuse an application&#8217;s mapping infrastructure, and the four-argument constructor sets the batch/page size.</p>
 </div>
+<div class="paragraph">
+<p>Reactive operations use Jackson for JSON processing.
+Document serialization and response mapping use the supplied <code>ObjectMapper</code>.
+Search and settings request bodies use a separate field-based mapper that preserves SDK wire names and omits null options without exposing SDK helper getters.
+<code>applySettings</code> uses the SDK&#8217;s <code>JacksonJsonHandler</code> with this protocol mapper.
+The application mapper is not reconfigured, and the synchronous client&#8217;s default JSON handler remains unchanged.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
