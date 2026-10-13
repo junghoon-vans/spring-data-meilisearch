@@ -9,6 +9,24 @@ Existing synchronous operations remain separate and unchanged.
 This API provides document and search operations, not reactive repositories, index administration, or coroutine extensions.
 Existing query, result, and mapping types are shared with the synchronous API; the library still depends on the Meilisearch Java SDK.
 
+== Reactor Dependency
+
+Reactor Core is optional in the library's Maven dependency metadata.
+Applications using reactive operations must declare it directly unless another application dependency already supplies it:
+
+[source,xml]
+----
+<dependency>
+    <groupId>io.projectreactor</groupId>
+    <artifactId>reactor-core</artifactId>
+    <version>${reactor.version}</version>
+</dependency>
+----
+
+Set `reactor.version` to a version aligned with the application's Spring Data release train.
+If dependency management already supplies that version, omit the `version` element.
+Blocking-only applications do not need Reactor.
+
 [[meilisearch.reactive-operations.configuration]]
 == Explicit Java Configuration
 
