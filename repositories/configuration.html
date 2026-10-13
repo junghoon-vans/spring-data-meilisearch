@@ -20,9 +20,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.12.0">
-    <meta name="generation" content="0.12.0">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.12.0/repositories/configuration.html">
+    <meta name="version" content="0.13.0">
+    <meta name="generation" content="0.13.0">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.13.0/repositories/configuration.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="true">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -249,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.12.0">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.13.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.12.0</span>
+  <span class="version">0.13.0</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -376,7 +376,7 @@
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/blob/v0.12.0/src/main/antora/modules/ROOT/pages/repositories/configuration.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/repositories/configuration.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -437,8 +437,9 @@ import org.springframework.context.annotation.Configuration;
 
 </span><span class="fold-block">@Configuration
 @EnableMeilisearchRepositories(
-        basePackages = "com.example.movies",
-        meilisearchTemplateRef = "meilisearchTemplate")
+        basePackages = "com.example.products",
+        meilisearchTemplateRef = "meilisearchTemplate",
+        namedQueriesLocation = "classpath:meilisearch-named-queries.properties")
 class RepositoryConfig {
 }</span></code></pre>
 </div>
@@ -476,10 +477,8 @@ repository factory selection, including:</p>
 <p>If no base packages are configured, Spring Data scans the package of the annotated configuration class.</p>
 </div>
 <div class="paragraph">
-<p><code>queryLookupStrategy</code> defaults to <code>CREATE_IF_NOT_FOUND</code> and supports the derived finder subset documented in
-<a href="repository-queries.html" class="xref page">Query Methods</a>. <code>USE_DECLARED_QUERY</code> cannot resolve
-derived methods. <code>namedQueriesLocation</code> remains available for Spring Data configuration compatibility, but named
-queries and declared <code>@Query</code> methods are rejected at repository bootstrap.</p>
+<p><code>queryLookupStrategy</code> defaults to <code>CREATE_IF_NOT_FOUND</code>: it prefers annotated <code>@Query</code> searches, then named searches, then derives supported predicates from the method name. <code>USE_DECLARED_QUERY</code> requires an annotated or named search; <code>CREATE</code> uses method-name derivation only.
+<code>namedQueriesLocation</code> loads filter templates and optional <code>.q</code> search-text templates from a properties resource. The location is optional when all queries are annotated or derived. See <a href="repository-queries.html" class="xref page">Query Methods</a> for the resolution table, syntax, parameter binding, and lookup precedence.</p>
 </div>
 </div>
 </div>
@@ -570,6 +569,11 @@ The one-argument <code>MeilisearchTemplate</code> constructor provides a default
                           <ul class="versions">
   <li class="version">
     <a href="configuration.html">
+      0.13.0
+    </a>
+  </li>
+  <li class="version">
+    <a href="../0.12.0/repositories/configuration.html">
       0.12.0
     </a>
   </li>
@@ -596,20 +600,6 @@ The one-argument <code>MeilisearchTemplate</code> constructor provides a default
   <li class="version">
     <a href="../0.8.0/index.html">
       0.8.0
-    </a>
-  </li>
-</ul>                        </div>
-                        <div class="version-item">
-                          <div>
-                            <button class="version-toggle" type="button">
-                              <span></span>
-                              Snapshot
-                            </button>
-                          </div>
-                          <ul class="versions">
-  <li class="version">
-    <a href="../snapshot/repositories/configuration.html">
-      0.12.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>

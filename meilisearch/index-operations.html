@@ -20,9 +20,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.12.0">
-    <meta name="generation" content="0.12.0">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.12.0/meilisearch/index-operations.html">
+    <meta name="version" content="0.13.0">
+    <meta name="generation" content="0.13.0">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.13.0/meilisearch/index-operations.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="true">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -249,14 +249,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.12.0">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.13.0">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.12.0</span>
+  <span class="version">0.13.0</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -376,7 +376,7 @@
       <div class="toc-menu"></div>
     </div>
     <div class="sidebar-links">
-        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/blob/v0.12.0/src/main/antora/modules/ROOT/pages/meilisearch/index-operations.adoc">
+        <a href="https://github.com/junghoon-vans/spring-data-meilisearch/edit/main/src/main/antora/modules/ROOT/pages/meilisearch/index-operations.adoc">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24"
@@ -598,9 +598,45 @@ settings mutations.</p>
 </div>
 <div class="paragraph">
 <p><code>ClientConfigurationBuilder.withRequestTimeout(&#8230;&#8203;)</code> and <code>withRequestInterval(&#8230;&#8203;)</code> configure these values in
-milliseconds. A non-succeeded task raises <code>TaskStatusException</code> from <code>save(&#8230;&#8203;)</code>, <code>applySettings(&#8230;&#8203;)</code>, index
-<code>create(&#8230;&#8203;)</code> and <code>update(&#8230;&#8203;)</code>, and settings mutations. Boolean deletion operations return <code>false</code> when their task
-does not succeed.</p>
+milliseconds. A failed or canceled completed task raises <code>TaskStatusException</code> from <code>save(&#8230;&#8203;)</code>, <code>applySettings(&#8230;&#8203;)</code>,
+<code>deleteByFilter(&#8230;&#8203;)</code>, index <code>create()</code> and <code>update(&#8230;&#8203;)</code>, and settings mutations. Boolean deletion operations return
+<code>false</code> when their task does not succeed.</p>
+</div>
+<div class="paragraph">
+<p><code>TaskStatusException</code> reports the completed task&#8217;s UID through <code>getTaskUid()</code>, its server-reported status through
+<code>getStatus()</code>, and the server error code through <code>getErrorCode()</code> when one is available. The error code is <code>null</code>
+when Meilisearch provides no task error details. The exception message retains the operation and server failure
+reason when available. A wait timeout is an unconfirmed outcome and remains a distinct
+<code>UncategorizedMeilisearchException</code>; it is not reported as a failed task.
+Document, settings, and index operations also reject a missing completed-task response as an unconfirmed outcome,
+using <code>UncategorizedMeilisearchException</code> rather than inventing a failed task status.</p>
+</div>
+<div class="paragraph">
+<p>Handle a completed task failure with the SDK-independent diagnostics:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import io.vanslog.spring.data.meilisearch.TaskStatusException;
+
+</span><span class="fold-block">try {
+    operations.save(movie);
+} catch (TaskStatusException ex) {
+    System.err.printf("Task %d ended with status %s (error %s): %s%n",
+            ex.getTaskUid(), ex.getStatus(), ex.getErrorCode(), ex.getMessage());
+}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The exception contract no longer exposes <code>com.meilisearch.sdk.model.TaskStatus</code>. Its SDK-typed public constructors
+and <code>getTaskStatus()</code> accessor have been removed, which is a source and binary compatibility change. Recompile
+applications that used the old constructors and replace <code>getTaskStatus()</code> with <code>getStatus()</code>; use <code>getTaskUid()</code> and
+<code>getErrorCode()</code> for the other diagnostics. Code constructing the exception directly must use its UID, string status,
+nullable error code, message, and optional cause constructor arguments.</p>
+</div>
+<div class="paragraph">
+<p>This change is limited to task failure diagnostics. The supported SDK-coupled callback and native client access
+boundaries remain unchanged; see <a href="template.html" class="xref page">Operations</a> and
+<a href="client-configuration.html" class="xref page">Client Configuration</a>.</p>
 </div>
 </div>
 </div>
@@ -649,6 +685,11 @@ does not succeed.</p>
                           <ul class="versions">
   <li class="version">
     <a href="index-operations.html">
+      0.13.0
+    </a>
+  </li>
+  <li class="version">
+    <a href="../0.12.0/meilisearch/index-operations.html">
       0.12.0
     </a>
   </li>
@@ -675,20 +716,6 @@ does not succeed.</p>
   <li class="version">
     <a href="../0.8.0/index.html">
       0.8.0
-    </a>
-  </li>
-</ul>                        </div>
-                        <div class="version-item">
-                          <div>
-                            <button class="version-toggle" type="button">
-                              <span></span>
-                              Snapshot
-                            </button>
-                          </div>
-                          <ul class="versions">
-  <li class="version">
-    <a href="../snapshot/meilisearch/index-operations.html">
-      0.12.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
