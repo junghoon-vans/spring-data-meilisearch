@@ -16,52 +16,79 @@
 package io.vanslog.spring.data.meilisearch;
 
 import org.springframework.dao.DataAccessException;
-
-import com.meilisearch.sdk.model.TaskStatus;
+import org.springframework.lang.Nullable;
 
 /**
- * Exception indicating that a task status was not successful.
+ * Exception indicating that a completed Meilisearch task did not succeed.
  *
  * @author Junghoon Ban
  */
 public class TaskStatusException extends DataAccessException {
 
-	private final TaskStatus taskStatus;
+	private final int taskUid;
+	private final String status;
+	@Nullable private final String errorCode;
 
 	/**
 	 * Constructor for TaskStatusException.
 	 *
-	 * @param taskStatus the task status
+	 * @param taskUid the task UID
+	 * @param status the server-reported task status
+	 * @param errorCode the server error code, or {@literal null} if unavailable
 	 * @param msg the detail message
 	 */
-	public TaskStatusException(TaskStatus taskStatus, String msg) {
-		super(msg);
-		this.taskStatus = taskStatus;
+	public TaskStatusException(int taskUid, String status, @Nullable String errorCode, String msg) {
+		this(taskUid, status, errorCode, msg, null);
 	}
 
 	/**
 	 * Constructor for TaskStatusException.
 	 *
-	 * @param taskStatus the task status
+	 * @param taskUid the task UID
+	 * @param status the server-reported task status
+	 * @param errorCode the server error code, or {@literal null} if unavailable
 	 * @param msg the detail message
 	 * @param cause the root cause from the data access API in use
 	 */
-	public TaskStatusException(TaskStatus taskStatus, String msg, Throwable cause) {
+	public TaskStatusException(int taskUid, String status, @Nullable String errorCode, String msg,
+			@Nullable Throwable cause) {
 		super(msg, cause);
-		this.taskStatus = taskStatus;
+		this.taskUid = taskUid;
+		this.status = status;
+		this.errorCode = errorCode;
 	}
 
 	/**
-	 * Return the task status.
+	 * Return the task UID.
 	 *
-	 * @return the task status
+	 * @return the task UID
 	 */
-	public TaskStatus getTaskStatus() {
-		return taskStatus;
+	public int getTaskUid() {
+		return taskUid;
+	}
+
+	/**
+	 * Return the status reported for the completed task.
+	 *
+	 * @return the server-reported task status
+	 */
+	public String getStatus() {
+		return status;
+	}
+
+	/**
+	 * Return the server error code when available.
+	 *
+	 * @return the server error code, or {@literal null} if the task has no error details
+	 */
+	@Nullable
+	public String getErrorCode() {
+		return errorCode;
 	}
 
 	@Override
 	public String toString() {
-		return "TaskStatusException{" + "taskStatus=" + taskStatus + "} " + super.toString();
+		return "TaskStatusException{" + "taskUid=" + taskUid + ", status='" + status + "', errorCode='" + errorCode + "'} "
+				+ super.toString();
 	}
 }

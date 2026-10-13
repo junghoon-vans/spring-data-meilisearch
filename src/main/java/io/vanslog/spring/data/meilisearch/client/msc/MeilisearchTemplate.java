@@ -54,7 +54,6 @@ import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
 
 import io.vanslog.spring.data.meilisearch.DocumentAccessException;
-import io.vanslog.spring.data.meilisearch.TaskStatusException;
 import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient;
 import io.vanslog.spring.data.meilisearch.core.FacetHit;
@@ -164,8 +163,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 			return client.index(indexUid).addDocuments(document, primaryKey);
 		});
 
-		if (!isTaskSucceeded(indexUid, taskInfo)) {
-			throw new TaskStatusException(taskInfo.getStatus(), "Failed to save entities.");
+		Task task = getCompletedTask(indexUid, taskInfo.getTaskUid());
+		if (task.getStatus() != TaskStatus.SUCCEEDED) {
+			throw TaskStatusExceptionSupport.fromCompletedTask(task, "Failed to save entities.");
 		}
 		return entities;
 	}
@@ -315,18 +315,9 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 			throw new UncategorizedMeilisearchException("Failed to retrieve filtered delete task.");
 		}
 		int taskUid = taskInfo.getTaskUid();
-
-		Task task = execute((Client client) -> {
-			Index index = client.index(indexUid);
-			index.waitForTask(taskUid, meilisearchClient.getRequestTimeout(), meilisearchClient.getRequestInterval());
-			return index.getTask(taskUid);
-		});
-		if (task == null) {
-			throw new UncategorizedMeilisearchException("Failed to retrieve completed delete task.");
-		}
-		TaskStatus taskStatus = task.getStatus();
-		if (taskStatus != TaskStatus.SUCCEEDED) {
-			throw new TaskStatusException(taskStatus, "Failed to delete documents by filter.");
+		Task task = getCompletedTask(indexUid, taskUid);
+		if (task.getStatus() != TaskStatus.SUCCEEDED) {
+			throw TaskStatusExceptionSupport.fromCompletedTask(task, "Failed to delete documents by filter.");
 		}
 		TaskDetails taskDetails = task.getDetails();
 		if (taskDetails == null) {
@@ -385,17 +376,30 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 
 		TaskInfo taskInfo = execute(client -> client.index(indexUid).updateSettings(settings));
 
-		if (!isTaskSucceeded(indexUid, taskInfo)) {
-			throw new TaskStatusException(taskInfo.getStatus(), "Failed to apply settings");
+		Task task = getCompletedTask(indexUid, taskInfo.getTaskUid());
+		if (task.getStatus() != TaskStatus.SUCCEEDED) {
+			throw TaskStatusExceptionSupport.fromCompletedTask(task, "Failed to apply settings.");
 		}
 	}
 
 	/**
-	 * Execute the given {@link MeilisearchCallback}.
+	 * Execute a supported, SDK-coupled low-level callback using the configured native client. Prefer
+	 * {@link MeilisearchOperations} and repositories for regular mapped application access.
+	 * <p>
+	 * The callback supplies SDK requests and interprets SDK results. This method does not automatically map entities,
+	 * wait for task completion, or validate completed task status. A returned {@link TaskInfo} confirms submission, not
+	 * task success; retrieving and interpreting the completed outcome is the caller's responsibility.
+	 * <p>
+	 * SDK {@link MeilisearchException} failures escaping callback execution are translated: the
+	 * {@code document_not_found} API error becomes {@link DocumentAccessException}, and other SDK failures become
+	 * {@link UncategorizedMeilisearchException}. Other runtime exceptions are not translated by this method. Direct SDK
+	 * calls outside this method do not pass through this translation boundary.
 	 *
 	 * @param callback must not be {@literal null}.
 	 * @return a result object returned by the action or {@literal null}.
 	 * @param <T> the type of the result object
+	 * @throws DocumentAccessException if an SDK API failure reports {@code document_not_found}
+	 * @throws UncategorizedMeilisearchException for other SDK {@link MeilisearchException} failures
 	 */
 	@Nullable
 	public <T> T execute(MeilisearchCallback<T> callback) {
@@ -424,25 +428,34 @@ public class MeilisearchTemplate implements MeilisearchOperations {
 	}
 
 	/**
-	 * Checks if the given {@link TaskInfo} is succeeded.
+	 * Waits for a task to complete and retrieves its final outcome.
 	 *
-	 * @param indexUid the index uid
-	 * @param taskInfo the {@link TaskInfo} to check
-	 * @return {@literal true} if the task is succeeded
+	 * @param indexUid the index UID
+	 * @param taskUid the task UID
+	 * @return the completed task
+	 * @throws UncategorizedMeilisearchException if no completed task is returned
+	 */
+	private Task getCompletedTask(String indexUid, int taskUid) {
+		Task task = execute((Client client) -> {
+			Index index = client.index(indexUid);
+			index.waitForTask(taskUid, meilisearchClient.getRequestTimeout(), meilisearchClient.getRequestInterval());
+			return index.getTask(taskUid);
+		});
+		if (task == null) {
+			throw new UncategorizedMeilisearchException("Failed to retrieve completed task " + taskUid + ".");
+		}
+		return task;
+	}
+
+	/**
+	 * Checks if the completed task succeeded.
+	 *
+	 * @param indexUid the index UID
+	 * @param taskInfo the submitted task
+	 * @return {@literal true} if the task succeeded
 	 */
 	private boolean isTaskSucceeded(String indexUid, TaskInfo taskInfo) {
-		int taskUid = taskInfo.getTaskUid();
-
-		execute(client -> {
-			client.index(indexUid).waitForTask( //
-					taskUid, meilisearchClient.getRequestTimeout(), //
-					meilisearchClient.getRequestInterval() //
-			);
-			return null;
-		});
-
-		TaskStatus taskStatus = execute(client -> client.index(indexUid).getTask(taskUid).getStatus());
-		return taskStatus == TaskStatus.SUCCEEDED;
+		return getCompletedTask(indexUid, taskInfo.getTaskUid()).getStatus() == TaskStatus.SUCCEEDED;
 	}
 
 	private <T> String getDocumentIdFor(T entity) {

@@ -50,7 +50,7 @@ public final class MeilisearchClientFactoryBean implements FactoryBean<Meilisear
 
 	@Override
 	public Class<? extends Client> getObjectType() {
-		return Client.class;
+		return MeilisearchClient.class;
 	}
 
 	@Override
