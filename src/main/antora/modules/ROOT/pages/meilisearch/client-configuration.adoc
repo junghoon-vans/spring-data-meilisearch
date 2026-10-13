@@ -5,6 +5,19 @@ Spring Data Meilisearch operates on top of the Meilisearch Java client and expos
 
 In most applications, the entry point is a Java configuration class that extends `MeilisearchConfiguration`. XML namespace support is available for applications that still use XML-based container configuration.
 
+[[meilisearch.clients.native-boundary]]
+== Native Client Boundary
+
+`MeilisearchClient` intentionally extends the Meilisearch Java SDK `Client`. This inheritance is retained as a supported
+low-level boundary, including for 1.0; it is not a reason to make ordinary application access a thin SDK wrapper.
+Prefer `MeilisearchOperations`, `indexOps(...)`, `instanceOps()`, and repositories for regular application work.
+See xref:meilisearch/template.adoc#meilisearch.operations.native-access[Native SDK Access] for callback and direct-client guarantees.
+
+Inherited SDK methods, SDK model types, and native JSON-handler configuration remain coupled to the supported SDK API
+and version. They do not make the entire public API SDK-independent. A future composition change would require a concrete
+driver and an explicit migration for inherited calls, SDK `Client` assignment/injection, and subclass/override assumptions;
+it is not a prerequisite for synchronous client support or a consequence of evaluating Reactive support.
+
 [[meilisearch.clients.javaconfig]]
 == JavaConfig
 
@@ -31,6 +44,25 @@ class MyClientConfig extends MeilisearchConfiguration {
     }
 }
 ----
+
+[[meilisearch.clients.native-client]]
+== Native Client Boundary
+
+`MeilisearchClient` intentionally extends `com.meilisearch.sdk.Client`; this low-level inheritance is retained for 1.0.
+JavaConfig and the XML namespace both expose `MeilisearchClient` as the concrete product type, which remains
+assignable to the SDK `Client`. For ordinary application data access, prefer `MeilisearchOperations` (see
+xref:meilisearch/template.adoc[Operations]), `indexOps(...)` and `instanceOps(...)` (see
+xref:meilisearch/index-operations.adoc[Index operations]), or xref:repositories.adoc[repositories].
+
+Direct use of `MeilisearchClient` is coupled to the supported `meilisearch-java` SDK API and models (currently version
+0.21.0). The raw `MeilisearchCallback` receives the SDK `Client`, and SDK `JsonHandler` types remain part of client
+configuration; retaining inheritance does not make the whole public API independent of the SDK. `MeilisearchClient`
+also keeps its internal HTTP transport-backed document retrieval for operations not supplied by the SDK.
+
+Replacing inheritance with composition would break direct calls to inherited SDK methods, assignment or dependency
+injection as `Client`, and user subclasses that override inherited methods. Any composition change would need an
+explicit compatibility and migration plan rather than a forwarding facade. Reopen that decision only for a concrete
+driver, such as a required alternative transport or an observed SDK inheritance compatibility problem.
 
 [[meilisearch.clients.builder]]
 == ClientConfiguration Builder
