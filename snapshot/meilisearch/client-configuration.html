@@ -488,6 +488,30 @@ class MyClientConfig extends MeilisearchConfiguration {
 </div>
 </div>
 <div class="sect1">
+<h2 id="meilisearch.clients.native-client"><a class="anchor" href="#meilisearch.clients.native-client"></a>Native Client Boundary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>MeilisearchClient</code> intentionally extends <code>com.meilisearch.sdk.Client</code>; this low-level inheritance is retained for 1.0.
+JavaConfig and the XML namespace both expose <code>MeilisearchClient</code> as the concrete product type, which remains
+assignable to the SDK <code>Client</code>. For ordinary application data access, prefer <code>MeilisearchOperations</code> (see
+<a href="template.html" class="xref page">Operations</a>), <code>indexOps(&#8230;&#8203;)</code> and <code>instanceOps(&#8230;&#8203;)</code> (see
+<a href="index-operations.html" class="xref page">Index operations</a>), or <a href="../repositories.html" class="xref page">repositories</a>.</p>
+</div>
+<div class="paragraph">
+<p>Direct use of <code>MeilisearchClient</code> is coupled to the supported <code>meilisearch-java</code> SDK API and models (currently version
+0.21.0). The raw <code>MeilisearchCallback</code> receives the SDK <code>Client</code>, and SDK <code>JsonHandler</code> types remain part of client
+configuration; retaining inheritance does not make the whole public API independent of the SDK. <code>MeilisearchClient</code>
+also keeps its internal HTTP transport-backed document retrieval for operations not supplied by the SDK.</p>
+</div>
+<div class="paragraph">
+<p>Replacing inheritance with composition would break direct calls to inherited SDK methods, assignment or dependency
+injection as <code>Client</code>, and user subclasses that override inherited methods. Any composition change would need an
+explicit compatibility and migration plan rather than a forwarding facade. Reopen that decision only for a concrete
+driver, such as a required alternative transport or an observed SDK inheritance compatibility problem.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="meilisearch.clients.builder"><a class="anchor" href="#meilisearch.clients.builder"></a>ClientConfiguration Builder</h2>
 <div class="sectionbody">
 <div class="paragraph">

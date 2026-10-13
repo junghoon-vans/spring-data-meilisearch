@@ -448,7 +448,8 @@
 <div class="sect2">
 <h3 id="meilisearch.appendix.xml-namespace.client"><a class="anchor" href="#meilisearch.appendix.xml-namespace.client"></a><code>&lt;meilisearch:meilisearch-client&gt;</code></h3>
 <div class="paragraph">
-<p>Creates a <code>MeilisearchClient</code> bean.</p>
+<p>Creates a concrete <code>MeilisearchClient</code> bean, which remains assignable to <code>com.meilisearch.sdk.Client</code>. See
+<a href="meilisearch/client-configuration.html#meilisearch.clients.native-client" class="xref page">Native Client Boundary</a> for the SDK compatibility boundary.</p>
 </div>
 <div class="paragraph">
 <p>When omitted, the XML factory leaves the optional task-wait timeout attributes at <code>0</code>, unlike the Java builder defaults of 5,000 ms and 50 ms. Set both attributes for applications that save documents or run other task-based operations.</p>
