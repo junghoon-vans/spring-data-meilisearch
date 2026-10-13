@@ -100,6 +100,12 @@ If you use `mvn` instead, Maven 3.9.6 is the version pinned by this project's wr
 
 _Also see link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] if you wish to submit pull requests._
 
+=== Continuous deployment
+
+Pushes to `main` and `develop` run `.github/workflows/cd.yaml`.
+The workflow explicitly allows `https://central.sonatype.com` in the generated `central` server's `repositoryOrigins` so Maven's origin-scoped authentication can publish snapshots.
+Preserve this allowance when changing the Maven or credentials setup; do not disable credential origin checks.
+
 === Building reference documentation
 
 Build the authoring/PR preview documentation from the checked-out HEAD with Maven:
