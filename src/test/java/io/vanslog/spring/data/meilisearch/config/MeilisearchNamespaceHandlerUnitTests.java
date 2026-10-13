@@ -24,6 +24,7 @@ import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +36,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.env.MapPropertySource;
@@ -44,6 +46,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meilisearch.sdk.Client;
 import com.sun.net.httpserver.HttpServer;
 
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
@@ -58,6 +61,8 @@ import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
 class MeilisearchNamespaceHandlerUnitTests {
 
 	@Autowired private ApplicationContext context;
+	@Autowired private MeilisearchClient meilisearchClient;
+	@Autowired private Client sdkClient;
 
 	@Test
 	void shouldCreateMeilisearchClient() {
@@ -71,6 +76,24 @@ class MeilisearchNamespaceHandlerUnitTests {
 	}
 
 	@Test
+	void shouldDiscoverConcreteFactoryBeanTypeBeforeProductInitialization() throws ReflectiveOperationException {
+		Constructor<MeilisearchClientFactoryBean> constructor = MeilisearchClientFactoryBean.class.getDeclaredConstructor();
+		constructor.setAccessible(true);
+		MeilisearchClientFactoryBean factoryBean = constructor.newInstance();
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		// Register without lifecycle initialization so type discovery runs before afterPropertiesSet creates the product.
+		beanFactory.registerSingleton("meilisearchClient", factoryBean);
+
+		assertThat(factoryBean.getObject()).isNull();
+		assertThat(beanFactory.getType("meilisearchClient", false)).isEqualTo(MeilisearchClient.class);
+		assertThat(beanFactory.isTypeMatch("meilisearchClient", MeilisearchClient.class)).isTrue();
+		assertThat(beanFactory.getBeanNamesForType(MeilisearchClient.class, true, false))
+				.containsExactly("meilisearchClient");
+		assertThat(beanFactory.getBeanNamesForType(Client.class, true, false)).containsExactly("meilisearchClient");
+		assertThat(factoryBean.getObject()).isNull();
+	}
+
+	@Test
 	void shouldWireConfiguredConverterAndObjectMapperIntoMeilisearchTemplate() {
 		MeilisearchTemplate template = context.getBean(MeilisearchTemplate.class);
 
@@ -81,6 +104,7 @@ class MeilisearchNamespaceHandlerUnitTests {
 
 	@Test
 	void shouldUseGsonJsonHandler() throws NoSuchFieldException, IllegalAccessException {
+		assertThat(sdkClient).isSameAs(this.meilisearchClient);
 		MeilisearchClient meilisearchClient = (MeilisearchClient) context.getBean("meilisearchClient");
 
 		Field jsonHandlerField = meilisearchClient.getClass().getDeclaredField("jsonHandler");

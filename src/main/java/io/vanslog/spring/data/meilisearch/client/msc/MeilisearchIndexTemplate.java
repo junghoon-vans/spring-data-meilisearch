@@ -17,12 +17,16 @@ package io.vanslog.spring.data.meilisearch.client.msc;
 
 import org.springframework.util.Assert;
 
+import com.meilisearch.sdk.Client;
+import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.model.IndexesQuery;
 import com.meilisearch.sdk.model.Settings;
+import com.meilisearch.sdk.model.Task;
 import com.meilisearch.sdk.model.TaskInfo;
 import com.meilisearch.sdk.model.TaskStatus;
 
-import io.vanslog.spring.data.meilisearch.TaskStatusException;
+import io.vanslog.spring.data.meilisearch.UncategorizedMeilisearchException;
+
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndex;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexCreateRequest;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchIndexList;
@@ -73,9 +77,10 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 		Assert.notNull(request, "MeilisearchIndexCreateRequest must not be null");
 
 		TaskInfo taskInfo = executor.execute(client -> client.createIndex(indexUid, request.getPrimaryKey()));
-		TaskStatus taskStatus = waitForTask(taskInfo);
-		if (taskStatus != TaskStatus.SUCCEEDED) {
-			throw new TaskStatusException(taskStatus, "Failed to create index.");
+
+		Task task = waitForTask(taskInfo);
+		if (task.getStatus() != TaskStatus.SUCCEEDED) {
+			throw TaskStatusExceptionSupport.fromCompletedTask(task, "Failed to create index.");
 		}
 
 		return get();
@@ -106,9 +111,10 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 		Assert.notNull(request, "MeilisearchIndexUpdateRequest must not be null");
 
 		TaskInfo taskInfo = executor.execute(client -> client.updateIndex(indexUid, request.getPrimaryKey()));
-		TaskStatus taskStatus = waitForTask(taskInfo);
-		if (taskStatus != TaskStatus.SUCCEEDED) {
-			throw new TaskStatusException(taskStatus, "Failed to update index.");
+
+		Task task = waitForTask(taskInfo);
+		if (task.getStatus() != TaskStatus.SUCCEEDED) {
+			throw TaskStatusExceptionSupport.fromCompletedTask(task, "Failed to update index.");
 		}
 
 		return get();
@@ -118,7 +124,8 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 	public boolean delete() {
 
 		TaskInfo taskInfo = executor.execute(client -> client.deleteIndex(indexUid));
-		return waitForTask(taskInfo) == TaskStatus.SUCCEEDED;
+
+		return waitForTask(taskInfo).getStatus() == TaskStatus.SUCCEEDED;
 	}
 
 	@Override
@@ -138,9 +145,10 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 
 		Settings sdkSettings = requestConverter.toSettings(settings);
 		TaskInfo taskInfo = executor.execute(client -> client.index(indexUid).updateSettings(sdkSettings));
-		TaskStatus taskStatus = waitForTask(taskInfo);
-		if (taskStatus != TaskStatus.SUCCEEDED) {
-			throw new TaskStatusException(taskStatus, "Failed to update index settings.");
+
+		Task task = waitForTask(taskInfo);
+		if (task.getStatus() != TaskStatus.SUCCEEDED) {
+			throw TaskStatusExceptionSupport.fromCompletedTask(task, "Failed to update index settings.");
 		}
 
 		return getSettings();
@@ -150,23 +158,27 @@ class MeilisearchIndexTemplate implements MeilisearchIndexOperations {
 	public MeilisearchIndexSettings resetSettings() {
 
 		TaskInfo taskInfo = executor.execute(client -> client.index(indexUid).resetSettings());
-		TaskStatus taskStatus = waitForTask(taskInfo);
-		if (taskStatus != TaskStatus.SUCCEEDED) {
-			throw new TaskStatusException(taskStatus, "Failed to reset index settings.");
+
+		Task task = waitForTask(taskInfo);
+		if (task.getStatus() != TaskStatus.SUCCEEDED) {
+			throw TaskStatusExceptionSupport.fromCompletedTask(task, "Failed to reset index settings.");
 		}
 
 		return getSettings();
 	}
 
-	private TaskStatus waitForTask(TaskInfo taskInfo) {
+	private Task waitForTask(TaskInfo taskInfo) {
 
 		int taskUid = taskInfo.getTaskUid();
 
-		executor.execute(client -> {
-			client.index(indexUid).waitForTask(taskUid, requestTimeout, requestInterval);
-			return null;
+		Task task = executor.execute((Client client) -> {
+			Index index = client.index(indexUid);
+			index.waitForTask(taskUid, requestTimeout, requestInterval);
+			return index.getTask(taskUid);
 		});
-
-		return executor.execute(client -> client.index(indexUid).getTask(taskUid).getStatus());
+		if (task == null) {
+			throw new UncategorizedMeilisearchException("Failed to retrieve completed task " + taskUid + ".");
+		}
+		return task;
 	}
 }

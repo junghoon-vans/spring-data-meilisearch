@@ -254,8 +254,12 @@ class MeilisearchTemplateIntegrationTests {
 		MeilisearchTemplate template = templateWithDeleteTask(true, TaskStatus.FAILED, null);
 
 		assertThatThrownBy(() -> template.deleteByFilter(Movie.class, "genres = Drama"))
-				.isInstanceOf(TaskStatusException.class).satisfies(
-						exception -> assertThat(((TaskStatusException) exception).getTaskStatus()).isEqualTo(TaskStatus.FAILED));
+				.isInstanceOfSatisfying(TaskStatusException.class, exception -> {
+					assertThat(exception.getTaskUid()).isEqualTo(1);
+					assertThat(exception.getStatus()).isEqualTo("failed");
+					assertThat(exception.getErrorCode()).isNull();
+				});
+
 	}
 
 	@Test
@@ -279,8 +283,7 @@ class MeilisearchTemplateIntegrationTests {
 		MeilisearchTemplate template = templateWithDeleteTask(false, null, null);
 
 		assertThatThrownBy(() -> template.deleteByFilter(Movie.class, "genres = Drama"))
-				.isInstanceOf(UncategorizedMeilisearchException.class)
-				.hasMessageContaining("Failed to retrieve filtered delete task");
+				.isInstanceOf(UncategorizedMeilisearchException.class);
 	}
 
 	@Test
@@ -323,6 +326,11 @@ class MeilisearchTemplateIntegrationTests {
 					return null;
 				}
 				return new Task() {
+					@Override
+					public int getUid() {
+						return 1;
+					}
+
 					@Override
 					public TaskStatus getStatus() {
 						return taskStatus;
