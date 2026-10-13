@@ -19,9 +19,9 @@
     <link rel="stylesheet" href="./_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.12.1">
-    <meta name="generation" content="0.12-SNAPSHOT">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.12-SNAPSHOT/repositories.html">
+    <meta name="version" content="0.13.1">
+    <meta name="generation" content="0.13-SNAPSHOT">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.13-SNAPSHOT/repositories.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="./_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.12.1">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.13.1">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.12.1-SNAPSHOT</span>
+  <span class="version">0.13.1-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -463,12 +463,15 @@ In particular, Spring Data Meilisearch currently documents:</p>
 <p>a limited set of filter-backed derived finder methods,</p>
 </li>
 <li>
+<p>declared filter/full-text searches through <code>@Query</code> annotations or named query templates,</p>
+</li>
+<li>
 <p>store-specific behavior such as automatic settings application and the difference between document-backed and search-backed methods.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Declared queries, named queries, and advanced derived operators remain unsupported. See <a href="repositories/repository-queries.html" class="xref page">Query Methods</a> for the supported subset.</p>
+<p>Derived operators remain limited to the documented subset. See <a href="repositories/repository-queries.html" class="xref page">Query Methods</a> for derived and declared query contracts and their limits.</p>
 </div>
 <div class="paragraph">
 <p>Read the common repository fundamentals first, then continue with the store-specific pages in this chapter to understand the exact repository surface exposed by Spring Data Meilisearch.</p>
@@ -525,7 +528,7 @@ In particular, Spring Data Meilisearch currently documents:</p>
                           <ul class="versions">
   <li class="version">
     <a href="index.html">
-      0.12.1-SNAPSHOT
+      0.13.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
@@ -837,6 +840,6 @@ In particular, Spring Data Meilisearch currently documents:</p>
 <script src="./_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="./_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="./_/css/vendor/search.css" data-page-version="0.12.1" data-page-generation="0.12-SNAPSHOT" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="./_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="./_/css/vendor/search.css" data-page-version="0.13.1" data-page-generation="0.13-SNAPSHOT" data-page-component="data-meilisearch"></script>
   </body>
 </html>

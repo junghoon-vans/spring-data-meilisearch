@@ -19,9 +19,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.12.1">
-    <meta name="generation" content="0.12-SNAPSHOT">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.12-SNAPSHOT/meilisearch/template.html">
+    <meta name="version" content="0.13.1">
+    <meta name="generation" content="0.13-SNAPSHOT">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.13-SNAPSHOT/meilisearch/template.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.12.1">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.13.1">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.12.1-SNAPSHOT</span>
+  <span class="version">0.13.1-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -707,6 +707,124 @@ reported total, while an unpaged repository lookup uses document retrieval. See
 </div>
 </div>
 <div class="sect1">
+<h2 id="meilisearch.operations.native-access"><a class="anchor" href="#meilisearch.operations.native-access"></a>Native SDK Access</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For regular application work, prefer <code>MeilisearchOperations</code>, its <code>indexOps(&#8230;&#8203;)</code> and <code>instanceOps()</code> entry points,
+or <a href="../repositories/meilisearch-repositories.html" class="xref page">repositories</a>. These APIs apply the selected operation&#8217;s mapping,
+result, exception, and blocking/task contract. Do not assume every operation waits or throws on a failed task:
+for example, document deletion methods report success through a boolean.</p>
+</div>
+<div class="paragraph">
+<p><code>MeilisearchTemplate.execute(MeilisearchCallback)</code> is a supported low-level escape hatch for deliberate native SDK work.
+It is a concrete-template API, not a method on <code>MeilisearchOperations</code>. Inject <code>MeilisearchTemplate</code> only where this
+boundary is needed. First check the mapped Operations APIs rather than treating callbacks as the default solution
+for every missing operation; raw access does not make deferred operational/admin APIs part of the module&#8217;s contract.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 28.5714%;">
+<col style="width: 28.5715%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Access path</th>
+<th class="tableblock halign-left valign-top">Mapping and results</th>
+<th class="tableblock halign-left valign-top">Exceptions</th>
+<th class="tableblock halign-left valign-top">Task completion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Operations/repositories</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Follow the selected operation&#8217;s mapped request/result contract.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Follow that operation&#8217;s Spring Data exception or return contract.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Follow that operation&#8217;s blocking/task contract.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>MeilisearchTemplate.execute(&#8230;&#8203;)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Callback supplies SDK requests and interprets SDK results; no automatic entity conversion or mapped index selection.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SDK <code>MeilisearchException</code> failures escaping callback execution receive Template translation.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No automatic wait or completed-task status validation.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Direct native client calls</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Caller supplies SDK requests and interprets SDK results.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Do not pass through Template exception translation.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Caller manages task submission, waiting, and outcome checks.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The callback translation boundary is precise: an SDK API error with code <code>document_not_found</code> becomes
+<code>DocumentAccessException</code>; other SDK <code>MeilisearchException</code> failures become <code>UncategorizedMeilisearchException</code>.
+Other runtime exceptions are not translated by <code>execute(&#8230;&#8203;)</code>. If a callback catches an SDK exception itself,
+there is no escaping failure for the template to translate.
+For comparison, mapped <code>get(id, Entity.class)</code> handles a missing document by returning <code>null</code>;
+a raw callback requesting the same missing document throws <code>DocumentAccessException</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="_submission_is_not_completion"><a class="anchor" href="#_submission_is_not_completion"></a>Submission Is Not Completion</h3>
+<div class="paragraph">
+<p>Native requests and results remain SDK-coupled. The following example uses the supported SDK&#8217;s <code>TaskInfo</code>, <code>Task</code>,
+and <code>TaskStatus</code> models; it does not change the ordinary operation task-failure exception contract.
+It accepts caller-provided JSON with an <code>id</code> primary key, not a mapped entity or its annotation settings.
+For ordinary entity writes, use <code>operations.save(entity)</code> instead.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"><span class="fold-block is-hidden-folded">import java.util.Objects;
+
+import com.meilisearch.sdk.model.Task;
+import com.meilisearch.sdk.model.TaskInfo;
+import com.meilisearch.sdk.model.TaskStatus;
+import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchTemplate;
+
+</span><span class="fold-block">class NativeDocuments {
+
+    static Task submitAndCheck(MeilisearchTemplate template, String indexUid, String documentJson) {
+        TaskInfo submitted = Objects.requireNonNull(
+                template.execute(client -&gt; client.index(indexUid).addDocuments(documentJson, "id")));
+
+        // Submission alone does not confirm success. Waiting and retrieval are explicit native SDK calls.
+        Task completed = Objects.requireNonNull(template.execute(client -&gt; {
+            var index = client.index(indexUid);
+            index.waitForTask(submitted.getTaskUid(), 5_000, 50);
+            return index.getTask(submitted.getTaskUid());
+        }));
+
+        if (completed.getStatus() != TaskStatus.SUCCEEDED) {
+            // Application policy, not automatic Template task-status validation.
+            throw new IllegalStateException(
+                    "Task " + completed.getUid() + " completed with " + completed.getStatus());
+        }
+        return completed;
+    }
+}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The example waits synchronously with an explicit timeout and polling interval in milliseconds.
+SDK failures during submission, waiting, or retrieval cross the callback translation boundary.
+A wait timeout is not proof of a failed task: the final outcome may still be unknown.
+After a successful wait, inspect the retrieved status rather than the submission status; failed or canceled
+outcomes are not made successful by returning normally from <code>waitForTask(&#8230;&#8203;)</code>.
+The example&#8217;s <code>IllegalStateException</code> is an application choice. Use the SDK task&#8217;s error details when available
+to apply the application&#8217;s failure policy; avoid including document payloads or credentials in diagnostics.</p>
+</div>
+<div class="paragraph">
+<p>Callbacks and direct calls do not automatically use <code>MeilisearchConverter</code>, infer entity metadata/index settings,
+or wrap native results in mapped <code>SearchHits&lt;T&gt;</code>. SDK method signatures, model types, and version compatibility
+remain part of native access. See <a href="client-configuration.html#meilisearch.clients.native-boundary" class="xref page">Native Client Boundary</a>
+for the intentionally retained SDK inheritance. This does not promise SDK task models in ordinary operation failure APIs
+or add a general-purpose task lifecycle API.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="meilisearch.operations.kotlin"><a class="anchor" href="#meilisearch.operations.kotlin"></a>Kotlin Extensions</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -767,7 +885,7 @@ from a manually issued search.</p>
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      0.12.1-SNAPSHOT
+      0.13.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
@@ -1079,6 +1197,6 @@ from a manually issued search.</p>
 <script src="../_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.12.1" data-page-generation="0.12-SNAPSHOT" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.13.1" data-page-generation="0.13-SNAPSHOT" data-page-component="data-meilisearch"></script>
   </body>
 </html>

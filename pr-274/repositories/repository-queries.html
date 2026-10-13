@@ -19,9 +19,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.12.1">
-    <meta name="generation" content="0.12-SNAPSHOT">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.12-SNAPSHOT/repositories/repository-queries.html">
+    <meta name="version" content="0.13.1">
+    <meta name="generation" content="0.13-SNAPSHOT">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.13-SNAPSHOT/repositories/repository-queries.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -248,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.12.1">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.13.1">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.12.1-SNAPSHOT</span>
+  <span class="version">0.13.1-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -585,7 +585,8 @@
 <div class="sect2">
 <h3 id="_method_return_types"><a class="anchor" href="#_method_return_types"></a>Method Return Types</h3>
 <div class="paragraph">
-<p>A finder method may return the repository&#8217;s domain type <code>T</code> directly, or one flat container: <code>Optional&lt;T&gt;</code>, <code>List&lt;T&gt;</code>, <code>Iterable&lt;T&gt;</code>, or <code>Page&lt;T&gt;</code>. Entity subtypes, projections, and nested containers are rejected. Entity and <code>Optional</code> methods require at most one match. When no hit matches, an entity method returns <code>null</code> by default; if its repository package uses Spring&#8217;s <code>@NonNullApi</code>, an unannotated entity method instead throws <code>EmptyResultDataAccessException</code>, while an explicitly <code>@Nullable</code> method may return <code>null</code>. <code>Optional</code> returns the sole hit or <code>Optional.empty()</code>. Either single-result form throws <code>IncorrectResultSizeDataAccessException</code> if multiple hits match. <code>List</code> and <code>Iterable</code> contain matching entity content.</p>
+<p>A finder method may return the repository&#8217;s domain type <code>T</code> directly, or one flat container: <code>Optional&lt;T&gt;</code>, <code>List&lt;T&gt;</code>, <code>Iterable&lt;T&gt;</code>, or <code>Page&lt;T&gt;</code>. Entity subtypes, projections, and nested containers are rejected. Entity and <code>Optional</code> methods require at most one match. When no hit matches, an entity method returns <code>null</code> by default; if its repository package uses Spring&#8217;s <code>@NonNullApi</code>, an unannotated entity method instead throws <code>EmptyResultDataAccessException</code>, while an explicitly <code>@Nullable</code> method may return <code>null</code>. <code>Optional</code> returns the sole hit or <code>Optional.empty()</code>. Either single-result form throws <code>IncorrectResultSizeDataAccessException</code> if multiple hits match. <code>List</code> and <code>Iterable</code> contain matching entity content.
+Inherited repository type variables are resolved in the concrete repository&#8217;s domain context. Method-level type variables are rejected, including inside a container, because the finder can only materialize the repository&#8217;s exact domain type.</p>
 </div>
 </div>
 <div class="sect2">
@@ -717,7 +718,7 @@ class ProductSearch {
 <p>Generic parameters and result types inherited from a repository base interface are resolved against the concrete repository&#8217;s type arguments before validation. The resolved types must still fit the supported binding and result forms; a parameter explicitly declared as <code>Serializable</code>, for example, does not become supported just because the caller supplies a string.</p>
 </div>
 <div class="paragraph">
-<p>Method-level result variables, such as <code>&lt;S extends Product&gt; Optional&lt;S&gt;</code>, are not concrete result declarations and are rejected even when their upper bound is the repository domain type. The repository materializes its fixed domain type; callers cannot select a different subtype through a method type argument.</p>
+<p>Method-level result variables, such as <code>&lt;S extends Product&gt; Optional&lt;S&gt;</code> or <code>&lt;S extends Product&gt; List&lt;? extends S&gt;</code>, are not concrete result declarations and are rejected even when their upper bound is the repository domain type. This restriction also applies to variables nested in wildcard bounds, generic owners, or array components. The repository materializes its fixed domain type; callers cannot select a different subtype through a method type argument. Concrete domain wildcards and inherited repository type variables remain supported when they resolve to a supported result form.</p>
 </div>
 <div class="sect2">
 <h3 id="_parameter_binding"><a class="anchor" href="#_parameter_binding"></a>Parameter Binding</h3>
@@ -732,12 +733,15 @@ Control characters and literal backslash escape sequences remain distinct filter
 </div>
 <div class="paragraph">
 <p>Supported value positions include comparison right-hand sides, both bounds of <code>price ?0 TO ?1</code>, <code>STARTS WITH</code> and <code>CONTAINS</code> operands, scalar entries in <code>category IN [?0, ?1]</code>, and complete flat collections/arrays in <code>category IN ?0</code> or <code>category NOT IN ?0</code>.
+Collection and array element declarations must support scalar binding. Known unsupported element types, including domain objects, nested collections, and arrays of collections or arrays, fail during repository creation. Inherited generic element types are resolved against the repository interface before this check. Raw collections, unresolved type variables, and <code>Object</code> element declarations retain runtime value validation.
 Numeric placeholders are also supported in <code>_geoRadius</code>, <code>_geoBoundingBox</code>, and <code>_geoPolygon</code> arguments.
 This binding support does not enable experimental operators or emulate operators missing from the server version.</p>
 </div>
 <div class="paragraph">
 <p>Boolean and finite standard numeric values are emitted as native literals.
 <code>BigInteger</code> and <code>BigDecimal</code> are supported; <code>Date</code> values use epoch milliseconds.
+Numeric binding preserves the literal&#8217;s integer precision and decimal scale without converting through floating point; this does not change Meilisearch&#8217;s own numeric storage or comparison semantics.
+<code>Number</code> parameter declarations are supported, but runtime numeric values must have one of the exact standard boxed primitive, <code>BigInteger</code>, or <code>BigDecimal</code> classes. Custom numeric subclasses are rejected rather than trusting their string representation as filter syntax.
 Strings, characters, enum names, temporal values, and UUIDs are quoted.
 These are native literal representations: the binder does not infer a property&#8217;s type from the filter string.
 Null values, non-finite numbers, unsupported value types, empty collections/arrays, null collection elements, and nested collections are rejected before searching.
@@ -748,7 +752,7 @@ Unlike derived <code>NotIn</code>, a declared <code>NOT IN</code> with an empty 
 A q-only search that binds to blank text is rejected rather than becoming an unrestricted placeholder search. Blank search text is allowed when the declaration also supplies a filter.</p>
 </div>
 <div class="paragraph">
-<p>Malformed placeholders (including <code>?name</code>, <code>?-1</code>, a bare <code>?</code>, or a marker using non-ASCII digits), invalid placeholder positions, out-of-range indices, special-parameter references, incompatible declared parameter types, and unused bindable parameters fail during repository creation.
+<p>Malformed placeholders (including <code>?name</code>, <code>?-1</code>, a bare <code>?</code>, or a marker using non-ASCII digits), invalid placeholder positions, out-of-range indices, special-parameter references, incompatible declared parameter types, and unused bindable parameters fail during repository creation. A non-ASCII digit immediately following an ASCII index, such as the Arabic-Indic digit in <code>?0٠</code>, is also invalid; this includes supplementary Unicode digits. Literal Unicode text separated from the index and runtime argument text are not restricted by the placeholder digit rule.
 A <code>?</code> outside a quoted filter literal is placeholder syntax; placeholders inside quoted filter literals are not supported.
 The binder checks substitution boundaries, not the entire server query language: actual filter syntax, operator availability, and index settings are validated by Meilisearch.</p>
 </div>
@@ -769,7 +773,7 @@ The binder checks substitution boundaries, not the entire server query language:
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Repository creation</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Conflicting <code>value</code>/<code>filter</code> aliases, an empty declaration, malformed or out-of-range placeholders, references to special parameters, unused bindable parameters, unsupported declared return types, or a missing declaration under <code>USE_DECLARED_QUERY</code> fail while the repository is created.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Conflicting <code>value</code>/<code>filter</code> aliases, an empty declaration, malformed or out-of-range placeholders, references to special parameters, unused bindable parameters, incompatible declared scalar or collection element types, unsupported declared return types, or a missing declaration under <code>USE_DECLARED_QUERY</code> fail while the repository is created.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Method invocation, before the search request</p></td>
@@ -1007,7 +1011,7 @@ import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      0.12.1-SNAPSHOT
+      0.13.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
@@ -1319,6 +1323,6 @@ import io.vanslog.spring.data.meilisearch.core.query.BasicQuery;
 <script src="../_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.12.1" data-page-generation="0.12-SNAPSHOT" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.13.1" data-page-generation="0.13-SNAPSHOT" data-page-component="data-meilisearch"></script>
   </body>
 </html>
