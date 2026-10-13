@@ -100,6 +100,12 @@ If you use `mvn` instead, Maven 3.9.6 is the version pinned by this project's wr
 
 _Also see link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] if you wish to submit pull requests._
 
+=== Continuous deployment
+
+Pushes to `main` and `develop` run `.github/workflows/cd.yaml`.
+The workflow uses the bundled Maven Wrapper, matching the Maven version used by CI and local builds instead of the changing Maven installation on the hosted runner.
+Verify publishing compatibility when changing the wrapper's Maven version.
+
 === Building reference documentation
 
 Build the authoring/PR preview documentation from the checked-out HEAD with Maven:
