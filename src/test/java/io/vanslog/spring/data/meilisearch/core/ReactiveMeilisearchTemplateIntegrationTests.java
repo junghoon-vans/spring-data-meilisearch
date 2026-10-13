@@ -216,8 +216,13 @@ class ReactiveMeilisearchTemplateIntegrationTests {
 		ReactiveMeilisearchOperations mappedOperations = new ReactiveMeilisearchTemplate(clientConfiguration,
 				operations.getMeilisearchConverter(), applicationMapper);
 
+		deleteIndexIfExists(DOCUMENT_INDEX);
+		createIndex(DOCUMENT_INDEX, "key");
 		mappedOperations.applySettings(ReactiveEntry.class).block(Duration.ofSeconds(30));
 
+		var settings = meilisearchClient.index(DOCUMENT_INDEX).getSettings();
+		assertThat(settings.getFilterableAttributes()).containsExactly("category");
+		assertThat(settings.getSortableAttributes()).containsExactly("rank");
 		assertThat(applicationMapper.readTree(applicationMapper.writeValueAsString(new NullableApplicationValue(null))))
 				.isEqualTo(applicationMapper.readTree("{\"value\":null}"));
 	}

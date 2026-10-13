@@ -33,3 +33,8 @@ The default container image is pinned to `v1.54.0` by `@MeilisearchTest`.
 `SortableMeilisearchRepositoryIntegrationTests` runs against `v1.16.0`, the earliest server version exercised by the sorted-listing compatibility test; other operations have their own server-version requirements.
 Give tests for different server versions distinct `@ContextConfiguration` configuration types
 so Spring does not reuse a context bound to another container.
+
+When testing settings application, recreate the fixture index before the call under test if setup already applied settings.
+Await task completion and read back the expected filterable and sortable attributes.
+Reading an already-configured index can conceal a missing settings write.
+Settings readback verifies persisted state, not the submitted JSON; verify null omission at the transport or serialization boundary separately.
