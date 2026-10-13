@@ -60,6 +60,9 @@ Set `spring-data-meilisearch.version` in your POM to a published version from th
 </dependency>
 ----
 
+Reactor Core is an optional dependency and is not added transitively to consuming applications.
+Blocking-only applications do not need to add Reactor.
+
 To use a development snapshot, set the dependency version property to the *exact* published `-SNAPSHOT` version and add the Central snapshots repository to your Maven `<repositories>`:
 
 [source,xml]
