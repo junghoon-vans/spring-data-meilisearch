@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import io.vanslog.spring.data.meilisearch.annotations.Document;
 import io.vanslog.spring.data.meilisearch.annotations.Setting;
 import io.vanslog.spring.data.meilisearch.consumer.UnannotatedMovieRepository;
+import io.vanslog.spring.data.meilisearch.consumer.queryvalidation.ConflictingAliasRepository;
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
@@ -29,6 +30,7 @@ import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingC
 import io.vanslog.spring.data.meilisearch.core.query.BaseQuery;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+import io.vanslog.spring.data.meilisearch.repository.Query;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -54,7 +56,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.data.repository.query.QueryCreationException;
 
 /**
@@ -360,27 +361,21 @@ class MeilisearchRepositoryFactoryUnitTests {
 	}
 
 	@Test
-	void shouldRejectDeclaredAndNamedQueriesDuringRepositoryBootstrap() {
+	void shouldRejectForeignQueryAnnotationsDuringRepositoryBootstrap() {
 		assertThatThrownBy(() -> repositoryFactory.getRepository(DeclaredQueryRepository.class))
-				.hasMessageContaining("Declared and named Meilisearch repository queries are not supported")
-				.hasMessageContaining("findByTitle");
+				.isInstanceOf(QueryCreationException.class);
+	}
 
-		repositoryFactory.setNamedQueries(new NamedQueries() {
-
-			@Override
-			public boolean hasQuery(String queryName) {
-				return queryName.endsWith(".findByTitle");
-			}
-
-			@Override
-			public String getQuery(String queryName) {
-				return "title = ?0";
-			}
-		});
-
-		assertThatThrownBy(() -> repositoryFactory.getRepository(NamedQueryRepository.class))
-				.hasMessageContaining("Declared and named Meilisearch repository queries are not supported")
-				.hasMessageContaining("findByTitle");
+	@Test
+	void shouldRejectInvalidDeclaredSearchContractsDuringRepositoryBootstrap() {
+		assertThatThrownBy(() -> repositoryFactory.getRepository(ConflictingAliasRepository.class))
+				.isInstanceOf(RuntimeException.class);
+		assertThatThrownBy(() -> repositoryFactory.getRepository(EmptyDeclaredRepository.class))
+				.isInstanceOf(QueryCreationException.class);
+		assertThatThrownBy(() -> repositoryFactory.getRepository(DeclaredCountRepository.class))
+				.isInstanceOf(QueryCreationException.class);
+		assertThatThrownBy(() -> repositoryFactory.getRepository(DeclaredSinglePageableRepository.class))
+				.isInstanceOf(QueryCreationException.class);
 	}
 
 	@Test
@@ -457,7 +452,7 @@ class MeilisearchRepositoryFactoryUnitTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@QueryAnnotation
-	@interface Query {
+	@interface ForeignQuery {
 
 		String value();
 	}
@@ -644,14 +639,29 @@ class MeilisearchRepositoryFactoryUnitTests {
 	@NoRepositoryBean
 	interface DeclaredQueryRepository extends MeilisearchRepository<QueryDocument, String> {
 
-		@Query("title = ?0")
+		@ForeignQuery("title = ?0")
 		QueryDocument findByTitle(String title);
 	}
 
 	@NoRepositoryBean
-	interface NamedQueryRepository extends MeilisearchRepository<QueryDocument, String> {
+	interface EmptyDeclaredRepository extends MeilisearchRepository<QueryDocument, String> {
 
-		QueryDocument findByTitle(String title);
+		@Query
+		List<QueryDocument> search();
+	}
+
+	@NoRepositoryBean
+	interface DeclaredCountRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		@Query("title = ?0")
+		long countByTitle(String title);
+	}
+
+	@NoRepositoryBean
+	interface DeclaredSinglePageableRepository extends MeilisearchRepository<QueryDocument, String> {
+
+		@Query("title = ?0")
+		QueryDocument search(String title, Pageable pageable);
 	}
 
 	@NoRepositoryBean

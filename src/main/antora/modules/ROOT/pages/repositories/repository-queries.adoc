@@ -1,7 +1,7 @@
 [[meilisearch.repositories.queries]]
 = Query Methods
 
-Repository query methods can derive Meilisearch filters from method names. The module supports a limited, search-backed finder subset and filter-based count, existence, and delete methods; use `MeilisearchOperations` for queries that need explicit search composition.
+Repository query methods can derive Meilisearch filters from method names or declare native filter and search-text templates. The module supports search-backed finders and derived filter-based count, existence, and delete methods; use `MeilisearchOperations` for dynamic search composition and richer search options.
 
 [[meilisearch.repositories.queries.derived]]
 == Query Creation
@@ -94,11 +94,14 @@ These methods use the same supported predicates listed above, including grouped 
 
 === Method Return Types
 
-A finder method may return one entity, `Optional<Entity>`, `List<Entity>`, `Iterable<Entity>`, or `Page<Entity>`. Entity and `Optional` methods require at most one match. When no hit matches, an entity method returns `null` by default; if its repository package uses Spring's `@NonNullApi`, an unannotated entity method instead throws `EmptyResultDataAccessException`, while an explicitly `@Nullable` method may return `null`. `Optional` returns the sole hit or `Optional.empty()`. Either single-result form throws `IncorrectResultSizeDataAccessException` if multiple hits match. `List` and `Iterable` contain matching entity content.
+A finder method may return the repository's domain type `T` directly, or one flat container: `Optional<T>`, `List<T>`, `Iterable<T>`, or `Page<T>`. Entity subtypes, projections, and nested containers are rejected. Entity and `Optional` methods require at most one match. When no hit matches, an entity method returns `null` by default; if its repository package uses Spring's `@NonNullApi`, an unannotated entity method instead throws `EmptyResultDataAccessException`, while an explicitly `@Nullable` method may return `null`. `Optional` returns the sole hit or `Optional.empty()`. Either single-result form throws `IncorrectResultSizeDataAccessException` if multiple hits match. `List` and `Iterable` contain matching entity content.
+Inherited repository type variables are resolved in the concrete repository's domain context. Method-level type variables are rejected, including inside a container, because the finder can only materialize the repository's exact domain type.
 
 === Sorting and Paging
 
-For finder methods, static ordering uses an `OrderBy` suffix, for example `findByGenreOrderByRatingDesc(String genre)`. A `Sort` parameter provides runtime ordering, and a `Pageable` parameter provides an offset, limit, and optional sort. A `Page` contains the requested window and exposes the total reported by Meilisearch. Without a `Pageable`, `List` and `Iterable` methods fetch all matching hits in chunks and require an exact total; they fail rather than return a partial collection if the index's `pagination.maxTotalHits` cap (1,000 by default) prevents complete retrieval. Configure `@Pagination(maxTotalHits = ...)` when the application needs a different search limit.
+For finder methods, static ordering uses an `OrderBy` suffix, for example `findByGenreOrderByRatingDesc(String genre)`. A `Sort` parameter provides runtime ordering, and a `Pageable` parameter provides an offset, limit, and optional sort.
+A paged `Page<Entity>` uses the total reported by the same Meilisearch paginated search response; it does not run a separate exact-count query. `pagination.maxTotalHits` limits the search result window that Meilisearch can return, even when the reported total is larger. A `Page` method must declare a `Pageable` parameter.
+A paged `List` or `Iterable` with `Pageable` returns only that requested window and has no total. An unpaged `List` or `Iterable` fetches all matching hits in chunks of 1,000 and requires Meilisearch to report an exact total. It fails rather than return partial content if the server's `pagination.maxTotalHits` cap prevents complete retrieval, if the exact total changes while fetching, or if Meilisearch does not report an exact total. Configure `@Pagination(maxTotalHits = ...)` when the application needs a different search limit; the default cap is 1,000. Passing `Pageable.unpaged()` requests the complete-result behavior; an unpaged `Page` reports the number of fetched results.
 
 === Index Settings
 
@@ -131,9 +134,189 @@ interface MovieRepository extends MeilisearchRepository<Movie, String> {
 
 Those index settings must be applied to Meilisearch before the search runs. See xref:meilisearch/settings.adoc[Settings] for annotation and programmatic configuration.
 
+[[meilisearch.repositories.queries.declared]]
+== Declared Searches
+
+Use `io.vanslog.spring.data.meilisearch.repository.Query` when a method name would be unwieldy or the search needs both full-text terms and explicit filters. The annotation's `value` and `filter` attributes are aliases for a native Meilisearch filter template; `q` is a separate full-text search template. The primary string is a filter expression, not a search term or a JSON search request.
+
+[source,java]
+----
+import java.util.Collection;
+import java.util.List;
+
+import io.vanslog.spring.data.meilisearch.annotations.Document;
+import io.vanslog.spring.data.meilisearch.annotations.Setting;
+import io.vanslog.spring.data.meilisearch.repository.MeilisearchRepository;
+import io.vanslog.spring.data.meilisearch.repository.Query;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+@Document(indexUid = "products")
+@Setting(
+    filterableAttributes = { "category", "price", "active" },
+    searchableAttributes = { "title" },
+    sortableAttributes = { "price" }
+)
+class Product {
+  @Id String id;
+  String title;
+  String category;
+  int price;
+  boolean active;
+}
+
+interface ProductRepository extends MeilisearchRepository<Product, String> {
+
+  @Query("category = ?0 AND price <= ?1")
+  List<Product> affordable(String category, int maximumPrice);
+
+  @Query(q = "?0", filter = "category = ?1 AND price <= ?2")
+  Page<Product> search(String text, String category, int maximumPrice, Pageable pageable);
+
+  @Query(q = "?0")
+  List<Product> fullText(String text);
+
+  @Query(filter = "category IN ?0 AND active = true")
+  List<Product> inCategories(Collection<String> categories, Sort sort);
+
+  @Query(filter = "category = ?0 AND price <= ?2")
+  List<Product> byCategoryAndPrice(String category, Pageable pageable, int maximumPrice);
+}
+
+class ProductSearch {
+
+  private final ProductRepository products;
+
+  ProductSearch(ProductRepository products) {
+    this.products = products;
+  }
+
+  Page<Product> findAffordableBooks() {
+    return products.search("sci-fi?", "books", 25, PageRequest.of(0, 20));
+  }
+}
+----
+
+The example's `@Setting` declares the index attributes required by its filters, full-text search, and sorting. Repository creation can apply those settings; see xref:repositories/meilisearch-repositories.adoc#meilisearch.repositories.autocreation[Automatic Settings Application]. The invocation passes `?` inside runtime search text. It remains text because placeholders are parsed from the template before values are bound.
+
+`@Query("category = ?0")` and `@Query(filter = "category = ?0")` are equivalent aliases. To use the named form of the annotated `search` method above, remove its annotation and load the matching `Product.search` filter and `Product.search.q` text templates shown below; the same invocation binds the same `q` and filter values.
+
+An annotated search replaces query derivation: method-name predicates, count/exists/delete prefixes, and static `OrderBy` suffixes do not contribute to it.
+
+Declared searches use `MeilisearchOperations` and the existing converter and finder execution path. They support only flat result forms using the repository's domain type `T`: `T`, `Optional<T>`, `List<T>`, `Iterable<T>`, and `Page<T>`. Return declarations using an entity subtype, projections, or nested container types are not supported. Use a `Pageable` parameter for a `Page` result. Runtime `Sort` and `Pageable` remain supported for collection/page finders; single-result finders do not accept `Pageable`. Declared count, exists, delete, streams, `Slice`, `Limit`, and scrolling are not supported.
+
+Generic parameters and result types inherited from a repository base interface are resolved against the concrete repository's type arguments before validation. The resolved types must still fit the supported binding and result forms; a parameter explicitly declared as `Serializable`, for example, does not become supported just because the caller supplies a string.
+
+Method-level result variables, such as `<S extends Product> Optional<S>` or `<S extends Product> List<? extends S>`, are not concrete result declarations and are rejected even when their upper bound is the repository domain type. This restriction also applies to variables nested in wildcard bounds, generic owners, or array components. The repository materializes its fixed domain type; callers cannot select a different subtype through a method type argument. Concrete domain wildcards and inherited repository type variables remain supported when they resolve to a supported result form.
+
+=== Parameter Binding
+
+Positional placeholders use a `?` followed by one or more ASCII digits, such as `?0` or `?12`, and refer to zero-based *method parameter positions*, including positions occupied by special parameters. Unlike the JPA reference's `?1` example, the index here is zero-based and is not the ordinal among bindable parameters. `Sort`, `Pageable`, and other special parameters cannot be bound. In the example, `byCategoryAndPrice(String category, Pageable pageable, int maximumPrice)` uses `?0` and `?2`; `?1` names the special `Pageable` and is invalid. Every bindable method argument must appear in the filter or search-text template.
+
+Filter placeholders must occupy complete value positions; do not quote them or interpolate them into field names, operators, or existing string literals.
+For example, use `category = ?0`, not `category = "?0"` or `?0 = true`.
+Strings are quoted and escaped so a value such as `x" OR active = true` remains one literal rather than adding a condition.
+Control characters and literal backslash escape sequences remain distinct filter values.
+
+Supported value positions include comparison right-hand sides, both bounds of `price ?0 TO ?1`, `STARTS WITH` and `CONTAINS` operands, scalar entries in `category IN [?0, ?1]`, and complete flat collections/arrays in `category IN ?0` or `category NOT IN ?0`.
+Collection and array element declarations must support scalar binding. Known unsupported element types, including domain objects, nested collections, and arrays of collections or arrays, fail during repository creation. Inherited generic element types are resolved against the repository interface before this check. Raw collections, unresolved type variables, and `Object` element declarations retain runtime value validation.
+Numeric placeholders are also supported in `_geoRadius`, `_geoBoundingBox`, and `_geoPolygon` arguments.
+This binding support does not enable experimental operators or emulate operators missing from the server version.
+
+Boolean and finite standard numeric values are emitted as native literals.
+`BigInteger` and `BigDecimal` are supported; `Date` values use epoch milliseconds.
+Numeric binding preserves the literal's integer precision and decimal scale without converting through floating point; this does not change Meilisearch's own numeric storage or comparison semantics.
+`Number` parameter declarations are supported, but runtime numeric values must have one of the exact standard boxed primitive, `BigInteger`, or `BigDecimal` classes. Custom numeric subclasses are rejected rather than trusting their string representation as filter syntax.
+Strings, characters, enum names, temporal values, and UUIDs are quoted.
+These are native literal representations: the binder does not infer a property's type from the filter string.
+Null values, non-finite numbers, unsupported value types, empty collections/arrays, null collection elements, and nested collections are rejected before searching.
+Unlike derived `NotIn`, a declared `NOT IN` with an empty bound collection does not silently remove the condition.
+
+Search-text templates are scanned for positional placeholders: every `?` in `q` must begin a placeholder with ASCII digits, such as `?0`; there is no quoted-literal exception. Put a literal question mark in the bound argument instead, as in the invocation above. Runtime text is inserted after template parsing and its `?` characters are not interpreted again. Search-text values are not filter-quoted and retain Meilisearch's normal full-text syntax.
+A q-only search that binds to blank text is rejected rather than becoming an unrestricted placeholder search. Blank search text is allowed when the declaration also supplies a filter.
+
+Malformed placeholders (including `?name`, `?-1`, a bare `?`, or a marker using non-ASCII digits), invalid placeholder positions, out-of-range indices, special-parameter references, incompatible declared parameter types, and unused bindable parameters fail during repository creation. A non-ASCII digit immediately following an ASCII index, such as the Arabic-Indic digit in `?0٠`, is also invalid; this includes supplementary Unicode digits. Literal Unicode text separated from the index and runtime argument text are not restricted by the placeholder digit rule.
+A `?` outside a quoted filter literal is placeholder syntax; placeholders inside quoted filter literals are not supported.
+The binder checks substitution boundaries, not the entire server query language: actual filter syntax, operator availability, and index settings are validated by Meilisearch.
+
+The failure boundary depends on what is wrong:
+
+[cols="1,3", options="header"]
+|===
+|When |Examples
+
+|Repository creation
+|Conflicting `value`/`filter` aliases, an empty declaration, malformed or out-of-range placeholders, references to special parameters, unused bindable parameters, incompatible declared scalar or collection element types, unsupported declared return types, or a missing declaration under `USE_DECLARED_QUERY` fail while the repository is created.
+
+|Method invocation, before the search request
+|Invalid runtime values such as `null`, an empty or nested collection, an unsupported value type, a non-finite number, or blank text for a q-only template are rejected by binding.
+
+|Meilisearch request
+|The complete filter expression, field availability/settings, server-supported operators, and server-version requirements are checked by Meilisearch. Placeholder validation does not parse or emulate the full filter language; unsupported syntax or unavailable server features fail at request time.
+|===
+
+
+=== Field Names and Settings
+
+Native filter templates refer to *stored Meilisearch index field names*, including dotted nested paths.
+The module does not rewrite Java property names inside a filter string.
+Runtime sort properties continue to use the repository's Java-property mapping.
+Fields used in filters must be configured as filterable, fields used in sorting as sortable, and full-text search uses the index's searchable attributes.
+
+=== Named Searches
+
+Load named templates from a properties resource using the existing `namedQueriesLocation` configuration:
+
+[source,java]
+----
+@EnableMeilisearchRepositories(
+    basePackages = "com.example.products",
+    namedQueriesLocation = "classpath:meilisearch-named-queries.properties")
+class RepositoryConfig {}
+----
+
+The key `<DomainSimpleName>.<methodName>` stores the filter template.
+An optional companion key ending in `.q` stores the search-text template.
+Either key can declare a search, and both use the same parameter binding and finder rules as `@Query`.
+
+[source,properties]
+----
+Product.search=category = ?1 AND price <= ?2
+Product.search.q=?0
+Product.inCategories=category IN ?0 AND active = true
+Product.fullText.q=?0
+----
+
+Use normal Java properties escaping in the resource.
+Overloaded methods share the same named-query key; each method must be compatible with that template.
+Annotations take precedence over named templates under declared-query lookup.
+
+
 == Query Lookup Strategies
 
-Repository configuration continues to expose `queryLookupStrategy` and `namedQueriesLocation` for Spring Data compatibility. Use `CREATE` or `CREATE_IF_NOT_FOUND` for derived methods; `USE_DECLARED_QUERY` cannot resolve them, and declared or named queries are rejected in all lookup modes. See xref:repositories/configuration.adoc[Repository Configuration].
+The strategy names follow Spring Data Commons' https://docs.spring.io/spring-data/commons/reference/repositories/query-methods-details.html#repositories.query-methods.query-lookup-strategies[query lookup strategy contract], with this module's declaration sources and precedence:
+
+[cols="1,2,2", options="header"]
+|===
+|Strategy |Resolution order |If no declaration matches
+
+|`CREATE_IF_NOT_FOUND` (default)
+|Annotated `@Query`, then named templates, then method-name derivation.
+|Derives a supported query from the method name.
+
+|`USE_DECLARED_QUERY`
+|Annotated `@Query`, then named templates.
+|Fails while the repository is created; it does not derive a query.
+
+|`CREATE`
+|Method-name derivation only; annotations and named templates are ignored.
+|Attempts to derive a supported query from the method name.
+|===
+
+An invalid selected declaration fails repository creation rather than falling through to a named template or derived query. See xref:repositories/configuration.adoc[Repository Configuration].
 
 [[meilisearch.repositories.queries.unsupported]]
 == Unsupported Query Methods
@@ -142,15 +325,23 @@ The supported predicate and return-type matrix is intentionally narrow. The repo
 
 * `Containing`, `EndingWith`, `Like`, and `Regex` are unsupported text-pattern predicates. `Containing` would require the experimental `CONTAINS` filter, which is not enabled by this module. Full-text search through `MeilisearchOperations` with a `BasicQuery` is a different, tokenized search mode, not an equivalent literal field-prefix or substring filter.
 * Filter-based count, existence, and delete methods are supported only through the patterns and return types listed above; they do not accept sorting or paging. The standard repository `count()` and delete methods are separate operations and are unchanged.
-* Methods annotated with repository `@Query` and named-query-backed methods are not supported.
+* Declared searches do not accept raw request JSON, Elasticsearch Query DSL, SpEL, or named placeholders. Use `MeilisearchOperations` and the existing Query models for advanced request options.
 * Interface or class projections, `Slice`, streams, scalar-valued finder results, and return types outside the supported method matrix are not supported.
+
+These syntaxes are store-specific rather than interchangeable:
+
+* Spring Data JPA's `@Query` reference describes JPQL and native SQL (https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html#jpa.query-methods.at-query[JPA query methods]).
+* Spring Data MongoDB documents JSON-based repository queries (https://docs.spring.io/spring-data/mongodb/reference/mongodb/repositories/query-methods.html#mongodb.repositories.queries.json-based[MongoDB JSON-based query methods]).
+* Spring Data Elasticsearch documents JSON query bodies and SpEL support (https://docs.spring.io/spring-data/elasticsearch/reference/elasticsearch/repositories/elasticsearch-repository-queries.html#elasticsearch.query-methods.at-query[Elasticsearch `@Query`]).
+
+Spring Data Meilisearch's `@Query` uses the native filter and `q` templates described on this page instead.
 
 For search modes outside this subset, use `MeilisearchOperations` directly; it exposes explicit Meilisearch query construction without bypassing the operations abstraction.
 
 [[meilisearch.repositories.queries.scope]]
 == Using MeilisearchOperations for Custom Queries
 
-Use `MeilisearchRepository` for the built-in CRUD, ID lookup, collection listing, sorting, pageable methods, and the supported derived finder, count, existence, and filter-delete methods. Use `MeilisearchOperations` for search features that need an explicit Meilisearch query or richer search result data, such as facets, similar-document search, or federated multi-search.
+Use `MeilisearchRepository` for the built-in CRUD, ID lookup, collection listing, sorting, pageable methods, declared searches, and supported derived finder, count, existence, and filter-delete methods. Use `MeilisearchOperations` for dynamically composed searches or richer search result data, such as facets, similar-document search, or federated multi-search.
 
 For a mapped domain type such as `Movie`, inject `MeilisearchOperations` when you need to compose a search query directly:
 
@@ -175,7 +366,7 @@ class MovieSearchService {
 }
 ----
 
-This service-level call returns Meilisearch search hits. Repository derived queries provide a small, filter-oriented subset for common lookups; use `MeilisearchOperations` when search needs free-text ranking, facets, similar-document search, or federated multi-search.
+This service-level call returns Meilisearch search hits. Repository query methods provide derived filters and declared filter/full-text searches with finder return forms; use `MeilisearchOperations` when search needs dynamic composition, advanced options, facets, similar-document search, or federated multi-search.
 
 [[meilisearch.repositories.queries.notes]]
 == Base Repository Paging, Sorting, and Result Limits

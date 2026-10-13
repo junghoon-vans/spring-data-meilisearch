@@ -7,7 +7,7 @@
 _Spring Data Meilisearch provides client connectivity, object mapping, blocking template-style operations, and repository support for the Meilisearch search engine._
 
 Start with xref:getting-started.adoc[Getting Started], then use the Meilisearch and Repositories chapters for their supported APIs and limits.
-Unlike some other Spring Data stores, this module does not provide reactive operations, derived repository finder methods, or Spring Boot auto-configuration.
+Repositories support derived finder methods and declared `@Query` searches. This module does not provide reactive operations or Spring Boot auto-configuration.
 
 [horizontal]
 xref:getting-started.adoc[Getting Started] :: Dependency setup, Java configuration, and first repository usage.
