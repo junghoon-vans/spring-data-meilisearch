@@ -658,33 +658,74 @@ Flux&lt;Movie&gt; movies = operations.findAll(Movie.class, Sort.by("title"));</c
 <h2 id="meilisearch.reactive-operations.search"><a class="anchor" href="#meilisearch.reactive-operations.search"></a>Search Operations</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>search(query, type)</code>, both <code>multiSearch</code> variants, <code>facetSearch(query, type)</code>, and <code>similarSearch(query, type)</code> return a finite <code>Mono&lt;SearchHits&lt;T&gt;&gt;</code>.
-Facet search uses <code>SearchHits&lt;FacetHit&gt;</code>.
-Queries and mapped hits use the existing <a href="template.html#meilisearch.operations.search" class="xref page">search model</a>.
-Single-search results retain total-hit and facet metadata.
-Non-federated multi-search flattens hits in query order while retaining per-query metadata; neither multi-search variant invents an exact aggregate total (<code>TotalHitsRelation.OFF</code>).</p>
+<p><code>search(query, type)</code>, both <code>multiSearch</code> variants, <code>facetSearch(query, type)</code>, and <code>similarSearch(query, type)</code> return a
+finite <code>Mono&lt;SearchHits&lt;T&gt;&gt;</code>. Facet search uses <code>SearchHits&lt;FacetHit&gt;</code>. Queries and mapped hits use the existing
+<a href="template.html#meilisearch.operations.search" class="xref page">search model</a>.</p>
 </div>
 <div class="paragraph">
-<p>Use the library&#8217;s <code>core.federation.Federation</code> and <code>FacetMergeOptions</code> records for reactive federation options:</p>
+<p><code>SearchHits#getResponseMetadata()</code> exposes an immutable, ordered entry per captured server response:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>single search, facet search, similar search, and federated multi-search return one entry;</p>
+</li>
+<li>
+<p>non-federated multi-search returns one entry for each query, including queries that return no hits;</p>
+</li>
+<li>
+<p><code>getQueryIndex()</code>, <code>getFirstHitIndex()</code>, and <code>getHitCount()</code> associate each entry with its position and returned
+range in the flattened <code>SearchHits#getSearchHits()</code> list;</p>
+</li>
+<li>
+<p>each entry retains response processing time, the wire query (or facet query), index uid when present, exact
+<code>totalHits</code>, estimated <code>estimatedTotalHits</code>, and returned <code>page</code>, <code>hitsPerPage</code>, <code>totalPages</code>, <code>offset</code>, and <code>limit</code>;</p>
+</li>
+<li>
+<p>response-level <code>facetDistribution</code>, <code>facetStats</code>, and <code>facetsByIndex</code> remain available even when the hit list is empty.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The entry&#8217;s <code>getTotalHitsRelation()</code> is <code>EQUAL_TO</code> for an exact reported total, <code>ESTIMATED</code> for an estimate, and <code>OFF</code>
+when neither is present. Missing wire fields remain <code>null</code>; they are not inferred from returned hits. <code>hasResponseMetadata()</code>
+distinguishes a captured empty response list from results created without response metadata. Existing blocking result
+constructors do not capture these entries.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Federation federation = new Federation(20, 0,
-        Map.of("movies", List.of("genre")), new FacetMergeOptions(10));
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Mono&lt;SearchHits&lt;Movie&gt;&gt; result = operations.search(query, Movie.class)
+        .doOnNext(searchHits -&gt; {
+            SearchResponseMetadata response = searchHits.getResponseMetadata().get(0);
+            Long exactTotal = response.getTotalHits();
+            Long estimate = response.getEstimatedTotalHits();
 
-Mono&lt;SearchHits&lt;Movie&gt;&gt; hits = operations.multiSearch(queries, federation, Movie.class);</code></pre>
+            if (response.getHitCount() &gt; 0) {
+                SearchHit&lt;Movie&gt; hit = searchHits.getSearchHit(response.getFirstHitIndex());
+                Map&lt;String, Object&gt; formattedFields = hit.getFormattedFields();
+                Double rankingScore = hit.getRankingScore();
+            }
+        });</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Federation <code>limit</code> and <code>offset</code> control the global window; per-query <code>Pageable</code> is not the federation window.
-Shared <code>IndexQuery</code> supports per-index query and weight options.
-Each federated hit retains <code>_federation</code> metadata through <code>SearchHit.getFederation()</code>.</p>
+<p><code>SearchHit#getFormattedFields()</code>, <code>getMatchesPosition()</code>, <code>getRankingScore()</code>, and <code>getRankingScoreDetails()</code> expose
+optional hit-level formatting and ranking fields when the query requested them and Meilisearch returned them. They do not
+replace or mutate mapped entity properties.
+Fields that an entity explicitly models under the reserved wire names also remain available through entity mapping.</p>
 </div>
 <div class="paragraph">
-<p>With <code>mergeFacets</code>, <code>SearchHit.getFacetDistribution()</code> exposes the normal merged distribution.
-Without merging, the same Object-valued accessor exposes <code>{ "facetsByIndex": { "indexUid": { "distribution": &#8230;&#8203;, "stats": &#8230;&#8203; } } }</code>.
-If a server returns both forms, that wrapper additionally contains <code>"facetDistribution"</code>.
-This preserves per-index facet statistics without changing the existing synchronous result types.</p>
+<p><code>SearchHits#getTotalHits()</code> and <code>getTotalHitsRelation()</code> keep their existing aggregate contract. <code>EQUAL_TO</code> means the
+single-search aggregate is the exact reported count; <code>OFF</code> means it is the number of loaded hits, not a total for all
+matches. Both multi-search variants keep aggregate relation <code>OFF</code>. Read exact or estimated totals from each response
+entry instead of summing them: per-query result sets may overlap, so their totals do not represent a count of distinct
+documents.</p>
+</div>
+<div class="paragraph">
+<p>Federation <code>limit</code> and <code>offset</code> control the global window; per-query <code>Pageable</code> is not the federation window. Shared
+<code>IndexQuery</code> supports per-index query and weight options. Each federated hit retains <code>_federation</code> metadata through
+<code>SearchHit#getFederation()</code>. Merged and per-index facet values are available on the response metadata entry; the existing
+per-hit <code>getFacetDistribution()</code> representation remains available for compatibility.</p>
 </div>
 </div>
 </div>
