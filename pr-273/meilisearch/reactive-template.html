@@ -451,6 +451,29 @@ Existing query, result, and mapping types are shared with the synchronous API; t
 </div>
 </div>
 <div class="sect1">
+<h2 id="_reactor_dependency"><a class="anchor" href="#_reactor_dependency"></a>Reactor Dependency</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Reactor Core is optional in the library&#8217;s Maven dependency metadata.
+Applications using reactive operations must declare it directly unless another application dependency already supplies it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;io.projectreactor&lt;/groupId&gt;
+    &lt;artifactId&gt;reactor-core&lt;/artifactId&gt;
+    &lt;version&gt;${reactor.version}&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Set <code>reactor.version</code> to a version aligned with the application&#8217;s Spring Data release train.
+If dependency management already supplies that version, omit the <code>version</code> element.
+Blocking-only applications do not need Reactor.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="meilisearch.reactive-operations.configuration"><a class="anchor" href="#meilisearch.reactive-operations.configuration"></a>Explicit Java Configuration</h2>
 <div class="sectionbody">
 <div class="paragraph">
