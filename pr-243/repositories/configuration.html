@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Repository Configuration :: Spring Data Meilisearch</title>
-    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/repositories/configuration.html">
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -20,9 +19,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.11.0">
-    <meta name="generation" content="0.11">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.11/repositories/configuration.html">
+    <meta name="version" content="0.13.1">
+    <meta name="generation" content="0.13-SNAPSHOT">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.13-SNAPSHOT/repositories/configuration.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -249,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.11.0">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.13.1">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.11.0</span>
+  <span class="version">0.13.1-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -336,7 +335,7 @@
     <a class="nav-link"  href="meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="repository-queries.html">Repository Methods and Limitations</a>
+    <a class="nav-link"  href="repository-queries.html">Query Methods</a>
   </li>
 </ul>
   </li>
@@ -455,8 +454,9 @@ import org.springframework.context.annotation.Configuration;
 
 </span><span class="fold-block">@Configuration
 @EnableMeilisearchRepositories(
-        basePackages = "com.example.movies",
-        meilisearchTemplateRef = "meilisearchTemplate")
+        basePackages = "com.example.products",
+        meilisearchTemplateRef = "meilisearchTemplate",
+        namedQueriesLocation = "classpath:meilisearch-named-queries.properties")
 class RepositoryConfig {
 }</span></code></pre>
 </div>
@@ -494,11 +494,8 @@ repository factory selection, including:</p>
 <p>If no base packages are configured, Spring Data scans the package of the annotated configuration class.</p>
 </div>
 <div class="paragraph">
-<p><code>namedQueriesLocation</code> and <code>queryLookupStrategy</code> are retained on the annotation because they are part of the standard
-Spring Data repository configuration contract.
-Changing those attributes does not enable repository query methods in Spring Data Meilisearch.
-Derived finder methods, declared <code>@Query</code> methods, and named-query-backed methods are rejected during repository
-bootstrap with a Meilisearch-specific message until repository query method support is implemented.</p>
+<p><code>queryLookupStrategy</code> defaults to <code>CREATE_IF_NOT_FOUND</code>: it prefers annotated <code>@Query</code> searches, then named searches, then derives supported predicates from the method name. <code>USE_DECLARED_QUERY</code> requires an annotated or named search; <code>CREATE</code> uses method-name derivation only.
+<code>namedQueriesLocation</code> loads filter templates and optional <code>.q</code> search-text templates from a properties resource. The location is optional when all queries are annotated or derived. See <a href="repository-queries.html" class="xref page">Query Methods</a> for the resolution table, syntax, parameter binding, and lookup precedence.</p>
 </div>
 </div>
 </div>
@@ -560,17 +557,17 @@ The one-argument <code>MeilisearchTemplate</code> constructor provides a default
                       <li class="component">
                         <div>
                           <a class="title" href="../index.html">Spring Data Meilisearch</a>
-                        </div>                        <div class="version-item is-active">
+                        </div>                        <div class="version-item">
                           <div>
                             <button class="version-toggle" type="button">
                               <span></span>
-                              Stable
+                              Snapshot
                             </button>
                           </div>
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      0.11.0
+      0.13.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
@@ -882,6 +879,6 @@ The one-argument <code>MeilisearchTemplate</code> constructor provides a default
 <script src="../_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.11.0" data-page-generation="0.11" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.13.1" data-page-generation="0.13-SNAPSHOT" data-page-component="data-meilisearch"></script>
   </body>
 </html>

@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Client Configuration :: Spring Data Meilisearch</title>
-    <link rel="canonical" href="https://junghoon-vans.github.io/spring-data-meilisearch/meilisearch/client-configuration.html">
     <meta name="generator" content="Antora 3.2.0-alpha.6">
     <script>
 !function (theme, navWidth) {
@@ -20,9 +19,9 @@
     <link rel="stylesheet" href="../_/css/vendor/asciidoctor-tabs.css">
 
     <meta name="antora-ui-version" content="v0.4.25"> 
-    <meta name="version" content="0.11.0">
-    <meta name="generation" content="0.11">
-    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.11/meilisearch/client-configuration.html">
+    <meta name="version" content="0.13.1">
+    <meta name="generation" content="0.13-SNAPSHOT">
+    <meta name="versioned-url" content="https://junghoon-vans.github.io/spring-data-meilisearch/0.13-SNAPSHOT/meilisearch/client-configuration.html">
     <meta name="component" content="data-meilisearch">
     <meta name="latest-version" content="false">
     <link rel="icon" href="../_/img/favicon.ico" type="image/vnd.microsoft.icon">
@@ -249,14 +248,14 @@
 }(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')?.matches && 'dark'))
 </script>
 <div class="body">
-<div class="nav-container" data-component="data-meilisearch" data-version="0.11.0">
+<div class="nav-container" data-component="data-meilisearch" data-version="0.13.1">
   <aside class="nav">
     <div class="panels">
       <div class="nav-panel-menu is-active" data-panel="menu">
         <nav class="nav-menu">
 <div class="context">
   <span class="title">Spring Data Meilisearch</span>
-  <span class="version">0.11.0</span>
+  <span class="version">0.13.1-SNAPSHOT</span>
   <button class="browse-version" id="browse-version">
     <svg
       height="24px"
@@ -336,7 +335,7 @@
     <a class="nav-link"  href="../repositories/meilisearch-repositories.html">Meilisearch Repositories</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link"  href="../repositories/repository-queries.html">Repository Methods and Limitations</a>
+    <a class="nav-link"  href="../repositories/repository-queries.html">Query Methods</a>
   </li>
 </ul>
   </li>
@@ -445,6 +444,23 @@
 </div>
 </div>
 <div class="sect1">
+<h2 id="meilisearch.clients.native-boundary"><a class="anchor" href="#meilisearch.clients.native-boundary"></a>Native Client Boundary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>MeilisearchClient</code> intentionally extends the Meilisearch Java SDK <code>Client</code>. This inheritance is retained as a supported
+low-level boundary, including for 1.0; it is not a reason to make ordinary application access a thin SDK wrapper.
+Prefer <code>MeilisearchOperations</code>, <code>indexOps(&#8230;&#8203;)</code>, <code>instanceOps()</code>, and repositories for regular application work.
+See <a href="template.html#meilisearch.operations.native-access" class="xref page">Native SDK Access</a> for callback and direct-client guarantees.</p>
+</div>
+<div class="paragraph">
+<p>Inherited SDK methods, SDK model types, and native JSON-handler configuration remain coupled to the supported SDK API
+and version. They do not make the entire public API SDK-independent. A future composition change would require a concrete
+driver and an explicit migration for inherited calls, SDK <code>Client</code> assignment/injection, and subclass/override assumptions;
+it is not a prerequisite for synchronous client support or a consequence of evaluating Reactive support.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="meilisearch.clients.javaconfig"><a class="anchor" href="#meilisearch.clients.javaconfig"></a>JavaConfig</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -471,6 +487,30 @@ class MyClientConfig extends MeilisearchConfiguration {
     }
 }</span></code></pre>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="meilisearch.clients.native-client"><a class="anchor" href="#meilisearch.clients.native-client"></a>Native Client Boundary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>MeilisearchClient</code> intentionally extends <code>com.meilisearch.sdk.Client</code>; this low-level inheritance is retained for 1.0.
+JavaConfig and the XML namespace both expose <code>MeilisearchClient</code> as the concrete product type, which remains
+assignable to the SDK <code>Client</code>. For ordinary application data access, prefer <code>MeilisearchOperations</code> (see
+<a href="template.html" class="xref page">Operations</a>), <code>indexOps(&#8230;&#8203;)</code> and <code>instanceOps(&#8230;&#8203;)</code> (see
+<a href="index-operations.html" class="xref page">Index operations</a>), or <a href="../repositories.html" class="xref page">repositories</a>.</p>
+</div>
+<div class="paragraph">
+<p>Direct use of <code>MeilisearchClient</code> is coupled to the supported <code>meilisearch-java</code> SDK API and models (currently version
+0.21.0). The raw <code>MeilisearchCallback</code> receives the SDK <code>Client</code>, and SDK <code>JsonHandler</code> types remain part of client
+configuration; retaining inheritance does not make the whole public API independent of the SDK. <code>MeilisearchClient</code>
+also keeps its internal HTTP transport-backed document retrieval for operations not supplied by the SDK.</p>
+</div>
+<div class="paragraph">
+<p>Replacing inheritance with composition would break direct calls to inherited SDK methods, assignment or dependency
+injection as <code>Client</code>, and user subclasses that override inherited methods. Any composition change would need an
+explicit compatibility and migration plan rather than a forwarding facade. Reopen that decision only for a concrete
+driver, such as a required alternative transport or an observed SDK inheritance compatibility problem.</p>
 </div>
 </div>
 </div>
@@ -625,17 +665,17 @@ The XML <code>api-key</code> attribute is optional. Omit it or set <code>api-key
                       <li class="component">
                         <div>
                           <a class="title" href="../index.html">Spring Data Meilisearch</a>
-                        </div>                        <div class="version-item is-active">
+                        </div>                        <div class="version-item">
                           <div>
                             <button class="version-toggle" type="button">
                               <span></span>
-                              Stable
+                              Snapshot
                             </button>
                           </div>
                           <ul class="versions">
   <li class="version">
     <a href="../index.html">
-      0.11.0
+      0.13.1-SNAPSHOT
     </a>
   </li>
 </ul>                        </div>
@@ -947,6 +987,6 @@ The XML <code>api-key</code> attribute is optional. Omit it or set <code>api-key
 <script src="../_/js/vendor/hotkeys.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.17.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Lf9DrpGmcRip6OQzbcL6lnvNmoZNSKpyQX5pMlwatWE=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.54.1/dist/instantsearch.production.min.js" integrity="sha256-xYsZPDeNjYNTBWLvqD2Lxe98hOxcDgOHyMPfz4tVAbk=" crossorigin="anonymous"></script>
-<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.11.0" data-page-generation="0.11" data-page-component="data-meilisearch"></script>
+<script async id="search-script" src="../_/js/vendor/search.js" data-app-id="WB1FQYI187" data-api-key="c2e84f15fa630d534f1c62b1c413bb77" data-index-name="springdocs" data-stylesheet="../_/css/vendor/search.css" data-page-version="0.13.1" data-page-generation="0.13-SNAPSHOT" data-page-component="data-meilisearch"></script>
   </body>
 </html>
