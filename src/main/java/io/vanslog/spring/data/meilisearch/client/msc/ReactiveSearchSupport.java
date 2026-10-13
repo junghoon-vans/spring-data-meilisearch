@@ -26,10 +26,8 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.meilisearch.sdk.IndexSearchRequest;
 import com.meilisearch.sdk.MultiSearchRequest;
 import com.meilisearch.sdk.model.SimilarDocumentsResults;
@@ -56,23 +54,24 @@ import reactor.core.publisher.Mono;
  */
 final class ReactiveSearchSupport {
 
-	private static final Gson GSON = new Gson();
-
 	private final ReactiveHttpTransport transport;
 	private final ObjectMapper objectMapper;
+	private final ObjectMapper requestObjectMapper;
 	private final MeilisearchConverter meilisearchConverter;
 	private final RequestConverter requestConverter = new RequestConverter();
 	private final ResponseConverter responseConverter;
 
 	ReactiveSearchSupport(ReactiveHttpTransport transport, ObjectMapper objectMapper,
-			MeilisearchConverter meilisearchConverter) {
+			MeilisearchConverter meilisearchConverter, ObjectMapper requestObjectMapper) {
 
 		Assert.notNull(transport, "ReactiveHttpTransport must not be null");
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		Assert.notNull(meilisearchConverter, "MeilisearchConverter must not be null");
+		Assert.notNull(requestObjectMapper, "Request ObjectMapper must not be null");
 
 		this.transport = transport;
 		this.objectMapper = objectMapper;
+		this.requestObjectMapper = requestObjectMapper;
 		this.meilisearchConverter = meilisearchConverter;
 		this.responseConverter = new ResponseConverter(meilisearchConverter, objectMapper);
 	}
@@ -81,7 +80,7 @@ final class ReactiveSearchSupport {
 		return Mono.defer(() -> {
 			String indexUid = getIndexUidFor(clazz);
 			String path = indexPath(indexUid, "search");
-			String body = requestConverter.searchRequest(query).toString();
+			String body = toSearchJson(requestConverter.searchRequest(query)).toString();
 			return transport.request("POST", path, body)
 					.map(response -> responseConverter.mapHits(MeilisearchSearchResult.from(response, objectMapper), clazz));
 		});
@@ -91,7 +90,7 @@ final class ReactiveSearchSupport {
 		return Mono.defer(() -> {
 			String indexUid = getIndexUidFor(clazz);
 			MultiSearchRequest request = requestConverter.multiSearchRequest(queries, indexUid, false);
-			return transport.request("POST", "/multi-search", GSON.toJson(toMultiSearchJson(request)))
+			return transport.request("POST", "/multi-search", toMultiSearchJson(request).toString())
 					.map(response -> mapMultiSearchResults(response, clazz));
 		});
 	}
@@ -100,9 +99,9 @@ final class ReactiveSearchSupport {
 		return Mono.defer(() -> {
 			String indexUid = getIndexUidFor(clazz);
 			MultiSearchRequest request = requestConverter.multiSearchRequest(queries, indexUid, true);
-			JsonObject body = toMultiSearchJson(request);
-			body.add("federation", toFederationJson(federation));
-			return transport.request("POST", "/multi-search", GSON.toJson(body))
+			ObjectNode body = toMultiSearchJson(request);
+			body.set("federation", requestObjectMapper.valueToTree(federation));
+			return transport.request("POST", "/multi-search", body.toString())
 					.map(response -> mapFederatedSearch(response, clazz));
 		});
 	}
@@ -110,7 +109,7 @@ final class ReactiveSearchSupport {
 	Mono<SearchHits<FacetHit>> facetSearch(FacetQuery query, Class<?> clazz) {
 		return Mono.defer(() -> {
 			String path = indexPath(getIndexUidFor(clazz), "facet-search");
-			String body = requestConverter.searchRequest(query).toString();
+			String body = toSearchJson(requestConverter.searchRequest(query)).toString();
 			return transport.request("POST", path, body).map(response -> responseConverter
 					.mapHits(MeilisearchFacetSearchResult.from(response, objectMapper), FacetHit.class));
 		});
@@ -119,7 +118,7 @@ final class ReactiveSearchSupport {
 	<T> Mono<SearchHits<T>> similarSearch(SimilarQuery query, Class<T> clazz) {
 		return Mono.defer(() -> {
 			String path = indexPath(getIndexUidFor(clazz), "similar");
-			String body = GSON.toJson(requestConverter.similarSearchRequest(query));
+			String body = toSearchJson(requestConverter.similarSearchRequest(query)).toString();
 			return transport.request("POST", path, body).map(response -> responseConverter
 					.mapResult(objectMapper.convertValue(response, SimilarDocumentsResults.class), clazz));
 		});
@@ -189,44 +188,25 @@ final class ReactiveSearchSupport {
 		return meilisearchConverter.read(clazz, document);
 	}
 
-	private JsonObject toFederationJson(Federation federation) {
+	private ObjectNode toSearchJson(Object request) {
 
-		JsonObject options = new JsonObject();
-		if (federation.limit() != null) {
-			options.addProperty("limit", federation.limit());
+		ObjectNode requestJson = requestObjectMapper.valueToTree(request);
+		// Meilisearch uses "filter" for both forms; filterArray is only a separate SDK DTO field.
+		// Match SDK single-search serialization by letting the nested array replace the string form.
+		JsonNode filterArray = requestJson.remove("filterArray");
+		if (filterArray != null && !filterArray.isNull()) {
+			requestJson.set("filter", filterArray);
 		}
-		if (federation.offset() != null) {
-			options.addProperty("offset", federation.offset());
-		}
-		if (federation.facetsByIndex() != null) {
-			options.add("facetsByIndex", GSON.toJsonTree(federation.facetsByIndex()));
-		}
-		if (federation.mergeFacets() != null) {
-			JsonObject mergeFacets = new JsonObject();
-			if (federation.mergeFacets().maxValuesPerFacet() != null) {
-				mergeFacets.addProperty("maxValuesPerFacet", federation.mergeFacets().maxValuesPerFacet());
-			}
-			options.add("mergeFacets", mergeFacets);
-		}
-		return options;
+		return requestJson;
 	}
 
-	private JsonObject toMultiSearchJson(MultiSearchRequest request) {
+	private ObjectNode toMultiSearchJson(MultiSearchRequest request) {
 
-		JsonArray queries = new JsonArray();
+		ObjectNode requestJson = requestObjectMapper.createObjectNode();
+		ArrayNode queries = requestJson.putArray("queries");
 		for (IndexSearchRequest query : request.getQueries()) {
-			JsonObject queryJson = GSON.toJsonTree(query).getAsJsonObject();
-			// Meilisearch uses "filter" for both forms; filterArray is only a separate SDK DTO field.
-			// Match single-search serialization by letting the nested array replace the string form.
-			JsonElement filterArray = queryJson.remove("filterArray");
-			if (filterArray != null && !filterArray.isJsonNull()) {
-				queryJson.add("filter", filterArray);
-			}
-			queries.add(queryJson);
+			queries.add(toSearchJson(query));
 		}
-
-		JsonObject requestJson = new JsonObject();
-		requestJson.add("queries", queries);
 		return requestJson;
 	}
 

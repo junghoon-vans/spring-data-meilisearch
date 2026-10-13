@@ -37,6 +37,7 @@ import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
@@ -207,6 +208,21 @@ class ReactiveMeilisearchTemplateIntegrationTests {
 		CustomMappedEntry found = mappedOperations.get("custom-1", CustomMappedEntry.class).block();
 
 		assertThat(found.getPrice()).isEqualTo(entry.getPrice());
+	}
+
+	@Test
+	void applyingSettingsPreservesApplicationJsonNullSerialization() throws Exception {
+		ObjectMapper applicationMapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.ALWAYS);
+		ReactiveMeilisearchOperations mappedOperations = new ReactiveMeilisearchTemplate(clientConfiguration,
+				operations.getMeilisearchConverter(), applicationMapper);
+
+		mappedOperations.applySettings(ReactiveEntry.class).block(Duration.ofSeconds(30));
+
+		assertThat(applicationMapper.readTree(applicationMapper.writeValueAsString(new NullableApplicationValue(null))))
+				.isEqualTo(applicationMapper.readTree("{\"value\":null}"));
+	}
+
+	private record NullableApplicationValue(String value) {
 	}
 
 	private ReactiveEntry entry(String key, String title, String category, int rank) {

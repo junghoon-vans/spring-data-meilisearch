@@ -30,10 +30,13 @@ import org.springframework.data.mapping.PersistentPropertyAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.meilisearch.sdk.json.GsonJsonHandler;
+import com.meilisearch.sdk.json.JacksonJsonHandler;
 import com.meilisearch.sdk.model.Settings;
 
 import io.vanslog.spring.data.meilisearch.MeilisearchRestException;
@@ -63,7 +66,12 @@ public class ReactiveMeilisearchTemplate implements ReactiveMeilisearchOperation
 
 	private static final int DEFAULT_BATCH_SIZE = 100;
 	private static final String DOCUMENTS_PATH = "/indexes/%s/documents";
-	private static final GsonJsonHandler SETTINGS_JSON_HANDLER = new GsonJsonHandler();
+	// SDK DTOs expose helper getters and getter-less fields; serialize their wire fields, not bean properties.
+	private static final ObjectMapper REQUEST_OBJECT_MAPPER = new ObjectMapper()
+			.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+			.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+			.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+	private static final JacksonJsonHandler SETTINGS_JSON_HANDLER = new JacksonJsonHandler(REQUEST_OBJECT_MAPPER);
 
 	private final MeilisearchConverter meilisearchConverter;
 	private final ObjectMapper objectMapper;
@@ -91,7 +99,8 @@ public class ReactiveMeilisearchTemplate implements ReactiveMeilisearchOperation
 				: new MappingMeilisearchConverter(new SimpleMeilisearchMappingContext());
 		this.objectMapper = objectMapper;
 		this.transport = new ReactiveHttpTransport(clientConfiguration, objectMapper);
-		this.searchSupport = new ReactiveSearchSupport(transport, objectMapper, this.meilisearchConverter);
+		this.searchSupport = new ReactiveSearchSupport(transport, objectMapper, this.meilisearchConverter,
+				REQUEST_OBJECT_MAPPER);
 		this.batchSize = batchSize;
 	}
 

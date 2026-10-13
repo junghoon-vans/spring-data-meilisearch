@@ -67,6 +67,12 @@ Do not import both configuration base classes together: they declare the same ma
 A standalone template can also be constructed with `new ReactiveMeilisearchTemplate(configuration)`.
 The converter/mapper constructors reuse an application's mapping infrastructure, and the four-argument constructor sets the batch/page size.
 
+Reactive operations use Jackson for JSON processing.
+Document serialization and response mapping use the supplied `ObjectMapper`.
+Search and settings request bodies use a separate field-based mapper that preserves SDK wire names and omits null options without exposing SDK helper getters.
+`applySettings` uses the SDK's `JacksonJsonHandler` with this protocol mapper.
+The application mapper is not reconfigured, and the synchronous client's default JSON handler remains unchanged.
+
 [[meilisearch.reactive-operations.documents]]
 == Document Operations
 

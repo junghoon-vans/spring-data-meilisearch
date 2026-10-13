@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.FederationOptions;
 import com.meilisearch.sdk.exceptions.MeilisearchApiException;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
+import com.meilisearch.sdk.model.MatchingStrategy;
 import com.meilisearch.sdk.model.TaskInfo;
 
 import io.vanslog.spring.data.meilisearch.annotations.Document;
@@ -117,12 +118,35 @@ class ReactiveSearchOperationsIntegrationTests {
 	}
 
 	@Test
+	void shouldPreferNestedFiltersForSingleAndFacetSearch() {
+		reactiveOperations.saveAll(Flux.just(book("book-1", "Hero one", "drama"), book("book-2", "Hero two", "action"),
+				book("book-3", "Hero excluded", "horror"))).then().block(BLOCK_TIMEOUT);
+		String[][] nestedFilter = { { "category = drama", "category = action" } };
+		BasicQuery query = BasicQuery.builder().withQ("hero").withFilter("category = horror").withFilterArray(nestedFilter)
+				.withMatchingStrategy(MatchingStrategy.ALL).build();
+
+		SearchHits<SearchBook> result = reactiveOperations.search(query, SearchBook.class).block(BLOCK_TIMEOUT);
+
+		assertThat(result.getSearchHits()).extracting(hit -> hit.getContent().getId()).containsExactlyInAnyOrder("book-1",
+				"book-2");
+		FacetQuery facetQuery = new FacetQuery(
+				FacetQuery.builder().withFacetName("category").withQ("hero").withFilter(new String[] { "category = horror" })
+						.withFilterArray(nestedFilter).withMatchingStrategy(MatchingStrategy.ALL));
+		SearchHits<FacetHit> facets = reactiveOperations.facetSearch(facetQuery, SearchBook.class).block(BLOCK_TIMEOUT);
+
+		assertThat(facets.getSearchHits()).extracting(hit -> hit.getContent().value()).containsExactlyInAnyOrder("drama",
+				"action");
+		query.setQ("hero nonexistent");
+		assertThat(reactiveOperations.search(query, SearchBook.class).block(BLOCK_TIMEOUT).getSearchHits()).isEmpty();
+	}
+
+	@Test
 	void shouldPreserveEachNonFederatedMultiSearchQueryAndFacetMetadata() {
 		reactiveOperations
 				.saveAll(Flux.just(book("book-1", "Hero one", "drama"), book("book-2", "Hero two", "action"),
 						book("book-3", "Quiet story", "drama"), book("book-4", "Hero excluded", "horror")))
 				.collectList().block(BLOCK_TIMEOUT);
-		List<BaseQuery> queries = List.of(BasicQuery.builder().withQ("hero")
+		List<BaseQuery> queries = List.of(BasicQuery.builder().withQ("hero").withFilter("category = horror")
 				.withFilterArray(new String[][] { { "category = drama", "category = action" } }).withFacets("category").build(),
 				BasicQuery.builder().withQ("quiet").withFacets("category").build());
 
