@@ -29,6 +29,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource;
 import org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport;
 import org.springframework.data.repository.config.XmlRepositoryConfigurationSource;
+import org.springframework.data.repository.core.RepositoryMetadata;
 import org.w3c.dom.Element;
 
 /**
@@ -77,4 +78,10 @@ public class MeilisearchRepositoryConfigExtension extends RepositoryConfiguratio
 	protected Collection<Class<?>> getIdentifyingTypes() {
 		return List.of(MeilisearchRepository.class);
 	}
+
+	@Override
+	protected boolean useRepositoryConfiguration(RepositoryMetadata metadata) {
+		return !metadata.isReactiveRepository() && super.useRepositoryConfiguration(metadata);
+	}
+
 }
