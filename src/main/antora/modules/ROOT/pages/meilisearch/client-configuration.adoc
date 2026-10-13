@@ -45,6 +45,25 @@ class MyClientConfig extends MeilisearchConfiguration {
 }
 ----
 
+[[meilisearch.clients.native-client]]
+== Native Client Boundary
+
+`MeilisearchClient` intentionally extends `com.meilisearch.sdk.Client`; this low-level inheritance is retained for 1.0.
+JavaConfig and the XML namespace both expose `MeilisearchClient` as the concrete product type, which remains
+assignable to the SDK `Client`. For ordinary application data access, prefer `MeilisearchOperations` (see
+xref:meilisearch/template.adoc[Operations]), `indexOps(...)` and `instanceOps(...)` (see
+xref:meilisearch/index-operations.adoc[Index operations]), or xref:repositories.adoc[repositories].
+
+Direct use of `MeilisearchClient` is coupled to the supported `meilisearch-java` SDK API and models (currently version
+0.21.0). The raw `MeilisearchCallback` receives the SDK `Client`, and SDK `JsonHandler` types remain part of client
+configuration; retaining inheritance does not make the whole public API independent of the SDK. `MeilisearchClient`
+also keeps its internal HTTP transport-backed document retrieval for operations not supplied by the SDK.
+
+Replacing inheritance with composition would break direct calls to inherited SDK methods, assignment or dependency
+injection as `Client`, and user subclasses that override inherited methods. Any composition change would need an
+explicit compatibility and migration plan rather than a forwarding facade. Reopen that decision only for a concrete
+driver, such as a required alternative transport or an observed SDK inheritance compatibility problem.
+
 [[meilisearch.clients.builder]]
 == ClientConfiguration Builder
 
