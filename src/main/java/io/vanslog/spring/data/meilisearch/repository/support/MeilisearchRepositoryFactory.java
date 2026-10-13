@@ -29,6 +29,7 @@ import org.springframework.data.repository.query.QueryMethodEvaluationContextPro
 import org.springframework.lang.Nullable;
 
 import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
+import io.vanslog.spring.data.meilisearch.repository.Query;
 
 /**
  * Factory to create {@link SimpleMeilisearchRepository} instances.
@@ -36,8 +37,6 @@ import io.vanslog.spring.data.meilisearch.core.MeilisearchOperations;
  * @author Junghoon Ban
  */
 public class MeilisearchRepositoryFactory extends RepositoryFactorySupport {
-
-	private static final String DECLARED_QUERIES_NOT_SUPPORTED = "Declared and named Meilisearch repository queries are not supported";
 
 	private final MeilisearchOperations meilisearchOperations;
 	private final MeilisearchEntityInformationCreator entityInformationCreator;
@@ -68,15 +67,29 @@ public class MeilisearchRepositoryFactory extends RepositoryFactorySupport {
 	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(@Nullable QueryLookupStrategy.Key key,
 			QueryMethodEvaluationContextProvider evaluationContextProvider) {
 		return Optional.of((method, metadata, factory, namedQueries) -> {
+			if (key == QueryLookupStrategy.Key.CREATE) {
+				return new MeilisearchPartTreeQuery(method, metadata, factory, meilisearchOperations);
+			}
+			Query annotation = AnnotatedElementUtils.findMergedAnnotation(method, Query.class);
+			if (annotation == null && AnnotatedElementUtils.hasAnnotation(method, QueryAnnotation.class)) {
+				throw new IllegalArgumentException(
+						"Unsupported query annotation on Meilisearch repository method " + method.toGenericString());
+			}
+			if (annotation != null) {
+				return new MeilisearchStringQuery(method, metadata, factory, meilisearchOperations, annotation.filter(),
+						annotation.q());
+			}
 			QueryMethod queryMethod = new QueryMethod(method, metadata, factory);
-			if (AnnotatedElementUtils.hasAnnotation(method, QueryAnnotation.class)
-					|| namedQueries.hasQuery(queryMethod.getNamedQueryName())) {
-				throw new IllegalStateException(DECLARED_QUERIES_NOT_SUPPORTED + ": " + method.getName()
-						+ ". Use MeilisearchOperations for explicit searches.");
+			String name = queryMethod.getNamedQueryName();
+			boolean hasFilter = namedQueries.hasQuery(name);
+			boolean hasText = namedQueries.hasQuery(name + ".q");
+			if (hasFilter || hasText) {
+				return new MeilisearchStringQuery(method, metadata, factory, meilisearchOperations,
+						hasFilter ? namedQueries.getQuery(name) : "", hasText ? namedQueries.getQuery(name + ".q") : "");
 			}
 			if (key == QueryLookupStrategy.Key.USE_DECLARED_QUERY) {
-				throw new IllegalStateException("Derived Meilisearch repository query " + method.getName()
-						+ " requires CREATE or CREATE_IF_NOT_FOUND query lookup.");
+				throw new IllegalStateException(
+						"No declared Meilisearch query for repository method " + method.toGenericString());
 			}
 			return new MeilisearchPartTreeQuery(method, metadata, factory, meilisearchOperations);
 		});
