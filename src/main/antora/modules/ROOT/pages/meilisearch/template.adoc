@@ -7,6 +7,8 @@ Use the `MeilisearchOperations` interface in application code; see xref:meilisea
 instance and index management, xref:meilisearch/settings.adoc[] for settings, and
 xref:meilisearch/object-mapping.adoc[] for entity conversion.
 
+For non-blocking document and search access, use xref:meilisearch/reactive-template.adoc[reactive operations].
+
 [[meilisearch.operations.entrypoint]]
 == Entry Point
 

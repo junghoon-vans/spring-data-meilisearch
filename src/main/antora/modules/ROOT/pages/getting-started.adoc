@@ -141,3 +141,4 @@ class MovieService {
 * Continue with xref:meilisearch/client-configuration.adoc[client configuration] to customize JSON handling, timeouts, and XML namespace usage.
 * Continue with xref:meilisearch/object-mapping.adoc[object mapping] to understand `@Document`, `@Setting`, and conversion support.
 * Continue with xref:meilisearch/template.adoc[operations] and xref:repositories.adoc[repositories] to choose between template-style access and repository abstractions.
+* Continue with xref:meilisearch/reactive-template.adoc[reactive operations] for non-blocking document and search access.
