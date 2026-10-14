@@ -86,6 +86,7 @@ public class ResponseConverter {
 		return new SearchHit<>(readHit(hit, clazz), searchable.getProcessingTimeMs(), searchable.getQuery(),
 				searchable.getFacetStats(), searchable.getFacetDistribution(), null, readHitMetadata(hit));
 	}
+
 	public <T> List<SearchHit<T>> mapHitList(FacetSearchable searchable, Class<T> clazz) {
 		return searchable.getFacetHits().stream() //
 				.map(hit -> new SearchHit<>(readHit(hit, clazz), searchable)) //

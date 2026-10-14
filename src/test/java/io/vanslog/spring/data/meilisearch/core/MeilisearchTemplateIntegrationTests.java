@@ -661,6 +661,7 @@ class MeilisearchTemplateIntegrationTests {
 		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getIndexUid)
 				.containsExactly("response-metadata-movies", "response-metadata-movies", "response-metadata-movies");
 	}
+
 	@Test
 	void shouldSearchWithIndexQuery() {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
