@@ -27,18 +27,33 @@ public class SearchHitsImpl<T> implements SearchHits<T> {
 	private final List<? extends SearchHit<T>> searchHits;
 	private final long totalHits;
 	private final TotalHitsRelation totalHitsRelation;
+	private final List<SearchResponseMetadata> responseMetadata;
+	private final boolean responseMetadataCaptured;
 	private final Lazy<List<SearchHit<T>>> unmodifiableSearchHits;
 
 	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits) {
-		this(executionDuration, searchHits, searchHits.size(), TotalHitsRelation.OFF);
+		this(executionDuration, searchHits, searchHits.size(), TotalHitsRelation.OFF, List.of(), false);
 	}
 
 	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits, long totalHits,
 			TotalHitsRelation totalHitsRelation) {
+		this(executionDuration, searchHits, totalHits, totalHitsRelation, List.of(), false);
+	}
+
+	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits, long totalHits,
+			TotalHitsRelation totalHitsRelation, List<SearchResponseMetadata> responseMetadata) {
+		this(executionDuration, searchHits, totalHits, totalHitsRelation, responseMetadata, true);
+	}
+
+	private SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits, long totalHits,
+			TotalHitsRelation totalHitsRelation, List<SearchResponseMetadata> responseMetadata,
+			boolean responseMetadataCaptured) {
 		this.executionDuration = executionDuration;
 		this.searchHits = searchHits;
 		this.totalHits = totalHits;
 		this.totalHitsRelation = totalHitsRelation;
+		this.responseMetadata = List.copyOf(responseMetadata);
+		this.responseMetadataCaptured = responseMetadataCaptured;
 		this.unmodifiableSearchHits = Lazy.of(() -> Collections.unmodifiableList(searchHits));
 	}
 
@@ -55,6 +70,16 @@ public class SearchHitsImpl<T> implements SearchHits<T> {
 	@Override
 	public List<SearchHit<T>> getSearchHits() {
 		return unmodifiableSearchHits.get();
+	}
+
+	@Override
+	public List<SearchResponseMetadata> getResponseMetadata() {
+		return responseMetadata;
+	}
+
+	@Override
+	public boolean hasResponseMetadata() {
+		return responseMetadataCaptured;
 	}
 
 	@Override

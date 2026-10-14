@@ -39,17 +39,30 @@ final class MeilisearchSearchResult implements Searchable {
 	private final int processingTimeMs;
 	private final String query;
 	@Nullable private final Integer totalHits;
+	@Nullable private final Integer estimatedTotalHits;
+	@Nullable private final Integer page;
+	@Nullable private final Integer hitsPerPage;
+	@Nullable private final Integer totalPages;
+	@Nullable private final Integer offset;
+	@Nullable private final Integer limit;
 
 	private MeilisearchSearchResult(ArrayList<HashMap<String, Object>> hits, @Nullable Object facetDistribution,
 			@Nullable HashMap<String, FacetRating> facetStats, int processingTimeMs, String query,
-			@Nullable Integer totalHits) {
-
+			@Nullable Integer totalHits, @Nullable Integer estimatedTotalHits, @Nullable Integer page,
+			@Nullable Integer hitsPerPage, @Nullable Integer totalPages, @Nullable Integer offset,
+			@Nullable Integer limit) {
 		this.hits = hits;
 		this.facetDistribution = facetDistribution;
 		this.facetStats = facetStats;
 		this.processingTimeMs = processingTimeMs;
 		this.query = query;
 		this.totalHits = totalHits;
+		this.estimatedTotalHits = estimatedTotalHits;
+		this.page = page;
+		this.hitsPerPage = hitsPerPage;
+		this.totalPages = totalPages;
+		this.offset = offset;
+		this.limit = limit;
 	}
 
 	static MeilisearchSearchResult from(JsonNode source, ObjectMapper objectMapper) {
@@ -62,7 +75,14 @@ final class MeilisearchSearchResult implements Searchable {
 		Integer totalHits = source.has("totalHits") ? source.get("totalHits").asInt() : null;
 
 		return new MeilisearchSearchResult(hits, facetDistribution, facetStats, source.path("processingTimeMs").asInt(),
-				source.path("query").asText(), totalHits);
+				source.path("query").asText(), totalHits, readInteger(source, "estimatedTotalHits"),
+				readInteger(source, "page"), readInteger(source, "hitsPerPage"), readInteger(source, "totalPages"),
+				readInteger(source, "offset"), readInteger(source, "limit"));
+	}
+
+	@Nullable
+	private static Integer readInteger(JsonNode source, String field) {
+		return source.hasNonNull(field) ? source.get(field).asInt() : null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -115,5 +135,35 @@ final class MeilisearchSearchResult implements Searchable {
 
 	int getTotalHits() {
 		return totalHits != null ? totalHits : hits.size();
+	}
+
+	@Nullable
+	Integer getEstimatedTotalHits() {
+		return estimatedTotalHits;
+	}
+
+	@Nullable
+	Integer getPage() {
+		return page;
+	}
+
+	@Nullable
+	Integer getHitsPerPage() {
+		return hitsPerPage;
+	}
+
+	@Nullable
+	Integer getTotalPages() {
+		return totalPages;
+	}
+
+	@Nullable
+	Integer getOffset() {
+		return offset;
+	}
+
+	@Nullable
+	Integer getLimit() {
+		return limit;
 	}
 }

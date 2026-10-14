@@ -29,6 +29,7 @@ import io.vanslog.spring.data.meilisearch.core.query.FacetQuery;
 import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 import io.vanslog.spring.data.meilisearch.entities.ComicsMovie;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
+import io.vanslog.spring.data.meilisearch.entities.ResponseMetadataMovie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -76,7 +78,7 @@ class MeilisearchTemplateIntegrationTests {
 
 	private static final List<String> LIFECYCLE_INDEX_UIDS = List.of("lifecycle-create-index", "lifecycle-get-list-index",
 			"lifecycle-update-index", "lifecycle-delete-index", "runtime-settings-index", "runtime-settings-reset-index",
-			"nested-movies", "listing-projection-movies");
+			"nested-movies", "listing-projection-movies", "response-metadata-movies");
 
 	@BeforeEach
 	void setUp() throws MeilisearchException {
@@ -541,6 +543,41 @@ class MeilisearchTemplateIntegrationTests {
 		List<Movie> movies = searchHits.stream().map(SearchHit::getContent).toList();
 
 		assertThat(movies).isEqualTo(List.of(movie2));
+	}
+
+	@Test // GH-285
+	void shouldExposeResponseMetadataForEmptyFacetedSearchPage() {
+		meilisearchTemplate.applySettings(ResponseMetadataMovie.class);
+		List<ResponseMetadataMovie> movies = List.of(new ResponseMetadataMovie("one", "Audit one", "alpha", 1),
+				new ResponseMetadataMovie("two", "Audit two", "alpha", 2),
+				new ResponseMetadataMovie("three", "Audit three", "beta", 3));
+		meilisearchTemplate.save(movies);
+
+		BasicQuery query = BasicQuery.builder().withQ("").withPageable(PageRequest.of(3, 1))
+				.withFacets("category", "rank").build();
+		SearchHits<ResponseMetadataMovie> result = meilisearchTemplate.search(query, ResponseMetadataMovie.class);
+
+		assertThat(result.getSearchHits()).isEmpty();
+		assertThat(result.getTotalHits()).isEqualTo(3);
+		assertThat(result.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.EQUAL_TO);
+		assertThat(result.hasResponseMetadata()).isTrue();
+
+		SearchResponseMetadata response = result.getResponseMetadata().get(0);
+		assertThat(response.getQueryIndex()).isZero();
+		assertThat(response.getFirstHitIndex()).isZero();
+		assertThat(response.getHitCount()).isZero();
+		assertThat(response.getProcessingTimeMs()).isNotNull().isGreaterThanOrEqualTo(0);
+		assertThat(response.getPage()).isEqualTo(4);
+		assertThat(response.getHitsPerPage()).isEqualTo(1);
+		assertThat(response.getTotalPages()).isEqualTo(3);
+		assertThat(response.getTotalHits()).isEqualTo(3L);
+		assertThat(response.getEstimatedTotalHits()).isNull();
+		assertThat(response.getTotalHitsRelation()).isEqualTo(SearchResponseTotalHitsRelation.EQUAL_TO);
+		assertThat(response.getFacetDistribution()).containsOnlyKeys("category", "rank");
+		assertThat(response.getFacetDistribution()).containsEntry("category", Map.of("alpha", 2, "beta", 1));
+		assertThat(response.getFacetDistribution()).containsEntry("rank", Map.of("1", 1, "2", 1, "3", 1));
+		assertThat(response.getFacetStats()).containsOnlyKeys("rank");
+		assertThat(response.getFacetStats()).containsEntry("rank", Map.of("min", 1.0, "max", 3.0));
 	}
 
 	@Test

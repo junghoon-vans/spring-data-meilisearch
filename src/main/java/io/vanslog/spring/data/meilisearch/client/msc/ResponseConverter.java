@@ -19,6 +19,7 @@ import io.vanslog.spring.data.meilisearch.core.FacetHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
+import io.vanslog.spring.data.meilisearch.core.SearchResponseMetadata;
 import io.vanslog.spring.data.meilisearch.core.TotalHitsRelation;
 import io.vanslog.spring.data.meilisearch.core.convert.MappingMeilisearchConverter;
 import io.vanslog.spring.data.meilisearch.core.convert.MeilisearchConverter;
@@ -32,12 +33,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.model.FacetSearchable;
 import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
+import com.meilisearch.sdk.model.SearchResult;
 import com.meilisearch.sdk.model.SearchResultPaginated;
 import com.meilisearch.sdk.model.Searchable;
 import com.meilisearch.sdk.model.SimilarDocumentsResults;
@@ -82,16 +86,61 @@ public class ResponseConverter {
 	public <T> SearchHits<T> mapHits(Searchable searchable, Class<T> clazz) {
 		List<SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
-		if (searchable instanceof MeilisearchSearchResult result) {
-			if (result.hasTotalHits()) {
-				return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(), TotalHitsRelation.EQUAL_TO);
-			}
+		SearchResponseMetadata responseMetadata = mapResponseMetadata(searchable, searchHits.size());
+		List<SearchResponseMetadata> responseMetadataList = List.of(responseMetadata);
+
+		if (searchable instanceof MeilisearchSearchResult result && result.hasTotalHits()) {
+			return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(), TotalHitsRelation.EQUAL_TO,
+					responseMetadataList);
 		}
 
 		if (searchable instanceof SearchResultPaginated result) {
-			return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(), TotalHitsRelation.EQUAL_TO);
+			return new SearchHitsImpl<>(executionDuration, searchHits, result.getTotalHits(), TotalHitsRelation.EQUAL_TO,
+					responseMetadataList);
 		}
-		return new SearchHitsImpl<>(executionDuration, searchHits);
+
+		return new SearchHitsImpl<>(executionDuration, searchHits, searchHits.size(), TotalHitsRelation.OFF,
+				responseMetadataList);
+	}
+
+	private SearchResponseMetadata mapResponseMetadata(Searchable searchable, int hitCount) {
+
+		Long totalHits = null;
+		Long estimatedTotalHits = null;
+		Integer page = null;
+		Integer hitsPerPage = null;
+		Integer totalPages = null;
+		Integer offset = null;
+		Integer limit = null;
+
+		if (searchable instanceof MeilisearchSearchResult result) {
+			totalHits = result.hasTotalHits() ? (long) result.getTotalHits() : null;
+			Integer estimated = result.getEstimatedTotalHits();
+			estimatedTotalHits = estimated == null ? null : estimated.longValue();
+			page = result.getPage();
+			hitsPerPage = result.getHitsPerPage();
+			totalPages = result.getTotalPages();
+			offset = result.getOffset();
+			limit = result.getLimit();
+		} else if (searchable instanceof SearchResultPaginated result) {
+			totalHits = (long) result.getTotalHits();
+			page = result.getPage();
+			hitsPerPage = result.getHitsPerPage();
+			totalPages = result.getTotalPages();
+		} else if (searchable instanceof SearchResult result) {
+			estimatedTotalHits = (long) result.getEstimatedTotalHits();
+			offset = result.getOffset();
+			limit = result.getLimit();
+		}
+
+		return new SearchResponseMetadata(0, 0, hitCount, searchable.getProcessingTimeMs(), searchable.getQuery(), null,
+				totalHits, estimatedTotalHits, page, hitsPerPage, totalPages, offset, limit,
+				metadataMap(searchable.getFacetDistribution()), metadataMap(searchable.getFacetStats()), null);
+	}
+
+	@Nullable
+	private Map<String, Object> metadataMap(@Nullable Object source) {
+		return source == null ? null : objectMapper.convertValue(source, new TypeReference<Map<String, Object>>() {});
 	}
 
 	public <T> SearchHits<T> mapHits(FacetSearchable searchable, Class<T> clazz) {
