@@ -128,39 +128,70 @@ final class MeilisearchSearchResult implements Searchable {
 		return query;
 	}
 
+	/**
+	 * Distinguishes an exact total, including zero, from an absent {@code totalHits} field.
+	 *
+	 * @return whether the response reported an exact total
+	 */
 	boolean hasTotalHits() {
 		return totalHits != null;
 	}
 
+	/**
+	 * Returns the exact total when reported, otherwise the loaded-hit count. Use {@link #hasTotalHits()} before treating
+	 * this value as an exact count.
+	 *
+	 * @return exact matching-hit count or loaded-hit count
+	 */
 	int getTotalHits() {
 		return totalHits != null ? totalHits : hits.size();
 	}
 
+	/**
+	 * Returns the estimate without promoting it to an exact total.
+	 *
+	 * @return estimated matching-hit count, or {@literal null} when absent
+	 */
 	@Nullable
 	Integer getEstimatedTotalHits() {
 		return estimatedTotalHits;
 	}
 
+	/**
+	 * @return one-based page number, or {@literal null} when absent
+	 */
 	@Nullable
 	Integer getPage() {
 		return page;
 	}
 
+	/**
+	 * @return server-reported page size, or {@literal null} when absent
+	 */
 	@Nullable
 	Integer getHitsPerPage() {
 		return hitsPerPage;
 	}
 
+	/**
+	 * @return server-reported page count, or {@literal null} when absent
+	 */
 	@Nullable
 	Integer getTotalPages() {
 		return totalPages;
 	}
 
+	/**
+	 * @return zero-based result-window offset, or {@literal null} when absent
+	 */
 	@Nullable
 	Integer getOffset() {
 		return offset;
 	}
 
+	/**
+	 * @return server-reported result-window limit, or {@literal null} when absent
+	 */
 	@Nullable
 	Integer getLimit() {
 		return limit;

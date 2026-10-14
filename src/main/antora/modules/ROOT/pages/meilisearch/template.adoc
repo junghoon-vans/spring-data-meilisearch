@@ -207,8 +207,9 @@ response:
   must not be treated as a total for the full result set.
 
 `SearchResponseMetadata#getTotalHitsRelation()` separately reports `EQUAL_TO`, `ESTIMATED`, or `OFF` for each
-response. Exact and estimated response totals remain separate fields and do not change the aggregate `SearchHits`
-total or relation.
+response. Exact and estimated response totals remain separate fields. For a single-index response that reports an exact
+`totalHits`, that value also supplies the aggregate `SearchHits` total with relation `EQUAL_TO`. An estimate alone does
+not establish an exact aggregate total; the aggregate remains the loaded-hit count with relation `OFF`.
 
 Facet search, similar search, and multi-search results do not provide an aggregate total through this API. For a
 single-index search, use total-hit metadata only when its relation is `EQUAL_TO`.
