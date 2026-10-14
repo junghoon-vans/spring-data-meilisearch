@@ -49,8 +49,7 @@ final class MeilisearchSearchResult implements Searchable {
 	private MeilisearchSearchResult(ArrayList<HashMap<String, Object>> hits, @Nullable Object facetDistribution,
 			@Nullable HashMap<String, FacetRating> facetStats, int processingTimeMs, String query,
 			@Nullable Integer totalHits, @Nullable Integer estimatedTotalHits, @Nullable Integer page,
-			@Nullable Integer hitsPerPage, @Nullable Integer totalPages, @Nullable Integer offset,
-			@Nullable Integer limit) {
+			@Nullable Integer hitsPerPage, @Nullable Integer totalPages, @Nullable Integer offset, @Nullable Integer limit) {
 		this.hits = hits;
 		this.facetDistribution = facetDistribution;
 		this.facetStats = facetStats;

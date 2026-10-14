@@ -553,8 +553,8 @@ class MeilisearchTemplateIntegrationTests {
 				new ResponseMetadataMovie("three", "Audit three", "beta", 3));
 		meilisearchTemplate.save(movies);
 
-		BasicQuery query = BasicQuery.builder().withQ("").withPageable(PageRequest.of(3, 1))
-				.withFacets("category", "rank").build();
+		BasicQuery query = BasicQuery.builder().withQ("").withPageable(PageRequest.of(3, 1)).withFacets("category", "rank")
+				.build();
 		SearchHits<ResponseMetadataMovie> result = meilisearchTemplate.search(query, ResponseMetadataMovie.class);
 
 		assertThat(result.getSearchHits()).isEmpty();
