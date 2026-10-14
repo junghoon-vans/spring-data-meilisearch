@@ -51,6 +51,8 @@ import com.meilisearch.sdk.model.SimilarDocumentsResults;
  */
 public class ResponseConverter {
 
+	private static final TypeReference<Map<String, Object>> METADATA_MAP_TYPE = new TypeReference<>() {};
+
 	private final MeilisearchConverter meilisearchConverter;
 	private final ObjectMapper objectMapper;
 
@@ -140,7 +142,7 @@ public class ResponseConverter {
 
 	@Nullable
 	private Map<String, Object> metadataMap(@Nullable Object source) {
-		return source == null ? null : objectMapper.convertValue(source, new TypeReference<Map<String, Object>>() {});
+		return source == null ? null : objectMapper.convertValue(source, METADATA_MAP_TYPE);
 	}
 
 	public <T> SearchHits<T> mapHits(FacetSearchable searchable, Class<T> clazz) {
