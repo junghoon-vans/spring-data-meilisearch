@@ -127,6 +127,31 @@ SearchHits<Movie> combined = operations.multiSearch(queries, Movie.class);
 Non-federated multi-search flattens per-query hits into one `SearchHits` list in query order; it does not return a
 separate `SearchHits` object for each query or an aggregate total.
 
+For non-federated multi-search, `combined.getResponseMetadata()` contains one `SearchResponseMetadata` entry per
+submitted query in request order, including queries with no returned hits. Each entry reports its query index, the first
+hit's index in the flattened list, the returned-hit count, and any exact total, estimated total, or pagination fields
+present in that response. Exact `totalHits` and `estimatedTotalHits` remain separate; a missing exact total is not
+inferred from an estimate.
+
+For example, when two queries search the same index on different pages, each response can report the same exact total
+even though their returned hits are flattened together:
+
+[source,java]
+----
+List<IndexQuery> pageQueries = List.of(
+        IndexQuery.builder().withQ("Wonder Woman").withPageable(PageRequest.of(0, 1)).build(),
+        IndexQuery.builder().withQ("Wonder Woman").withPageable(PageRequest.of(1, 1)).build());
+
+SearchHits<Movie> pages = operations.multiSearch(pageQueries, Movie.class);
+for (SearchResponseMetadata response : pages.getResponseMetadata()) {
+    System.out.println(response.getPage() + ": " + response.getTotalHits());
+}
+----
+
+`pages.getTotalHits()` continues to report only the number of loaded flattened hits and its relation remains `OFF`.
+Do not sum per-query totals to invent a distinct aggregate: queries may overlap, and an empty-page response still has its
+own metadata entry.
+
 Non-federated multi-search supports each query's `Pageable`. Federated multi-search instead takes the SDK's
 `MultiSearchFederation` options for the combined result window. Per-query `Pageable` settings are not sent in
 federated mode; set federation `limit` and `offset` instead.

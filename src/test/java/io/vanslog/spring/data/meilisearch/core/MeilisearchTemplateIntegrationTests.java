@@ -580,6 +580,46 @@ class MeilisearchTemplateIntegrationTests {
 		assertThat(response.getFacetStats()).containsEntry("rank", Map.of("min", 1.0, "max", 3.0));
 	}
 
+	@Test // GH-284
+	void shouldExposeMetadataForEachNonFederatedMultiSearchResponse() {
+		meilisearchTemplate.applySettings(ResponseMetadataMovie.class);
+		meilisearchTemplate.save(List.of(new ResponseMetadataMovie("one", "Audit one", "alpha", 1),
+				new ResponseMetadataMovie("two", "Audit two", "alpha", 2),
+				new ResponseMetadataMovie("three", "Audit three", "beta", 3)));
+
+		List<BaseQuery> queries = List.of(IndexQuery.builder().withQ("Audit").withPageable(PageRequest.of(0, 1)).build(),
+				IndexQuery.builder().withQ("Audit").withPageable(PageRequest.of(1, 1)).build(),
+				IndexQuery.builder().withQ("Audit").withPageable(PageRequest.of(3, 1)).build());
+
+		SearchHits<ResponseMetadataMovie> result = meilisearchTemplate.multiSearch(queries, ResponseMetadataMovie.class);
+
+		assertThat(result.getSearchHits()).hasSize(2);
+		assertThat(result.getTotalHits()).isEqualTo(2);
+		assertThat(result.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
+		assertThat(result.hasResponseMetadata()).isTrue();
+		assertThat(result.getResponseMetadata()).hasSize(3);
+
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getQueryIndex).containsExactly(0, 1, 2);
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getFirstHitIndex).containsExactly(0, 1,
+				2);
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getHitCount).containsExactly(1, 1, 0);
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getPage).containsExactly(1, 2, 4);
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getHitsPerPage).containsExactly(1, 1,
+				1);
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getTotalPages).containsExactly(3, 3, 3);
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getTotalHits).containsExactly(3L, 3L,
+				3L);
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getEstimatedTotalHits)
+				.containsOnlyNulls();
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getTotalHitsRelation).containsExactly(
+				SearchResponseTotalHitsRelation.EQUAL_TO, SearchResponseTotalHitsRelation.EQUAL_TO,
+				SearchResponseTotalHitsRelation.EQUAL_TO);
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getQuery).containsExactly("Audit",
+				"Audit", "Audit");
+		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getIndexUid)
+				.containsExactly("response-metadata-movies", "response-metadata-movies", "response-metadata-movies");
+	}
+
 	@Test
 	void shouldSearchWithIndexQuery() {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
