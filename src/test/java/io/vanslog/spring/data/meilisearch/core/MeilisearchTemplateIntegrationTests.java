@@ -580,6 +580,48 @@ class MeilisearchTemplateIntegrationTests {
 		assertThat(response.getFacetStats()).containsEntry("rank", Map.of("min", 1.0, "max", 3.0));
 	}
 
+	@Test // GH-286
+	void shouldExposeHitMetadataAcrossTemplateSearchMappings() {
+		meilisearchTemplate.save(movie2);
+		meilisearchTemplate.save(comics1);
+
+		BasicQuery query = BasicQuery.builder() //
+				.withQ("Wonder") //
+				.withAttributesToHighlight("title") //
+				.withHighlightPreTag("<em>") //
+				.withHighlightPostTag("</em>") //
+				.withShowMatchesPosition(true) //
+				.withShowRankingScore(true) //
+				.withShowRankingScoreDetails(true) //
+				.build();
+
+		SearchHits<Movie> singleSearch = meilisearchTemplate.search(query, Movie.class);
+		assertThat(singleSearch.getSearchHits()).hasSize(1);
+		assertHitMetadata(singleSearch.getSearchHit(0));
+
+		SearchHits<Movie> multiSearch = meilisearchTemplate.multiSearch(List.of(query, query), Movie.class);
+		assertThat(multiSearch.getSearchHits()).hasSize(2);
+		multiSearch.getSearchHits().forEach(this::assertHitMetadata);
+
+		List<BaseQuery> federatedQueries = List.of(
+				IndexQuery.builder().withQ("Wonder").withIndexUid("movies").withAttributesToHighlight("title")
+						.withHighlightPreTag("<em>").withHighlightPostTag("</em>").withShowMatchesPosition(true)
+						.withShowRankingScore(true).withShowRankingScoreDetails(true).build(),
+				IndexQuery.builder().withQ("Wonder").withIndexUid("comics").withAttributesToHighlight("title")
+						.withHighlightPreTag("<em>").withHighlightPostTag("</em>").withShowMatchesPosition(true)
+						.withShowRankingScore(true).withShowRankingScoreDetails(true).build());
+		MultiSearchFederation federation = new MultiSearchFederation();
+		federation.setLimit(10);
+		federation.setOffset(0);
+
+		SearchHits<Movie> federatedSearch = meilisearchTemplate.multiSearch(federatedQueries, federation, Movie.class);
+		assertThat(federatedSearch.getSearchHits()).hasSize(2);
+		federatedSearch.getSearchHits().forEach(hit -> {
+			assertHitMetadata(hit);
+			assertThat(hit.getFederation()).isNotNull();
+		});
+	}
+
 	@Test // GH-284
 	void shouldExposeMetadataForEachNonFederatedMultiSearchResponse() {
 		meilisearchTemplate.applySettings(ResponseMetadataMovie.class);
@@ -619,7 +661,6 @@ class MeilisearchTemplateIntegrationTests {
 		assertThat(result.getResponseMetadata()).extracting(SearchResponseMetadata::getIndexUid)
 				.containsExactly("response-metadata-movies", "response-metadata-movies", "response-metadata-movies");
 	}
-
 	@Test
 	void shouldSearchWithIndexQuery() {
 		meilisearchTemplate.save(List.of(movie1, movie2, movie3));
@@ -840,6 +881,18 @@ class MeilisearchTemplateIntegrationTests {
 		public int getYear() {
 			return year;
 		}
+	}
+
+	private void assertHitMetadata(SearchHit<Movie> hit) {
+		assertThat(hit.getContent().getTitle()).isEqualTo("Wonder Woman");
+		assertThat(hit.getFormattedFields()).containsEntry("title", "<em>Wonder</em> Woman");
+		List<?> positions = (List<?>) hit.getMatchesPosition().get("title");
+		assertThat(positions).hasSize(1);
+		Map<?, ?> position = (Map<?, ?>) positions.get(0);
+		assertThat(((Number) position.get("start")).doubleValue()).isZero();
+		assertThat(((Number) position.get("length")).doubleValue()).isEqualTo(6);
+		assertThat(hit.getRankingScore()).isNotNull();
+		assertThat(hit.getRankingScoreDetails()).isNotNull();
 	}
 
 	private void deleteLifecycleIndexes() throws MeilisearchException {
