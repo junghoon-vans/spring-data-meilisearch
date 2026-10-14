@@ -43,6 +43,27 @@ public final class SearchResponseMetadata {
 	@Nullable private final Map<String, Object> facetStats;
 	@Nullable private final Map<String, Object> facetsByIndex;
 
+	/**
+	 * Creates a response snapshot without inferring absent wire fields. Nested facet maps and lists are copied into
+	 * unmodifiable structures.
+	 *
+	 * @param queryIndex zero-based response position in the request
+	 * @param firstHitIndex zero-based start of this response's hits in the flattened result, including empty spans
+	 * @param hitCount number of loaded hits associated with this response
+	 * @param processingTimeMs captured processing time in milliseconds, or {@literal null}
+	 * @param query captured query text, or {@literal null}
+	 * @param indexUid captured index uid, or {@literal null}
+	 * @param totalHits exact matching-hit count, or {@literal null} when not reported
+	 * @param estimatedTotalHits estimated matching-hit count, or {@literal null} when not reported
+	 * @param page one-based page number, or {@literal null} when not reported
+	 * @param hitsPerPage requested page size returned by the server, or {@literal null}
+	 * @param totalPages reported page count, or {@literal null}
+	 * @param offset zero-based result-window offset, or {@literal null}
+	 * @param limit reported result-window limit, or {@literal null}
+	 * @param facetDistribution response-level facet value counts, or {@literal null}
+	 * @param facetStats response-level numeric facet bounds, or {@literal null}
+	 * @param facetsByIndex per-index facet distributions and statistics, or {@literal null}
+	 */
 	public SearchResponseMetadata(int queryIndex, int firstHitIndex, int hitCount, @Nullable Integer processingTimeMs,
 			@Nullable String query, @Nullable String indexUid, @Nullable Long totalHits, @Nullable Long estimatedTotalHits,
 			@Nullable Integer page, @Nullable Integer hitsPerPage, @Nullable Integer totalPages, @Nullable Integer offset,
