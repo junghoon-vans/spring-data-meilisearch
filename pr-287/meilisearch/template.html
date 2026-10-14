@@ -692,8 +692,9 @@ must not be treated as a total for the full result set.</p>
 </div>
 <div class="paragraph">
 <p><code>SearchResponseMetadata#getTotalHitsRelation()</code> separately reports <code>EQUAL_TO</code>, <code>ESTIMATED</code>, or <code>OFF</code> for each
-response. Exact and estimated response totals remain separate fields and do not change the aggregate <code>SearchHits</code>
-total or relation.</p>
+response. Exact and estimated response totals remain separate fields. For a single-index response that reports an exact
+<code>totalHits</code>, that value also supplies the aggregate <code>SearchHits</code> total with relation <code>EQUAL_TO</code>. An estimate alone does
+not establish an exact aggregate total; the aggregate remains the loaded-hit count with relation <code>OFF</code>.</p>
 </div>
 <div class="paragraph">
 <p>Facet search, similar search, and multi-search results do not provide an aggregate total through this API. For a
