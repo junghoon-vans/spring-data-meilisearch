@@ -615,6 +615,11 @@ present in that response. Exact <code>totalHits</code> and <code>estimatedTotalH
 inferred from an estimate.</p>
 </div>
 <div class="paragraph">
+<p>The configured <code>JsonHandler</code> still decodes the SDK&#8217;s original <code>Results&lt;MultiSearchResult&gt;</code> type, so custom
+deserializers registered for <code>MultiSearchResult</code> remain effective. Pagination metadata is captured separately
+from the wire response without replacing the decoded hit objects.</p>
+</div>
+<div class="paragraph">
 <p>For example, when two queries search the same index on different pages, each response can report the same exact total
 even though their returned hits are flattened together:</p>
 </div>
