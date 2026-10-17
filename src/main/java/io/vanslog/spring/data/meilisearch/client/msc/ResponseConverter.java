@@ -161,7 +161,13 @@ public class ResponseConverter {
 				}).toList();
 
 		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
-		return new SearchHitsImpl<>(executionDuration, searchHits);
+		SearchResponseMetadata responseMetadata = new SearchResponseMetadata(0, 0, searchHits.size(),
+				result.getProcessingTimeMs(), result.getQuery(), result.getIndexUid(), null, null, null, null, null, null, null,
+				metadataMap(result.getFacetDistribution()), metadataMap(result.getFacetStats()),
+				metadataMap(result.getFacetsByIndex()));
+
+		return new SearchHitsImpl<>(executionDuration, searchHits, searchHits.size(), TotalHitsRelation.OFF,
+				List.of(responseMetadata));
 	}
 
 	public <T> SearchHits<T> mapResult(SimilarDocumentsResults result, Class<T> clazz) {
