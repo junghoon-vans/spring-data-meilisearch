@@ -133,6 +133,10 @@ hit's index in the flattened list, the returned-hit count, and any exact total, 
 present in that response. Exact `totalHits` and `estimatedTotalHits` remain separate; a missing exact total is not
 inferred from an estimate.
 
+The configured `JsonHandler` still decodes the SDK's original `Results<MultiSearchResult>` type, so custom
+deserializers registered for `MultiSearchResult` remain effective. Pagination metadata is captured separately
+from the wire response without replacing the decoded hit objects.
+
 For example, when two queries search the same index on different pages, each response can report the same exact total
 even though their returned hits are flattened together:
 
