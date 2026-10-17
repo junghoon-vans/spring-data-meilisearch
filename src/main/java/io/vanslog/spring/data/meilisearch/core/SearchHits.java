@@ -48,6 +48,21 @@ public interface SearchHits<T> extends Streamable<SearchHit<T>> {
 	List<SearchHit<T>> getSearchHits();
 
 	/**
+	 * @return response-level metadata captured for each search response, in request order; empty when none were captured
+	 *         or the request returned no response entries
+	 */
+	default List<SearchResponseMetadata> getResponseMetadata() {
+		return List.of();
+	}
+
+	/**
+	 * @return whether response metadata was captured; distinguishes an empty response list from an uncaptured result
+	 */
+	default boolean hasResponseMetadata() {
+		return false;
+	}
+
+	/**
 	 * @return the reported total-hit metadata only when {@link #getTotalHitsRelation()} is
 	 *         {@link TotalHitsRelation#EQUAL_TO}; otherwise the loaded hit count, which is not usable as a page total.
 	 */

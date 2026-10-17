@@ -21,24 +21,71 @@ import java.util.List;
 
 import org.springframework.data.util.Lazy;
 
+/**
+ * Search hits with an explicitly supplied aggregate total and optional response-level metadata. The constructors
+ * without response metadata mark it as uncaptured; a captured response can describe a window containing no hits.
+ *
+ * @param <T> mapped entity type
+ * @author Junghoon Ban
+ */
 public class SearchHitsImpl<T> implements SearchHits<T> {
 
 	private final Duration executionDuration;
 	private final List<? extends SearchHit<T>> searchHits;
 	private final long totalHits;
 	private final TotalHitsRelation totalHitsRelation;
+	private final List<SearchResponseMetadata> responseMetadata;
+	private final boolean responseMetadataCaptured;
 	private final Lazy<List<SearchHit<T>>> unmodifiableSearchHits;
 
+	/**
+	 * Creates a result without captured response metadata; the aggregate is the loaded-hit count with relation
+	 * {@link TotalHitsRelation#OFF}.
+	 *
+	 * @param executionDuration search execution duration
+	 * @param searchHits loaded search hits
+	 */
 	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits) {
-		this(executionDuration, searchHits, searchHits.size(), TotalHitsRelation.OFF);
+		this(executionDuration, searchHits, searchHits.size(), TotalHitsRelation.OFF, List.of(), false);
 	}
 
+	/**
+	 * Creates a result with the supplied aggregate total and no captured response metadata.
+	 *
+	 * @param executionDuration search execution duration
+	 * @param searchHits loaded search hits
+	 * @param totalHits aggregate count interpreted according to {@code totalHitsRelation}
+	 * @param totalHitsRelation whether the aggregate count is exact or only the loaded-hit count
+	 */
 	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits, long totalHits,
 			TotalHitsRelation totalHitsRelation) {
+		this(executionDuration, searchHits, totalHits, totalHitsRelation, List.of(), false);
+	}
+
+	/**
+	 * Creates a result with captured response metadata, independently of the number of loaded hits. Response totals do
+	 * not implicitly replace the supplied aggregate count or relation.
+	 *
+	 * @param executionDuration search execution duration
+	 * @param searchHits loaded search hits
+	 * @param totalHits aggregate count interpreted according to {@code totalHitsRelation}
+	 * @param totalHitsRelation whether the aggregate count is exact or only the loaded-hit count
+	 * @param responseMetadata response snapshots, copied into an unmodifiable list
+	 */
+	public SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits, long totalHits,
+			TotalHitsRelation totalHitsRelation, List<SearchResponseMetadata> responseMetadata) {
+		this(executionDuration, searchHits, totalHits, totalHitsRelation, responseMetadata, true);
+	}
+
+	private SearchHitsImpl(Duration executionDuration, List<? extends SearchHit<T>> searchHits, long totalHits,
+			TotalHitsRelation totalHitsRelation, List<SearchResponseMetadata> responseMetadata,
+			boolean responseMetadataCaptured) {
 		this.executionDuration = executionDuration;
 		this.searchHits = searchHits;
 		this.totalHits = totalHits;
 		this.totalHitsRelation = totalHitsRelation;
+		this.responseMetadata = List.copyOf(responseMetadata);
+		this.responseMetadataCaptured = responseMetadataCaptured;
 		this.unmodifiableSearchHits = Lazy.of(() -> Collections.unmodifiableList(searchHits));
 	}
 
@@ -55,6 +102,16 @@ public class SearchHitsImpl<T> implements SearchHits<T> {
 	@Override
 	public List<SearchHit<T>> getSearchHits() {
 		return unmodifiableSearchHits.get();
+	}
+
+	@Override
+	public List<SearchResponseMetadata> getResponseMetadata() {
+		return responseMetadata;
+	}
+
+	@Override
+	public boolean hasResponseMetadata() {
+		return responseMetadataCaptured;
 	}
 
 	@Override

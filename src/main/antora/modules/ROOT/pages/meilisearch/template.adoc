@@ -165,16 +165,26 @@ SearchHits<Movie> similar = operations.similarSearch(similarQuery, Movie.class);
 [[meilisearch.operations.results]]
 == Search Result Types
 
-Search methods return `SearchHits<T>`, which exposes the hit list, request execution duration, and total-hit metadata
-when the response provides it. Each `SearchHit<T>` contains the mapped content, Meilisearch processing time and query,
-optional facet statistics/distribution, and optional federation metadata.
+Search methods return `SearchHits<T>`, which exposes the hit list, request execution duration, and aggregate total-hit
+metadata when the response provides it. Each `SearchHit<T>` contains the mapped content, Meilisearch processing time and
+query, optional facet statistics/distribution, and optional federation metadata.
 
-`SearchHits#getTotalHitsRelation()` identifies whether `getTotalHits()` contains a total reported by the search
+For a blocking single-index `search`, `SearchHits#getResponseMetadata()` retains one `SearchResponseMetadata` entry even
+when the hit list is empty. It exposes the response's processing time, query, pagination fields, and facet
+distribution/statistics independently of the returned hits. `SearchHits#hasResponseMetadata()` distinguishes captured
+metadata from an operation that did not capture it.
+
+`SearchHits#getTotalHitsRelation()` identifies whether `getTotalHits()` contains an exact total reported by the search
 response:
 
 * `EQUAL_TO` means Meilisearch reported the total matching-hit count.
-* `OFF` means total-hit metadata is unavailable; `getTotalHits()` then reflects the number of loaded hits and must not
-  be treated as a total for the full result set.
+* `OFF` means aggregate total-hit metadata is unavailable; `getTotalHits()` then reflects the number of loaded hits and
+  must not be treated as a total for the full result set.
+
+`SearchResponseMetadata#getTotalHitsRelation()` separately reports `EQUAL_TO`, `ESTIMATED`, or `OFF` for each
+response. Exact and estimated response totals remain separate fields. For a single-index response that reports an exact
+`totalHits`, that value also supplies the aggregate `SearchHits` total with relation `EQUAL_TO`. An estimate alone does
+not establish an exact aggregate total; the aggregate remains the loaded-hit count with relation `OFF`.
 
 Facet search, similar search, and multi-search results do not provide an aggregate total through this API. For a
 single-index search, use total-hit metadata only when its relation is `EQUAL_TO`.

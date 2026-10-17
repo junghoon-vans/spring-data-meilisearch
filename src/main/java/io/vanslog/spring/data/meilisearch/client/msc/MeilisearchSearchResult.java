@@ -39,17 +39,29 @@ final class MeilisearchSearchResult implements Searchable {
 	private final int processingTimeMs;
 	private final String query;
 	@Nullable private final Integer totalHits;
+	@Nullable private final Integer estimatedTotalHits;
+	@Nullable private final Integer page;
+	@Nullable private final Integer hitsPerPage;
+	@Nullable private final Integer totalPages;
+	@Nullable private final Integer offset;
+	@Nullable private final Integer limit;
 
 	private MeilisearchSearchResult(ArrayList<HashMap<String, Object>> hits, @Nullable Object facetDistribution,
 			@Nullable HashMap<String, FacetRating> facetStats, int processingTimeMs, String query,
-			@Nullable Integer totalHits) {
-
+			@Nullable Integer totalHits, @Nullable Integer estimatedTotalHits, @Nullable Integer page,
+			@Nullable Integer hitsPerPage, @Nullable Integer totalPages, @Nullable Integer offset, @Nullable Integer limit) {
 		this.hits = hits;
 		this.facetDistribution = facetDistribution;
 		this.facetStats = facetStats;
 		this.processingTimeMs = processingTimeMs;
 		this.query = query;
 		this.totalHits = totalHits;
+		this.estimatedTotalHits = estimatedTotalHits;
+		this.page = page;
+		this.hitsPerPage = hitsPerPage;
+		this.totalPages = totalPages;
+		this.offset = offset;
+		this.limit = limit;
 	}
 
 	static MeilisearchSearchResult from(JsonNode source, ObjectMapper objectMapper) {
@@ -62,7 +74,14 @@ final class MeilisearchSearchResult implements Searchable {
 		Integer totalHits = source.has("totalHits") ? source.get("totalHits").asInt() : null;
 
 		return new MeilisearchSearchResult(hits, facetDistribution, facetStats, source.path("processingTimeMs").asInt(),
-				source.path("query").asText(), totalHits);
+				source.path("query").asText(), totalHits, readInteger(source, "estimatedTotalHits"),
+				readInteger(source, "page"), readInteger(source, "hitsPerPage"), readInteger(source, "totalPages"),
+				readInteger(source, "offset"), readInteger(source, "limit"));
+	}
+
+	@Nullable
+	private static Integer readInteger(JsonNode source, String field) {
+		return source.hasNonNull(field) ? source.get(field).asInt() : null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -109,11 +128,72 @@ final class MeilisearchSearchResult implements Searchable {
 		return query;
 	}
 
+	/**
+	 * Distinguishes an exact total, including zero, from an absent {@code totalHits} field.
+	 *
+	 * @return whether the response reported an exact total
+	 */
 	boolean hasTotalHits() {
 		return totalHits != null;
 	}
 
+	/**
+	 * Returns the exact total when reported, otherwise the loaded-hit count. Use {@link #hasTotalHits()} before treating
+	 * this value as an exact count.
+	 *
+	 * @return exact matching-hit count or loaded-hit count
+	 */
 	int getTotalHits() {
 		return totalHits != null ? totalHits : hits.size();
+	}
+
+	/**
+	 * Returns the estimate without promoting it to an exact total.
+	 *
+	 * @return estimated matching-hit count, or {@literal null} when absent
+	 */
+	@Nullable
+	Integer getEstimatedTotalHits() {
+		return estimatedTotalHits;
+	}
+
+	/**
+	 * @return one-based page number, or {@literal null} when absent
+	 */
+	@Nullable
+	Integer getPage() {
+		return page;
+	}
+
+	/**
+	 * @return server-reported page size, or {@literal null} when absent
+	 */
+	@Nullable
+	Integer getHitsPerPage() {
+		return hitsPerPage;
+	}
+
+	/**
+	 * @return server-reported page count, or {@literal null} when absent
+	 */
+	@Nullable
+	Integer getTotalPages() {
+		return totalPages;
+	}
+
+	/**
+	 * @return zero-based result-window offset, or {@literal null} when absent
+	 */
+	@Nullable
+	Integer getOffset() {
+		return offset;
+	}
+
+	/**
+	 * @return server-reported result-window limit, or {@literal null} when absent
+	 */
+	@Nullable
+	Integer getLimit() {
+		return limit;
 	}
 }
