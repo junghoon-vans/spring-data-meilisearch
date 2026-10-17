@@ -21,9 +21,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.meilisearch.sdk.IndexSearchRequest;
 import com.meilisearch.sdk.MultiSearchRequest;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
@@ -81,6 +89,52 @@ class MeilisearchClientMultiSearchMetadataTests {
 	@Test // GH-284
 	void shouldPreserveExactAndEstimatedMetadataWithConfiguredJsonHandler() throws IOException, MeilisearchException {
 		assertMetadata(new JacksonJsonHandler());
+	}
+
+	@Test // GH-284
+	void shouldPreserveCustomSdkResultDeserializationAndPaginationMetadata() throws Exception {
+		ObjectMapper delegate = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(MultiSearchResult.class, new JsonDeserializer<MultiSearchResult>() {
+			@Override
+			public MultiSearchResult deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+				JsonNode tree = parser.readValueAsTree();
+				MultiSearchResult result = delegate.treeToValue(tree, MultiSearchResult.class);
+				result.getHits().forEach(hit -> hit.put("title", hit.get("title").toString().toUpperCase(Locale.ROOT)));
+				return result;
+			}
+		});
+		JsonHandler handler = new JacksonJsonHandler(
+				new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).registerModule(module));
+		HttpServer server = serverRespondingWith("""
+				{"results":[{"hits":[{"id":"one","title":"wire title"}],"processingTimeMs":2,
+				"query":"wire","indexUid":"movies","totalHits":7,"page":2,"hitsPerPage":1,"totalPages":7}]}
+				""");
+		try {
+			ClientConfiguration configuration = ClientConfiguration.builder()
+					.connectedTo("http://127.0.0.1:" + server.getAddress().getPort()).withApiKey("test-key").build();
+			MeilisearchClient client = new MeilisearchClient(configuration, handler);
+			MultiSearchRequest request = new MultiSearchRequest();
+			request.addQuery(IndexSearchRequest.builder().indexUid("movies").q("wire").page(2).hitsPerPage(1).build());
+
+			SearchHits<MetadataMovie> hits = new ResponseConverter().mapResults(client.multiSearch(request),
+					MetadataMovie.class);
+
+			assertThat(hits.getSearchHit(0).getContent().title()).isEqualTo("WIRE TITLE");
+			assertThat(hits.getTotalHits()).isEqualTo(1);
+			assertThat(hits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
+			SearchResponseMetadata metadata = hits.getResponseMetadata().get(0);
+			assertThat(metadata.getTotalHits()).isEqualTo(7L);
+			assertThat(metadata.getEstimatedTotalHits()).isNull();
+			assertThat(metadata.getPage()).isEqualTo(2);
+			assertThat(metadata.getHitsPerPage()).isEqualTo(1);
+			assertThat(metadata.getTotalPages()).isEqualTo(7);
+		} finally {
+			server.stop(0);
+		}
+	}
+
+	public record MetadataMovie(String id, String title) {
 	}
 
 	@Test // GH-284

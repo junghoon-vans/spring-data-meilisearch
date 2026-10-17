@@ -16,7 +16,7 @@
 package io.vanslog.spring.data.meilisearch.client.msc;
 
 import io.vanslog.spring.data.meilisearch.client.MeilisearchClient.MultiSearchResultMetadata;
-import io.vanslog.spring.data.meilisearch.client.MeilisearchClient.MultiSearchResultWithMetadata;
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClient.MultiSearchResultsWithMetadata;
 import io.vanslog.spring.data.meilisearch.core.FacetHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHitMetadata;
@@ -154,11 +154,8 @@ public class ResponseConverter {
 	}
 
 	private SearchResponseMetadata mapResponseMetadata(MultiSearchResult result, int queryIndex, int firstHitIndex,
-			int hitCount) {
+			int hitCount, @Nullable MultiSearchResultMetadata capturedMetadata) {
 
-		MultiSearchResultMetadata capturedMetadata = result instanceof MultiSearchResultWithMetadata enriched
-				? enriched.getResponseMetadata()
-				: null;
 		Integer processingTimeMs = capturedMetadata != null ? capturedMetadata.processingTimeMs()
 				: result.getProcessingTimeMs();
 		Long estimatedTotalHits;
@@ -230,7 +227,11 @@ public class ResponseConverter {
 			}
 
 			int hitCount = searchHits.size() - firstHitIndex;
-			SearchResponseMetadata metadata = mapResponseMetadata(result, queryIndex, firstHitIndex, hitCount);
+			MultiSearchResultMetadata capturedMetadata = results instanceof MultiSearchResultsWithMetadata enriched
+					? enriched.getResponseMetadata(queryIndex)
+					: null;
+			SearchResponseMetadata metadata = mapResponseMetadata(result, queryIndex, firstHitIndex, hitCount,
+					capturedMetadata);
 			responseMetadata.add(metadata);
 			maxProcessingTime = Math.max(maxProcessingTime,
 					metadata.getProcessingTimeMs() != null ? metadata.getProcessingTimeMs() : 0);

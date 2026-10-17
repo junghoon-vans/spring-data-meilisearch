@@ -130,27 +130,33 @@ public class MeilisearchClient extends Client {
 	}
 
 	/**
-	 * SDK result subtype used to retain fields omitted by the 0.21 SDK model.
+	 * SDK results container retaining response metadata separately from the configured codec's result objects.
 	 */
-	public static final class MultiSearchResultWithMetadata extends MultiSearchResult {
+	public static final class MultiSearchResultsWithMetadata extends Results<MultiSearchResult> {
 
-		@Nullable private MultiSearchResultMetadata responseMetadata;
+		private final List<MultiSearchResultMetadata> responseMetadata;
 
-		public MultiSearchResultWithMetadata() {}
-
-		@Nullable
-		public MultiSearchResultMetadata getResponseMetadata() {
-			return responseMetadata;
+		private MultiSearchResultsWithMetadata(Results<MultiSearchResult> decoded,
+				List<MultiSearchResultMetadata> responseMetadata) {
+			this.results = decoded.getResults();
+			this.limit = decoded.getLimit();
+			this.offset = decoded.getOffset();
+			this.total = decoded.getTotal();
+			this.responseMetadata = responseMetadata;
 		}
 
-		private void setResponseMetadata(MultiSearchResultMetadata responseMetadata) {
-			this.responseMetadata = responseMetadata;
+		/**
+		 * @param queryIndex zero-based response position
+		 * @return captured wire metadata for that response
+		 */
+		public MultiSearchResultMetadata getResponseMetadata(int queryIndex) {
+			return responseMetadata.get(queryIndex);
 		}
 	}
 
 	/**
-	 * Delegates the configured codec except for the SDK's non-federated multi-search result type, whose 0.21 model omits
-	 * pagination and exact-total fields.
+	 * Delegates decoding with the SDK's original result types, then captures pagination and exact-total fields omitted by
+	 * the 0.21 SDK model alongside the decoded results.
 	 */
 	private static final class MetadataAwareJsonHandler implements JsonHandler {
 
@@ -174,24 +180,13 @@ public class MeilisearchClient extends Client {
 			}
 
 			List<MultiSearchResultMetadata> metadata = readMultiSearchMetadata(source);
-			Results<MultiSearchResult> results = (Results<MultiSearchResult>) delegate.decode(source, Results.class,
-					MultiSearchResultWithMetadata.class);
+			Results<MultiSearchResult> results = (Results<MultiSearchResult>) delegate.decode(source, clazz, types);
 			MultiSearchResult[] responses = results.getResults();
 			if (responses == null || responses.length != metadata.size()) {
 				throw new JsonDecodingException("The multi-search response metadata did not match its result count.");
 			}
 
-			for (int i = 0; i < responses.length; i++) {
-				if (responses[i] == null) {
-					continue;
-				}
-				if (!(responses[i] instanceof MultiSearchResultWithMetadata result)) {
-					throw new JsonDecodingException(
-							"The configured JSON handler did not retain the extended multi-search result type.");
-				}
-				result.setResponseMetadata(metadata.get(i));
-			}
-			return (T) results;
+			return (T) new MultiSearchResultsWithMetadata(results, metadata);
 		}
 	}
 
