@@ -7,6 +7,16 @@
 ./mvnw test
 ----
 
+== Reactive HTTP transport
+
+[source,bash]
+----
+./mvnw -Dtest=ReactiveHttpTransportTests test
+----
+
+`ReactiveHttpTransportTests` exercise the internal asynchronous HTTP boundary with a local HTTP server.
+They cover cold requests, authentication, task success/failure, observation errors, timeout, and cancellation without requiring a Meilisearch container.
+
 == Create integration test
 
 For an integration test, use the test harness annotation and a configuration bound to its container:

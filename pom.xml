@@ -65,6 +65,13 @@
             <version>${springdata.commons}</version>
         </dependency>
 
+        <!-- Reactive operations -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Meilisearch -->
         <dependency>
             <groupId>com.meilisearch.sdk</groupId>
@@ -93,6 +100,11 @@
         </dependency>
 
         <!-- Test -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>io.vanslog</groupId>
             <artifactId>testcontainers-meilisearch</artifactId>
