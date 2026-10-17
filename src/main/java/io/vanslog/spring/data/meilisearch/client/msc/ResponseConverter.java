@@ -15,6 +15,8 @@
  */
 package io.vanslog.spring.data.meilisearch.client.msc;
 
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClient.MultiSearchResultMetadata;
+import io.vanslog.spring.data.meilisearch.client.MeilisearchClient.MultiSearchResultsWithMetadata;
 import io.vanslog.spring.data.meilisearch.core.FacetHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
@@ -28,7 +30,7 @@ import io.vanslog.spring.data.meilisearch.core.federation.FederationResponse;
 import io.vanslog.spring.data.meilisearch.core.mapping.SimpleMeilisearchMappingContext;
 
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +77,12 @@ public class ResponseConverter {
 
 	public <T> List<SearchHit<T>> mapHitList(Searchable searchable, Class<T> clazz) {
 		return searchable.getHits().stream() //
-				.map(hit -> new SearchHit<>(readHit(hit, clazz), searchable)) //
+				.map(hit -> mapSearchHit(hit, searchable, clazz)) //
 				.toList();
+	}
+
+	private <T> SearchHit<T> mapSearchHit(Map<String, Object> hit, Searchable searchable, Class<T> clazz) {
+		return new SearchHit<>(readHit(hit, clazz), searchable);
 	}
 
 	public <T> List<SearchHit<T>> mapHitList(FacetSearchable searchable, Class<T> clazz) {
@@ -145,6 +151,30 @@ public class ResponseConverter {
 		return source == null ? null : objectMapper.convertValue(source, METADATA_MAP_TYPE);
 	}
 
+	private SearchResponseMetadata mapResponseMetadata(MultiSearchResult result, int queryIndex, int firstHitIndex,
+			int hitCount, @Nullable MultiSearchResultMetadata capturedMetadata) {
+
+		Integer processingTimeMs = capturedMetadata != null ? capturedMetadata.processingTimeMs()
+				: result.getProcessingTimeMs();
+		Long estimatedTotalHits;
+		if (capturedMetadata != null) {
+			estimatedTotalHits = capturedMetadata.estimatedTotalHits();
+		} else {
+			estimatedTotalHits = result.getEstimatedTotalHits() > 0 ? (long) result.getEstimatedTotalHits() : null;
+		}
+
+		return new SearchResponseMetadata(queryIndex, firstHitIndex, hitCount, processingTimeMs,
+				capturedMetadata != null ? capturedMetadata.query() : result.getQuery(),
+				capturedMetadata != null ? capturedMetadata.indexUid() : result.getIndexUid(),
+				capturedMetadata != null ? capturedMetadata.totalHits() : null, estimatedTotalHits,
+				capturedMetadata != null ? capturedMetadata.page() : null,
+				capturedMetadata != null ? capturedMetadata.hitsPerPage() : null,
+				capturedMetadata != null ? capturedMetadata.totalPages() : null,
+				capturedMetadata != null ? capturedMetadata.offset() : null,
+				capturedMetadata != null ? capturedMetadata.limit() : null, metadataMap(result.getFacetDistribution()),
+				metadataMap(result.getFacetStats()), metadataMap(result.getFacetsByIndex()));
+	}
+
 	public <T> SearchHits<T> mapHits(FacetSearchable searchable, Class<T> clazz) {
 		List<SearchHit<T>> searchHits = this.mapHitList(searchable, clazz);
 		Duration executionDuration = Duration.ofMillis(searchable.getProcessingTimeMs());
@@ -181,16 +211,31 @@ public class ResponseConverter {
 
 	public <T> SearchHits<T> mapResults(Results<MultiSearchResult> results, Class<T> clazz) {
 		MultiSearchResult[] multiSearchResults = results.getResults();
-		List<SearchHit<T>> searchHits = Arrays.stream(multiSearchResults) //
-				.flatMap(result -> result.getHits().stream() //
-						.map(hit -> new SearchHit<>(readHit(hit, clazz), result)))
-				.toList();
+		List<SearchHit<T>> searchHits = new ArrayList<>();
+		List<SearchResponseMetadata> responseMetadata = new ArrayList<>(multiSearchResults.length);
 
-		int maxProcessingTime = Arrays.stream(multiSearchResults) //
-				.mapToInt(MultiSearchResult::getProcessingTimeMs).max().orElse(0);
-		Duration executionDuration = Duration.ofMillis(maxProcessingTime);
+		int firstHitIndex = 0;
+		int maxProcessingTime = 0;
+		for (int queryIndex = 0; queryIndex < multiSearchResults.length; queryIndex++) {
+			MultiSearchResult result = multiSearchResults[queryIndex];
+			for (Map<String, Object> hit : result.getHits()) {
+				searchHits.add(mapSearchHit(hit, result, clazz));
+			}
 
-		return new SearchHitsImpl<>(executionDuration, searchHits);
+			int hitCount = searchHits.size() - firstHitIndex;
+			MultiSearchResultMetadata capturedMetadata = results instanceof MultiSearchResultsWithMetadata enriched
+					? enriched.getResponseMetadata(queryIndex)
+					: null;
+			SearchResponseMetadata metadata = mapResponseMetadata(result, queryIndex, firstHitIndex, hitCount,
+					capturedMetadata);
+			responseMetadata.add(metadata);
+			maxProcessingTime = Math.max(maxProcessingTime,
+					metadata.getProcessingTimeMs() != null ? metadata.getProcessingTimeMs() : 0);
+			firstHitIndex += hitCount;
+		}
+
+		return new SearchHitsImpl<>(Duration.ofMillis(maxProcessingTime), searchHits, searchHits.size(),
+				TotalHitsRelation.OFF, responseMetadata);
 	}
 
 	private <T> T readHit(Map<String, Object> hit, Class<T> clazz) {
