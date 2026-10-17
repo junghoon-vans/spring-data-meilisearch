@@ -30,6 +30,7 @@ import io.vanslog.spring.data.meilisearch.core.query.IndexQuery;
 import io.vanslog.spring.data.meilisearch.entities.ComicsMovie;
 import io.vanslog.spring.data.meilisearch.entities.Movie;
 import io.vanslog.spring.data.meilisearch.entities.ResponseMetadataMovie;
+import io.vanslog.spring.data.meilisearch.entities.ResponseMetadataAltMovie;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTest;
 import io.vanslog.spring.data.meilisearch.junit.jupiter.MeilisearchTestConfiguration;
 
@@ -76,9 +77,12 @@ class MeilisearchTemplateIntegrationTests {
 	ComicsMovie comics1 = new ComicsMovie(1, "Wonder Woman", "A superhero comic", new String[] { "Comics", "Action" });
 	ComicsMovie comics2 = new ComicsMovie(2, "Batman", "A superhero comic", new String[] { "Comics", "Action" });
 
+	private static final String RESPONSE_METADATA_MAIN_INDEX_UID = "response-metadata-movies";
+	private static final String RESPONSE_METADATA_ALT_INDEX_UID = "response-metadata-alt-movies";
+
 	private static final List<String> LIFECYCLE_INDEX_UIDS = List.of("lifecycle-create-index", "lifecycle-get-list-index",
 			"lifecycle-update-index", "lifecycle-delete-index", "runtime-settings-index", "runtime-settings-reset-index",
-			"nested-movies", "listing-projection-movies", "response-metadata-movies");
+			"nested-movies", "listing-projection-movies", RESPONSE_METADATA_MAIN_INDEX_UID, RESPONSE_METADATA_ALT_INDEX_UID);
 
 	@BeforeEach
 	void setUp() throws MeilisearchException {
@@ -789,6 +793,79 @@ class MeilisearchTemplateIntegrationTests {
 
 	}
 
+	@Test // GH-283
+	void shouldPreserveFederatedFacetMetadataWithHitsAndWithoutHits() {
+		meilisearchTemplate.applySettings(ResponseMetadataMovie.class);
+		meilisearchTemplate.applySettings(ResponseMetadataAltMovie.class);
+		meilisearchTemplate.save(List.of(new ResponseMetadataMovie("one", "Audit one", "alpha", 1),
+				new ResponseMetadataMovie("two", "Audit two", "alpha", 2),
+				new ResponseMetadataMovie("three", "Audit three", "beta", 3)));
+		meilisearchTemplate.save(List.of(new ResponseMetadataAltMovie("four", "Audit four", "gamma", 4),
+				new ResponseMetadataAltMovie("five", "Audit five", "delta", 5)));
+
+		Map<String, String[]> facetsByIndex = Map.of(RESPONSE_METADATA_MAIN_INDEX_UID, new String[] { "category", "rank" },
+				RESPONSE_METADATA_ALT_INDEX_UID, new String[] { "category", "rank" });
+		MultiSearchFederation federation = new MultiSearchFederation();
+		federation.setOffset(0);
+		federation.setLimit(10);
+		MergeFacets mergeFacets = new MergeFacets();
+		mergeFacets.setMaxValuesPerFacet(10);
+		federation.setMergeFacets(mergeFacets);
+		federation.setFacetsByIndex(facetsByIndex);
+
+		List<BaseQuery> queries = List.of(
+				IndexQuery.builder().withQ("Audit").withIndexUid(RESPONSE_METADATA_MAIN_INDEX_UID).build(),
+				IndexQuery.builder().withQ("Audit").withIndexUid(RESPONSE_METADATA_ALT_INDEX_UID).build());
+		SearchHits<ResponseMetadataMovie> result = meilisearchTemplate.multiSearch(queries, federation,
+				ResponseMetadataMovie.class);
+
+		assertThat(result.getSearchHits()).hasSize(5);
+		assertThat(result.getTotalHits()).isEqualTo(5);
+		assertThat(result.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
+		assertThat(result.getSearchHits()).allSatisfy(hit -> assertThat(hit.getFederation()).isNotNull());
+		assertThat(result.getSearchHits()).extracting(hit -> hit.getFederation().getIndexUid()).containsExactlyInAnyOrder(
+				RESPONSE_METADATA_MAIN_INDEX_UID, RESPONSE_METADATA_MAIN_INDEX_UID, RESPONSE_METADATA_MAIN_INDEX_UID,
+				RESPONSE_METADATA_ALT_INDEX_UID, RESPONSE_METADATA_ALT_INDEX_UID);
+		assertThat(result.hasResponseMetadata()).isTrue();
+
+		SearchResponseMetadata response = result.getResponseMetadata().get(0);
+		assertThat(response.getQueryIndex()).isZero();
+		assertThat(response.getFirstHitIndex()).isZero();
+		assertThat(response.getHitCount()).isEqualTo(5);
+		assertThat(response.getTotalHits()).isNull();
+		assertThat(response.getFacetDistribution()).containsOnlyKeys("category", "rank");
+		assertThat(response.getFacetDistribution()).containsEntry("category",
+				Map.of("alpha", 2, "beta", 1, "delta", 1, "gamma", 1));
+		assertThat(response.getFacetDistribution()).containsEntry("rank", Map.of("1", 1, "2", 1, "3", 1, "4", 1, "5", 1));
+		assertThat(response.getFacetStats()).containsOnlyKeys("rank");
+		assertThat(response.getFacetStats()).containsEntry("rank", Map.of("min", 1.0, "max", 5.0));
+		federation.setMergeFacets(null);
+		SearchResponseMetadata perIndexResponse = meilisearchTemplate
+				.multiSearch(queries, federation, ResponseMetadataMovie.class).getResponseMetadata().get(0);
+		assertThat(perIndexResponse.getFacetsByIndex()).containsOnlyKeys(RESPONSE_METADATA_MAIN_INDEX_UID,
+				RESPONSE_METADATA_ALT_INDEX_UID);
+		assertPerIndexFacetMetadata(perIndexResponse, RESPONSE_METADATA_MAIN_INDEX_UID, Map.of("alpha", 2, "beta", 1), 1,
+				3);
+		assertPerIndexFacetMetadata(perIndexResponse, RESPONSE_METADATA_ALT_INDEX_UID, Map.of("gamma", 1, "delta", 1), 4,
+				5);
+
+		federation.setOffset(5);
+		SearchHits<ResponseMetadataMovie> emptyResult = meilisearchTemplate.multiSearch(queries, federation,
+				ResponseMetadataMovie.class);
+
+		assertThat(emptyResult.getSearchHits()).isEmpty();
+		assertThat(emptyResult.getTotalHits()).isZero();
+		assertThat(emptyResult.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
+		assertThat(emptyResult.hasResponseMetadata()).isTrue();
+		assertThat(emptyResult.getResponseMetadata()).singleElement().satisfies(emptyResponse -> {
+			assertThat(emptyResponse.getHitCount()).isZero();
+			assertThat(emptyResponse.getFacetsByIndex()).containsOnlyKeys(RESPONSE_METADATA_MAIN_INDEX_UID,
+					RESPONSE_METADATA_ALT_INDEX_UID);
+			assertPerIndexFacetMetadata(emptyResponse, RESPONSE_METADATA_MAIN_INDEX_UID, Map.of("alpha", 2, "beta", 1), 1, 3);
+			assertPerIndexFacetMetadata(emptyResponse, RESPONSE_METADATA_ALT_INDEX_UID, Map.of("gamma", 1, "delta", 1), 4, 5);
+		});
+	}
+
 	@Test
 	void shouldSaveEntityWithAnnotatedIdField() {
 
@@ -814,6 +891,20 @@ class MeilisearchTemplateIntegrationTests {
 		assertThat(saved.getDetails().getDirector()).isEqualTo("Director");
 		assertThat(saved.getDetails().getYear()).isEqualTo(2026);
 		assertThat(searchHits.getSearchHit(0).getContent().getDetails().getDirector()).isEqualTo("Director");
+	}
+
+	private void assertPerIndexFacetMetadata(SearchResponseMetadata response, String indexUid,
+			Map<String, Integer> expectedCategories, int minimumRank, int maximumRank) {
+		Map<?, ?> facets = (Map<?, ?>) response.getFacetsByIndex().get(indexUid);
+		Map<?, ?> distribution = (Map<?, ?>) facets.get("distribution");
+		Map<?, ?> categories = (Map<?, ?>) distribution.get("category");
+		assertThat(categories.keySet()).isEqualTo(expectedCategories.keySet());
+		expectedCategories.forEach((category, count) -> assertThat(((Number) categories.get(category)).doubleValue())
+				.isEqualTo(count.doubleValue()));
+		Map<?, ?> stats = (Map<?, ?>) facets.get("stats");
+		Map<?, ?> rank = (Map<?, ?>) stats.get("rank");
+		assertThat(((Number) rank.get("min")).doubleValue()).isEqualTo(minimumRank);
+		assertThat(((Number) rank.get("max")).doubleValue()).isEqualTo(maximumRank);
 	}
 
 	@Document(indexUid = "listing-projection-movies")

@@ -165,6 +165,19 @@ federation.setLimit(10);
 SearchHits<Movie> federated = operations.multiSearch(queries, federation, Movie.class);
 ----
 
+When federated `facetsByIndex` is requested without `mergeFacets`, the single `SearchResponseMetadata` entry retains
+per-index distribution and statistics in `facetsByIndex`. With `mergeFacets`, Meilisearch returns merged
+`facetDistribution` and `facetStats` instead; the metadata preserves whichever fields the response contains.
+The entry is preserved even when the federation's offset leaves no loaded hits. This does not create an aggregate
+count of distinct matches: `SearchHits#getTotalHitsRelation()` remains `OFF`, and `getTotalHits()` is only the
+flattened loaded-hit count.
+
+[source,java]
+----
+SearchResponseMetadata responseMetadata = federated.getResponseMetadata().get(0);
+var perIndexFacets = responseMetadata.getFacetsByIndex();
+----
+
 [[meilisearch.operations.queries]]
 == Query Types
 
