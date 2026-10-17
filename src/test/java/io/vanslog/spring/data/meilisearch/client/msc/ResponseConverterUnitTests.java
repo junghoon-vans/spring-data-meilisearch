@@ -102,6 +102,59 @@ class ResponseConverterUnitTests {
 	}
 
 	@Test
+	void shouldMapRequestedAndAbsentHitMetadataWithoutChangingWireFields() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		MeilisearchSearchResult result = MeilisearchSearchResult.from(objectMapper.readTree("""
+				{
+				  "hits": [
+				    {
+				      "id": "143",
+				      "title": "Audit one",
+				      "_formatted": {"title": "<em>Audit</em> one"},
+				      "_matchesPosition": {"title": [{"start": 0, "length": 5}]},
+				      "_rankingScore": 0.91,
+				      "_rankingScoreDetails": {"words": {"order": 0, "matchingWords": 1}}
+				    },
+				    {"id": "144", "title": "Audit two"}
+				  ],
+				  "processingTimeMs": 25,
+				  "query": "Audit"
+				}
+				"""), objectMapper);
+
+		SearchHits<MetadataMovie> searchHits = converter.mapHits(result, MetadataMovie.class);
+		SearchHit<MetadataMovie> requested = searchHits.getSearchHit(0);
+
+		assertThat(requested.getFormattedFields()).containsEntry("title", "<em>Audit</em> one");
+		assertThat(requested.getMatchesPosition()).containsEntry("title", List.of(Map.of("start", 0, "length", 5)));
+		assertThat(requested.getRankingScore()).isEqualTo(0.91);
+		assertThat(requested.getRankingScoreDetails()).containsEntry("words", Map.of("order", 0, "matchingWords", 1));
+		assertThat(requested.getContent().getTitle()).isEqualTo("Audit one");
+		assertThat(ReflectionTestUtils.getField(requested.getContent(), "_formatted"))
+				.isEqualTo(requested.getFormattedFields());
+		assertThat(ReflectionTestUtils.getField(requested.getContent(), "_matchesPosition"))
+				.isEqualTo(requested.getMatchesPosition());
+		assertThat(ReflectionTestUtils.getField(requested.getContent(), "_rankingScore"))
+				.isEqualTo(requested.getRankingScore());
+		assertThat(ReflectionTestUtils.getField(requested.getContent(), "_rankingScoreDetails"))
+				.isEqualTo(requested.getRankingScoreDetails());
+
+		@SuppressWarnings("unchecked")
+		Map<String, Object> wireFormatted = (Map<String, Object>) result.getHits().get(0).get("_formatted");
+		wireFormatted.put("title", "changed in source map");
+		assertThat(requested.getFormattedFields()).containsEntry("title", "<em>Audit</em> one");
+		assertThatThrownBy(() -> requested.getFormattedFields().put("title", "changed in returned metadata"))
+				.isInstanceOf(UnsupportedOperationException.class);
+
+		SearchHit<MetadataMovie> absent = searchHits.getSearchHit(1);
+		assertThat(absent.getContent().getTitle()).isEqualTo("Audit two");
+		assertThat(absent.getFormattedFields()).isNull();
+		assertThat(absent.getMatchesPosition()).isNull();
+		assertThat(absent.getRankingScore()).isNull();
+		assertThat(absent.getRankingScoreDetails()).isNull();
+	}
+
+	@Test
 	void shouldKeepTotalHitsOffForEstimatedSearchResults() {
 		SearchResult result = new SearchResult();
 		ArrayList<HashMap<String, Object>> hits = new ArrayList<>();
@@ -122,7 +175,7 @@ class ResponseConverterUnitTests {
 	void shouldConvertSimilarDocumentsResultsToSearchHits() {
 		SimilarDocumentsResults result = new SimilarDocumentsResults();
 		ArrayList<HashMap<String, Object>> hits = new ArrayList<>();
-		hits.add(hit("143", "Escape Room"));
+		hits.add(hitWithMetadata("143", "Escape Room", 0.84));
 
 		ReflectionTestUtils.setField(result, "hits", hits);
 		ReflectionTestUtils.setField(result, "processingTimeMs", 25);
@@ -139,6 +192,7 @@ class ResponseConverterUnitTests {
 		assertThat(searchHit.getQuery()).isEmpty();
 		assertThat(searchHit.getContent().getId()).isEqualTo("143");
 		assertThat(searchHit.getContent().getTitle()).isEqualTo("Escape Room");
+		assertHitMetadata(searchHit, "Escape Room", 0.84);
 	}
 
 	@Test
@@ -159,6 +213,71 @@ class ResponseConverterUnitTests {
 		assertThat(searchHits.getSearchHits()).hasSize(2);
 		assertThat(searchHits.getTotalHits()).isEqualTo(2);
 		assertThat(searchHits.getTotalHitsRelation()).isEqualTo(TotalHitsRelation.OFF);
+	}
+
+	@Test
+	void shouldMapHitMetadataFromEachNonFederatedMultiSearchResponse() {
+		MultiSearchResult first = new MultiSearchResult();
+		ReflectionTestUtils.setField(first, "hits", new ArrayList<>(List.of(hitWithMetadata("143", "Audit one", 0.91))));
+		ReflectionTestUtils.setField(first, "processingTimeMs", 25);
+		ReflectionTestUtils.setField(first, "query", "Audit one");
+
+		MultiSearchResult second = new MultiSearchResult();
+		ReflectionTestUtils.setField(second, "hits", new ArrayList<>(List.of(hit("144", "Audit two"))));
+		ReflectionTestUtils.setField(second, "processingTimeMs", 15);
+		ReflectionTestUtils.setField(second, "query", "Audit two");
+
+		Results<MultiSearchResult> results = new Results<>();
+		ReflectionTestUtils.setField(results, "results", new MultiSearchResult[] { first, second });
+
+		SearchHits<SimilarMovie> searchHits = converter.mapResults(results, SimilarMovie.class);
+
+		assertThat(searchHits.getSearchHits()).extracting(hit -> hit.getContent().getTitle()).containsExactly("Audit one",
+				"Audit two");
+		assertHitMetadata(searchHits.getSearchHit(0), "<em>Audit</em> one", 0.91);
+		assertThat(searchHits.getSearchHit(1).getFormattedFields()).isNull();
+		assertThat(searchHits.getSearchHit(1).getMatchesPosition()).isNull();
+		assertThat(searchHits.getSearchHit(1).getRankingScore()).isNull();
+		assertThat(searchHits.getSearchHit(1).getRankingScoreDetails()).isNull();
+	}
+
+	@Test
+	void shouldMapHitMetadataAlongsideFederationMetadata() {
+		HashMap<String, Object> firstHit = hitWithMetadata("143", "Audit one", 0.91);
+		firstHit.put("_federation", Map.of("indexUid", "movies", "queriesPosition", 0.0, "weightedRankingScore", 0.8));
+		HashMap<String, Object> secondHit = hitWithMetadata("144", "Audit two", 0.82);
+		secondHit.put("_federation", Map.of("indexUid", "comics", "queriesPosition", 1.0, "weightedRankingScore", 0.7));
+
+		MultiSearchResult result = new MultiSearchResult();
+		ReflectionTestUtils.setField(result, "hits", new ArrayList<>(List.of(firstHit, secondHit)));
+		ReflectionTestUtils.setField(result, "processingTimeMs", 25);
+		ReflectionTestUtils.setField(result, "query", "Audit");
+
+		SearchHits<SimilarMovie> searchHits = converter.mapResult(result, SimilarMovie.class);
+
+		assertThat(searchHits.getSearchHits()).extracting(hit -> hit.getContent().getTitle()).containsExactly("Audit one",
+				"Audit two");
+		assertHitMetadata(searchHits.getSearchHit(0), "<em>Audit</em> one", 0.91);
+		assertThat(searchHits.getSearchHit(0).getFederation().getIndexUid()).isEqualTo("movies");
+		assertHitMetadata(searchHits.getSearchHit(1), "<em>Audit</em> two", 0.82);
+		assertThat(searchHits.getSearchHit(1).getFederation().getIndexUid()).isEqualTo("comics");
+	}
+
+	private static HashMap<String, Object> hitWithMetadata(String id, String title, double rankingScore) {
+		HashMap<String, Object> hit = hit(id, title);
+		String formattedTitle = title.replace("Audit", "<em>Audit</em>");
+		hit.put("_formatted", Map.of("title", formattedTitle));
+		hit.put("_matchesPosition", Map.of("title", List.of(Map.of("start", 0, "length", 5))));
+		hit.put("_rankingScore", rankingScore);
+		hit.put("_rankingScoreDetails", Map.of("words", Map.of("order", 0, "matchingWords", 1)));
+		return hit;
+	}
+
+	private static void assertHitMetadata(SearchHit<?> hit, String formattedTitle, double rankingScore) {
+		assertThat(hit.getFormattedFields()).containsEntry("title", formattedTitle);
+		assertThat(hit.getMatchesPosition()).containsEntry("title", List.of(Map.of("start", 0, "length", 5)));
+		assertThat(hit.getRankingScore()).isEqualTo(rankingScore);
+		assertThat(hit.getRankingScoreDetails()).containsEntry("words", Map.of("order", 0, "matchingWords", 1));
 	}
 
 	@Test
@@ -264,6 +383,20 @@ class ResponseConverterUnitTests {
 
 		public void setTitle(String title) {
 			this.title = title;
+		}
+	}
+
+	static class MetadataMovie {
+
+		@Id private String id;
+		private String title;
+		private Map<String, Object> _formatted;
+		private Map<String, Object> _matchesPosition;
+		private Double _rankingScore;
+		private Map<String, Object> _rankingScoreDetails;
+
+		public String getTitle() {
+			return title;
 		}
 	}
 
