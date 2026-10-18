@@ -17,6 +17,7 @@ package io.vanslog.spring.data.meilisearch.client.msc;
 
 import io.vanslog.spring.data.meilisearch.core.FacetHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
+import io.vanslog.spring.data.meilisearch.core.SearchHitMetadata;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
 import io.vanslog.spring.data.meilisearch.core.SearchHitsImpl;
 import io.vanslog.spring.data.meilisearch.core.SearchResponseMetadata;
@@ -80,7 +81,8 @@ public class ResponseConverter {
 	}
 
 	private <T> SearchHit<T> mapSearchHit(Map<String, Object> hit, Searchable searchable, Class<T> clazz) {
-		return new SearchHit<>(readHit(hit, clazz), searchable);
+		return new SearchHit<>(readHit(hit, clazz), searchable.getProcessingTimeMs(), searchable.getQuery(),
+				searchable.getFacetStats(), searchable.getFacetDistribution(), null, readHitMetadata(hit));
 	}
 
 	public <T> List<SearchHit<T>> mapHitList(FacetSearchable searchable, Class<T> clazz) {
@@ -185,7 +187,8 @@ public class ResponseConverter {
 					Map<String, Object> source = new LinkedHashMap<>(hit);
 					FederationResponse federation = objectMapper.convertValue(source.remove("_federation"),
 							FederationResponse.class);
-					return new SearchHit<>(readHit(source, clazz), result, federation);
+					return new SearchHit<>(readHit(source, clazz), result.getProcessingTimeMs(), result.getQuery(),
+							result.getFacetStats(), result.getFacetDistribution(), federation, readHitMetadata(source));
 				}).toList();
 
 		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
@@ -200,7 +203,8 @@ public class ResponseConverter {
 
 	public <T> SearchHits<T> mapResult(SimilarDocumentsResults result, Class<T> clazz) {
 		List<SearchHit<T>> searchHits = result.getHits().stream() //
-				.map(hit -> new SearchHit<>(readHit(hit, clazz), result)) //
+				.map(hit -> new SearchHit<>(readHit(hit, clazz), result.getProcessingTimeMs(), "", null, null, null,
+						readHitMetadata(hit))) //
 				.toList();
 
 		Duration executionDuration = Duration.ofMillis(result.getProcessingTimeMs());
@@ -243,6 +247,32 @@ public class ResponseConverter {
 		}
 
 		return meilisearchConverter.read(clazz, toDocument(hit));
+	}
+
+	@Nullable
+	private static SearchHitMetadata readHitMetadata(Map<String, Object> source) {
+
+		Map<String, Object> formattedFields = readMap(source.get("_formatted"));
+		Map<String, Object> matchesPosition = readMap(source.get("_matchesPosition"));
+		Object rankingScoreValue = source.get("_rankingScore");
+		Double rankingScore = rankingScoreValue instanceof Number number ? number.doubleValue() : null;
+		Map<String, Object> rankingScoreDetails = readMap(source.get("_rankingScoreDetails"));
+		if (formattedFields == null && matchesPosition == null && rankingScore == null && rankingScoreDetails == null) {
+			return null;
+		}
+		return new SearchHitMetadata(formattedFields, matchesPosition, rankingScore, rankingScoreDetails);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private static Map<String, Object> readMap(@Nullable Object value) {
+
+		if (!(value instanceof Map<?, ?> source)) {
+			return null;
+		}
+
+		// These maps come from JSON object fields, whose keys are strings; the metadata constructor snapshots them.
+		return (Map<String, Object>) source;
 	}
 
 	private static Document toDocument(Map<String, Object> hit) {

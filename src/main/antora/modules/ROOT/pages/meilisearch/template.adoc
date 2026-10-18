@@ -216,6 +216,11 @@ when the hit list is empty. It exposes the response's processing time, query, pa
 distribution/statistics independently of the returned hits. `SearchHits#hasResponseMetadata()` distinguishes captured
 metadata from an operation that did not capture it.
 
+Hit-level response metadata is available through `getFormattedFields()`, `getMatchesPosition()`, `getRankingScore()`, and
+`getRankingScoreDetails()`. These values are separate from mapped content: formatted fields are presentation values,
+while `getContent()` retains the original mapped document. Each accessor returns `null` when that value was not
+requested or returned by Meilisearch.
+
 `SearchHits#getTotalHitsRelation()` identifies whether `getTotalHits()` contains an exact total reported by the search
 response:
 
