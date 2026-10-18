@@ -15,8 +15,6 @@
  */
 package io.vanslog.spring.data.meilisearch.client.msc;
 
-import io.vanslog.spring.data.meilisearch.client.MeilisearchClient.MultiSearchResultMetadata;
-import io.vanslog.spring.data.meilisearch.client.MeilisearchClient.MultiSearchResultsWithMetadata;
 import io.vanslog.spring.data.meilisearch.core.FacetHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHit;
 import io.vanslog.spring.data.meilisearch.core.SearchHits;
