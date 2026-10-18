@@ -31,12 +31,14 @@ import com.meilisearch.sdk.model.MultiSearchResult;
 import com.meilisearch.sdk.model.Results;
 
 /**
+ * {@link JsonHandler} adapter for Meilisearch SDK responses.
+ * <p>
  * Delegates decoding with the SDK's original result types, then captures pagination and exact-total fields omitted by
  * the 0.21 SDK model alongside the decoded results.
  *
  * @author Junghoon Ban
  */
-public final class MetadataAwareJsonHandler implements JsonHandler {
+public final class MeilisearchJsonHandler implements JsonHandler {
 
 	private static final JsonFactory JSON_FACTORY = new JsonFactory();
 
@@ -45,7 +47,7 @@ public final class MetadataAwareJsonHandler implements JsonHandler {
 	/**
 	 * @param delegate configured codec used to encode requests and decode SDK result objects
 	 */
-	public MetadataAwareJsonHandler(JsonHandler delegate) {
+	public MeilisearchJsonHandler(JsonHandler delegate) {
 		this.delegate = delegate;
 	}
 

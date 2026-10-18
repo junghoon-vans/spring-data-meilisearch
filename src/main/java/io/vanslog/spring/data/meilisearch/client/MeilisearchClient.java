@@ -15,7 +15,7 @@
  */
 package io.vanslog.spring.data.meilisearch.client;
 
-import io.vanslog.spring.data.meilisearch.client.msc.MetadataAwareJsonHandler;
+import io.vanslog.spring.data.meilisearch.client.msc.MeilisearchJsonHandler;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +49,7 @@ public class MeilisearchClient extends Client {
 	public MeilisearchClient(ClientConfiguration clientConfiguration, JsonHandler jsonHandler) {
 		this(
 				new Config(clientConfiguration.getHostUrl(), clientConfiguration.getApiKey(),
-						new MetadataAwareJsonHandler(jsonHandler), clientConfiguration.getClientAgents()),
+						new MeilisearchJsonHandler(jsonHandler), clientConfiguration.getClientAgents()),
 				clientConfiguration, jsonHandler);
 	}
 
